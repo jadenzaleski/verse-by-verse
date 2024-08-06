@@ -1,11 +1,19 @@
 import * as React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {Text, View, StyleSheet, TouchableOpacity} from 'react-native';
+import {
+  Text,
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  useColorScheme,
+} from 'react-native';
 import Icon from '@react-native-vector-icons/ionicons';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
+import ThemeContext, {ThemeProvider} from '../context/ThemeContext';
+import {useContext} from 'react';
 
 const Tab = createBottomTabNavigator();
-
 // Define icon mapping for each screen
 const ICONS = {
   Home: {
@@ -85,27 +93,34 @@ const renderTabBar = props => <MyTabBar {...props} />;
 
 const App = () => {
   return (
-    <NavigationContainer>
-      <Tab.Navigator
-        screenOptions={{
-          headerShown: false,
-          tabBarShowLabel: false,
-        }}
-        tabBar={renderTabBar} // Use the extracted function here
-      >
-        <Tab.Screen name="Home" component={HomeScreen} />
-        <Tab.Screen name="Verses" component={VersesScreen} />
-        <Tab.Screen name="Profile" component={ProfileScreen} />
-        <Tab.Screen name="Settings" component={SettingsScreen} />
-      </Tab.Navigator>
-    </NavigationContainer>
+    <ThemeProvider>
+      <NavigationContainer>
+        <Tab.Navigator
+          screenOptions={{
+            headerShown: false,
+            tabBarShowLabel: false,
+          }}
+          tabBar={renderTabBar} // Use the extracted function here
+        >
+          <Tab.Screen name="Home" component={HomeScreen} />
+          <Tab.Screen name="Verses" component={VersesScreen} />
+          <Tab.Screen name="Profile" component={ProfileScreen} />
+          <Tab.Screen name="Settings" component={SettingsScreen} />
+        </Tab.Navigator>
+      </NavigationContainer>
+    </ThemeProvider>
   );
 };
 
 const HomeScreen = ({navigation}) => {
+  const colorScheme = useColorScheme();
+  const color = colorScheme === 'light' ? Colors.darker : Colors.lighter;
+
   return (
     <View style={styles.container}>
       <Text style={styles.plain}>Home</Text>
+      <Text style={{color: color}}>Current Color Scheme: {colorScheme}</Text>
+
       <Text style={styles.variableFontText}>This is a variable font</Text>
       <Text style={{...styles.variableFontText, ...styles.boldText}}>
         This is bold
@@ -134,9 +149,60 @@ const ProfileScreen = ({route}) => {
 };
 
 const SettingsScreen = () => {
+  const systemTheme = useColorScheme();
+  const {theme, toggleTheme, useSystemTheme} = useContext(ThemeContext);
+  const HandleSystemTheme = () => {
+    useSystemTheme();
+  };
+
+  const settingsStyles = StyleSheet.create({
+    container: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme === 'dark' ? 'black' : 'white',
+    },
+    text: {
+      color: theme === 'dark' ? 'white' : 'black',
+    },
+    button: {
+      color: theme === 'dark' ? 'black' : 'white',
+    },
+  });
   return (
-    <View style={styles.container}>
-      <Text>Settings</Text>
+    <View style={settingsStyles.container}>
+      <Text style={settingsStyles.text}>Current Theme: {theme}</Text>
+      <Text style={settingsStyles.text}>System Theme: {systemTheme}</Text>
+      <TouchableOpacity
+        onPress={() => toggleTheme('light')}
+        style={{
+          marginTop: 10,
+          paddingVertical: 5,
+          paddingHorizontal: 10,
+          backgroundColor: theme === 'dark' ? '#fff' : '#000',
+        }}>
+        <Text style={settingsStyles.button}>Light Theme</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => toggleTheme('dark')}
+        style={{
+          marginTop: 20,
+          paddingVertical: 5,
+          paddingHorizontal: 10,
+          backgroundColor: theme === 'dark' ? '#fff' : '#000',
+        }}>
+        <Text style={settingsStyles.button}>Dark Theme</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => HandleSystemTheme()}
+        style={{
+          marginTop: 20,
+          paddingVertical: 5,
+          paddingHorizontal: 10,
+          backgroundColor: theme === 'dark' ? '#fff' : '#000',
+        }}>
+        <Text style={settingsStyles.button}>System Theme</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -160,6 +226,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'gray',
   },
   tabContainer: {
     flexDirection: 'row',
