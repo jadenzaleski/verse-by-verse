@@ -2,7 +2,7 @@ import React, {createContext, useState, useEffect} from 'react';
 import {useColorScheme} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const ThemeContext = createContext();
+const ThemeContext = createContext(undefined);
 
 export const ThemeProvider = ({children}) => {
   const colorScheme = useColorScheme();
@@ -20,7 +20,7 @@ export const ThemeProvider = ({children}) => {
         console.log('Error loading theme:', error);
       }
     };
-    getTheme();
+    getTheme().then(() => console.log(`Retrieved theme.`));
   }, []);
 
   useEffect(() => {
@@ -32,12 +32,12 @@ export const ThemeProvider = ({children}) => {
 
   const toggleTheme = newTheme => {
     setTheme(newTheme);
-    AsyncStorage.setItem('theme', newTheme); // Save selected theme to storage
+    AsyncStorage.setItem('theme', newTheme).then(() => console.log(`Theme value saved to storage.`));
   };
 
   const useSystemTheme = () => {
     setTheme(colorScheme);
-    AsyncStorage.setItem('theme', colorScheme);
+    AsyncStorage.setItem('theme', colorScheme).then(() => console.log(`System theme value saved to storage.`));
   };
 
   return (

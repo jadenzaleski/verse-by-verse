@@ -12,6 +12,7 @@ import Icon from '@react-native-vector-icons/ionicons';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import ThemeContext, {ThemeProvider} from '../context/ThemeContext';
 import {useContext} from 'react';
+import HomeScreen from "./Home/Home";
 
 const Tab = createBottomTabNavigator();
 // Define icon mapping for each screen
@@ -100,7 +101,7 @@ const App = () => {
             headerShown: false,
             tabBarShowLabel: false,
           }}
-          tabBar={renderTabBar} // Use the extracted function here
+          tabBar={renderTabBar}
         >
           <Tab.Screen name="Home" component={HomeScreen} />
           <Tab.Screen name="Verses" component={VersesScreen} />
@@ -112,25 +113,7 @@ const App = () => {
   );
 };
 
-const HomeScreen = ({navigation}) => {
-  const colorScheme = useColorScheme();
-  const color = colorScheme === 'light' ? Colors.darker : Colors.lighter;
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.plain}>Home</Text>
-      <Text style={{color: color}}>Current Color Scheme: {colorScheme}</Text>
-
-      <Text style={styles.variableFontText}>This is a variable font</Text>
-      <Text style={{...styles.variableFontText, ...styles.boldText}}>
-        This is bold
-      </Text>
-      <Text style={{...styles.variableFontText, ...styles.italicText}}>
-        This is italic
-      </Text>
-    </View>
-  );
-};
 
 const VersesScreen = ({navigation}) => {
   return (
