@@ -20,7 +20,7 @@ export const ThemeProvider = ({children}) => {
         console.log('Error loading theme:', error);
       }
     };
-    getTheme().then(() => console.log(`Retrieved theme.`));
+    getTheme().then(() => console.log('Retrieved theme.'));
   }, []);
 
   useEffect(() => {
@@ -32,12 +32,16 @@ export const ThemeProvider = ({children}) => {
 
   const toggleTheme = newTheme => {
     setTheme(newTheme);
-    AsyncStorage.setItem('theme', newTheme).then(() => console.log(`Theme value saved to storage.`));
+    AsyncStorage.setItem('theme', newTheme).then(() =>
+      console.log('Theme value saved to storage.'),
+    );
   };
 
   const useSystemTheme = () => {
     setTheme(colorScheme);
-    AsyncStorage.setItem('theme', colorScheme).then(() => console.log(`System theme value saved to storage.`));
+    AsyncStorage.setItem('theme', colorScheme).then(() =>
+      console.log('System theme value saved to storage.'),
+    );
   };
 
   return (

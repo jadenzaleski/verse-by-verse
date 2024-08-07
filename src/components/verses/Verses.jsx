@@ -1,23 +1,10 @@
-import { StyleSheet, Text, useColorScheme, View } from "react-native";
-import { Colors } from "react-native/Libraries/NewAppScreen";
-import * as React from "react";
+import {StyleSheet, Text, View} from 'react-native';
+import * as React from 'react';
 
-const HomeScreen = ({navigation}) => {
-  const colorScheme = useColorScheme();
-  const color = colorScheme === 'light' ? Colors.darker : Colors.lighter;
-
+const VersesScreen = ({navigation}) => {
   return (
     <View style={styles.container}>
-      <Text style={styles.plain}>Home</Text>
-      <Text style={{color: color}}>Current Color Scheme: {colorScheme}</Text>
-
-      <Text style={styles.variableFontText}>This is a variable font</Text>
-      <Text style={{...styles.variableFontText, ...styles.boldText}}>
-        This is bold
-      </Text>
-      <Text style={{...styles.variableFontText, ...styles.italicText}}>
-        This is italic
-      </Text>
+      <Text>Verses</Text>
     </View>
   );
 };
@@ -65,4 +52,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HomeScreen;
+export default VersesScreen;

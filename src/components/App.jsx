@@ -6,13 +6,13 @@ import {
   View,
   StyleSheet,
   TouchableOpacity,
-  useColorScheme,
 } from 'react-native';
 import Icon from '@react-native-vector-icons/ionicons';
-import {Colors} from 'react-native/Libraries/NewAppScreen';
-import ThemeContext, {ThemeProvider} from '../context/ThemeContext';
-import {useContext} from 'react';
-import HomeScreen from "./Home/Home";
+import {ThemeProvider} from '../context/ThemeContext';
+import HomeScreen from './home/Home';
+import VersesScreen from './verses/Verses';
+import ProfileScreen from './profile/Profile';
+import SettingsScreen from './settings/Settings';
 
 const Tab = createBottomTabNavigator();
 // Define icon mapping for each screen
@@ -101,8 +101,7 @@ const App = () => {
             headerShown: false,
             tabBarShowLabel: false,
           }}
-          tabBar={renderTabBar}
-        >
+          tabBar={renderTabBar}>
           <Tab.Screen name="Home" component={HomeScreen} />
           <Tab.Screen name="Verses" component={VersesScreen} />
           <Tab.Screen name="Profile" component={ProfileScreen} />
@@ -110,83 +109,6 @@ const App = () => {
         </Tab.Navigator>
       </NavigationContainer>
     </ThemeProvider>
-  );
-};
-
-
-
-const VersesScreen = ({navigation}) => {
-  return (
-    <View style={styles.container}>
-      <Text>Verses</Text>
-    </View>
-  );
-};
-
-const ProfileScreen = ({route}) => {
-  return (
-    <View style={styles.container}>
-      <Text>Profile</Text>
-    </View>
-  );
-};
-
-const SettingsScreen = () => {
-  const systemTheme = useColorScheme();
-  const {theme, toggleTheme, useSystemTheme} = useContext(ThemeContext);
-  const HandleSystemTheme = () => {
-    useSystemTheme();
-  };
-
-  const settingsStyles = StyleSheet.create({
-    container: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: theme === 'dark' ? 'black' : 'white',
-    },
-    text: {
-      color: theme === 'dark' ? 'white' : 'black',
-    },
-    button: {
-      color: theme === 'dark' ? 'black' : 'white',
-    },
-  });
-  return (
-    <View style={settingsStyles.container}>
-      <Text style={settingsStyles.text}>Current Theme: {theme}</Text>
-      <Text style={settingsStyles.text}>System Theme: {systemTheme}</Text>
-      <TouchableOpacity
-        onPress={() => toggleTheme('light')}
-        style={{
-          marginTop: 10,
-          paddingVertical: 5,
-          paddingHorizontal: 10,
-          backgroundColor: theme === 'dark' ? '#fff' : '#000',
-        }}>
-        <Text style={settingsStyles.button}>Light Theme</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        onPress={() => toggleTheme('dark')}
-        style={{
-          marginTop: 20,
-          paddingVertical: 5,
-          paddingHorizontal: 10,
-          backgroundColor: theme === 'dark' ? '#fff' : '#000',
-        }}>
-        <Text style={settingsStyles.button}>Dark Theme</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        onPress={() => HandleSystemTheme()}
-        style={{
-          marginTop: 20,
-          paddingVertical: 5,
-          paddingHorizontal: 10,
-          backgroundColor: theme === 'dark' ? '#fff' : '#000',
-        }}>
-        <Text style={settingsStyles.button}>System Theme</Text>
-      </TouchableOpacity>
-    </View>
   );
 };
 
