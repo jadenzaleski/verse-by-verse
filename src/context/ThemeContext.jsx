@@ -1,12 +1,18 @@
 import React, {createContext, useState, useEffect} from 'react';
-import {useColorScheme} from 'react-native';
+import {StyleSheet, useColorScheme} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {getCustomTheme} from '../styles/themes/Theme';
 
 const ThemeContext = createContext(undefined);
 
 export const ThemeProvider = ({children}) => {
   const colorScheme = useColorScheme();
-  const [theme, setTheme] = useState(colorScheme || 'light');
+  const [themeName, setThemeName] = useState(colorScheme || 'light');
+  const theme = getCustomTheme(themeName);
+
+  const themeSheet = StyleSheet.create({
+    shadowSmall: {},
+  });
 
   useEffect(() => {
     // Load saved theme from storage
@@ -14,7 +20,7 @@ export const ThemeProvider = ({children}) => {
       try {
         const savedTheme = await AsyncStorage.getItem('theme');
         if (savedTheme) {
-          setTheme(savedTheme);
+          setThemeName(savedTheme);
         }
       } catch (error) {
         console.log('Error loading theme:', error);
@@ -24,30 +30,32 @@ export const ThemeProvider = ({children}) => {
   }, []);
 
   useEffect(() => {
-    // set theme to system selected theme
+    // Set theme to system selected theme
     if (colorScheme) {
-      setTheme(colorScheme);
+      setThemeName(colorScheme);
     }
   }, [colorScheme]);
 
   const toggleTheme = newTheme => {
-    setTheme(newTheme);
+    setThemeName(newTheme);
     AsyncStorage.setItem('theme', newTheme).then(() =>
       console.log('Theme value saved to storage.'),
     );
   };
 
   const useSystemTheme = () => {
-    setTheme(colorScheme);
+    setThemeName(colorScheme);
     AsyncStorage.setItem('theme', colorScheme).then(() =>
       console.log('System theme value saved to storage.'),
     );
   };
 
   return (
-    <ThemeContext.Provider value={{theme, toggleTheme, useSystemTheme}}>
+    <ThemeContext.Provider
+      value={{theme, themeName, toggleTheme, useSystemTheme}}>
       {children}
     </ThemeContext.Provider>
   );
 };
+
 export default ThemeContext;

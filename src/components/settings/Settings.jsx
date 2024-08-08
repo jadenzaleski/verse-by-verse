@@ -11,7 +11,9 @@ import * as React from 'react';
 
 const SettingsScreen = () => {
   const systemTheme = useColorScheme();
-  const {theme, toggleTheme, useSystemTheme} = useContext(ThemeContext);
+  const {theme, themeName, toggleTheme, useSystemTheme} =
+    useContext(ThemeContext);
+
   const HandleSystemTheme = () => {
     useSystemTheme();
   };
@@ -21,49 +23,44 @@ const SettingsScreen = () => {
       flex: 1,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: theme === 'dark' ? 'black' : 'white',
+      backgroundColor: theme.colors.primary,
+    },
+    container2: {
+      padding: 20,
+      margin: 20,
+      borderRadius: 15,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.colors.secondary,
     },
     text: {
-      color: theme === 'dark' ? 'white' : 'black',
+      color: theme.colors.text,
     },
     button: {
-      color: theme === 'dark' ? 'black' : 'white',
+      color: theme.colors.text,
+      backgroundColor: theme.colors.accent,
+      padding: 10,
+      margin: 20,
     },
   });
+
   return (
     <View style={settingsStyles.container}>
-      <Text style={settingsStyles.text}>Current Theme: {theme}</Text>
+      <Text style={settingsStyles.text}>Current Theme: {themeName}</Text>
       <Text style={settingsStyles.text}>System Theme: {systemTheme}</Text>
-      <TouchableOpacity
-        onPress={() => toggleTheme('light')}
-        style={{
-          marginTop: 10,
-          paddingVertical: 5,
-          paddingHorizontal: 10,
-          backgroundColor: theme === 'dark' ? '#fff' : '#000',
-        }}>
-        <Text style={settingsStyles.button}>Light Theme</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        onPress={() => toggleTheme('dark')}
-        style={{
-          marginTop: 20,
-          paddingVertical: 5,
-          paddingHorizontal: 10,
-          backgroundColor: theme === 'dark' ? '#fff' : '#000',
-        }}>
-        <Text style={settingsStyles.button}>Dark Theme</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        onPress={() => HandleSystemTheme()}
-        style={{
-          marginTop: 20,
-          paddingVertical: 5,
-          paddingHorizontal: 10,
-          backgroundColor: theme === 'dark' ? '#fff' : '#000',
-        }}>
-        <Text style={settingsStyles.button}>System Theme</Text>
-      </TouchableOpacity>
+      <View style={settingsStyles.container2}>
+        <TouchableOpacity
+          activeOpacity={0.9}
+          onPress={() => toggleTheme('light')}>
+          <Text style={settingsStyles.button}>Light Theme</Text>
+        </TouchableOpacity>
+        <TouchableOpacity activeOpacity={0.9} onPress={() => toggleTheme('dark')}>
+          <Text style={settingsStyles.button}>Dark Theme</Text>
+        </TouchableOpacity>
+        <TouchableOpacity activeOpacity={0.9} onPress={() => HandleSystemTheme()}>
+          <Text style={settingsStyles.button}>System Theme</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };

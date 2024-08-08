@@ -1,18 +1,14 @@
 import * as React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {
-  Text,
-  View,
-  StyleSheet,
-  TouchableOpacity,
-} from 'react-native';
+import {Text, View, StyleSheet, TouchableOpacity} from 'react-native';
 import Icon from '@react-native-vector-icons/ionicons';
-import {ThemeProvider} from '../context/ThemeContext';
+import ThemeContext, {ThemeProvider} from '../context/ThemeContext';
 import HomeScreen from './home/Home';
 import VersesScreen from './verses/Verses';
 import ProfileScreen from './profile/Profile';
 import SettingsScreen from './settings/Settings';
+import {useContext} from 'react';
 
 const Tab = createBottomTabNavigator();
 // Define icon mapping for each screen
@@ -137,7 +133,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#F7F7F8',
     position: 'absolute',
     bottom: 25,
     left: 50,
