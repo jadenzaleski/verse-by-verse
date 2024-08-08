@@ -5,17 +5,47 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-import {useContext} from 'react';
+import {useContext, useState} from 'react';
 import ThemeContext from '../../context/ThemeContext';
 import * as React from 'react';
+import Icon from '@react-native-vector-icons/ionicons';
 
 const SettingsScreen = () => {
-  const systemTheme = useColorScheme();
   const {theme, themeSheet, themeName, toggleTheme, useSystemTheme} =
     useContext(ThemeContext);
+  const systemTheme = useColorScheme();
+  const [themeNum, setThemeNum] = useState(0);
 
-  const HandleSystemTheme = () => {
+  function UseSystemTheme() {
     useSystemTheme();
+  }
+
+  function HandleNextTheme() {
+    if (themeNum === 0) {
+      toggleTheme('dark');
+    } else if (themeNum === 1) {
+      UseSystemTheme();
+    } else {
+      toggleTheme('light');
+    }
+    if (themeNum < 2) {
+      setThemeNum(themeNum + 1);
+    } else {
+      setThemeNum(0);
+    }
+  }
+
+  const getIconName = () => {
+    switch (themeNum) {
+      case 1:
+        return 'moon-outline'; // Dark theme icon
+      case 2:
+        return 'phone-portrait-outline'; // System theme icon
+      case 0:
+        return 'sunny-outline'; // Light theme icon
+      default:
+        return 'sunny-outline'; // Default icon
+    }
   };
 
   const settingsStyles = StyleSheet.create({
@@ -55,26 +85,8 @@ const SettingsScreen = () => {
       <Text style={settingsStyles.text}>Current Theme: {themeName}</Text>
       <Text style={settingsStyles.text}>System Theme: {systemTheme}</Text>
       <View style={settingsStyles.container2}>
-        <TouchableOpacity
-          activeOpacity={0.9}
-          onPress={() => toggleTheme('light')}>
-          <Text style={{...settingsStyles.button, ...themeSheet.shadowSmall}}>
-            Light Theme
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          activeOpacity={0.9}
-          onPress={() => toggleTheme('dark')}>
-          <Text style={{...settingsStyles.button, ...themeSheet.shadowMedium}}>
-            Dark Theme
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          activeOpacity={0.9}
-          onPress={() => HandleSystemTheme()}>
-          <Text style={{...settingsStyles.button, ...themeSheet.shadowLarge}}>
-            System Theme
-          </Text>
+        <TouchableOpacity onPress={HandleNextTheme}>
+          <Icon name={getIconName()} size={24} />
         </TouchableOpacity>
       </View>
     </View>
