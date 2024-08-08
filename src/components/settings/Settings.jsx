@@ -74,6 +74,7 @@ const SettingsScreen = () => {
       backgroundColor: theme.colors.accent,
       padding: 10,
       margin: 20,
+      borderRadius: 10,
       font: theme.font,
       fontSize: theme.fontSizes.medium,
       fontWeight: theme.fontWeights.light,
@@ -85,7 +86,10 @@ const SettingsScreen = () => {
       <Text style={settingsStyles.text}>Current Theme: {themeName}</Text>
       <Text style={settingsStyles.text}>System Theme: {systemTheme}</Text>
       <View style={settingsStyles.container2}>
-        <TouchableOpacity onPress={HandleNextTheme}>
+        <TouchableOpacity
+          activeOpacity={0.4}
+          onPress={HandleNextTheme}
+          style={{...settingsStyles.button, ...themeSheet.shadowSmall}}>
           <Icon name={getIconName()} size={24} />
         </TouchableOpacity>
       </View>
