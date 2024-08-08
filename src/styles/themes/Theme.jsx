@@ -1,9 +1,7 @@
-const primary = '#36383f';
-const secondary = '#F4F5FB';
 const accent = '#A2C2BA';
 
-const primaryDark = '#4D4852';
-const secondaryDark = '#898891';
+const primaryDark = '#2d2d38';
+const secondaryDark = '#676670';
 
 const primaryLight = '#F7F7F8';
 const secondaryLight = '#e8e8ea';
@@ -17,14 +15,26 @@ export const getCustomTheme = themeName => ({
     secondary: themeName === 'dark' ? secondaryDark : secondaryLight,
     accent: accent,
     text: themeName === 'dark' ? textLight : textDark,
+    textDark: textDark,
+    textLight: textLight,
   },
-  fonts: {
-    regular: 'System',
-    bold: 'System',
-  },
+  font: 'Montserrat',
+
   fontSizes: {
+    extraSmall: 10,
     small: 12,
     medium: 16,
     large: 24,
+    extraLarge: 32,
   },
+
+  fontWeights: {
+    thin: 100,
+    extraLight: 200,
+    light: 300,
+    regular: 400,
+    heavy: 500,
+    bold: 700,
+    black: 900,
+  }
 });

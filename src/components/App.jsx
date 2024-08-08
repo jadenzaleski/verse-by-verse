@@ -34,8 +34,10 @@ const ICONS = {
 
 // Custom Tab Bar
 function MyTabBar({state, descriptors, navigation}) {
+  const {theme, themeSheet} = useContext(ThemeContext);
+
   return (
-    <View style={styles.tabContainer}>
+    <View style={{...themeSheet.shadowSmall, ...{backgroundColor: theme.colors.secondary}, ...styles.tabContainer, }}>
       {state.routes.map((route, index) => {
         const {options} = descriptors[route.key];
         const isFocused = state.index === index;
@@ -45,13 +47,7 @@ function MyTabBar({state, descriptors, navigation}) {
           ? ICONS[route.name]?.focused || 'help-circle'
           : ICONS[route.name]?.unfocused || 'help-circle-outline';
 
-        const icon = (
-          <Icon
-            name={iconName}
-            color={isFocused ? '#3c63e5' : '#222'}
-            size={24}
-          />
-        );
+        const icon = <Icon name={iconName} color={isFocused ? theme.colors.accent : theme.colors.text} size={24} />;
 
         const onPress = () => {
           const event = navigation.emit({
@@ -74,6 +70,7 @@ function MyTabBar({state, descriptors, navigation}) {
         return (
           <TouchableOpacity
             key={route.key}
+            activeOpacity={0.4}
             onPress={onPress}
             onLongPress={onLongPress}
             style={styles.tabButton}>
@@ -133,17 +130,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    backgroundColor: '#F7F7F8',
     position: 'absolute',
     bottom: 25,
     left: 50,
     right: 50,
     borderRadius: 50,
-    shadowColor: '#777777',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.8,
-    shadowRadius: 2,
-    elevation: 5,
     paddingVertical: 15,
   },
   tabButton: {

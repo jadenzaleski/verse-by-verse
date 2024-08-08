@@ -11,7 +11,7 @@ import * as React from 'react';
 
 const SettingsScreen = () => {
   const systemTheme = useColorScheme();
-  const {theme, themeName, toggleTheme, useSystemTheme} =
+  const {theme, themeSheet, themeName, toggleTheme, useSystemTheme} =
     useContext(ThemeContext);
 
   const HandleSystemTheme = () => {
@@ -35,12 +35,18 @@ const SettingsScreen = () => {
     },
     text: {
       color: theme.colors.text,
+      font: theme.font,
+      fontSize: theme.fontSizes.large,
+      fontWeight: theme.fontWeights.thin,
     },
     button: {
       color: theme.colors.text,
       backgroundColor: theme.colors.accent,
       padding: 10,
       margin: 20,
+      font: theme.font,
+      fontSize: theme.fontSizes.medium,
+      fontWeight: theme.fontWeights.light,
     },
   });
 
@@ -52,13 +58,23 @@ const SettingsScreen = () => {
         <TouchableOpacity
           activeOpacity={0.9}
           onPress={() => toggleTheme('light')}>
-          <Text style={settingsStyles.button}>Light Theme</Text>
+          <Text style={{...settingsStyles.button, ...themeSheet.shadowSmall}}>
+            Light Theme
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity activeOpacity={0.9} onPress={() => toggleTheme('dark')}>
-          <Text style={settingsStyles.button}>Dark Theme</Text>
+        <TouchableOpacity
+          activeOpacity={0.9}
+          onPress={() => toggleTheme('dark')}>
+          <Text style={{...settingsStyles.button, ...themeSheet.shadowMedium}}>
+            Dark Theme
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity activeOpacity={0.9} onPress={() => HandleSystemTheme()}>
-          <Text style={settingsStyles.button}>System Theme</Text>
+        <TouchableOpacity
+          activeOpacity={0.9}
+          onPress={() => HandleSystemTheme()}>
+          <Text style={{...settingsStyles.button, ...themeSheet.shadowLarge}}>
+            System Theme
+          </Text>
         </TouchableOpacity>
       </View>
     </View>

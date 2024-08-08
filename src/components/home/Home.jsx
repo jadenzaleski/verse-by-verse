@@ -12,12 +12,8 @@ const HomeScreen = ({navigation}) => {
       <Text style={{color: color}}>Current Color Scheme: {colorScheme}</Text>
 
       <Text style={styles.variableFontText}>This is a variable font</Text>
-      <Text style={{...styles.variableFontText, ...styles.boldText}}>
-        This is bold
-      </Text>
-      <Text style={{...styles.variableFontText, ...styles.italicText}}>
-        This is italic
-      </Text>
+      <Text style={{...styles.variableFontText, ...styles.boldText}}>This is bold</Text>
+      <Text style={{...styles.variableFontText, ...styles.italicText}}>This is italic</Text>
     </View>
   );
 };
