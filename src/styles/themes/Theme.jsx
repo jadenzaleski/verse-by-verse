@@ -101,17 +101,41 @@ export const getCustomTheme = themeName => ({
     extraSmall: 10,
     small: 12,
     medium: 15,
+    subtitle: 18,
     large: 24,
     extraLarge: 32,
   },
 
-  fontWeights: {
-    thin: '100',
-    extraLight: '200',
-    light: '300',
-    regular: '400',
-    heavy: '500',
-    bold: '700',
-    black: '900',
+  shadows: {
+    small: {
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      elevation: 5,
+    },
+    medium: {
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: 6,
+      },
+      shadowOpacity: 0.39,
+      shadowRadius: 8.3,
+      elevation: 13,
+    },
+    large: {
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: 10,
+      },
+      shadowOpacity: 0.51,
+      shadowRadius: 13.16,
+      elevation: 20,
+    },
   },
 });

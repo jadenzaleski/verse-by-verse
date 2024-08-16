@@ -5,7 +5,7 @@ import * as React from 'react';
 import Icon from '@react-native-vector-icons/ionicons';
 
 const SettingsScreen = () => {
-  const {theme, themeSheet, themeName, toggleTheme, useSystemTheme} = useContext(ThemeContext);
+  const {theme, themeName, toggleTheme, useSystemTheme} = useContext(ThemeContext);
   const systemTheme = useColorScheme();
   const [themeNum, setThemeNum] = useState(0);
 
@@ -58,16 +58,14 @@ const SettingsScreen = () => {
     },
     text: {
       color: theme.colors.text,
-      fontFamily: theme.font,
       fontSize: theme.fontSizes.large,
-      // fontWeight: theme.fontWeights.thin,
     },
     button: {
-      color: theme.colors.text,
       backgroundColor: theme.colors.accent,
       padding: 12,
       margin: 20,
       borderRadius: 50,
+      ...theme.shadows.small,
     },
   });
 
@@ -77,10 +75,7 @@ const SettingsScreen = () => {
       <Text style={settingsStyles.text}>Current Theme: {themeName}</Text>
       <Text style={settingsStyles.text}>System Theme: {systemTheme}</Text>
       <View style={settingsStyles.container2}>
-        <TouchableOpacity
-          activeOpacity={0.4}
-          onPress={HandleNextTheme}
-          style={{...settingsStyles.button, ...themeSheet.shadowSmall}}>
+        <TouchableOpacity activeOpacity={0.4} onPress={HandleNextTheme} style={settingsStyles.button}>
           <Icon name={getIconName()} size={24} />
         </TouchableOpacity>
       </View>

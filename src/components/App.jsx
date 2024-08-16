@@ -34,10 +34,10 @@ const ICONS = {
 
 // Custom Tab Bar
 function MyTabBar({state, descriptors, navigation}) {
-  const {theme, themeSheet} = useContext(ThemeContext);
+  const {theme} = useContext(ThemeContext);
 
   return (
-    <View style={{...themeSheet.shadowSmall, ...{backgroundColor: theme.colors.secondary}, ...styles.tabContainer}}>
+    <View style={{...theme.shadows.small, ...{backgroundColor: theme.colors.secondary}, ...styles.tabContainer}}>
       <StatusBar hidden={false} translucent={true} backgroundColor={'transparent'} />
       {state.routes.map((route, index) => {
         const {options} = descriptors[route.key];

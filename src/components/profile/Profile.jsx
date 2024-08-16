@@ -5,15 +5,17 @@ import ThemeContext from '../../context/ThemeContext';
 import Svg, {Defs, RadialGradient, Rect, Stop} from 'react-native-svg';
 import XPBar from './XP';
 import Icon from '@react-native-vector-icons/ionicons';
+import Achievements from './Achievements';
 
 const ProfileScreen = () => {
-  const {theme, themeSheet} = useContext(ThemeContext);
+  const {theme} = useContext(ThemeContext);
 
   const profileStyles = StyleSheet.create({
     container: {
       flex: 1,
       alignItems: 'center',
       backgroundColor: theme.colors.primary,
+      alignSelf: 'stretch',
     },
     buttonContainer: {
       position: 'absolute',
@@ -29,7 +31,7 @@ const ProfileScreen = () => {
       height: '25%',
       width: '100%',
       backgroundColor: theme.colors.primary,
-      ...themeSheet.shadowSmall,
+      ...theme.shadows.small,
     },
     gradientWrapper: {
       overflow: 'hidden',
@@ -43,7 +45,7 @@ const ProfileScreen = () => {
       alignSelf: 'center',
       justifyContent: 'center',
       alignItems: 'center',
-      ...themeSheet.shadowSmall,
+      ...theme.shadows.small,
     },
     profileImage: {
       width: 125,
@@ -51,8 +53,8 @@ const ProfileScreen = () => {
       borderRadius: 62.5,
     },
     title: {
-      paddingTop: 62.5 + 20,
-      paddingBottom: 20,
+      marginTop: 62.5 + 20,
+      marginBottom: 20,
       fontSize: theme.fontSizes.extraLarge,
       color: theme.colors.text,
       ...theme.fonts.regular,
@@ -85,8 +87,9 @@ const ProfileScreen = () => {
         </View>
       </View>
       <Text style={profileStyles.title}>Jaden Zaleski</Text>
-      <View style={{...profileStyles.container, ...{paddingHorizontal: 30}}}>
+      <View style={{...profileStyles.container, ...{paddingHorizontal: 30, }}}>
         <XPBar />
+        <Achievements />
       </View>
     </View>
   );

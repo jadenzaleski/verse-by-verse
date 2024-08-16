@@ -6,7 +6,7 @@ import ProgressBar from 'react-native-progress/Bar';
 import Icon from '@react-native-vector-icons/ionicons';
 
 const XPBar = () => {
-  const {theme, themeSheet} = useContext(ThemeContext);
+  const {theme} = useContext(ThemeContext);
 
   const xpStyles = StyleSheet.create({
     container: {
@@ -23,7 +23,6 @@ const XPBar = () => {
       justifyContent: 'center',
       alignItems: 'center',
       marginRight: 10,
-      // ...themeSheet.shadowSmall,
     },
     numberText: {
       fontSize: theme.fontSizes.medium + 5,

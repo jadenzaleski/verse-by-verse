@@ -1,5 +1,5 @@
 import React, {createContext, useState, useEffect} from 'react';
-import {StyleSheet, useColorScheme} from 'react-native';
+import {useColorScheme} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {getCustomTheme} from '../styles/themes/Theme';
 
@@ -9,41 +9,6 @@ export const ThemeProvider = ({children}) => {
   const colorScheme = useColorScheme();
   const [themeName, setThemeName] = useState(colorScheme || 'light');
   const theme = getCustomTheme(themeName);
-
-  const themeSheet = StyleSheet.create({
-    // https://ethercreative.github.io/react-native-shadow-generator/
-    shadowSmall: {
-      shadowColor: '#000',
-      shadowOffset: {
-        width: 0,
-        height: 2,
-      },
-      shadowOpacity: 0.25,
-      shadowRadius: 3.84,
-      elevation: 5,
-    },
-    shadowMedium: {
-      shadowColor: '#000',
-      shadowOffset: {
-        width: 0,
-        height: 6,
-      },
-      shadowOpacity: 0.39,
-      shadowRadius: 8.3,
-      elevation: 13,
-    },
-
-    shadowLarge: {
-      shadowColor: '#000',
-      shadowOffset: {
-        width: 0,
-        height: 10,
-      },
-      shadowOpacity: 0.51,
-      shadowRadius: 13.16,
-      elevation: 20,
-    },
-  });
 
   useEffect(() => {
     // Load saved theme from storage
@@ -78,9 +43,7 @@ export const ThemeProvider = ({children}) => {
   };
 
   return (
-    <ThemeContext.Provider value={{theme, themeSheet, themeName, toggleTheme, useSystemTheme}}>
-      {children}
-    </ThemeContext.Provider>
+    <ThemeContext.Provider value={{theme, themeName, toggleTheme, useSystemTheme}}>{children}</ThemeContext.Provider>
   );
 };
 
