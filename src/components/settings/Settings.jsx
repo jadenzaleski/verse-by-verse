@@ -1,18 +1,11 @@
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  useColorScheme,
-  View,
-} from 'react-native';
+import {StyleSheet, Text, TouchableOpacity, useColorScheme, View} from 'react-native';
 import {useContext, useState} from 'react';
 import ThemeContext from '../../context/ThemeContext';
 import * as React from 'react';
 import Icon from '@react-native-vector-icons/ionicons';
 
 const SettingsScreen = () => {
-  const {theme, themeSheet, themeName, toggleTheme, useSystemTheme} =
-    useContext(ThemeContext);
+  const {theme, themeSheet, themeName, toggleTheme, useSystemTheme} = useContext(ThemeContext);
   const systemTheme = useColorScheme();
   const [themeNum, setThemeNum] = useState(0);
 
@@ -65,24 +58,22 @@ const SettingsScreen = () => {
     },
     text: {
       color: theme.colors.text,
-      font: theme.font,
+      fontFamily: theme.font,
       fontSize: theme.fontSizes.large,
-      fontWeight: theme.fontWeights.thin,
+      // fontWeight: theme.fontWeights.thin,
     },
     button: {
       color: theme.colors.text,
       backgroundColor: theme.colors.accent,
-      padding: 10,
+      padding: 12,
       margin: 20,
-      borderRadius: 10,
-      font: theme.font,
-      fontSize: theme.fontSizes.medium,
-      fontWeight: theme.fontWeights.light,
+      borderRadius: 50,
     },
   });
 
   return (
     <View style={settingsStyles.container}>
+      <Text style={{fontSize: 24}}>Plain Text</Text>
       <Text style={settingsStyles.text}>Current Theme: {themeName}</Text>
       <Text style={settingsStyles.text}>System Theme: {systemTheme}</Text>
       <View style={settingsStyles.container2}>

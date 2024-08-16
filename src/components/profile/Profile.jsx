@@ -1,55 +1,50 @@
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, Text, View, Image} from 'react-native';
 import * as React from 'react';
+import {useContext} from 'react';
+import ThemeContext from '../../context/ThemeContext';
+import Svg, {Defs, RadialGradient, Rect, Stop} from 'react-native-svg';
 
-const ProfileScreen = ({route}) => {
+const ProfileScreen = () => {
+  const {theme, themeSheet} = useContext(ThemeContext);
+
+  const profileStyles = StyleSheet.create({
+    container: {
+      flex: 1,
+      alignItems: 'center',
+      backgroundColor: theme.colors.primary,
+    },
+    gradientContainer: {
+      height: '25%',
+      width: '100%',
+      backgroundColor: theme.colors.primary,
+      ...themeSheet.shadowSmall,
+    },
+    gradientWrapper: {
+      overflow: 'hidden',
+    },
+    text: {
+      marginTop: 20,
+      color: theme.colors.text,
+      fontSize: 20,
+    },
+  });
+
   return (
-    <View style={styles.container}>
-      <Text>Profile</Text>
+    <View style={profileStyles.container}>
+      <View style={profileStyles.gradientContainer}>
+        <Svg style={profileStyles.gradientWrapper}>
+          <Defs>
+            <RadialGradient id="grad" cx="50%" cy="90%" r="100%" fx="50%" fy="90%" gradientUnits="userSpaceOnUse">
+              <Stop offset="0%" stopColor={theme.colors.accent.toString()} stopOpacity="1" />
+              <Stop offset="100%" stopColor={theme.colors.primary.toString()} stopOpacity="1" />
+            </RadialGradient>
+          </Defs>
+          <Rect width="100%" height="100%" fill="url(#grad)" />
+        </Svg>
+      </View>
+      <Text style={profileStyles.text}>Hello World</Text>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  plain: {
-    fontSize: 20,
-  },
-  variableFontText: {
-    fontFamily: 'Montserrat', // The name of the font file without extension
-    fontSize: 20,
-  },
-  boldText: {
-    fontWeight: '700', // Example: Bold
-  },
-  italicText: {
-    fontFamily: 'Montserrat',
-    fontStyle: 'italic',
-  },
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'gray',
-  },
-  tabContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    position: 'absolute',
-    bottom: 25,
-    left: 50,
-    right: 50,
-    borderRadius: 50,
-    shadowColor: '#777777',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.8,
-    shadowRadius: 2,
-    elevation: 5,
-    paddingVertical: 15,
-  },
-  tabButton: {
-    alignItems: 'center',
-  },
-});
 
 export default ProfileScreen;

@@ -29,12 +29,12 @@ export const getCustomTheme = themeName => ({
   },
 
   fontWeights: {
-    thin: 100,
-    extraLight: 200,
-    light: 300,
-    regular: 400,
-    heavy: 500,
-    bold: 700,
-    black: 900,
-  }
+    thin: '100',
+    extraLight: '200',
+    light: '300',
+    regular: '400',
+    heavy: '500',
+    bold: '700',
+    black: '900',
+  },
 });

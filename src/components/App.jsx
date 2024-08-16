@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {Text, View, StyleSheet, TouchableOpacity} from 'react-native';
+import {View, StyleSheet, TouchableOpacity} from 'react-native';
 import Icon from '@react-native-vector-icons/ionicons';
 import ThemeContext, {ThemeProvider} from '../context/ThemeContext';
 import HomeScreen from './home/Home';
@@ -37,7 +37,7 @@ function MyTabBar({state, descriptors, navigation}) {
   const {theme, themeSheet} = useContext(ThemeContext);
 
   return (
-    <View style={{...themeSheet.shadowSmall, ...{backgroundColor: theme.colors.secondary}, ...styles.tabContainer, }}>
+    <View style={{...themeSheet.shadowSmall, ...{backgroundColor: theme.colors.secondary}, ...styles.tabContainer}}>
       {state.routes.map((route, index) => {
         const {options} = descriptors[route.key];
         const isFocused = state.index === index;
