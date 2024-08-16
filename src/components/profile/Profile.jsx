@@ -1,9 +1,10 @@
-import {Image, StyleSheet, View, Text} from 'react-native';
+import {Image, StyleSheet, View, Text, TouchableOpacity} from 'react-native';
 import * as React from 'react';
 import {useContext} from 'react';
 import ThemeContext from '../../context/ThemeContext';
 import Svg, {Defs, RadialGradient, Rect, Stop} from 'react-native-svg';
 import XPBar from './XP';
+import Icon from '@react-native-vector-icons/ionicons';
 
 const ProfileScreen = () => {
   const {theme, themeSheet} = useContext(ThemeContext);
@@ -13,6 +14,16 @@ const ProfileScreen = () => {
       flex: 1,
       alignItems: 'center',
       backgroundColor: theme.colors.primary,
+    },
+    buttonContainer: {
+      position: 'absolute',
+      top: 50,
+      right: 30,
+      zIndex: 1,
+    },
+    button: {
+      padding: 10,
+      paddingRight: 0,
     },
     gradientContainer: {
       height: '25%',
@@ -50,6 +61,15 @@ const ProfileScreen = () => {
 
   return (
     <View style={profileStyles.container}>
+      <View style={profileStyles.buttonContainer}>
+        <TouchableOpacity
+          style={profileStyles.button}
+          onPress={() => {
+            /* Handle button press */
+          }}>
+          <Icon name="ellipsis-horizontal" color={theme.colors.primary.toString()} size={24} />
+        </TouchableOpacity>
+      </View>
       <View style={profileStyles.gradientContainer}>
         <Svg style={profileStyles.gradientWrapper}>
           <Defs>
