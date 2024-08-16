@@ -1,4 +1,4 @@
-import {StyleSheet, Text, View, Image} from 'react-native';
+import {Image, StyleSheet, View, Text} from 'react-native';
 import * as React from 'react';
 import {useContext} from 'react';
 import ThemeContext from '../../context/ThemeContext';
@@ -22,10 +22,29 @@ const ProfileScreen = () => {
     gradientWrapper: {
       overflow: 'hidden',
     },
-    text: {
-      marginTop: 20,
+    shadowContainer: {
+      width: 125,
+      height: 125,
+      borderRadius: 62.5,
+      backgroundColor: theme.colors.primary,
+      bottom: 62.5,
+      alignSelf: 'center',
+      justifyContent: 'center',
+      alignItems: 'center',
+      ...themeSheet.shadowSmall,
+    },
+    profileImage: {
+      width: 125,
+      height: 125,
+      borderRadius: 62.5,
+      // borderWidth: 4,
+      // borderColor: theme.colors.primary,
+    },
+    title: {
+      paddingTop: 62.5 + 20,
+      fontSize: theme.fontSizes.extraLarge,
       color: theme.colors.text,
-      fontSize: 20,
+      ...theme.fonts.regular,
     },
   });
 
@@ -41,8 +60,11 @@ const ProfileScreen = () => {
           </Defs>
           <Rect width="100%" height="100%" fill="url(#grad)" />
         </Svg>
+        <View style={profileStyles.shadowContainer}>
+          <Image source={require('../../../assets/images/avatars/me.jpg')} style={profileStyles.profileImage} />
+        </View>
       </View>
-      <Text style={profileStyles.text}>Hello World</Text>
+      <Text style={profileStyles.title}>Jaden Zaleski</Text>
     </View>
   );
 };
