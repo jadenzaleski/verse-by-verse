@@ -3,6 +3,7 @@ import * as React from 'react';
 import {useContext} from 'react';
 import ThemeContext from '../../context/ThemeContext';
 import Svg, {Defs, RadialGradient, Rect, Stop} from 'react-native-svg';
+import XPBar from './XP';
 
 const ProfileScreen = () => {
   const {theme, themeSheet} = useContext(ThemeContext);
@@ -37,11 +38,10 @@ const ProfileScreen = () => {
       width: 125,
       height: 125,
       borderRadius: 62.5,
-      // borderWidth: 4,
-      // borderColor: theme.colors.primary,
     },
     title: {
       paddingTop: 62.5 + 20,
+      paddingBottom: 20,
       fontSize: theme.fontSizes.extraLarge,
       color: theme.colors.text,
       ...theme.fonts.regular,
@@ -65,6 +65,9 @@ const ProfileScreen = () => {
         </View>
       </View>
       <Text style={profileStyles.title}>Jaden Zaleski</Text>
+      <View style={{...profileStyles.container, ...{paddingHorizontal: 30}}}>
+        <XPBar />
+      </View>
     </View>
   );
 };

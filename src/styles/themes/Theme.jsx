@@ -100,7 +100,7 @@ export const getCustomTheme = themeName => ({
   fontSizes: {
     extraSmall: 10,
     small: 12,
-    medium: 16,
+    medium: 15,
     large: 24,
     extraLarge: 32,
   },
