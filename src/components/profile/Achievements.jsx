@@ -16,7 +16,7 @@ const Achievements = () => {
     title: {
       color: theme.colors.text,
       fontSize: theme.fontSizes.subtitle,
-      ...theme.fonts.semiBold,
+      ...theme.fonts.regular,
       marginTop: 20,
     },
     achievementsList: {

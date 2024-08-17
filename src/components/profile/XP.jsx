@@ -14,9 +14,9 @@ const XPBar = () => {
       alignItems: 'center',
     },
     numberContainer: {
-      width: 50,
-      height: 50,
-      borderRadius: 25,
+      width: 55,
+      height: 55,
+      borderRadius: 27.5,
       borderWidth: 4,
       borderColor: theme.colors.accent,
       backgroundColor: theme.colors.primary,
@@ -76,10 +76,10 @@ const XPBar = () => {
         <ProgressBar
           progress={0.6}
           width={null}
-          height={6}
+          height={10}
           color={theme.colors.accent}
           borderWidth={0}
-          borderRadius={3}
+          borderRadius={5}
           style={xpStyles.progressBar}
         />
         <View style={xpStyles.levelContainer}>

@@ -1,4 +1,4 @@
-import {Image, StyleSheet, View, Text, TouchableOpacity} from 'react-native';
+import {Image, StyleSheet, View, Text, TouchableOpacity, ScrollView} from 'react-native';
 import * as React from 'react';
 import {useContext} from 'react';
 import ThemeContext from '../../context/ThemeContext';
@@ -6,6 +6,7 @@ import Svg, {Defs, RadialGradient, Rect, Stop} from 'react-native-svg';
 import XPBar from './XP';
 import Icon from '@react-native-vector-icons/ionicons';
 import Achievements from './Achievements';
+import RecentVerses from './RecentVerses';
 
 const ProfileScreen = () => {
   const {theme} = useContext(ThemeContext);
@@ -28,7 +29,7 @@ const ProfileScreen = () => {
       paddingRight: 0,
     },
     gradientContainer: {
-      height: '25%',
+      height: '15%',
       width: '100%',
       backgroundColor: theme.colors.primary,
       ...theme.shadows.small,
@@ -62,36 +63,40 @@ const ProfileScreen = () => {
   });
 
   return (
-    <View style={profileStyles.container}>
-      <View style={profileStyles.buttonContainer}>
-        <TouchableOpacity
-          style={profileStyles.button}
-          onPress={() => {
-            /* Handle button press */
-          }}>
-          <Icon name="ellipsis-horizontal" color={theme.colors.primary.toString()} size={24} />
-        </TouchableOpacity>
-      </View>
-      <View style={profileStyles.gradientContainer}>
-        <Svg style={profileStyles.gradientWrapper}>
-          <Defs>
-            <RadialGradient id="grad" cx="50%" cy="90%" r="100%" fx="50%" fy="90%" gradientUnits="userSpaceOnUse">
-              <Stop offset="0%" stopColor={theme.colors.accent.toString()} stopOpacity="1" />
-              <Stop offset="100%" stopColor={theme.colors.primary.toString()} stopOpacity="1" />
-            </RadialGradient>
-          </Defs>
-          <Rect width="100%" height="100%" fill="url(#grad)" />
-        </Svg>
-        <View style={profileStyles.shadowContainer}>
-          <Image source={require('../../../assets/images/avatars/me.jpg')} style={profileStyles.profileImage} />
+    <ScrollView showsVerticalScrollIndicator={false} backgroundColor={theme.colors.primary}>
+      <View style={profileStyles.container}>
+        <View style={profileStyles.buttonContainer}>
+          <TouchableOpacity
+            style={profileStyles.button}
+            onPress={() => {
+              /* Handle button press */
+            }}>
+            <Icon name="ellipsis-horizontal" color={theme.colors.primary.toString()} size={24} />
+          </TouchableOpacity>
+        </View>
+        <View style={profileStyles.gradientContainer}>
+          <Svg style={profileStyles.gradientWrapper}>
+            <Defs>
+              <RadialGradient id="grad" cx="50%" cy="90%" r="100%" fx="50%" fy="90%" gradientUnits="userSpaceOnUse">
+                <Stop offset="0%" stopColor={theme.colors.accent.toString()} stopOpacity="1" />
+                <Stop offset="100%" stopColor={theme.colors.primary.toString()} stopOpacity="1" />
+              </RadialGradient>
+            </Defs>
+            <Rect width="100%" height="100%" fill="url(#grad)" />
+          </Svg>
+          <View style={profileStyles.shadowContainer}>
+            <Image source={require('../../../assets/images/avatars/me.jpg')} style={profileStyles.profileImage} />
+          </View>
+        </View>
+        <Text style={profileStyles.title}>Jaden Zaleski</Text>
+        <View style={{...profileStyles.container, ...{paddingHorizontal: 30}}}>
+          <XPBar />
+          <Achievements />
+          <RecentVerses />
+          <View style={{backgroundColor: theme.colors.primary, paddingVertical: 100}} />
         </View>
       </View>
-      <Text style={profileStyles.title}>Jaden Zaleski</Text>
-      <View style={{...profileStyles.container, ...{paddingHorizontal: 30, }}}>
-        <XPBar />
-        <Achievements />
-      </View>
-    </View>
+    </ScrollView>
   );
 };
 
