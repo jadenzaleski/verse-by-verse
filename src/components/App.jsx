@@ -30,7 +30,6 @@ const ICONS = {
     focused: 'cog',
     unfocused: 'cog-outline',
   },
-  // Add more screens and their icons here
 };
 
 const styles = StyleSheet.create({

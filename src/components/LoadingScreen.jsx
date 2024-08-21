@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, {useContext, useEffect, useState} from 'react';
 import {View, Text, StyleSheet, ActivityIndicator} from 'react-native';
 import ThemeContext from '../context/ThemeContext';
 
@@ -9,15 +9,15 @@ const LoadingScreen = ({onFinishLoading}) => {
   useEffect(() => {
     const performLoadingTasks = async () => {
       // Simulate a task with a timeout
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 500));
       setLoadingMessage('Loading resources...');
 
       // Another simulated task
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 500));
       setLoadingMessage('Almost there...');
 
       // Finish loading after all tasks are done
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 500));
       onFinishLoading();
     };
 
@@ -41,7 +41,7 @@ const LoadingScreen = ({onFinishLoading}) => {
 
   return (
     <View style={styles.container}>
-      <ActivityIndicator size="medium" color={theme.colors.accent.toString()} />
+      <ActivityIndicator size="small" color={theme.colors.accent.toString()} />
       <Text style={styles.loadingText}>{loadingMessage}</Text>
     </View>
   );
