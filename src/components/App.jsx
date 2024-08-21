@@ -8,7 +8,8 @@ import HomeScreen from './home/Home';
 import VersesScreen from './verses/Verses';
 import ProfileScreen from './profile/Profile';
 import SettingsScreen from './settings/Settings';
-import {useContext} from 'react';
+import {useContext, useState} from 'react';
+import LoadingScreen from './LoadingScreen';
 
 const Tab = createBottomTabNavigator();
 // Define icon mapping for each screen
@@ -31,6 +32,42 @@ const ICONS = {
   },
   // Add more screens and their icons here
 };
+
+const styles = StyleSheet.create({
+  plain: {
+    fontSize: 20,
+  },
+  variableFontText: {
+    fontFamily: 'Montserrat', // The name of the font file without extension
+    fontSize: 20,
+  },
+  boldText: {
+    fontWeight: '700', // Example: Bold
+  },
+  italicText: {
+    fontFamily: 'Montserrat',
+    fontStyle: 'italic',
+  },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    position: 'absolute',
+    bottom: 25,
+    left: 50,
+    right: 50,
+    borderRadius: 50,
+    paddingVertical: 15,
+  },
+  tabButton: {
+    alignItems: 'center',
+  },
+});
 
 // Custom Tab Bar
 function MyTabBar({state, descriptors, navigation}) {
@@ -87,59 +124,33 @@ function MyTabBar({state, descriptors, navigation}) {
 const renderTabBar = props => <MyTabBar {...props} />;
 
 const App = () => {
+  const [isLoading, setIsLoading] = useState(true);
+
+  const handleFinishLoading = () => {
+    setIsLoading(false);
+  };
+
   return (
     <ThemeProvider>
       <NavigationContainer>
-        <Tab.Navigator
-          screenOptions={{
-            headerShown: false,
-            tabBarShowLabel: false,
-          }}
-          tabBar={renderTabBar}>
-          <Tab.Screen name="Home" component={HomeScreen} />
-          <Tab.Screen name="Verses" component={VersesScreen} />
-          <Tab.Screen name="Profile" component={ProfileScreen} />
-          <Tab.Screen name="Settings" component={SettingsScreen} />
-        </Tab.Navigator>
+        {isLoading ? (
+          <LoadingScreen onFinishLoading={handleFinishLoading} />
+        ) : (
+          <Tab.Navigator
+            screenOptions={{
+              headerShown: false,
+              tabBarShowLabel: false,
+            }}
+            tabBar={renderTabBar}>
+            <Tab.Screen name="Home" component={HomeScreen} />
+            <Tab.Screen name="Verses" component={VersesScreen} />
+            <Tab.Screen name="Profile" component={ProfileScreen} />
+            <Tab.Screen name="Settings" component={SettingsScreen} />
+          </Tab.Navigator>
+        )}
       </NavigationContainer>
     </ThemeProvider>
   );
 };
-
-const styles = StyleSheet.create({
-  plain: {
-    fontSize: 20,
-  },
-  variableFontText: {
-    fontFamily: 'Montserrat', // The name of the font file without extension
-    fontSize: 20,
-  },
-  boldText: {
-    fontWeight: '700', // Example: Bold
-  },
-  italicText: {
-    fontFamily: 'Montserrat',
-    fontStyle: 'italic',
-  },
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  tabContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    position: 'absolute',
-    bottom: 25,
-    left: 50,
-    right: 50,
-    borderRadius: 50,
-    paddingVertical: 15,
-  },
-  tabButton: {
-    alignItems: 'center',
-  },
-});
 
 export default App;
