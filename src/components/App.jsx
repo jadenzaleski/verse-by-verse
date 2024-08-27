@@ -10,6 +10,7 @@ import ProfileScreen from './profile/Profile';
 import SettingsScreen from './settings/Settings';
 import {useContext, useState} from 'react';
 import LoadingScreen from './LoadingScreen';
+import CustomToasts from './Toasts';
 
 const Tab = createBottomTabNavigator();
 // Define icon mapping for each screen
@@ -32,48 +33,29 @@ const ICONS = {
   },
 };
 
-const styles = StyleSheet.create({
-  plain: {
-    fontSize: 20,
-  },
-  variableFontText: {
-    fontFamily: 'Montserrat', // The name of the font file without extension
-    fontSize: 20,
-  },
-  boldText: {
-    fontWeight: '700', // Example: Bold
-  },
-  italicText: {
-    fontFamily: 'Montserrat',
-    fontStyle: 'italic',
-  },
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  tabContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    position: 'absolute',
-    bottom: 25,
-    left: 50,
-    right: 50,
-    borderRadius: 50,
-    paddingVertical: 15,
-  },
-  tabButton: {
-    alignItems: 'center',
-  },
-});
-
 // Custom Tab Bar
 function MyTabBar({state, descriptors, navigation}) {
   const {theme} = useContext(ThemeContext);
 
+  const tabStyles = StyleSheet.create({
+    tabContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      alignItems: 'center',
+      position: 'absolute',
+      bottom: 25,
+      left: 50,
+      right: 50,
+      borderRadius: 50,
+      paddingVertical: 15,
+    },
+    tabButton: {
+      alignItems: 'center',
+    },
+  });
+
   return (
-    <View style={{...theme.shadows.small, ...{backgroundColor: theme.colors.secondary}, ...styles.tabContainer}}>
+    <View style={{...theme.shadows.small, ...{backgroundColor: theme.colors.secondary}, ...tabStyles.tabContainer}}>
       <StatusBar hidden={false} translucent={true} backgroundColor={'transparent'} />
       {state.routes.map((route, index) => {
         const {options} = descriptors[route.key];
@@ -110,7 +92,7 @@ function MyTabBar({state, descriptors, navigation}) {
             activeOpacity={0.4}
             onPress={onPress}
             onLongPress={onLongPress}
-            style={styles.tabButton}>
+            style={tabStyles.tabButton}>
             {icon}
           </TouchableOpacity>
         );
@@ -124,11 +106,9 @@ const renderTabBar = props => <MyTabBar {...props} />;
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
-
   const handleFinishLoading = () => {
     setIsLoading(false);
   };
-
   return (
     <ThemeProvider>
       <NavigationContainer>
@@ -148,6 +128,8 @@ const App = () => {
           </Tab.Navigator>
         )}
       </NavigationContainer>
+      {/*Allow for Toast displays*/}
+      <CustomToasts />
     </ThemeProvider>
   );
 };

@@ -1,4 +1,6 @@
 import {Platform} from 'react-native';
+import Toast from 'react-native-toast-message';
+const LOCAL = true;
 
 // Define local and remote URLs
 const LOCAL_URL = Platform.select({
@@ -7,8 +9,6 @@ const LOCAL_URL = Platform.select({
   default: 'http://10.0.2.2:3000', // Fallback for Android emulators
 });
 const REMOTE_URL = 'https://your-production-url.com';
-
-const LOCAL = true;
 const BASE_URL = LOCAL ? LOCAL_URL : REMOTE_URL;
 
 /**
@@ -32,6 +32,11 @@ export const refreshUserToken = async (email, password) => {
   } catch (error) {
     console.log('Error refreshing token:', error);
     // Optionally, return null in case of an error
+    Toast.show({
+      type: 'error',
+      text1: error.toString(),
+    });
+
     return null;
   }
 };

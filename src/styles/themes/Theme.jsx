@@ -38,6 +38,8 @@ export const getCustomTheme = themeName => ({
     text: themeName === 'dark' ? textLight : textDark,
     textDark: textDark,
     textLight: textLight,
+    red: '#ef4444',
+    green: '#15803d',
   },
 
   fonts: {
