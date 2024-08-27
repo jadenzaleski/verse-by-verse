@@ -11,6 +11,7 @@ import SettingsScreen from './settings/Settings';
 import {useContext, useState} from 'react';
 import LoadingScreen from './LoadingScreen';
 import CustomToasts from './Toasts';
+import { DarkTheme as theme } from '@react-navigation/native/src';
 
 const Tab = createBottomTabNavigator();
 // Define icon mapping for each screen
