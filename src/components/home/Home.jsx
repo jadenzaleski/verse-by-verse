@@ -1,6 +1,6 @@
 import {StyleSheet, Text, View, Button} from 'react-native';
 import * as React from 'react';
-import {refreshUserToken} from '../../utils/api/APICalls';
+import { getUser, refreshUserToken } from '../../utils/api/APICalls';
 import {useContext} from 'react';
 import ThemeContext from '../../context/ThemeContext';
 
@@ -38,7 +38,7 @@ const HomeScreen = ({navigation}) => {
 
       {/* Button to trigger token refresh */}
       <Button title="Refresh Token" onPress={handleTokenRefresh} />
-
+      <Button title="getUser Token" onPress={getUser} />
       {/* Display the result */}
       {result !== null && (
         <View style={styles.resultContainer}>

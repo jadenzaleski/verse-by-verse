@@ -1,5 +1,6 @@
 import {Platform} from 'react-native';
 import Toast from 'react-native-toast-message';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const LOCAL = true;
 
 // Define local and remote URLs
@@ -28,15 +29,76 @@ export const refreshUserToken = async (email, password) => {
       },
       body: JSON.stringify({email, password}),
     });
-    return await response.json();
+
+    if (!response.ok) {
+      // If the response is not OK, handle the error directly
+      const errorResponse = await response.json();
+      const errorMessage = errorResponse.message || 'Failed to refresh token';
+      console.log('Error refreshing token:', errorMessage);
+      Toast.show({
+        type: 'error',
+        text1: errorMessage,
+      });
+      return null;
+    }
+
+    const data = await response.json();
+
+    // Assuming the JWT is in the `token` field of the response
+    const {jwt} = data;
+
+    // Store JWT in AsyncStorage
+    await AsyncStorage.setItem('jwt', JSON.stringify(jwt));
+    console.log('JWT stored successfully');
+
+    return data; // Return the entire response or relevant part
   } catch (error) {
     console.log('Error refreshing token:', error);
-    // Optionally, return null in case of an error
+
+    // Show error toast
     Toast.show({
       type: 'error',
       text1: error.toString(),
     });
 
+    return null;
+  }
+};
+
+export const getUser = async () => {
+  try {
+    let jwt = await AsyncStorage.getItem('jwt');
+    jwt = JSON.parse(jwt);
+    // Make the fetch call with the constructed Authorization header
+    const response = await fetch(`${BASE_URL}/user`, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + jwt,
+      },
+    });
+
+    if (!response.ok) {
+      const errorResponse = await response.json();
+      const errorMessage = errorResponse.message || 'Failed to get user';
+      console.log('Error getting user:', errorMessage);
+      Toast.show({
+        type: 'error',
+        text1: errorMessage,
+      });
+      return null;
+    }
+
+    const responseData = await response.json();
+    console.log('Success getting user, /user:', responseData);
+    return responseData;
+  } catch (error) {
+    console.log('Error getting user, /user:', error);
+    Toast.show({
+      type: 'error',
+      text1: error.toString(),
+    });
     return null;
   }
 };
