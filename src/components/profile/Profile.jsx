@@ -1,15 +1,40 @@
-import {Image, StyleSheet, View, Text, TouchableOpacity, ScrollView} from 'react-native';
+import {Image, StyleSheet, View, Text, TouchableOpacity, ScrollView, ActivityIndicator} from 'react-native';
 import * as React from 'react';
-import {useContext} from 'react';
+import {useContext, useState} from 'react';
 import ThemeContext from '../../context/ThemeContext';
 import Svg, {Defs, RadialGradient, Rect, Stop} from 'react-native-svg';
 import XPBar from './XP';
 import Icon from '@react-native-vector-icons/ionicons';
 import Achievements from './Achievements';
 import RecentVerses from './RecentVerses';
+import {useFocusEffect} from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ProfileScreen = () => {
   const {theme} = useContext(ThemeContext);
+  const [user, setUser] = useState(null);
+  const avatarImages = {
+    0: require('../../../assets/images/avatars/crab.png'),
+    5: require('../../../assets/images/avatars/crab.png'),
+    6: require('../../../assets/images/avatars/crab.png'),
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchUser = async () => {
+        console.log('Attempting to fetch user...');
+        try {
+          const userData = await AsyncStorage.getItem('user');
+          if (userData) {
+            setUser(JSON.parse(userData));
+          }
+        } catch (error) {
+          console.error('Failed to load user data from AsyncStorage', error);
+        }
+      };
+      fetchUser();
+    }, []),
+  );
 
   const profileStyles = StyleSheet.create({
     container: {
@@ -48,10 +73,11 @@ const ProfileScreen = () => {
       alignItems: 'center',
       ...theme.shadows.small,
     },
+
     profileImage: {
-      width: 125,
-      height: 125,
-      borderRadius: 62.5,
+      width: 90,
+      height: 90,
+      backgroundColor: 'transparent',
     },
     title: {
       marginTop: 62.5 + 20,
@@ -60,9 +86,16 @@ const ProfileScreen = () => {
       color: theme.colors.text,
       ...theme.fonts.regular,
     },
+
+    loader: {
+      backgroundColor: theme.colors.primary,
+      flex: 1,
+      justifyContent: 'center',
+      alignSelf: 'stretch',
+    },
   });
 
-  return (
+  return user ? (
     <ScrollView showsVerticalScrollIndicator={false} backgroundColor={theme.colors.primary}>
       <View style={profileStyles.container}>
         <View style={profileStyles.buttonContainer}>
@@ -85,18 +118,21 @@ const ProfileScreen = () => {
             <Rect width="100%" height="100%" fill="url(#grad)" />
           </Svg>
           <View style={profileStyles.shadowContainer}>
-            <Image source={require('../../../assets/images/avatars/me.jpg')} style={profileStyles.profileImage} />
+            <Image source={avatarImages[parseInt(user.avatar_id, 10)]} style={profileStyles.profileImage} />
           </View>
         </View>
-        <Text style={profileStyles.title}>Jaden Zaleski</Text>
+        <Text style={profileStyles.title}>{user.name}</Text>
         <View style={{...profileStyles.container, ...{paddingHorizontal: 30}}}>
-          <XPBar />
+          <XPBar user={user} />
           <Achievements />
           <RecentVerses />
           <View style={{backgroundColor: theme.colors.primary, paddingVertical: 100}} />
         </View>
       </View>
     </ScrollView>
+  ) : (
+    // The user is being found in storage so we show this
+    <ActivityIndicator style={profileStyles.loader} size="small" color={theme.colors.accent.toString()} />
   );
 };
 

@@ -5,7 +5,7 @@ import ThemeContext from '../../context/ThemeContext';
 import ProgressBar from 'react-native-progress/Bar';
 import Icon from '@react-native-vector-icons/ionicons';
 
-const XPBar = () => {
+const XPBar = ({user}) => {
   const {theme} = useContext(ThemeContext);
 
   const xpStyles = StyleSheet.create({
@@ -70,7 +70,7 @@ const XPBar = () => {
       </View>
       <View style={xpStyles.detailsContainer}>
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
-          <Text style={xpStyles.xpNumber}>1200</Text>
+          <Text style={xpStyles.xpNumber}>{user.xp}</Text>
           <Icon name="sparkles" color={theme.colors.accent.toString()} size={14} />
         </View>
         <ProgressBar

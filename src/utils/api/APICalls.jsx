@@ -91,7 +91,8 @@ export const getUser = async () => {
     }
 
     const responseData = await response.json();
-    console.log('Success getting user, /user:', responseData);
+    console.log('Success getting user, /user:');
+    await AsyncStorage.setItem('user', JSON.stringify(responseData.user));
     return responseData;
   } catch (error) {
     console.log('Error getting user, /user:', error);
