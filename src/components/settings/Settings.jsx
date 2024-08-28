@@ -1,4 +1,4 @@
-import {StyleSheet, Text, TouchableOpacity, useColorScheme, View} from 'react-native';
+import {ScrollView, StyleSheet, Text, TouchableOpacity, useColorScheme, View, Image} from 'react-native';
 import {useContext, useState} from 'react';
 import ThemeContext from '../../context/ThemeContext';
 import * as React from 'react';
@@ -41,45 +41,157 @@ const SettingsScreen = () => {
     }
   };
 
+  const getIconText = () => {
+    switch (themeNum) {
+      case 1:
+        return 'DARK';
+      case 2:
+        return 'SYSTEM';
+      case 0:
+        return 'LIGHT';
+      default:
+        return 'SYSTEM';
+    }
+  };
+
   const settingsStyles = StyleSheet.create({
     container: {
       flex: 1,
-      alignItems: 'center',
+      flexDirection: 'column',
       justifyContent: 'center',
+      marginHorizontal: 30,
+      marginTop: 75,
       backgroundColor: theme.colors.primary,
     },
-    container2: {
-      padding: 20,
-      margin: 20,
+    title: {
+      marginBottom: 5,
+      alignSelf: 'center',
+      textTransform: 'uppercase',
+      color: theme.colors.text,
+      fontSize: theme.fontSizes.extraLarge,
+      ...theme.fonts.light,
+    },
+    divider: {
+      borderBottomColor: theme.colors.secondary,
+      borderBottomWidth: 2,
+    },
+    header: {
+      marginTop: 25,
+      textTransform: 'uppercase',
+      color: theme.colors.text,
+      fontSize: theme.fontSizes.regular,
+      ...theme.fonts.medium,
+    },
+    itemContainer: {
+      flexDirection: 'row',
+      alignSelf: 'stretch',
+      backgroundColor: theme.colors.secondary,
+      padding: 15,
       borderRadius: 15,
       alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: theme.colors.secondary,
+      marginVertical: 5,
     },
-    text: {
+    itemIcon: {
+      marginRight: 10,
+      overflow: 'hidden',
+      width: 25,
+      height: 25,
+    },
+    itemText: {
       color: theme.colors.text,
-      fontSize: theme.fontSizes.large,
+      fontSize: theme.fontSizes.subtitle,
+      ...theme.fonts.regular,
+      textTransform: 'capitalize',
     },
-    button: {
+    itemButton: {
+      marginLeft: 'auto',
+      color: theme.colors.accent,
+    },
+    accentColorContainer: {
+      marginLeft: 'auto',
+      width: 25,
+      height: 25,
+      borderRadius: 20,
+      borderColor: theme.colors.text,
+      borderWidth: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+
+    accentColorCircle: {
       backgroundColor: theme.colors.accent,
-      padding: 12,
-      margin: 20,
-      borderRadius: 50,
-      ...theme.shadows.small,
+      width: 15,
+      height: 15,
+      borderRadius: 15,
     },
   });
 
   return (
-    <View style={settingsStyles.container}>
-      <Text style={{fontSize: 24}}>Plain Text</Text>
-      <Text style={settingsStyles.text}>Current Theme: {themeName}</Text>
-      <Text style={settingsStyles.text}>System Theme: {systemTheme}</Text>
-      <View style={settingsStyles.container2}>
-        <TouchableOpacity activeOpacity={0.4} onPress={HandleNextTheme} style={settingsStyles.button}>
-          <Icon name={getIconName()} size={24} />
+    <ScrollView showsVerticalScrollIndicator={false} backgroundColor={theme.colors.primary}>
+      <View style={settingsStyles.container}>
+        <Text style={settingsStyles.title}>Settings</Text>
+        <View style={settingsStyles.divider}></View>
+        <Text style={settingsStyles.header}>appearance</Text>
+        <TouchableOpacity activeOpacity={0.6} onPress={HandleNextTheme} style={settingsStyles.itemContainer}>
+          <Image
+            source={require('../../../assets/images/dayNight.png')}
+            style={settingsStyles.itemIcon}
+            name={'color-fill-outline'}
+            size={25}
+          />
+          <Text style={settingsStyles.itemText}>theme</Text>
+          <Icon style={settingsStyles.itemButton} name={getIconName()} size={25} />
+        </TouchableOpacity>
+        <TouchableOpacity activeOpacity={0.6} style={settingsStyles.itemContainer}>
+          <Icon style={settingsStyles.itemIcon} color={theme.colors.accent} name={'color-palette-outline'} size={25} />
+          <Text style={settingsStyles.itemText}>accent color</Text>
+          <View style={settingsStyles.accentColorContainer}>
+            <View style={settingsStyles.accentColorCircle} />
+          </View>
+        </TouchableOpacity>
+
+        <Text style={settingsStyles.header}>Notifications</Text>
+
+        <Text style={settingsStyles.header}>user data</Text>
+
+        <Text style={settingsStyles.header}>resources</Text>
+        <TouchableOpacity activeOpacity={0.6} style={settingsStyles.itemContainer}>
+          <Icon style={settingsStyles.itemIcon} color={theme.colors.yellow} name={'star-outline'} size={25} />
+          <Text style={settingsStyles.itemText}>Rate in App Store</Text>
+          <Icon style={settingsStyles.itemButton} name={'chevron-forward'} size={25} />
+        </TouchableOpacity>
+        <TouchableOpacity activeOpacity={0.6} style={settingsStyles.itemContainer}>
+          <Icon style={settingsStyles.itemIcon} color={theme.colors.red} name={'bug-outline'} size={25} />
+          <Text style={settingsStyles.itemText}>Report a Bug</Text>
+          <Icon style={settingsStyles.itemButton} name={'chevron-forward'} size={25} />
+        </TouchableOpacity>
+        <TouchableOpacity activeOpacity={0.6} style={settingsStyles.itemContainer}>
+          <Icon style={settingsStyles.itemIcon} color={theme.colors.blue} name={'mail-outline'} size={25} />
+          <Text style={settingsStyles.itemText}>contact</Text>
+          <Icon style={settingsStyles.itemButton} name={'chevron-forward'} size={25} />
+        </TouchableOpacity>
+        <TouchableOpacity activeOpacity={0.6} style={settingsStyles.itemContainer}>
+          <Icon style={settingsStyles.itemIcon} color={theme.colors.text} name={'logo-github'} size={25} />
+          <Text style={settingsStyles.itemText}>Contribute</Text>
+          <Icon style={settingsStyles.itemButton} name={'chevron-forward'} size={25} />
+        </TouchableOpacity>
+        <TouchableOpacity activeOpacity={0.6} style={settingsStyles.itemContainer}>
+          <Icon style={settingsStyles.itemIcon} color={theme.colors.green} name={'lock-closed-outline'} size={25} />
+          <Text style={settingsStyles.itemText}>Privacy policy</Text>
+          <Icon style={settingsStyles.itemButton} name={'chevron-forward'} size={25} />
+        </TouchableOpacity>
+        <TouchableOpacity activeOpacity={0.6} style={settingsStyles.itemContainer}>
+          <Icon
+            style={settingsStyles.itemIcon}
+            color={theme.colors.text}
+            name={'information-circle-outline'}
+            size={25}
+          />
+          <Text style={settingsStyles.itemText}>about</Text>
+          <Icon style={settingsStyles.itemButton} name={'chevron-forward'} size={25} />
         </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 

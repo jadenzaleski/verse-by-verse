@@ -45,8 +45,8 @@ function MyTabBar({state, descriptors, navigation}) {
       alignItems: 'center',
       position: 'absolute',
       bottom: 25,
-      left: 50,
-      right: 50,
+      left: 30,
+      right: 30,
       borderRadius: 50,
       paddingVertical: 15,
     },
@@ -81,10 +81,14 @@ function MyTabBar({state, descriptors, navigation}) {
         };
 
         const onLongPress = () => {
-          navigation.emit({
+          const event = navigation.emit({
             type: 'tabLongPress',
             target: route.key,
           });
+
+          if (!isFocused && !event.defaultPrevented) {
+            navigation.navigate(route.name);
+          }
         };
 
         return (
