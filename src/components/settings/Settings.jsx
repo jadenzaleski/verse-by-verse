@@ -1,5 +1,15 @@
-import {ScrollView, StyleSheet, Text, TouchableOpacity, useColorScheme, View, Image} from 'react-native';
-import {useContext, useState} from 'react';
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useColorScheme,
+  View,
+  Image,
+  RefreshControl,
+  SafeAreaView,
+} from 'react-native';
+import {useCallback, useContext, useState} from 'react';
 import ThemeContext from '../../context/ThemeContext';
 import * as React from 'react';
 import Icon from '@react-native-vector-icons/ionicons';
@@ -8,6 +18,13 @@ const SettingsScreen = () => {
   const {theme, themeName, toggleTheme, useSystemTheme} = useContext(ThemeContext);
   const systemTheme = useColorScheme();
   const [themeNum, setThemeNum] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    console.log('Refreshing...');
+    setRefreshing(false);
+  }, []);
 
   function UseSystemTheme() {
     useSystemTheme();
@@ -38,19 +55,6 @@ const SettingsScreen = () => {
         return 'sunny-outline'; // Light theme icon
       default:
         return 'sunny-outline'; // Default icon
-    }
-  };
-
-  const getIconText = () => {
-    switch (themeNum) {
-      case 1:
-        return 'DARK';
-      case 2:
-        return 'SYSTEM';
-      case 0:
-        return 'LIGHT';
-      default:
-        return 'SYSTEM';
     }
   };
 
@@ -127,10 +131,13 @@ const SettingsScreen = () => {
   });
 
   return (
-    <ScrollView showsVerticalScrollIndicator={false} backgroundColor={theme.colors.primary}>
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      backgroundColor={theme.colors.primary}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
       <View style={settingsStyles.container}>
         <Text style={settingsStyles.title}>Settings</Text>
-        <View style={settingsStyles.divider}></View>
+        <View style={settingsStyles.divider} />
         <Text style={settingsStyles.header}>appearance</Text>
         <TouchableOpacity activeOpacity={0.6} onPress={HandleNextTheme} style={settingsStyles.itemContainer}>
           <Image

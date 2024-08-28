@@ -1,6 +1,15 @@
-import {Image, StyleSheet, View, Text, TouchableOpacity, ScrollView, ActivityIndicator} from 'react-native';
+import {
+  Image,
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
+  RefreshControl,
+} from 'react-native';
 import * as React from 'react';
-import {useContext, useState} from 'react';
+import { useCallback, useContext, useState } from 'react';
 import ThemeContext from '../../context/ThemeContext';
 import Svg, {Defs, RadialGradient, Rect, Stop} from 'react-native-svg';
 import XPBar from './XP';
@@ -9,32 +18,51 @@ import Achievements from './Achievements';
 import RecentVerses from './RecentVerses';
 import {useFocusEffect} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getUser } from '../../utils/api/APICalls';
 
 const ProfileScreen = () => {
   const {theme} = useContext(ThemeContext);
   const [user, setUser] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+
   const avatarImages = {
     0: require('../../../assets/images/avatars/crab.png'),
     5: require('../../../assets/images/avatars/crab.png'),
     6: require('../../../assets/images/avatars/crab.png'),
   };
 
-  useFocusEffect(
-    React.useCallback(() => {
-      const fetchUser = async () => {
-        console.log('Attempting to fetch user...');
-        try {
-          const userData = await AsyncStorage.getItem('user');
-          if (userData) {
-            setUser(JSON.parse(userData));
-          }
-        } catch (error) {
-          console.error('Failed to load user data from AsyncStorage', error);
+  const updateUser = async () => {
+    console.log('Attempting to fetch user...');
+    try {
+      // pull from api, if it fails get the latest from the device
+      const result = await getUser();
+      if (result) {
+        setUser(result.user);
+      } else {
+        const userData = await AsyncStorage.getItem('user');
+        if (userData) {
+          setUser(JSON.parse(userData));
         }
-      };
-      fetchUser();
+      }
+    } catch (error) {
+      console.error('Failed to load user data from AsyncStorage', error);
+    }
+  };
+
+// useFocusEffect to call updateUser when the screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      updateUser(); // No need for async/await here since the function handles it
     }, []),
   );
+
+// onRefresh function with async/await
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    console.log('Refreshing...');
+    await updateUser(); // Wait for updateUser to complete
+    setRefreshing(false); // Set refreshing to false after updateUser completes
+  }, []);
 
   const profileStyles = StyleSheet.create({
     container: {
@@ -96,7 +124,10 @@ const ProfileScreen = () => {
   });
 
   return user ? (
-    <ScrollView showsVerticalScrollIndicator={false} backgroundColor={theme.colors.primary}>
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      backgroundColor={theme.colors.primary}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
       <View style={profileStyles.container}>
         <View style={profileStyles.buttonContainer}>
           <TouchableOpacity
