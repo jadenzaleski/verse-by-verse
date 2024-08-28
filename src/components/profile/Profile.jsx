@@ -86,6 +86,10 @@ const ProfileScreen = () => {
       width: '100%',
       backgroundColor: theme.colors.primary,
       ...theme.shadows.small,
+      borderTopLeftRadius: 300,
+      borderTopRightRadius: 300,
+      borderTopWidth: 0,
+      borderTopColor: 'transparent',
     },
     gradientWrapper: {
       overflow: 'hidden',

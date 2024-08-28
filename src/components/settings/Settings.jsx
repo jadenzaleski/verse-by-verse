@@ -1,12 +1,4 @@
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  Image,
-  RefreshControl,
-} from 'react-native';
+import {ScrollView, StyleSheet, Text, TouchableOpacity, View, Image, RefreshControl} from 'react-native';
 import {useCallback, useContext, useState} from 'react';
 import ThemeContext from '../../context/ThemeContext';
 import * as React from 'react';
@@ -194,6 +186,8 @@ const SettingsScreen = () => {
           <Text style={settingsStyles.itemText}>about</Text>
           <Icon style={settingsStyles.itemButton} name={'chevron-forward'} size={25} />
         </TouchableOpacity>
+        {/*bottom padding*/}
+        <View style={{marginVertical: 50}} />
       </View>
     </ScrollView>
   );
