@@ -3,11 +3,9 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View,
   Image,
   RefreshControl,
-  SafeAreaView,
 } from 'react-native';
 import {useCallback, useContext, useState} from 'react';
 import ThemeContext from '../../context/ThemeContext';
@@ -15,8 +13,7 @@ import * as React from 'react';
 import Icon from '@react-native-vector-icons/ionicons';
 
 const SettingsScreen = () => {
-  const {theme, themeName, toggleTheme, useSystemTheme} = useContext(ThemeContext);
-  const systemTheme = useColorScheme();
+  const {theme, toggleTheme, useSystemTheme} = useContext(ThemeContext);
   const [themeNum, setThemeNum] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
 
