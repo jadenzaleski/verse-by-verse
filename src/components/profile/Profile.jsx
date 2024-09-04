@@ -19,7 +19,6 @@ import RecentVerses from './RecentVerses';
 import {useFocusEffect} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {getUser} from '../../utils/api/APICalls';
-
 const ProfileScreen = () => {
   const {theme} = useContext(ThemeContext);
   const [user, setUser] = useState(null);

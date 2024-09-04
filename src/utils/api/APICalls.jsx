@@ -1,16 +1,7 @@
-import {Platform} from 'react-native';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-const LOCAL = true;
+import * as Globals from '../Globals';
 
-// Define local and remote URLs
-const LOCAL_URL = Platform.select({
-  ios: 'http://127.0.0.1:3000',
-  android: 'http://10.0.2.2:3000',
-  default: 'http://10.0.2.2:3000', // Fallback for Android emulators
-});
-const REMOTE_URL = 'https://your-production-url.com';
-const BASE_URL = LOCAL ? LOCAL_URL : REMOTE_URL;
 
 /**
  * Sends a request to refresh the user's JWT token.
@@ -22,7 +13,7 @@ const BASE_URL = LOCAL ? LOCAL_URL : REMOTE_URL;
  */
 export const refreshUserToken = async (email, password) => {
   try {
-    const response = await fetch(`${BASE_URL}/refresh`, {
+    const response = await fetch(`${Globals.BASE_API_URL}/refresh`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -66,11 +57,13 @@ export const refreshUserToken = async (email, password) => {
 };
 
 export const getUser = async () => {
+  console.log(Globals.BASE_API_URL);
+  console.log(Globals.USE_LOCAL_API);
   try {
     let jwt = await AsyncStorage.getItem('jwt');
     jwt = JSON.parse(jwt);
     // Make the fetch call with the constructed Authorization header
-    const response = await fetch(`${BASE_URL}/user`, {
+    const response = await fetch(`${Globals.BASE_API_URL}/user`, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
