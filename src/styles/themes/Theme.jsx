@@ -30,7 +30,7 @@ const Montserrat = {
   ThinItalic: 'Montserrat-ThinItalic',
 };
 
-export const getCustomTheme = themeName => ({
+export const getCustomTheme = (themeName, isBold) => ({
   colors: {
     primary: themeName === 'dark' ? primaryDark : primaryLight,
     secondary: themeName === 'dark' ? secondaryDark : secondaryLight,
@@ -42,7 +42,6 @@ export const getCustomTheme = themeName => ({
     green: '#198754',
     blue: '#0d6efd',
     yellow: '#ffc107',
-
   },
 
   fonts: {
@@ -52,32 +51,23 @@ export const getCustomTheme = themeName => ({
     blackItalic: {
       fontFamily: Montserrat.BlackItalic,
     },
-    bold: {
-      fontFamily: Montserrat.Bold,
-    },
-    boldItalic: {
-      fontFamily: Montserrat.BoldItalic,
-    },
     extraBold: {
       fontFamily: Montserrat.ExtraBold,
     },
     extraBoldItalic: {
       fontFamily: Montserrat.ExtraBoldItalic,
     },
-    extraLight: {
-      fontFamily: Montserrat.ExtraLight,
+    bold: {
+      fontFamily: Montserrat.Bold,
     },
-    extraLightItalic: {
-      fontFamily: Montserrat.ExtraLightItalic,
+    boldItalic: {
+      fontFamily: Montserrat.BoldItalic,
     },
-    italic: {
-      fontFamily: Montserrat.Italic,
+    semiBold: {
+      fontFamily: Montserrat.SemiBold,
     },
-    light: {
-      fontFamily: Montserrat.Light,
-    },
-    lightItalic: {
-      fontFamily: Montserrat.LightItalic,
+    semiBoldItalic: {
+      fontFamily: Montserrat.SemiBoldItalic,
     },
     medium: {
       fontFamily: Montserrat.Medium,
@@ -88,17 +78,26 @@ export const getCustomTheme = themeName => ({
     regular: {
       fontFamily: Montserrat.Regular,
     },
-    semiBold: {
-      fontFamily: Montserrat.SemiBold,
+    italic: {
+      fontFamily: Montserrat.Italic,
     },
-    semiBoldItalic: {
-      fontFamily: Montserrat.SemiBoldItalic,
+    light: {
+      fontFamily: Montserrat.Light,
+    },
+    lightItalic: {
+      fontFamily: Montserrat.LightItalic,
+    },
+    extraLight: {
+      fontFamily: Montserrat.ExtraLight,
+    },
+    extraLightItalic: {
+      fontFamily: Montserrat.ExtraLightItalic,
     },
     thin: {
-      fontFamily: Montserrat.Thin,
+      fontFamily: isBold ? Montserrat.Regular : Montserrat.Thin,
     },
     thinItalic: {
-      fontFamily: Montserrat.ThinItalic,
+      fontFamily: isBold ? Montserrat.ExtraLightItalic : Montserrat.ThinItalic,
     },
   },
 

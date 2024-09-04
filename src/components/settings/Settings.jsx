@@ -1,11 +1,12 @@
-import {ScrollView, StyleSheet, Text, TouchableOpacity, View, Image, RefreshControl} from 'react-native';
+import {ScrollView, StyleSheet, Text, TouchableOpacity, View, Image, RefreshControl, Switch} from 'react-native';
 import {useCallback, useContext, useState} from 'react';
 import ThemeContext from '../../context/ThemeContext';
 import * as React from 'react';
 import Icon from '@react-native-vector-icons/ionicons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SettingsScreen = () => {
-  const {theme, toggleTheme, useSystemTheme} = useContext(ThemeContext);
+  const {theme, themeName, toggleTheme, useSystemTheme, isBold, toggleBold} = useContext(ThemeContext);
   const [themeNum, setThemeNum] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -145,6 +146,18 @@ const SettingsScreen = () => {
             <View style={settingsStyles.accentColorCircle} />
           </View>
         </TouchableOpacity>
+        <View style={settingsStyles.itemContainer}>
+          <Icon style={settingsStyles.itemIcon} color={theme.colors.text} name={'text-outline'} size={25} />
+          <Text style={settingsStyles.itemText}>Bold text</Text>
+          <Switch
+            style={settingsStyles.itemButton}
+            trackColor={{true: theme.colors.green, false: theme.colors.primary}}
+            thumbColor={theme.colors.textLight}
+            ios_backgroundColor={themeName === 'light' ? theme.colors.secondary : theme.colors.primary}
+            onValueChange={toggleBold}
+            value={isBold}
+          />
+        </View>
 
         <Text style={settingsStyles.header}>Notifications</Text>
 
