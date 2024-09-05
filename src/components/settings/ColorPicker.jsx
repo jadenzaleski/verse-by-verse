@@ -1,24 +1,15 @@
-import React, { useContext, useState } from 'react';
-import { View, StyleSheet, ActivityIndicator } from 'react-native';
+import React, {useContext, useState} from 'react';
+import {View, StyleSheet, ActivityIndicator, TouchableOpacity, Text} from 'react-native';
 import ThemeContext from '../../context/ThemeContext';
 import ColorPicker from 'react-native-wheel-color-picker';
 
-const ColorPickerScreen = ({ navigation }) => {
-  const { theme } = useContext(ThemeContext);
+const ColorPickerScreen = ({navigation}) => {
+  const {theme} = useContext(ThemeContext);
 
   // Initialize state using useState hook
-  const [currentColor, setCurrentColor] = useState('#a44646');
-  const [swatchesOnly, setSwatchesOnly] = useState(false);
-  const [swatchesLast, setSwatchesLast] = useState(false);
-  const [swatchesEnabled, setSwatchesEnabled] = useState(false);
-  const [discrete, setDiscrete] = useState(false);
+  const [currentColor, setCurrentColor] = useState('#A2C2BA');
 
-  // Handlers for color changes
   const onColorChange = (color) => {
-    setCurrentColor(color);
-  };
-
-  const onColorChangeComplete = (color) => {
     setCurrentColor(color);
   };
 
@@ -31,36 +22,85 @@ const ColorPickerScreen = ({ navigation }) => {
     },
 
     pickerContainer: {
-      height: 400,
-      padding: 0,
-      margin: 0,
-      gap: 0,
-      backgroundColor: theme.colors.secondary,
-    }
+      height: '50%',
+      width: '100%',
+      backgroundColor: theme.colors.primary,
+    },
+
+    currentBox: {
+      backgroundColor: theme.colors.accent,
+      alignSelf: 'stretch',
+      borderRadius: 15,
+      height: 75,
+      marginVertical: 15,
+      alignItems: 'center',
+      justifyContent: 'center',
+      ...theme.shadows.small
+    },
+    buttonContainer: {
+      flex: 1, flexDirection: 'column', alignSelf: 'stretch', marginBottom: 100,
+      alignItems: 'center',
+      marginTop: 15,
+      gap: 15,
+    }, selectionText: {
+      color: theme.colors.text,
+      fontSize: theme.fontSizes.subtitle,
+      ...theme.fonts.regular,
+    },
+    setBox: {
+      alignSelf: 'stretch',
+      borderRadius: 15,
+      height: 75,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: currentColor,
+      ...theme.shadows.small
+
+    },
+    resetBox: {
+      backgroundColor: theme.colors.accent,
+      alignSelf: 'stretch',
+      borderRadius: 15,
+      height: 75,
+      alignItems: 'center',
+      justifyContent: 'center',
+      ...theme.shadows.small
+    },
+
   });
 
   return (
     <View style={colorPickerStyles.container}>
+      <View style={colorPickerStyles.currentBox}><Text style={colorPickerStyles.selectionText}>Current Color</Text></View>
       <View style={colorPickerStyles.pickerContainer}>
-      <ColorPicker
-        ref={r => { this.picker = r }}
-        color={currentColor}
-        swatchesOnly={false}
-        onColorChange={onColorChange}
-        onColorChangeComplete={onColorChangeComplete}
-        thumbSize={50}
-        sliderHidden={false}
-        gapSize={0}
-        noSnap={true}
-        row={false}
-        swatchesLast={swatchesLast}
-        swatches={false}
-        discrete={true}
-        wheelLodingIndicator={<ActivityIndicator size={40} />}
-        sliderLodingIndicator={<ActivityIndicator size={20} />}
-        useNativeDriver={true}
-        useNativeLayout={true}
-      />
+        <ColorPicker
+          ref={r => {
+            this.picker = r;
+          }}
+          color={currentColor}
+          onColorChange={onColorChange}
+          onColorChangeComplete={onColorChange}
+          thumbSize={50}
+          sliderSize={35}
+          sliderHidden={false}
+          gapSize={0}
+          noSnap={true}
+          row={false}
+          swatches={false}
+          discrete={false}
+          wheelLodingIndicator={<ActivityIndicator size={40} />}
+          sliderLodingIndicator={<ActivityIndicator size={20} />}
+          useNativeDriver={true}
+          useNativeLayout={true}
+        />
+      </View>
+      <View style={colorPickerStyles.buttonContainer}>
+          <TouchableOpacity backgroundColor={'#000'} style={colorPickerStyles.setBox}  >
+            <Text style={colorPickerStyles.selectionText}>Set Color</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={colorPickerStyles.resetBox}>
+            <Text style={colorPickerStyles.selectionText}>Reset to Default Color</Text>
+          </TouchableOpacity>
       </View>
     </View>
   );
