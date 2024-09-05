@@ -4,12 +4,34 @@ import ThemeContext from '../../context/ThemeContext';
 import ColorPicker from 'react-native-wheel-color-picker';
 
 const ColorPickerScreen = ({navigation}) => {
-  const {theme} = useContext(ThemeContext);
+  const {theme, updateAccentColor} = useContext(ThemeContext);
 
   // Initialize state using useState hook
-  const [currentColor, setCurrentColor] = useState('#A2C2BA');
+  const [currentColor, setCurrentColor] = useState(theme.colors.accent);
 
-  const onColorChange = (color) => {
+  // Function to handle setting color
+  const handleSetColor = async () => {
+    try {
+      updateAccentColor(currentColor);
+      console.log('Accent color saved:', currentColor);
+    } catch (error) {
+      console.error('Error saving color:', error);
+    }
+  };
+
+  // Function to handle resetting color
+  const handleResetColor = async () => {
+    const defaultColor = '#A2C2BA';
+    setCurrentColor(defaultColor);
+    try {
+      updateAccentColor(defaultColor);
+      console.log('Accent color reset to default:', defaultColor);
+    } catch (error) {
+      console.error('Error resetting color:', error);
+    }
+  };
+
+  const onColorChange = color => {
     setCurrentColor(color);
   };
 
@@ -35,14 +57,18 @@ const ColorPickerScreen = ({navigation}) => {
       marginVertical: 15,
       alignItems: 'center',
       justifyContent: 'center',
-      ...theme.shadows.small
+      ...theme.shadows.small,
     },
     buttonContainer: {
-      flex: 1, flexDirection: 'column', alignSelf: 'stretch', marginBottom: 100,
+      flex: 1,
+      flexDirection: 'column',
+      alignSelf: 'stretch',
+      marginBottom: 100,
       alignItems: 'center',
       marginTop: 15,
       gap: 15,
-    }, selectionText: {
+    },
+    selectionText: {
       color: theme.colors.text,
       fontSize: theme.fontSizes.subtitle,
       ...theme.fonts.regular,
@@ -54,8 +80,7 @@ const ColorPickerScreen = ({navigation}) => {
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: currentColor,
-      ...theme.shadows.small
-
+      ...theme.shadows.small,
     },
     resetBox: {
       backgroundColor: theme.colors.accent,
@@ -64,14 +89,15 @@ const ColorPickerScreen = ({navigation}) => {
       height: 75,
       alignItems: 'center',
       justifyContent: 'center',
-      ...theme.shadows.small
+      ...theme.shadows.small,
     },
-
   });
 
   return (
     <View style={colorPickerStyles.container}>
-      <View style={colorPickerStyles.currentBox}><Text style={colorPickerStyles.selectionText}>Current Color</Text></View>
+      <View style={colorPickerStyles.currentBox}>
+        <Text style={colorPickerStyles.selectionText}>Current Color</Text>
+      </View>
       <View style={colorPickerStyles.pickerContainer}>
         <ColorPicker
           ref={r => {
@@ -95,12 +121,12 @@ const ColorPickerScreen = ({navigation}) => {
         />
       </View>
       <View style={colorPickerStyles.buttonContainer}>
-          <TouchableOpacity backgroundColor={'#000'} style={colorPickerStyles.setBox}  >
-            <Text style={colorPickerStyles.selectionText}>Set Color</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={colorPickerStyles.resetBox}>
-            <Text style={colorPickerStyles.selectionText}>Reset to Default Color</Text>
-          </TouchableOpacity>
+        <TouchableOpacity style={[colorPickerStyles.setBox, {backgroundColor: currentColor}]} onPress={handleSetColor}>
+          <Text style={colorPickerStyles.selectionText}>Set Color</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={colorPickerStyles.resetBox} onPress={handleResetColor}>
+          <Text style={colorPickerStyles.selectionText}>Reset to Default Color</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );

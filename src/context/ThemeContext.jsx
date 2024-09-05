@@ -9,13 +9,15 @@ export const ThemeProvider = ({children}) => {
   const colorScheme = useColorScheme();
   const [themeName, setThemeName] = useState(colorScheme || 'light');
   const [isBold, setIsBold] = useState(false); // State for font boldness
-  const theme = getCustomTheme(themeName, isBold);
+  const [accentColor, setAccentColor] = useState('#A2C2BA'); // Default accent color
+  const theme = getCustomTheme(themeName, isBold, accentColor);
 
   useEffect(() => {
     const loadSettings = async () => {
       try {
         const savedTheme = await AsyncStorage.getItem('theme');
         const savedBold = await AsyncStorage.getItem('isBold');
+        const savedAccentColor = await AsyncStorage.getItem('accentColor');
 
         // If no saved theme is found, fall back to system color scheme
         if (savedTheme) {
@@ -26,6 +28,16 @@ export const ThemeProvider = ({children}) => {
 
         if (savedBold !== null) {
           setIsBold(JSON.parse(savedBold));
+        } else {
+          // Set default bold value if not found in storage
+          await AsyncStorage.setItem('isBold', JSON.stringify(false));
+        }
+
+        if (savedAccentColor) {
+          setAccentColor(savedAccentColor);
+        } else {
+          // Set default accent color if not found in storage
+          await AsyncStorage.setItem('accentColor', '#A2C2BA');
         }
       } catch (error) {
         console.log('Error loading settings:', error);
@@ -35,23 +47,31 @@ export const ThemeProvider = ({children}) => {
     loadSettings().then(() => console.log('Settings retrieved.'));
   }, [colorScheme]);
 
-  const toggleTheme = newTheme => {
+  const toggleTheme = async newTheme => {
     setThemeName(newTheme);
-    AsyncStorage.setItem('theme', newTheme).then(() => console.log('Theme value saved to storage.'));
+    await AsyncStorage.setItem('theme', newTheme).then(() => console.log('Theme value saved to storage.'));
   };
 
-  const useSystemTheme = () => {
+  const useSystemTheme = async () => {
     setThemeName(colorScheme);
-    AsyncStorage.setItem('theme', colorScheme).then(() => console.log('System theme value saved to storage.'));
+    await AsyncStorage.setItem('theme', colorScheme).then(() => console.log('System theme value saved to storage.'));
   };
 
-  const toggleBold = () => {
+  const toggleBold = async () => {
     setIsBold(previousState => !previousState);
-    AsyncStorage.setItem('isBold', JSON.stringify(!isBold)).then(() => console.log('Bold setting saved to storage.'));
+    await AsyncStorage.setItem('isBold', JSON.stringify(!isBold)).then(() =>
+      console.log('Bold setting saved to storage.'),
+    );
+  };
+
+  const updateAccentColor = async color => {
+    setAccentColor(color);
+    await AsyncStorage.setItem('accentColor', color).then(() => console.log('Accent color saved to storage.'));
   };
 
   return (
-    <ThemeContext.Provider value={{theme, themeName, toggleTheme, useSystemTheme, isBold, toggleBold}}>
+    <ThemeContext.Provider
+      value={{theme, themeName, toggleTheme, useSystemTheme, isBold, toggleBold, accentColor, updateAccentColor}}>
       {children}
     </ThemeContext.Provider>
   );

@@ -30,11 +30,11 @@ const Montserrat = {
   ThinItalic: 'Montserrat-ThinItalic',
 };
 
-export const getCustomTheme = (themeName, isBold) => ({
+export const getCustomTheme = (themeName, isBold, accentColor) => ({
   colors: {
     primary: themeName === 'dark' ? primaryDark : primaryLight,
     secondary: themeName === 'dark' ? secondaryDark : secondaryLight,
-    accent: accent,
+    accent: accentColor,
     text: themeName === 'dark' ? textLight : textDark,
     textDark: textDark,
     textLight: textLight,
