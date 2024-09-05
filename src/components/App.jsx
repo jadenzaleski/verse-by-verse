@@ -1,4 +1,5 @@
 import * as React from 'react';
+import 'react-native-gesture-handler';
 import {NavigationContainer} from '@react-navigation/native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {View, StyleSheet, TouchableOpacity, StatusBar} from 'react-native';
@@ -11,6 +12,7 @@ import SettingsScreen from './settings/Settings';
 import {useContext, useState} from 'react';
 import LoadingScreen from './LoadingScreen';
 import CustomToasts from './Toasts';
+import SettingsNavigator from './settings/SettingsNavigator';
 
 const Tab = createBottomTabNavigator();
 // Define icon mapping for each screen
@@ -128,7 +130,7 @@ const App = () => {
             <Tab.Screen name="Home" component={HomeScreen} />
             <Tab.Screen name="Verses" component={VersesScreen} />
             <Tab.Screen name="Profile" component={ProfileScreen} />
-            <Tab.Screen name="Settings" component={SettingsScreen} />
+            <Tab.Screen name="Settings" component={SettingsNavigator} />
           </Tab.Navigator>
         )}
       </NavigationContainer>

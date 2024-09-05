@@ -3,9 +3,8 @@ import {useCallback, useContext, useState} from 'react';
 import ThemeContext from '../../context/ThemeContext';
 import * as React from 'react';
 import Icon from '@react-native-vector-icons/ionicons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const SettingsScreen = () => {
+const SettingsScreen = ({navigation}) => {
   const {theme, themeName, toggleTheme, useSystemTheme, isBold, toggleBold} = useContext(ThemeContext);
   const [themeNum, setThemeNum] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
@@ -139,7 +138,10 @@ const SettingsScreen = () => {
           <Text style={settingsStyles.itemText}>theme</Text>
           <Icon style={settingsStyles.itemButton} name={getIconName()} size={25} />
         </TouchableOpacity>
-        <TouchableOpacity activeOpacity={0.6} style={settingsStyles.itemContainer}>
+        <TouchableOpacity
+          activeOpacity={0.6}
+          style={settingsStyles.itemContainer}
+          onPress={() => navigation.navigate('ColorPicker')}>
           <Icon style={settingsStyles.itemIcon} color={theme.colors.accent} name={'color-palette-outline'} size={25} />
           <Text style={settingsStyles.itemText}>accent color</Text>
           <View style={settingsStyles.accentColorContainer}>
