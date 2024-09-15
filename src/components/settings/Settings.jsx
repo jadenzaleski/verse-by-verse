@@ -162,8 +162,31 @@ const SettingsScreen = ({navigation}) => {
         </View>
 
         <Text style={settingsStyles.header}>Notifications</Text>
-
-        <Text style={settingsStyles.header}>user data</Text>
+        <View style={settingsStyles.itemContainer}>
+          <Icon style={settingsStyles.itemIcon} color={theme.colors.blue} name={'hourglass-outline'} size={25} />
+          <Text style={settingsStyles.itemText}>Practice Reminders</Text>
+          <Switch
+            style={settingsStyles.itemButton}
+            trackColor={{true: theme.colors.green, false: theme.colors.primary}}
+            thumbColor={theme.colors.textLight}
+            ios_backgroundColor={themeName === 'light' ? theme.colors.secondary : theme.colors.primary}
+            value={false}
+          />
+        </View>
+        <View style={settingsStyles.itemContainer}>
+          <Icon style={settingsStyles.itemIcon} color={theme.colors.text} name={'time-outline'} size={25} />
+          <Text style={settingsStyles.itemText}>Daily Verse: </Text>
+          <TouchableOpacity activeOpacity={0.6}>
+            <Text style={{...settingsStyles.itemText, ...{color: theme.colors.blue}}}>23:59pm</Text>
+          </TouchableOpacity>
+          <Switch
+            style={settingsStyles.itemButton}
+            trackColor={{true: theme.colors.green, false: theme.colors.primary}}
+            thumbColor={theme.colors.textLight}
+            ios_backgroundColor={themeName === 'light' ? theme.colors.secondary : theme.colors.primary}
+            value={false}
+          />
+        </View>
 
         <Text style={settingsStyles.header}>resources</Text>
         <TouchableOpacity activeOpacity={0.6} style={settingsStyles.itemContainer}>
@@ -201,6 +224,19 @@ const SettingsScreen = ({navigation}) => {
           <Text style={settingsStyles.itemText}>about</Text>
           <Icon style={settingsStyles.itemButton} name={'chevron-forward'} size={25} />
         </TouchableOpacity>
+
+        <Text style={settingsStyles.header}>user data</Text>
+        <TouchableOpacity activeOpacity={0.6} style={settingsStyles.itemContainer}>
+          <Icon style={settingsStyles.itemIcon} color={theme.colors.text} name={'download-outline'} size={25} />
+          <Text style={settingsStyles.itemText}>Export/import Data</Text>
+          <Icon style={settingsStyles.itemButton} name={'chevron-forward'} size={25} />
+        </TouchableOpacity>
+        <TouchableOpacity activeOpacity={0.6} style={settingsStyles.itemContainer}>
+          <Icon style={settingsStyles.itemIcon} color={theme.colors.red} name={'trash-outline'} size={25} />
+          <Text style={settingsStyles.itemText}>Delete Account</Text>
+          <Icon style={settingsStyles.itemButton} name={'chevron-forward'} size={25} />
+        </TouchableOpacity>
+
         {/*bottom padding*/}
         <View style={{marginVertical: 50}} />
       </View>

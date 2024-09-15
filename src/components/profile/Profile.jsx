@@ -68,7 +68,6 @@ const ProfileScreen = () => {
       flex: 1,
       alignItems: 'center',
       backgroundColor: theme.colors.primary,
-      alignSelf: 'stretch',
     },
     buttonContainer: {
       position: 'absolute',
@@ -81,7 +80,7 @@ const ProfileScreen = () => {
       paddingRight: 0,
     },
     gradientContainer: {
-      height: '15%',
+      height: 200,
       width: '100%',
       backgroundColor: theme.colors.primary,
       ...theme.shadows.small,
@@ -97,7 +96,7 @@ const ProfileScreen = () => {
       width: 125,
       height: 125,
       borderRadius: 62.5,
-      backgroundColor: theme.colors.primary,
+      backgroundColor: theme.colors.secondary,
       bottom: 62.5,
       alignSelf: 'center',
       justifyContent: 'center',
@@ -110,6 +109,7 @@ const ProfileScreen = () => {
       height: 90,
       backgroundColor: 'transparent',
     },
+
     title: {
       marginTop: 62.5 + 20,
       marginBottom: 20,
@@ -132,15 +132,15 @@ const ProfileScreen = () => {
       backgroundColor={theme.colors.primary}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
       <View style={profileStyles.container}>
-        <View style={profileStyles.buttonContainer}>
-          <TouchableOpacity
-            style={profileStyles.button}
-            onPress={() => {
-              /* Handle button press */
-            }}>
-            <Icon name="ellipsis-horizontal" color={theme.colors.primary.toString()} size={24} />
-          </TouchableOpacity>
-        </View>
+        {/*<View style={profileStyles.buttonContainer}>*/}
+        {/*  <TouchableOpacity*/}
+        {/*    style={profileStyles.button}*/}
+        {/*    onPress={() => {*/}
+        {/*      /* Handle button press */}
+        {/*    }}>*/}
+        {/*    <Icon name="ellipsis-horizontal" color={theme.colors.primary.toString()} size={24} />*/}
+        {/*  </TouchableOpacity>*/}
+        {/*</View>*/}
         <View style={profileStyles.gradientContainer}>
           <Svg style={profileStyles.gradientWrapper}>
             <Defs>
@@ -149,7 +149,7 @@ const ProfileScreen = () => {
                 <Stop offset="100%" stopColor={theme.colors.primary.toString()} stopOpacity="1" />
               </RadialGradient>
             </Defs>
-            <Rect width="100%" height="100%" fill="url(#grad)" />
+            <Rect width="100%" height="200" fill="url(#grad)" />
           </Svg>
           <View style={profileStyles.shadowContainer}>
             <Image source={avatarImages[parseInt(user.avatar_id, 10)]} style={profileStyles.profileImage} />
@@ -158,8 +158,8 @@ const ProfileScreen = () => {
         <Text style={profileStyles.title}>{user.name}</Text>
         <View style={{...profileStyles.container, ...{paddingHorizontal: 30}}}>
           <XPBar user={user} />
-          <Achievements />
-          <RecentVerses />
+          {/*<Achievements />*/}
+          {/*<RecentVerses />*/}
           <View style={{backgroundColor: theme.colors.primary, paddingVertical: 100}} />
         </View>
       </View>
