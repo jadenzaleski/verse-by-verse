@@ -7,7 +7,9 @@ import Icon from '@react-native-vector-icons/ionicons';
 
 const XPBar = ({user}) => {
   const {theme} = useContext(ThemeContext);
-
+  const levelProgress = (user.xp - user.current_level_xp) / (user.next_level_xp - user.current_level_xp);
+  const neededXp = user.next_level_xp - user.xp;
+  console.log(levelProgress, neededXp, user.xp, user.current_level_xp, user.next_level_xp);
   const xpStyles = StyleSheet.create({
     container: {
       flexDirection: 'row',
@@ -66,7 +68,7 @@ const XPBar = ({user}) => {
   return (
     <View style={xpStyles.container}>
       <View style={xpStyles.numberContainer}>
-        <Text style={xpStyles.numberText}>123</Text>
+        <Text style={xpStyles.numberText}>{user.level}</Text>
       </View>
       <View style={xpStyles.detailsContainer}>
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -74,17 +76,21 @@ const XPBar = ({user}) => {
           <Icon name="sparkles" color={theme.colors.accent.toString()} size={14} />
         </View>
         <ProgressBar
-          progress={0.6}
+          progress={levelProgress}
           width={null}
           height={10}
           color={theme.colors.accent}
           borderWidth={0}
           borderRadius={5}
+          animated={true} // Enable animation
+          animationType="timing" // Optional: you can also try 'timing'
           style={xpStyles.progressBar}
         />
         <View style={xpStyles.levelContainer}>
-          <Text style={xpStyles.levelText}>Level 5</Text>
-          <Text style={xpStyles.levelText}> 120k until Level 6</Text>
+          <Text style={xpStyles.levelText}>Level {user.level}</Text>
+          <Text style={xpStyles.levelText}>
+            {neededXp} xp until Level {user.level + 1}
+          </Text>
         </View>
       </View>
     </View>
