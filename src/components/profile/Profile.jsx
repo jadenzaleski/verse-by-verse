@@ -36,6 +36,7 @@ const ProfileScreen = () => {
       // pull from api, if it fails get the latest from the device
       const result = await getUser();
       if (result) {
+        console.log('Got user from API!');
         setUser(result.user);
       } else {
         const userData = await AsyncStorage.getItem('user');

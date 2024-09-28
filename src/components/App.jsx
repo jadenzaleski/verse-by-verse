@@ -115,6 +115,7 @@ const App = () => {
   const handleFinishLoading = () => {
     setIsLoading(false);
   };
+
   return (
     <ThemeProvider>
       <NavigationContainer>

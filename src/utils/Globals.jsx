@@ -9,3 +9,5 @@ export const REMOTE_URL = 'https://myapi.com';
 export const USE_LOCAL_API = true;
 
 export const BASE_API_URL = USE_LOCAL_API ? LOCAL_URL : REMOTE_URL;
+
+export const DEBUG = true;

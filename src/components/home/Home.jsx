@@ -1,17 +1,23 @@
 import {StyleSheet, Text, View, Button} from 'react-native';
 import * as React from 'react';
-import { getUser, refreshUserToken } from '../../utils/api/APICalls';
+import {getUser} from '../../utils/api/APICalls'; // Ensure this path is correct
 import {useContext} from 'react';
 import ThemeContext from '../../context/ThemeContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as PrintAsyncStorage from '../../utils/PrintAsyncStorage';
 
 const HomeScreen = ({navigation}) => {
   const {theme} = useContext(ThemeContext);
-  const [result, setResult] = React.useState(null);
+  const [userText, setUserText] = React.useState(null);
 
-  const handleTokenRefresh = async () => {
-    const response = await refreshUserToken('jadenzaleski@icloud.com', 'august30');
-    setResult(response); // Store the response (token) in state
+  const fetchUser = async () => {
+    const result = await getUser(); // Call the getUser API
+    setUserText(result); // Set the result in the state
   };
+
+  async function doPrint() {
+    await PrintAsyncStorage.print();
+  }
 
   const styles = StyleSheet.create({
     container: {
@@ -30,19 +36,26 @@ const HomeScreen = ({navigation}) => {
       marginVertical: 5,
       color: theme.colors.text,
     },
+    plain: {
+      fontSize: theme.fontSizes.large,
+      color: theme.colors.text,
+    },
   });
 
   return (
     <View style={styles.container}>
       <Text style={styles.plain}>Home</Text>
 
-      {/* Button to trigger token refresh */}
-      <Button title="Refresh Token" onPress={handleTokenRefresh} />
-      <Button title="getUser Token" onPress={getUser} />
+      {/* Button to trigger getUser call */}
+      <Button title="Get User Token" onPress={fetchUser} />
+
+      {/* Button to print AsyncStorage values */}
+      <Button title="Print AsyncStorage" onPress={doPrint} />
+
       {/* Display the result */}
-      {result !== null && (
+      {userText !== null && (
         <View style={styles.resultContainer}>
-          <Text style={styles.resultText}>Result: {JSON.stringify(result)}</Text>
+          <Text style={styles.resultText}>Result: {JSON.stringify(userText, null, 4)}</Text>
         </View>
       )}
     </View>

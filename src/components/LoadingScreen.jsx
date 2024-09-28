@@ -2,6 +2,9 @@ import React, {useContext, useEffect, useState} from 'react';
 import {View, Text, StyleSheet, ActivityIndicator, Image} from 'react-native';
 import ThemeContext from '../context/ThemeContext';
 import {getUser} from '../utils/api/APICalls';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Globals from '../utils/Globals';
+import * as PrintAsyncStorage from '../utils/PrintAsyncStorage';
 
 const LoadingScreen = ({onFinishLoading}) => {
   const [loadingMessage, setLoadingMessage] = useState('Initializing...');
@@ -9,10 +12,16 @@ const LoadingScreen = ({onFinishLoading}) => {
 
   useEffect(() => {
     const performLoadingTasks = async () => {
-      await getUser();
       setLoadingMessage('Updating User...');
+      await getUser();
       // example:
       await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Log the storage
+      if (Globals.DEBUG) {
+        await PrintAsyncStorage.print();
+      }
+
       onFinishLoading();
     };
 

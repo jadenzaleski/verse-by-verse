@@ -9,7 +9,6 @@ const XPBar = ({user}) => {
   const {theme} = useContext(ThemeContext);
   const levelProgress = (user.xp - user.current_level_xp) / (user.next_level_xp - user.current_level_xp);
   const neededXp = user.next_level_xp - user.xp;
-  console.log(levelProgress, neededXp, user.xp, user.current_level_xp, user.next_level_xp);
   const xpStyles = StyleSheet.create({
     container: {
       flexDirection: 'row',
