@@ -1,7 +1,6 @@
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Globals from '../Globals';
-
 // Helper to get JWT token from AsyncStorage
 const getToken = async () => {
   let jwt = await AsyncStorage.getItem('jwt');
@@ -13,15 +12,9 @@ const setToken = async jwt => {
   await AsyncStorage.setItem('jwt', JSON.stringify(jwt));
 };
 
-// Helper function to get stored credentials for token refresh
-const getCredentials = async () => {
-  const email = await AsyncStorage.getItem('user');
-  const password = await AsyncStorage.getItem('password');
-  return {email: JSON.parse(email), password: JSON.parse(password)};
-};
 
 // Centralized API call function with token management and refresh logic
-export const apiCall = async (endpoint, method = 'GET', body = null, headers = {}) => {
+export const apiCall = async (endpoint, method = 'GET', body = null, headers = {}, showLoginModal) => {
   console.log('[API] Trying call:', method, endpoint);
   try {
     let jwt = await getToken();
@@ -40,15 +33,9 @@ export const apiCall = async (endpoint, method = 'GET', body = null, headers = {
     });
 
     if (response.status === 401) {
-      // instead of below, we need to pop up a login screen to show the user that they need to log in
-      // console.log('[API] Token may be expired, trying to refresh it...');
-      // // Token might be expired, try refreshing it
-      // const refreshedToken = await refreshToken();
-      // if (refreshedToken) {
-      //   return apiCall(endpoint, method, body, headers); // Retry with the new token
-      // } else {
-      //   return null; // If token refresh fails, return null
-      // }
+      console.log('[API] Token may be expired, showing login modal...');
+      showLoginModal(); // Call showLoginModal if it's provided
+      return null; // Stop further processing
     }
 
     if (!response.ok) {
@@ -65,11 +52,9 @@ export const apiCall = async (endpoint, method = 'GET', body = null, headers = {
     return null;
   }
 };
-
 // Token refresh function that handles getting a new token from the server
 export const refreshToken = async (email, password) => {
   try {
-    const credentials = await getCredentials();
     const response = await fetch(`${Globals.BASE_API_URL}/refresh`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
@@ -95,8 +80,8 @@ export const refreshToken = async (email, password) => {
 };
 
 // Get user data
-export const getUser = async () => {
-  const user = await apiCall('/user', 'GET');
+export const getUser = async showLoginModal => {
+  const user = await apiCall('/user', 'GET', null, {}, showLoginModal);
   if (user) {
     if (Globals.DEBUG) console.log('[AS] Updating "user"');
     await AsyncStorage.setItem('user', JSON.stringify(user));

@@ -13,6 +13,8 @@ import {useContext, useState} from 'react';
 import LoadingScreen from './LoadingScreen';
 import CustomToasts from './Toasts';
 import SettingsNavigator from './settings/SettingsNavigator';
+import {AuthProvider} from '../context/AuthContext';
+import { LoginModal } from './LoginModal';
 
 const Tab = createBottomTabNavigator();
 // Define icon mapping for each screen
@@ -117,27 +119,30 @@ const App = () => {
   };
 
   return (
-    <ThemeProvider>
-      <NavigationContainer>
-        {isLoading ? (
-          <LoadingScreen onFinishLoading={handleFinishLoading} />
-        ) : (
-          <Tab.Navigator
-            screenOptions={{
-              headerShown: false,
-              tabBarShowLabel: false,
-            }}
-            tabBar={renderTabBar}>
-            <Tab.Screen name="Home" component={HomeScreen} />
-            <Tab.Screen name="Verses" component={VersesScreen} />
-            <Tab.Screen name="Profile" component={ProfileScreen} />
-            <Tab.Screen name="Settings" component={SettingsNavigator} />
-          </Tab.Navigator>
-        )}
-      </NavigationContainer>
-      {/*Allow for Toast displays*/}
-      <CustomToasts />
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider>
+        <NavigationContainer>
+          {isLoading ? (
+            <LoadingScreen onFinishLoading={handleFinishLoading} />
+          ) : (
+            <Tab.Navigator
+              screenOptions={{
+                headerShown: false,
+                tabBarShowLabel: false,
+              }}
+              tabBar={renderTabBar}>
+              <Tab.Screen name="Home" component={HomeScreen} />
+              <Tab.Screen name="Verses" component={VersesScreen} />
+              <Tab.Screen name="Profile" component={ProfileScreen} />
+              <Tab.Screen name="Settings" component={SettingsNavigator} />
+            </Tab.Navigator>
+          )}
+        </NavigationContainer>
+        {/*Allow for Toast displays*/}
+        <CustomToasts />
+        <LoginModal />
+      </ThemeProvider>
+    </AuthProvider>
   );
 };
 

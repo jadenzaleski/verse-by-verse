@@ -3,15 +3,16 @@ import * as React from 'react';
 import {getUser} from '../../utils/api/APICalls'; // Ensure this path is correct
 import {useContext} from 'react';
 import ThemeContext from '../../context/ThemeContext';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as PrintAsyncStorage from '../../utils/PrintAsyncStorage';
+import AuthContext from '../../context/AuthContext';
 
 const HomeScreen = ({navigation}) => {
   const {theme} = useContext(ThemeContext);
   const [userText, setUserText] = React.useState(null);
+  const {showLoginModal} = useContext(AuthContext);
 
   const fetchUser = async () => {
-    const result = await getUser(); // Call the getUser API
+    const result = await getUser(showLoginModal); // Call the getUser API
     setUserText(result); // Set the result in the state
   };
 

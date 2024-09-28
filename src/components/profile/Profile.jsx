@@ -19,10 +19,12 @@ import RecentVerses from './RecentVerses';
 import {useFocusEffect} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {getUser} from '../../utils/api/APICalls';
+import AuthContext from '../../context/AuthContext';
 const ProfileScreen = () => {
   const {theme} = useContext(ThemeContext);
   const [user, setUser] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
+  const {showLoginModal} = useContext(AuthContext);
 
   const avatarImages = {
     0: require('../../../assets/images/avatars/crab.png'),
@@ -34,7 +36,7 @@ const ProfileScreen = () => {
     console.log('Attempting to fetch user...');
     try {
       // pull from api, if it fails get the latest from the device
-      const result = await getUser();
+      const result = await getUser(showLoginModal);
       if (result) {
         console.log('Got user from API!');
         setUser(result.user);
