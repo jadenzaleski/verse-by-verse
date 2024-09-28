@@ -15,7 +15,7 @@ const setToken = async jwt => {
 
 // Helper function to get stored credentials for token refresh
 const getCredentials = async () => {
-  const email = await AsyncStorage.getItem('email');
+  const email = await AsyncStorage.getItem('user');
   const password = await AsyncStorage.getItem('password');
   return {email: JSON.parse(email), password: JSON.parse(password)};
 };
@@ -40,14 +40,15 @@ export const apiCall = async (endpoint, method = 'GET', body = null, headers = {
     });
 
     if (response.status === 401) {
-      console.log('[API] Token may be expired, trying to refresh it...');
-      // Token might be expired, try refreshing it
-      const refreshedToken = await refreshToken();
-      if (refreshedToken) {
-        return apiCall(endpoint, method, body, headers); // Retry with the new token
-      } else {
-        return null; // If token refresh fails, return null
-      }
+      // instead of below, we need to pop up a login screen to show the user that they need to log in
+      // console.log('[API] Token may be expired, trying to refresh it...');
+      // // Token might be expired, try refreshing it
+      // const refreshedToken = await refreshToken();
+      // if (refreshedToken) {
+      //   return apiCall(endpoint, method, body, headers); // Retry with the new token
+      // } else {
+      //   return null; // If token refresh fails, return null
+      // }
     }
 
     if (!response.ok) {
@@ -66,13 +67,13 @@ export const apiCall = async (endpoint, method = 'GET', body = null, headers = {
 };
 
 // Token refresh function that handles getting a new token from the server
-export const refreshToken = async () => {
+export const refreshToken = async (email, password) => {
   try {
     const credentials = await getCredentials();
     const response = await fetch(`${Globals.BASE_API_URL}/refresh`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(credentials),
+      body: JSON.stringify({email: email, password: password}),
     });
 
     if (!response.ok) {
