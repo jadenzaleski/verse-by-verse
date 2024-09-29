@@ -12,7 +12,6 @@ const setToken = async jwt => {
   await AsyncStorage.setItem('jwt', JSON.stringify(jwt));
 };
 
-
 // Centralized API call function with token management and refresh logic
 export const apiCall = async (endpoint, method = 'GET', body = null, headers = {}, showLoginModal) => {
   console.log('[API] Trying call:', method, endpoint);
@@ -34,8 +33,17 @@ export const apiCall = async (endpoint, method = 'GET', body = null, headers = {
 
     if (response.status === 401) {
       console.log('[API] Token may be expired, showing login modal...');
-      showLoginModal(); // Call showLoginModal if it's provided
-      return null; // Stop further processing
+
+      // Await the modal to resolve before continuing
+      const loggedIn = await showLoginModal();
+      console.log('[API] Logged in', loggedIn);
+      if (loggedIn) {
+        console.log('[API] Retrying API call after login...');
+        return apiCall(endpoint, method, body, headers, showLoginModal); // Retry with the new token
+      } else {
+        console.log('[API] Login canceled');
+        return null; // If login is canceled, stop processing
+      }
     }
 
     if (!response.ok) {
@@ -52,6 +60,7 @@ export const apiCall = async (endpoint, method = 'GET', body = null, headers = {
     return null;
   }
 };
+
 // Token refresh function that handles getting a new token from the server
 export const refreshToken = async (email, password) => {
   try {
