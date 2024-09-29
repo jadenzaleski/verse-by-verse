@@ -14,17 +14,19 @@ export const AuthProvider = ({children}) => {
     });
   };
 
-  // Hide the login modal and resolve the promise with the login result (true for success, false for cancel)
-  const hideLoginModal = (loginSuccess = false) => {
+  // Hide the login modal and resolve the promise (no value passed)
+  const hideLoginModal = () => {
     setIsModalVisible(false);
     if (modalPromise) {
-      modalPromise(loginSuccess); // Resolve the promise with login result
+      modalPromise(true); // Resolve the promise without any value
       setModalPromise(null); // Clear the stored promise after resolving it
     }
   };
 
   return (
-    <AuthContext.Provider value={{isModalVisible, showLoginModal, hideLoginModal}}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{isModalVisible, showLoginModal, hideLoginModal}}>
+      {children}
+    </AuthContext.Provider>
   );
 };
 

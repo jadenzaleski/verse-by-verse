@@ -1,4 +1,4 @@
-import React, {useContext, useRef} from 'react';
+import React, {useContext, useRef, useState} from 'react';
 import {
   Modal,
   View,
@@ -11,26 +11,34 @@ import {
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import AuthContext from '../context/AuthContext';
 import ThemeContext from '../context/ThemeContext';
 import CustomTextInput from './CustomTextInputs';
+import {refreshToken} from '../utils/api/APICalls';
 
 export const LoginModal = () => {
   const {isModalVisible, hideLoginModal} = useContext(AuthContext);
   const {theme} = useContext(ThemeContext);
   const passwordRef = useRef();
-  // Simulate login process and close modal with success
-  const handleLogin = () => {
-    // Simulate successful login and close modal with "true"
-    hideLoginModal(true);
-  };
+  const [showLoader, setShowLoader] = useState(false);
+  const [email, setEmail] = React.useState(null);
+  const [password, setPassword] = React.useState(null);
+  const [feedback, setFeedback] = React.useState(null);
 
-  // Handle modal close without login
-  const handleClose = () => {
-    // Close modal without login, pass "false"
-    hideLoginModal(false);
-  };
+  async function attemptLogin() {
+    setShowLoader(true);
+    const {response, data} = await refreshToken(email, password); // Destructure response and data
+    if (response && response.ok) {
+      hideLoginModal();
+      setFeedback(' ');
+    } else {
+      console.log('Error refreshing token:', data);
+      setFeedback(data?.message); // Set feedback message
+    }
+    setShowLoader(false);
+  }
 
   const loginModalStyles = StyleSheet.create({
     container: {
@@ -73,7 +81,6 @@ export const LoginModal = () => {
       alignSelf: 'stretch',
       justifyContent: 'center',
       gap: 10,
-      marginBottom: Platform.OS === 'android' ? 30 : 30,
     },
 
     button: {
@@ -89,6 +96,14 @@ export const LoginModal = () => {
     buttonText: {
       fontSize: theme.fontSizes.medium,
       ...theme.fonts.semiBold,
+    },
+
+    feedback: {
+      marginTop: 5,
+      color: theme.colors.red,
+      fontSize: theme.fontSizes.small,
+      ...theme.fonts.regular,
+      marginBottom: Platform.OS === 'android' ? 30 : 30,
     }
   });
 
@@ -105,6 +120,7 @@ export const LoginModal = () => {
             <Image style={loginModalStyles.img} source={require('../../assets/images/VerseByVerseLogo.png')} />
             <Text style={loginModalStyles.login}>Login:</Text>
             <CustomTextInput
+              onChangeText={text => setEmail(text)}
               style={loginModalStyles.textInput}
               borderColor={theme.colors.text}
               textBackgroundColor={theme.colors.secondary}
@@ -115,6 +131,8 @@ export const LoginModal = () => {
               onSubmitEditing={() => passwordRef.current.focus()}
             />
             <CustomTextInput
+              onSubmitEditing={attemptLogin}
+              onChangeText={text => setPassword(text)}
               style={loginModalStyles.textInput}
               borderColor={theme.colors.text}
               textBackgroundColor={theme.colors.secondary}
@@ -125,13 +143,21 @@ export const LoginModal = () => {
               ref={passwordRef}
             />
             <View style={loginModalStyles.buttonContainer}>
+              <TouchableOpacity
+                onPress={attemptLogin}
+                disabled={showLoader}
+                style={{...loginModalStyles.button, ...{borderColor: theme.colors.green}}}>
+                {showLoader ? (
+                  <ActivityIndicator size="small" color={theme.colors.green.toString()} />
+                ) : (
+                  <Text style={{...loginModalStyles.buttonText, ...{color: theme.colors.green}}}>Login</Text>
+                )}
+              </TouchableOpacity>
               <TouchableOpacity style={{...loginModalStyles.button, ...{borderColor: theme.colors.blue}}}>
                 <Text style={{...loginModalStyles.buttonText, ...{color: theme.colors.blue}}}>Register</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={{...loginModalStyles.button, ...{borderColor: theme.colors.green}}} >
-                <Text style={{...loginModalStyles.buttonText, ...{color: theme.colors.green}}}>Login</Text>
-              </TouchableOpacity>
             </View>
+            <Text style={loginModalStyles.feedback}>{feedback} </Text>
           </View>
         </KeyboardAvoidingView>
       </SafeAreaView>

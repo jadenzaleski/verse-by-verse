@@ -33,17 +33,11 @@ export const apiCall = async (endpoint, method = 'GET', body = null, headers = {
 
     if (response.status === 401) {
       console.log('[API] Token may be expired, showing login modal...');
-
+      console.log(await response.json());
       // Await the modal to resolve before continuing
-      const loggedIn = await showLoginModal();
-      console.log('[API] Logged in', loggedIn);
-      if (loggedIn) {
-        console.log('[API] Retrying API call after login...');
-        return apiCall(endpoint, method, body, headers, showLoginModal); // Retry with the new token
-      } else {
-        console.log('[API] Login canceled');
-        return null; // If login is canceled, stop processing
-      }
+      await showLoginModal();
+      console.log('[API] Retrying API call after login...');
+      return apiCall(endpoint, method, body, headers, showLoginModal); // Retry with the new token
     }
 
     if (!response.ok) {
@@ -63,6 +57,7 @@ export const apiCall = async (endpoint, method = 'GET', body = null, headers = {
 
 // Token refresh function that handles getting a new token from the server
 export const refreshToken = async (email, password) => {
+  console.log('[API] Attempting to refresh token...');
   try {
     const response = await fetch(`${Globals.BASE_API_URL}/refresh`, {
       method: 'POST',
@@ -70,24 +65,19 @@ export const refreshToken = async (email, password) => {
       body: JSON.stringify({email: email, password: password}),
     });
 
-    if (!response.ok) {
-      const errorResponse = await response.json();
-      const errorMessage = errorResponse.message || 'Failed to refresh token';
-      Toast.show({type: 'error', text1: errorMessage});
-      return null;
+    const data = await response.json(); // Parse the JSON only once
+
+    if (response.ok) {
+      if (Globals.DEBUG) console.log('[API] Token refreshed, saving it.');
+      await AsyncStorage.setItem('jwt', JSON.stringify(data.jwt)); // Store the token
     }
 
-    const data = await response.json();
-    const {jwt} = data;
-    await setToken(jwt); // Store new token
-    return jwt;
+    return {response, data}; // Return both response and parsed data
   } catch (error) {
     console.error('Error refreshing token:', error);
-    Toast.show({type: 'error', text1: error.toString()});
-    return null;
+    return {error}; // Return the error object if failure occurs
   }
 };
-
 // Get user data
 export const getUser = async showLoginModal => {
   const user = await apiCall('/user', 'GET', null, {}, showLoginModal);

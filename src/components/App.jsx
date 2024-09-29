@@ -138,9 +138,9 @@ const App = () => {
             </Tab.Navigator>
           )}
         </NavigationContainer>
+        <LoginModal />
         {/*Allow for Toast displays*/}
         <CustomToasts />
-        <LoginModal />
       </ThemeProvider>
     </AuthProvider>
   );
