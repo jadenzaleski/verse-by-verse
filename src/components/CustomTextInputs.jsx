@@ -1,5 +1,5 @@
 import React, {forwardRef, useContext} from 'react';
-import {View, TextInput, Text, StyleSheet} from 'react-native';
+import { View, TextInput, Text, StyleSheet, Platform } from 'react-native';
 import ThemeContext from '../context/ThemeContext';
 
 const CustomTextInput = forwardRef(
@@ -56,6 +56,7 @@ const CustomTextInput = forwardRef(
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
+          placeholderTextColor={Platform.OS === 'ios' ? theme.colors.text + '100' : '#ffffff40'}
           secureTextEntry={secureTextEntry} // Hides the text if true
           keyboardType={keyboardType} // Specifies the keyboard type
           autoComplete={autoComplete} // Controls autocomplete behavior
