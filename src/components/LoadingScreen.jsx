@@ -1,20 +1,19 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {View, Text, StyleSheet, ActivityIndicator, Image} from 'react-native';
 import ThemeContext from '../context/ThemeContext';
-import {getUser} from '../utils/api/APICalls';
+import {useGetUser} from '../utils/api/APICalls';
 import * as Globals from '../utils/Globals';
 import * as PrintAsyncStorage from '../utils/PrintAsyncStorage';
-import AuthContext from '../context/AuthContext';
 
 const LoadingScreen = ({onFinishLoading}) => {
   const [loadingMessage, setLoadingMessage] = useState('Initializing...');
   const {theme} = useContext(ThemeContext);
-  const {showLoginModal} = useContext(AuthContext);
+  const {getUser} = useGetUser();
 
   useEffect(() => {
     const performLoadingTasks = async () => {
       setLoadingMessage('Updating User...');
-      await getUser(showLoginModal);
+      await getUser();
       // example:
       await new Promise(resolve => setTimeout(resolve, 500));
 

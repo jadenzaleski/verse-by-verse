@@ -5,7 +5,6 @@ const AuthContext = createContext();
 export const AuthProvider = ({children}) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalPromise, setModalPromise] = useState(null); // To hold the promise resolver
-
   // Show login modal and return a Promise
   const showLoginModal = () => {
     setIsModalVisible(true);

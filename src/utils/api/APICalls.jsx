@@ -1,89 +1,150 @@
-import Toast from 'react-native-toast-message';
+import {useCallback, useContext, useRef} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Globals from '../Globals';
-// Helper to get JWT token from AsyncStorage
+import Toast from 'react-native-toast-message';
+import * as Globals from '../Globals'; // Import global constants (like API base URL)
+import AuthContext from '../../context/AuthContext'; // Import the Auth context for managing authentication state
+
+/**
+ * Helper function to retrieve the JWT token from AsyncStorage.
+ *
+ * This function asynchronously retrieves the JWT token stored in AsyncStorage.
+ * It parses the JSON string and returns the token.
+ *
+ * @returns {Promise<string|null>} The JWT token as a string, or null if not found.
+ */
 const getToken = async () => {
-  let jwt = await AsyncStorage.getItem('jwt');
-  return JSON.parse(jwt);
+  let jwt = await AsyncStorage.getItem('jwt'); // Get JWT from AsyncStorage
+  return JSON.parse(jwt); // Parse and return the JWT
 };
 
-// Helper to set JWT token in AsyncStorage
-const setToken = async jwt => {
-  await AsyncStorage.setItem('jwt', JSON.stringify(jwt));
-};
-
-// Centralized API call function with token management and refresh logic
-export const apiCall = async (endpoint, method = 'GET', body = null, headers = {}, showLoginModal) => {
-  console.log('[API] Trying call:', method, endpoint);
+/**
+ * Function to perform API calls with error handling and JWT authentication.
+ *
+ * This function handles making HTTP requests to the API, automatically adds
+ * the JWT token in the headers, manages unauthorized responses by showing
+ * a login modal, and handles errors.
+ *
+ * @param {string} endpoint - The API endpoint to call.
+ * @param {string} method - The HTTP method (e.g., 'GET', 'POST'). Defaults to 'GET'.
+ * @param {object|null} body - The request body for methods like POST. Defaults to null.
+ * @param {object} headers - Any additional headers to include in the request. Defaults to an empty object.
+ * @param {function} showLoginModal - A function to show the login modal when the JWT is expired.
+ * @returns {Promise<object|null>} The parsed response data, or null in case of error.
+ */
+const apiCall = async (endpoint, method = 'GET', body = null, headers = {}, showLoginModal) => {
   try {
-    let jwt = await getToken();
-
+    let jwt = await getToken(); // Get the JWT token
     const finalHeaders = {
       Accept: 'application/json',
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${jwt}`,
-      ...headers,
+      Authorization: `Bearer ${jwt}`, // Add the JWT to the Authorization header
+      ...headers, // Spread any additional headers
     };
 
+    // Make the API call
     const response = await fetch(`${Globals.BASE_API_URL}${endpoint}`, {
       method,
       headers: finalHeaders,
-      body: body ? JSON.stringify(body) : null,
+      body: body ? JSON.stringify(body) : null, // Stringify the body if it exists
     });
 
+    // Handle unauthorized access (401)
     if (response.status === 401) {
-      console.log('[API] Token may be expired, showing login modal...');
-      console.log(await response.json());
-      // Await the modal to resolve before continuing
-      await showLoginModal();
-      console.log('[API] Retrying API call after login...');
-      return apiCall(endpoint, method, body, headers, showLoginModal); // Retry with the new token
+      await showLoginModal(); // Show the login modal if the token is expired
+      return apiCall(endpoint, method, body, headers, showLoginModal); // Retry the API call after login
     }
 
+    // Handle non-OK responses
     if (!response.ok) {
-      const errorResponse = await response.json();
-      const errorMessage = errorResponse.message || `Failed to ${method} ${endpoint}`;
-      Toast.show({type: 'error', text1: errorMessage});
-      return null;
+      const errorResponse = await response.json(); // Parse the error response
+      const errorMessage = errorResponse.message || `Failed to ${method} ${endpoint}`; // Set the error message
+      Toast.show({type: 'error', text1: errorMessage}); // Show an error toast message
+      return null; // Return null for non-OK responses
     }
 
-    return await response.json();
+    return await response.json(); // Return the parsed response data
   } catch (error) {
-    console.error(`[API] Error calling: ${method} ${endpoint}:`, error);
-    Toast.show({type: 'error', text1: error.toString()});
-    return null;
+    console.error(`[API] Error calling: ${method} ${endpoint}:`, error); // Log the error
+    Toast.show({type: 'error', text1: error.toString()}); // Show an error toast message
+    return null; // Return null in case of error
   }
 };
 
-// Token refresh function that handles getting a new token from the server
-export const refreshToken = async (email, password) => {
-  console.log('[API] Attempting to refresh token...');
-  try {
-    const response = await fetch(`${Globals.BASE_API_URL}/refresh`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({email: email, password: password}),
-    });
+/**
+ * Custom hook for making API calls.
+ *
+ * This hook provides a function to perform authenticated API calls using JWT.
+ *
+ * @returns {object} An object containing the callApi function.
+ */
+export const useApi = () => {
+  const {showLoginModal} = useContext(AuthContext); // Get the showLoginModal function from AuthContext
 
-    const data = await response.json(); // Parse the JSON only once
+  // Wrapper function for making API calls
+  const callApi = async (endpoint, method = 'GET', body = null, headers = {}) => {
+    return await apiCall(endpoint, method, body, headers, showLoginModal); // Call the apiCall function
+  };
 
-    if (response.ok) {
-      if (Globals.DEBUG) console.log('[API] Token refreshed, saving it.');
-      await AsyncStorage.setItem('jwt', JSON.stringify(data.jwt)); // Store the token
-    }
-
-    return {response, data}; // Return both response and parsed data
-  } catch (error) {
-    console.error('Error refreshing token:', error);
-    return {error}; // Return the error object if failure occurs
-  }
+  return {callApi}; // Return the callApi function for external use
 };
-// Get user data
-export const getUser = async showLoginModal => {
-  const user = await apiCall('/user', 'GET', null, {}, showLoginModal);
-  if (user) {
-    if (Globals.DEBUG) console.log('[AS] Updating "user"');
-    await AsyncStorage.setItem('user', JSON.stringify(user));
-  }
-  return user;
+
+export const useRefreshToken = () => {
+  const {callApi} = useApi();
+  const refreshToken = useCallback(
+    async (email, password) => {
+      console.log('[API] Refreshing token...');
+      const result = await callApi('/refresh', 'POST', {email: email, password: password});
+      if (result) {
+        await AsyncStorage.setItem('jwt', JSON.stringify(result.jwt));
+        console.log('[AS] Set jwt.');
+      }
+      return result;
+    },
+    [callApi],
+  );
+
+  return {refreshToken};
+};
+
+/**
+ * Custom hook to get user data.
+ *
+ * This hook provides a function to fetch user data from the API and store it in AsyncStorage.
+ *
+ * @returns {object} An object containing the getUser function.
+ */
+export const useGetUser = () => {
+  const {callApi} = useApi(); // Use the callApi function from the useApi hook
+
+  // Memoized getUser function to prevent re-creation on each render
+  const getUser = useCallback(async () => {
+    console.log('[API] Getting user...');
+    const user = await callApi('/user', 'GET'); // Call the API to get user data
+    if (user) {
+      await AsyncStorage.setItem('user', JSON.stringify(user)); // Store the user data in AsyncStorage
+      console.log('[AS] Set user.');
+    }
+    return user; // Return the user data
+  }, [callApi]); // Add callApi as dependency since it's used in getUser
+
+  return {getUser}; // Return the memoized getUser function
+};
+
+/**
+ * Custom hook to post user data.
+ *
+ * This hook provides a function to post user data to the API.
+ *
+ * @returns {object} An object containing the postUser function.
+ */
+export const usePostUser = () => {
+  const {callApi} = useApi(); // Use the callApi function from the useApi hook
+
+  // Function to post user data
+  const postUser = async (name, email, password) => {
+    const body = {name, email, password}; // Create the body object
+    return await callApi('/user', 'POST', body); // Call the API to post user data
+  };
+
+  return {postUser}; // Return the postUser function for external use
 };

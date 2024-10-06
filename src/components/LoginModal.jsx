@@ -3,11 +3,9 @@ import {
   Modal,
   View,
   Text,
-  Button,
   StyleSheet,
   SafeAreaView,
   Image,
-  TextInput,
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
@@ -16,11 +14,12 @@ import {
 import AuthContext from '../context/AuthContext';
 import ThemeContext from '../context/ThemeContext';
 import CustomTextInput from './CustomTextInputs';
-import {refreshToken} from '../utils/api/APICalls';
+import {useRefreshToken} from '../utils/api/APICalls';
 
 export const LoginModal = () => {
   const {isModalVisible, hideLoginModal} = useContext(AuthContext);
   const {theme} = useContext(ThemeContext);
+  const {refreshToken} = useRefreshToken(); // Get the refreshToken function
 
   const passwordRef = useRef();
   const [showLoader, setShowLoader] = useState(false);
@@ -40,16 +39,17 @@ export const LoginModal = () => {
   const [showRegLoader, setShowRegLoader] = useState(false);
 
   async function attemptLogin() {
-    setShowLoader(true);
-    const {response, data} = await refreshToken(email, password); // Destructure response and data
-    if (response && response.ok) {
-      hideLoginModal();
-      setFeedback(' ');
+    setShowLoader(true); // Show a loading indicator
+    const tokenData = await refreshToken(email, password); // This returns the token data or null
+
+    if (tokenData) {
+      hideLoginModal(); // Hide the login modal on successful token refresh
+      setFeedback(''); // Clear any feedback message
     } else {
-      console.log('Error refreshing token:', data);
-      setFeedback(data?.message); // Set feedback message
+      setFeedback('Failed to refresh your token.'); // Set feedback message if available
     }
-    setShowLoader(false);
+
+    setShowLoader(false); // Hide the loading indicator
   }
 
   async function attemptRegister() {
@@ -150,7 +150,7 @@ export const LoginModal = () => {
                 onSubmitEditing={() => passwordRef.current.focus()}
               />
               <CustomTextInput
-                onSubmitEditing={attemptLogin}
+                onSubmitEditing={() => attemptLogin()}
                 onChangeText={text => setPassword(text)}
                 style={loginModalStyles.textInput}
                 borderColor={theme.colors.text}
@@ -221,6 +221,7 @@ export const LoginModal = () => {
                 autoComplete="new-password"
               />
               <CustomTextInput
+                onSubmitEditing={() => attemptRegister()}
                 onChangeText={text => setRegPasswordConfirm(text)}
                 style={loginModalStyles.textInput}
                 borderColor={theme.colors.text}
