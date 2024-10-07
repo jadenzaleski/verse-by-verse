@@ -115,16 +115,22 @@ export const useRefreshToken = () => {
  */
 export const useGetUser = () => {
   const {callApi} = useApi(); // Use the callApi function from the useApi hook
+  const {showLoginModal} = useContext(AuthContext); // Get the showLoginModal function from AuthContext
 
   // Memoized getUser function to prevent re-creation on each render
   const getUser = useCallback(async () => {
     console.log('[API] Getting user...');
-    const user = await callApi('/user', 'GET'); // Call the API to get user data
-    if (user) {
-      await AsyncStorage.setItem('user', JSON.stringify(user)); // Store the user data in AsyncStorage
+    const result = await callApi('/user', 'GET'); // Call the API to get user data
+    if (result) {
+      if (result.user.force_login) {
+        console.log('[API] Forcing login...');
+        showLoginModal();
+      }
+
+      await AsyncStorage.setItem('user', JSON.stringify(result.user)); // Store the user data in AsyncStorage
       console.log('[AS] Set user.');
     }
-    return user; // Return the user data
+    return result; // Return the user data
   }, [callApi]); // Add callApi as dependency since it's used in getUser
 
   return {getUser}; // Return the memoized getUser function

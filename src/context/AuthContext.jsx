@@ -23,9 +23,7 @@ export const AuthProvider = ({children}) => {
   };
 
   return (
-    <AuthContext.Provider value={{isModalVisible, showLoginModal, hideLoginModal}}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={{isModalVisible, showLoginModal, hideLoginModal}}>{children}</AuthContext.Provider>
   );
 };
 

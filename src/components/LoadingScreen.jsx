@@ -26,6 +26,7 @@ const LoadingScreen = ({onFinishLoading}) => {
     };
 
     performLoadingTasks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onFinishLoading]);
 
   const styles = StyleSheet.create({
