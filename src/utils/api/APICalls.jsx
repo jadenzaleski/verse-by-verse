@@ -1,36 +1,14 @@
-import {useCallback, useContext, useRef} from 'react';
+import {useCallback, useContext} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import * as Globals from '../Globals'; // Import global constants (like API base URL)
 import AuthContext from '../../context/AuthContext'; // Import the Auth context for managing authentication state
 
-/**
- * Helper function to retrieve the JWT token from AsyncStorage.
- *
- * This function asynchronously retrieves the JWT token stored in AsyncStorage.
- * It parses the JSON string and returns the token.
- *
- * @returns {Promise<string|null>} The JWT token as a string, or null if not found.
- */
 const getToken = async () => {
   let jwt = await AsyncStorage.getItem('jwt'); // Get JWT from AsyncStorage
   return JSON.parse(jwt); // Parse and return the JWT
 };
 
-/**
- * Function to perform API calls with error handling and JWT authentication.
- *
- * This function handles making HTTP requests to the API, automatically adds
- * the JWT token in the headers, manages unauthorized responses by showing
- * a login modal, and handles errors.
- *
- * @param {string} endpoint - The API endpoint to call.
- * @param {string} method - The HTTP method (e.g., 'GET', 'POST'). Defaults to 'GET'.
- * @param {object|null} body - The request body for methods like POST. Defaults to null.
- * @param {object} headers - Any additional headers to include in the request. Defaults to an empty object.
- * @param {function} showLoginModal - A function to show the login modal when the JWT is expired.
- * @returns {Promise<object|null>} The parsed response data, or null in case of error.
- */
 const apiCall = async (endpoint, method = 'GET', body = null, headers = {}, showLoginModal) => {
   try {
     let jwt = await getToken(); // Get the JWT token
@@ -62,7 +40,14 @@ const apiCall = async (endpoint, method = 'GET', body = null, headers = {}, show
       return null; // Return null for non-OK responses
     }
 
-    return await response.json(); // Return the parsed response data
+    const responseJSON = await response.json();
+
+    if (responseJSON.user.force_login) {
+      console.log('[API] Forcing login...');
+      await showLoginModal();
+    }
+
+    return responseJSON; // Return the parsed response data
   } catch (error) {
     console.error(`[API] Error calling: ${method} ${endpoint}:`, error); // Log the error
     Toast.show({type: 'error', text1: error.toString()}); // Show an error toast message
@@ -70,13 +55,6 @@ const apiCall = async (endpoint, method = 'GET', body = null, headers = {}, show
   }
 };
 
-/**
- * Custom hook for making API calls.
- *
- * This hook provides a function to perform authenticated API calls using JWT.
- *
- * @returns {object} An object containing the callApi function.
- */
 export const useApi = () => {
   const {showLoginModal} = useContext(AuthContext); // Get the showLoginModal function from AuthContext
 
@@ -106,13 +84,6 @@ export const useRefreshToken = () => {
   return {refreshToken};
 };
 
-/**
- * Custom hook to get user data.
- *
- * This hook provides a function to fetch user data from the API and store it in AsyncStorage.
- *
- * @returns {object} An object containing the getUser function.
- */
 export const useGetUser = () => {
   const {callApi} = useApi(); // Use the callApi function from the useApi hook
   const {showLoginModal} = useContext(AuthContext); // Get the showLoginModal function from AuthContext
@@ -122,11 +93,6 @@ export const useGetUser = () => {
     console.log('[API] Getting user...');
     const result = await callApi('/user', 'GET'); // Call the API to get user data
     if (result) {
-      if (result.user.force_login) {
-        console.log('[API] Forcing login...');
-        showLoginModal();
-      }
-
       await AsyncStorage.setItem('user', JSON.stringify(result.user)); // Store the user data in AsyncStorage
       console.log('[AS] Set user.');
     }
@@ -136,13 +102,6 @@ export const useGetUser = () => {
   return {getUser}; // Return the memoized getUser function
 };
 
-/**
- * Custom hook to post user data.
- *
- * This hook provides a function to post user data to the API.
- *
- * @returns {object} An object containing the postUser function.
- */
 export const usePostUser = () => {
   const {callApi} = useApi(); // Use the callApi function from the useApi hook
 
