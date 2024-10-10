@@ -19,12 +19,12 @@ import {useRefreshToken} from '../utils/api/APICalls';
 export const LoginModal = () => {
   const {isModalVisible, hideLoginModal} = useContext(AuthContext);
   const {theme} = useContext(ThemeContext);
-  const {refreshToken} = useRefreshToken(); // Get the refreshToken function
+  const {refreshToken} = useRefreshToken();
 
   const passwordRef = useRef();
   const [showLoader, setShowLoader] = useState(false);
-  const [email, setEmail] = React.useState(null);
-  const [password, setPassword] = React.useState(null);
+  const [email, setEmail] = React.useState(' ');
+  const [password, setPassword] = React.useState(' ');
   const [feedback, setFeedback] = React.useState(null);
 
   const [showRegister, setShowRegister] = React.useState(false);
@@ -40,13 +40,13 @@ export const LoginModal = () => {
 
   async function attemptLogin() {
     setShowLoader(true); // Show a loading indicator
-    const tokenData = await refreshToken(email, password); // This returns the token data or null
-
-    if (tokenData) {
+    const result = await refreshToken(email, password); // This returns the token data or null
+    console.log('tried token and got result:', result);
+    if (result?.jwt) {
       hideLoginModal(); // Hide the login modal on successful token refresh
       setFeedback(''); // Clear any feedback message
     } else {
-      setFeedback('Failed to refresh your token.'); // Set feedback message if available
+      setFeedback(result.message || `Login failed, code: ${result.message}`); // Set feedback message if available
     }
 
     setShowLoader(false); // Hide the loading indicator

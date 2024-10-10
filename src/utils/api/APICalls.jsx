@@ -9,7 +9,7 @@ const getToken = async () => {
   return JSON.parse(jwt); // Parse and return the JWT
 };
 
-const apiCall = async (endpoint, method = 'GET', body = null, headers = {}, showLoginModal) => {
+const apiCall = async (endpoint, method = 'GET', body = null, headers = {}, showLoginModal, isModalVisible) => {
   try {
     let jwt = await getToken(); // Get the JWT token
     const finalHeaders = {
@@ -27,22 +27,21 @@ const apiCall = async (endpoint, method = 'GET', body = null, headers = {}, show
     });
 
     // Handle unauthorized access (401)
-    if (response.status === 401) {
+    if (response.status === 401 && !isModalVisible) {
       await showLoginModal(); // Show the login modal if the token is expired
       return apiCall(endpoint, method, body, headers, showLoginModal); // Retry the API call after login
     }
 
-    // Handle non-OK responses
-    if (!response.ok) {
-      const errorResponse = await response.json(); // Parse the error response
-      const errorMessage = errorResponse.message || `Failed to ${method} ${endpoint}`; // Set the error message
-      Toast.show({type: 'error', text1: errorMessage}); // Show an error toast message
-      return null; // Return null for non-OK responses
-    }
-
     const responseJSON = await response.json();
 
-    if (responseJSON.user.force_login) {
+    // Handle non-OK responses
+    if (!response.ok) {
+      const errorMessage = responseJSON.message || `Failed to ${method} ${endpoint}`; // Set the error message
+      Toast.show({type: 'error', text1: errorMessage}); // Show an error toast message
+      return responseJSON; // Return null for non-OK responses
+    }
+
+    if (responseJSON?.user?.force_login === 1) {
       console.log('[API] Forcing login...');
       await showLoginModal();
     }
@@ -56,11 +55,10 @@ const apiCall = async (endpoint, method = 'GET', body = null, headers = {}, show
 };
 
 export const useApi = () => {
-  const {showLoginModal} = useContext(AuthContext); // Get the showLoginModal function from AuthContext
-
+  const {showLoginModal, isModalVisible} = useContext(AuthContext); // Get the showLoginModal function from AuthContext
   // Wrapper function for making API calls
   const callApi = async (endpoint, method = 'GET', body = null, headers = {}) => {
-    return await apiCall(endpoint, method, body, headers, showLoginModal); // Call the apiCall function
+    return await apiCall(endpoint, method, body, headers, showLoginModal, isModalVisible); // Call the apiCall function
   };
 
   return {callApi}; // Return the callApi function for external use
@@ -72,9 +70,9 @@ export const useRefreshToken = () => {
     async (email, password) => {
       console.log('[API] Refreshing token...');
       const result = await callApi('/refresh', 'POST', {email: email, password: password});
-      if (result) {
+      if (result && result.jwt) {
         await AsyncStorage.setItem('jwt', JSON.stringify(result.jwt));
-        console.log('[AS] Set jwt.');
+        console.log('[AS] Set jwt:', result.jwt);
       }
       return result;
     },
@@ -86,13 +84,12 @@ export const useRefreshToken = () => {
 
 export const useGetUser = () => {
   const {callApi} = useApi(); // Use the callApi function from the useApi hook
-  const {showLoginModal} = useContext(AuthContext); // Get the showLoginModal function from AuthContext
 
   // Memoized getUser function to prevent re-creation on each render
   const getUser = useCallback(async () => {
     console.log('[API] Getting user...');
     const result = await callApi('/user', 'GET'); // Call the API to get user data
-    if (result) {
+    if (result?.user) {
       await AsyncStorage.setItem('user', JSON.stringify(result.user)); // Store the user data in AsyncStorage
       console.log('[AS] Set user.');
     }
