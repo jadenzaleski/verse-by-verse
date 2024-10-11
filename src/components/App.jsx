@@ -9,12 +9,12 @@ import HomeScreen from './home/Home';
 import VersesScreen from './verses/Verses';
 import ProfileScreen from './profile/Profile';
 import SettingsScreen from './settings/Settings';
-import {useContext, useState} from 'react';
+import {useContext, useEffect, useState} from 'react';
 import LoadingScreen from './LoadingScreen';
 import CustomToasts from './Toasts';
 import SettingsNavigator from './settings/SettingsNavigator';
 import {AuthProvider} from '../context/AuthContext';
-import { LoginModal } from './LoginModal';
+import {LoginModal} from './LoginModal';
 
 const Tab = createBottomTabNavigator();
 // Define icon mapping for each screen
@@ -117,6 +117,14 @@ const App = () => {
   const handleFinishLoading = () => {
     setIsLoading(false);
   };
+
+  useEffect(() => {
+    if (__DEV__) {
+      console.log('This is development mode. Some things will run twice.');
+    } else {
+      console.log('This is production mode.');
+    }
+  });
 
   return (
     <AuthProvider>

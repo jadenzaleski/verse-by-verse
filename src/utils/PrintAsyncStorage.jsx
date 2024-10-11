@@ -11,13 +11,12 @@ export const print = async () => {
       try {
         // Try to parse the value as JSON
         const parsedValue = JSON.parse(value);
-        console.log(`Key: ${key}, Value (parsed):`, parsedValue);
+        console.log(`Key: ${key}, Value (parsed):`, JSON.stringify(parsedValue, null, 2));
       } catch (e) {
         // If it fails to parse, just log the value as a string
         console.log(`Key: ${key}, Value (raw): ${value}`);
       }
     });
-
   } catch (error) {
     console.error('Error fetching AsyncStorage data:', error);
   }

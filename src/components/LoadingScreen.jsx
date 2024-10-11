@@ -4,6 +4,7 @@ import ThemeContext from '../context/ThemeContext';
 import {useGetUser} from '../utils/api/APICalls';
 import * as Globals from '../utils/Globals';
 import * as PrintAsyncStorage from '../utils/PrintAsyncStorage';
+import {fetchData} from '../utils/api/Axios';
 
 const LoadingScreen = ({onFinishLoading}) => {
   const [loadingMessage, setLoadingMessage] = useState('Initializing...');
@@ -13,7 +14,7 @@ const LoadingScreen = ({onFinishLoading}) => {
   useEffect(() => {
     const performLoadingTasks = async () => {
       setLoadingMessage('Updating User...');
-      await getUser();
+      await fetchData();
       // example:
       await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -26,7 +27,6 @@ const LoadingScreen = ({onFinishLoading}) => {
     };
 
     performLoadingTasks();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onFinishLoading]);
 
   const styles = StyleSheet.create({
