@@ -1,5 +1,5 @@
 import Axios from 'axios';
-import { buildStorage, setupCache } from 'axios-cache-interceptor';
+import {buildStorage, setupCache} from 'axios-cache-interceptor';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const asyncStorage = buildStorage({
@@ -46,29 +46,28 @@ const asyncStorage = buildStorage({
 });
 
 // Set up the cache with axios
-const axios = setupCache(Axios, {
-  debug: console.log, // Optional: Log cache behavior
+const axiosInstance = setupCache(Axios, {
+  debug: console.log, // Optional: Log cache behavior, must also add /dev to import.
   storage: asyncStorage,
 });
 
-// Create an async function to handle the API calls
-export async function fetchData() {
-  console.log('Fetching data');
-  try {
-    // Make two requests, the second should come from the cache
-    const req1 = axios.get('https://fake-json-api.mock.beeceptor.com/users');
-    const req2 = axios.get('https://fake-json-api.mock.beeceptor.com/users');
-
-    // Use Promise.all to wait for both requests to resolve
-    const [res1, res2] = await Promise.all([req1, req2]);
-
-    // Check if responses were cached
-    console.log('Response 1 cached:', res1.cached); // Should be false
-    console.log('Response 2 cached:', res2.cached); // Should be true
-  } catch (error) {
-    console.error('Error during API calls:', error);
+axiosInstance.interceptors.request.use(
+  async config => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`; // Add token to headers
+      }
+      config.headers['Content-Type'] = 'application/json'; // Set content type
+    } catch (error) {
+      console.error('[AS] Error fetching token from AsyncStorage:', error);
+    }
+    return config;
+  },
+  (error) => {
+    console.error(error);
+    return Promise.reject(error);
   }
-}
+);
 
-// Call the function
-fetchData();
+export const axios = axiosInstance;

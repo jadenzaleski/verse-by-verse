@@ -1698,6 +1698,11 @@
     prompts "^2.4.2"
     semver "^7.5.2"
 
+"@react-native-community/netinfo@^11.4.1":
+  version "11.4.1"
+  resolved "https://registry.npmjs.org/@react-native-community/netinfo/-/netinfo-11.4.1.tgz"
+  integrity sha512-B0BYAkghz3Q2V09BF88RA601XursIEA111tnc2JOaN7axJWmNefmfjZqw/KdSxKZp7CZUuPpjBmz/WCR9uaHYg==
+
 "@react-native-vector-icons/common@^0.0.1-alpha.11", "@react-native-vector-icons/common@^0.0.1-alpha.20":
   version "0.0.1-alpha.20"
   resolved "https://registry.npmjs.org/@react-native-vector-icons/common/-/common-0.0.1-alpha.20.tgz"
@@ -6110,7 +6115,7 @@ react-native-wheel-color-picker@^1.3.1:
   dependencies:
     react-native-elevation "^1.0.0"
 
-react-native@*, "react-native@^0.0.0-0 || >=0.60 <1.0", react-native@0.74.4:
+react-native@*, "react-native@^0.0.0-0 || >=0.60 <1.0", react-native@>=0.59, react-native@0.74.4:
   version "0.74.4"
   resolved "https://registry.npmjs.org/react-native/-/react-native-0.74.4.tgz"
   integrity sha512-Cox7h0UkFPY+79DsInn2BAhnmGiqKBHKoYHoPAPW8oQCPyna8jvS0hfUmHBWm/MOHSXi4NYPKd5plpD50B3B2Q==
