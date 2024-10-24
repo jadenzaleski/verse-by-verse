@@ -15,11 +15,11 @@ import AuthContext from '../context/AuthContext';
 import ThemeContext from '../context/ThemeContext';
 import CustomTextInput from './CustomTextInputs';
 import {useRefreshToken} from '../utils/api/APICalls';
+import postRefresh from '../utils/api/PostRefresh';
 
 export const LoginModal = () => {
   const {isModalVisible, hideLoginModal} = useContext(AuthContext);
   const {theme} = useContext(ThemeContext);
-  const {refreshToken} = useRefreshToken();
 
   const passwordRef = useRef();
   const [showLoader, setShowLoader] = useState(false);
@@ -40,7 +40,7 @@ export const LoginModal = () => {
 
   async function attemptLogin() {
     setShowLoader(true); // Show a loading indicator
-    const result = await refreshToken(email, password); // This returns the token data or null
+    const result = await postRefresh(email, password); // This returns the token data or null
     console.log('tried token and got result:', result);
     if (result?.jwt) {
       hideLoginModal(); // Hide the login modal on successful token refresh
