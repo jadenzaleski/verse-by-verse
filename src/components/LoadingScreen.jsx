@@ -5,6 +5,7 @@ import * as Globals from '../utils/Globals';
 import * as PrintAsyncStorage from '../utils/PrintAsyncStorage';
 import getUser from '../utils/api/GetUser';
 import AuthContext from '../context/AuthContext';
+import foo, { testDatabase } from '../utils/db/Instance';
 
 const LoadingScreen = ({onFinishLoading}) => {
   const [loadingMessage, setLoadingMessage] = useState('Initializing...');
@@ -13,8 +14,9 @@ const LoadingScreen = ({onFinishLoading}) => {
 
   useEffect(() => {
     const performLoadingTasks = async () => {
-      setLoadingMessage('Updating User...');
-      await getUser(showLoginModal);
+      await testDatabase();
+      // setLoadingMessage('Updating User...');
+      // await getUser(showLoginModal);
       // example:
       await new Promise(resolve => setTimeout(resolve, 500));
 

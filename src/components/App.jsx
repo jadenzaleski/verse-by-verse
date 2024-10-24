@@ -120,9 +120,9 @@ const App = () => {
 
   useEffect(() => {
     if (__DEV__) {
-      console.log('This is development mode. Some things will run twice.');
+      console.info('Running in development mode. Some things will run twice.');
     } else {
-      console.log('This is production mode.');
+      console.info('Running in production mode.');
     }
   });
 
