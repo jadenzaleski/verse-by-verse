@@ -1,4 +1,5 @@
 import {Platform} from 'react-native';
+import RNFS from 'react-native-fs';
 
 export const LOCAL_URL = Platform.select({
   ios: 'http://127.0.0.1:3000',
@@ -11,3 +12,7 @@ export const USE_LOCAL_API = true;
 export const BASE_API_URL = USE_LOCAL_API ? LOCAL_URL : REMOTE_URL;
 
 export const DEBUG = true;
+
+// the maximum amount of days to hold logs for
+export const MAX_LOG_DAYS = 30;
+export const LOGS_FOLDER = `${RNFS.DocumentDirectoryPath}/logs`;

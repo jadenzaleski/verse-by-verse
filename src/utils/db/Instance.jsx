@@ -1,4 +1,5 @@
 import {open} from '@op-engineering/op-sqlite';
+import log from '../Logger';
 
 let dbInstance = null;
 
@@ -36,7 +37,11 @@ export const testDatabase = async () => {
 
     // Get the database path (optional for debugging purposes)
     const path = db.getDbPath();
-    console.info(`Database path: ${path}`);
+    log.info(`Database path: ${path}`);
+    log.debug("This is a Debug log", 'another string');
+    log.info("This is an Info log");
+    log.warn("This is a Warning log");
+    log.error("This is an Error log");
 
     // Create a sample table if it doesn't already exist
     await db.execute(`
