@@ -6,6 +6,8 @@ import * as PrintAsyncStorage from '../utils/PrintAsyncStorage';
 import getUser from '../utils/api/GetUser';
 import AuthContext from '../context/AuthContext';
 import foo, { testDatabase } from '../utils/db/Instance';
+import { initTables } from '../utils/db/TablesInit';
+import { level } from '../utils/db/Users';
 
 const LoadingScreen = ({onFinishLoading}) => {
   const [loadingMessage, setLoadingMessage] = useState('Initializing...');
@@ -14,7 +16,9 @@ const LoadingScreen = ({onFinishLoading}) => {
 
   useEffect(() => {
     const performLoadingTasks = async () => {
-      await testDatabase();
+      setLoadingMessage('Grabbing your data');
+      await initTables();
+      await level();
       // setLoadingMessage('Updating User...');
       // await getUser(showLoginModal);
       // example:

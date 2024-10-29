@@ -6,17 +6,15 @@ let dbInstance = null;
 export const getDBInstance = async () => {
   try {
     if (!dbInstance) {
-      // If no instance exists, create a new one
       dbInstance = open({
         name: 'vbvDB',
       });
-      console.log('Database opened successfully!');
+      log.debug('[DB] Database opened successfully!');
+      log.info(`[DB] Database path: ${dbInstance.getDbPath()}`);
     }
-
-    // Return the existing instance (whether newly created or previously existing)
     return dbInstance;
   } catch (error) {
-    console.error('Error opening the database:', error);
+    log.error('[DB] Error opening the database:', error);
     throw error; // Re-throw the error if there's a failure opening the DB
   }
 };
@@ -24,24 +22,24 @@ export const getDBInstance = async () => {
 export const closeDBInstance = async () => {
   if (dbInstance) {
     await dbInstance.close();
-    dbInstance = null; // Reset the instance so a new connection can be created later if needed
-    console.log('Database closed successfully!');
+    dbInstance = null;
+    log.debug('[DB] Database closed successfully!');
   }
 };
+
+export const deleteDB = async () => {
+  if (dbInstance) {
+    await dbInstance.delete();
+    log.debug('[DB] Database deleted successfully!');
+
+  }
+}
 
 // Function to test database interaction using the singleton instance
 export const testDatabase = async () => {
   try {
     // Get the singleton instance of the database
     const db = await getDBInstance();
-
-    // Get the database path (optional for debugging purposes)
-    const path = db.getDbPath();
-    log.info(`Database path: ${path}`);
-    log.debug("This is a Debug log", 'another string');
-    log.info("This is an Info log");
-    log.warn("This is a Warning log");
-    log.error("This is an Error log");
 
     // Create a sample table if it doesn't already exist
     await db.execute(`
@@ -51,7 +49,7 @@ export const testDatabase = async () => {
         value INTEGER
       )
     `);
-    console.log('Table created successfully!');
+    log.info('Table created successfully!');
 
     // Insert a row into the table
     await db.execute(
@@ -64,10 +62,8 @@ export const testDatabase = async () => {
 
     // Query the data
     const results = await db.execute('SELECT * FROM TestTable');
-    console.log('Query results:', results);
+    log.debug('Query results:', results);
 
-    // Optional: Close the database (only if you want to clean up at some point)
-    // await closeDatabaseInstance();
   } catch (error) {
     console.error('Error interacting with the database:', error);
   }

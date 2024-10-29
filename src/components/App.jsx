@@ -15,6 +15,7 @@ import CustomToasts from './Toasts';
 import SettingsNavigator from './settings/SettingsNavigator';
 import {AuthProvider} from '../context/AuthContext';
 import {LoginModal} from './LoginModal';
+import log from '../utils/Logger';
 
 const Tab = createBottomTabNavigator();
 // Define icon mapping for each screen
@@ -120,9 +121,9 @@ const App = () => {
 
   useEffect(() => {
     if (__DEV__) {
-      console.info('Running in development mode. Some things will run twice.');
+      log.info('Running in development mode. Some things will run twice.');
     } else {
-      console.info('Running in production mode.');
+      log.info('Running in production mode.');
     }
   });
 

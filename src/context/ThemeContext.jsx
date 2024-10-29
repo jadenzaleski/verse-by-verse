@@ -2,6 +2,7 @@ import React, {createContext, useState, useEffect} from 'react';
 import {useColorScheme} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {getCustomTheme} from '../styles/Theme';
+import log from '../utils/Logger';
 
 const ThemeContext = createContext(undefined);
 
@@ -44,7 +45,7 @@ export const ThemeProvider = ({children}) => {
       }
     };
 
-    loadSettings().then(() => console.log('Settings retrieved.'));
+    loadSettings().then(() => log.debug('Settings retrieved.'));
   }, [colorScheme]);
 
   const toggleTheme = async newTheme => {

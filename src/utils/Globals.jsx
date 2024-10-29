@@ -8,7 +8,6 @@ export const LOCAL_URL = Platform.select({
 });
 export const REMOTE_URL = 'https://myapi.com';
 export const USE_LOCAL_API = true;
-
 export const BASE_API_URL = USE_LOCAL_API ? LOCAL_URL : REMOTE_URL;
 
 export const DEBUG = true;
@@ -16,3 +15,7 @@ export const DEBUG = true;
 // the maximum amount of days to hold logs for
 export const MAX_LOG_DAYS = 30;
 export const LOGS_FOLDER = `${RNFS.DocumentDirectoryPath}/logs`;
+
+// User level and xp calculation variables
+export const SCALING_FACTOR = 100;
+export const EXPONENT = 1.2;
