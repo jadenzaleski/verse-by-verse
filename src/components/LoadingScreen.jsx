@@ -3,11 +3,10 @@ import {View, Text, StyleSheet, ActivityIndicator, Image} from 'react-native';
 import ThemeContext from '../context/ThemeContext';
 import * as Globals from '../utils/Globals';
 import * as PrintAsyncStorage from '../utils/PrintAsyncStorage';
-import getUser from '../utils/api/GetUser';
 import AuthContext from '../context/AuthContext';
 import foo, { testDatabase } from '../utils/db/Instance';
 import { initTables } from '../utils/db/TablesInit';
-import { level } from '../utils/db/Users';
+import { currentLevelXp, level, nextLevelXp, getUser, createUser } from '../utils/db/Users';
 
 const LoadingScreen = ({onFinishLoading}) => {
   const [loadingMessage, setLoadingMessage] = useState('Initializing...');
@@ -18,7 +17,11 @@ const LoadingScreen = ({onFinishLoading}) => {
     const performLoadingTasks = async () => {
       setLoadingMessage('Grabbing your data');
       await initTables();
-      await level();
+      await nextLevelXp();
+      await currentLevelXp();
+
+      await createUser('my-name', 'email', 'password');
+      await getUser();
       // setLoadingMessage('Updating User...');
       // await getUser(showLoginModal);
       // example:
