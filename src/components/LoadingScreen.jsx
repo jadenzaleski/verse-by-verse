@@ -4,9 +4,9 @@ import ThemeContext from '../context/ThemeContext';
 import * as Globals from '../utils/Globals';
 import * as PrintAsyncStorage from '../utils/PrintAsyncStorage';
 import AuthContext from '../context/AuthContext';
-import foo, { deleteDB, testDatabase } from '../utils/db/Instance';
-import { initTables } from '../utils/db/TablesInit';
-import { currentLevelXp, level, nextLevelXp, getUser, createUser, updateUser } from '../utils/db/Users';
+import foo, {deleteDB, testDatabase} from '../utils/db/Instance';
+import {initTables} from '../utils/db/TablesInit';
+import {currentLevelXp, level, nextLevelXp, getUser, createUser, updateUser} from '../utils/db/Users';
 import log from '../utils/Logger';
 
 const LoadingScreen = ({onFinishLoading}) => {
@@ -17,13 +17,9 @@ const LoadingScreen = ({onFinishLoading}) => {
   useEffect(() => {
     const performLoadingTasks = async () => {
       setLoadingMessage('Grabbing your data');
-      await initTables();
-      await createUser('my-name', 'email@example.com', 'password!');
-      await getUser();
-      await updateUser({name: 'JADEN', xp: 1000});
-      // setLoadingMessage('Updating User...');
-      // await getUser(showLoginModal);
-      // example:
+      const init = await initTables();
+      log.debug('init.users:', init.users);
+
       await new Promise(resolve => setTimeout(resolve, 500));
 
       // Log the storage

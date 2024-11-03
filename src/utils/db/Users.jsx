@@ -6,9 +6,9 @@ export async function initTable() {
   const db = await getDBInstance();
   const timestamp = new Date().toISOString();
   log.debug('[DB] Creating Users table if it doesnt exist');
-  // Create the user table if it doesn't already exist
-  return await db.execute(
-    `
+  try {
+    const result = await db.execute(
+      `
       CREATE TABLE IF NOT EXISTS Users (
                 user_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
@@ -22,8 +22,14 @@ export async function initTable() {
                 created_at TEXT DEFAULT '${timestamp}',
                 updated_at TEXT DEFAULT '${timestamp}'
             );
-    `
-  );
+    `,
+    );
+
+    return {ok: true, response: result};
+  } catch (error) {
+    log.error(`[DB] Error creating Users table: ${error}`);
+    return {ok: false, error: error};
+  }
 }
 
 export async function level() {
@@ -37,18 +43,19 @@ export async function level() {
 
     if (result.rows.length > 0) {
       const xp = result.rows[0].xp;
-      log.debug(`[DB] Level calculation xp to use: ${xp}`);
+      // log.debug(`[DB] Level calculation xp to use: ${xp}`);
 
       const calculatedLevel = Math.floor(Math.pow(xp / SCALING_FACTOR, 1 / EXPONENT));
-      log.debug(`[DB] Calculated Level: ${calculatedLevel}`);
+      // log.debug(`[DB] Calculated Level: ${calculatedLevel}`);
 
       return calculatedLevel;
     } else {
       log.error(`[DB] No user found in the database when attempting to retrieve the level`);
+      return {ok: false, error: `No user found in the database when attempting to retrieve the level`};
     }
   } catch (error) {
     log.error(`[DB] Error while retrieving user level: ${error}`);
-    throw error;
+    return {ok: false, error: error};
   }
 }
 // Calculate the xp needed to reach the next level
@@ -75,12 +82,14 @@ export async function getUser() {
 
     if (result.rows.length > 0) {
       log.debug('[DB] GET USER:', result.rows[0]);
-      return result.rows[0];
+      return {ok: true, response: result.rows[0]};
     } else {
       log.error(`[DB] No user found in the database when attempting to retrieve the user`);
+      return {ok: false, error: `No user found in the database when attempting to retrieve the user`};
     }
   } catch (error) {
     log.error(`[DB] Error while getting the user: ${error}`);
+    return {ok: false, error: error};
   }
 }
 
@@ -95,7 +104,7 @@ function validateEmail(email) {
 
 function validatePassword(password) {
   if (!PASSWORD_REGEX.test(password)) {
-    log.warn(`[DB] Invalid email address: ${password}`);
+    log.warn(`[DB] Invalid password: ${password}`);
     return false;
   } else {
     return true;
@@ -108,12 +117,12 @@ export async function createUser(name, email, password) {
 
   try {
     if (!validateEmail(emailLower)) {
-      return `Invalid email address: ${email}`;
+      return {ok: false, error: `Invalid email address: ${email}`};
     }
 
     //requires at least one digit (0-9) or a non-word character
     if (!validatePassword(password)) {
-      return `Password must contain at least one digit or symbol`;
+      return {ok: false, error: `Password must be 8 >= characters and contain at least one digit or symbol`};
     }
 
     let hashedPassword = 'hashed_password';
@@ -125,9 +134,15 @@ export async function createUser(name, email, password) {
     );
 
     log.debug(`[DB] User ${name} created successfully`);
-    return result;
+    return {ok: true, response: result};
   } catch (error) {
-    log.error(`[DB] Error creating the user: ${error}`);
+    if (error.message && error.message.includes('UNIQUE constraint failed: Users.email')) {
+      log.warn(`[DB] User creation failed: Email already exists`);
+      return {ok: false, error: 'This email is already in use. Please choose another one.'};
+    } else {
+      log.error(`[DB] Error creating the user: ${error}`);
+      return {ok: false, error: error.message || 'Unknown error'};
+    }
   }
 }
 
@@ -145,17 +160,17 @@ export async function updateUser(data, increments) {
 
     // Validate email if provided
     if (data.email && !validateEmail(data.email)) {
-      return `Invalid email address: ${data.email}`;
+      return {ok: false, error: `Invalid email address: ${data.email}`};
     }
 
     // Validate password if provided
     if (data.password && !validatePassword(data.password)) {
-      return `Password must contain at least one digit or symbol`;
+      return {ok: false, error: `Password must contain at least one digit or symbol`};
     }
 
     // Hash the password if it needs to be updated
     if (data.password) {
-      data.password = 'hashed_password'; // Replace with actual hashing logic
+      data.password = 'hashed_password'; // TODO: Replace with actual hashing logic
     }
 
     // Add `updated_at` field with the current timestamp
@@ -165,34 +180,40 @@ export async function updateUser(data, increments) {
     const fields = Object.keys(data);
     const values = Object.values(data);
 
-    // Check if there's anything to update
-    if (fields.length === 0) {
-      log.warn(`[DB] No fields provided to update`);
-      return;
+    // Construct the `SET` clause dynamically for standard updates
+    let setClause = fields.map(field => `${field} = ?`).join(', ');
+
+    // Handle increments
+    if (increments) {
+      const incrementFields = Object.keys(increments);
+      incrementFields.forEach(field => {
+        setClause += `, ${field} = ${field} + ?`;
+        values.push(increments[field]);
+      });
     }
 
-    // Construct the `SET` clause dynamically
-    const setClause = fields.map(field => `${field} = ?`).join(', ');
+    if (setClause.trim() === '') {
+      log.warn(`[DB] No allowed fields provided to update`);
+      return {ok: false, error: `No allowed fields provided to update`};
+    }
 
-    // Retrieve the first user's ID
     const userResult = await db.execute(`SELECT user_id FROM Users LIMIT 1;`);
 
     if (userResult.rows.length === 0) {
       log.warn(`[DB] No user found in the database`);
-      return;
+      return {ok: false, error: `No user found in the database when updating the user`};
     }
 
     const userId = userResult.rows[0].user_id;
-    values.push(userId); // Add userId to values array for WHERE clause
+    values.push(userId);
 
-    // Execute the update query
     const query = `UPDATE Users SET ${setClause} WHERE user_id = ?;`;
     const result = await db.execute(query, values);
 
-    log.debug(`[DB] Updated user with ID ${userId}: ${JSON.stringify(data)}`);
-    return result;
+    log.debug(`[DB] Updated user with ID ${userId}: ${JSON.stringify(setClause)}`);
+    return {ok: true, response: result};
   } catch (error) {
     log.error(`[DB] Error updating user: ${error}`);
-    throw error;
+    return {ok: false, error: error};
   }
 }

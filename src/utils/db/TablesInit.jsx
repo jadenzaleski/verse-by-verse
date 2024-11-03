@@ -3,6 +3,6 @@ import { getDBInstance } from './Instance';
 import { initTable } from './Users';
 
 export async function initTables() {
-  await initTable();
+  return {users: await initTable()};
 }
 
