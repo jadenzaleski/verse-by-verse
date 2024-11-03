@@ -4,9 +4,10 @@ import ThemeContext from '../context/ThemeContext';
 import * as Globals from '../utils/Globals';
 import * as PrintAsyncStorage from '../utils/PrintAsyncStorage';
 import AuthContext from '../context/AuthContext';
-import foo, { testDatabase } from '../utils/db/Instance';
+import foo, { deleteDB, testDatabase } from '../utils/db/Instance';
 import { initTables } from '../utils/db/TablesInit';
-import { currentLevelXp, level, nextLevelXp, getUser, createUser } from '../utils/db/Users';
+import { currentLevelXp, level, nextLevelXp, getUser, createUser, updateUser } from '../utils/db/Users';
+import log from '../utils/Logger';
 
 const LoadingScreen = ({onFinishLoading}) => {
   const [loadingMessage, setLoadingMessage] = useState('Initializing...');
@@ -17,11 +18,9 @@ const LoadingScreen = ({onFinishLoading}) => {
     const performLoadingTasks = async () => {
       setLoadingMessage('Grabbing your data');
       await initTables();
-      await nextLevelXp();
-      await currentLevelXp();
-
-      await createUser('my-name', 'email', 'password');
+      await createUser('my-name', 'email@example.com', 'password!');
       await getUser();
+      await updateUser({name: 'JADEN', xp: 1000});
       // setLoadingMessage('Updating User...');
       // await getUser(showLoginModal);
       // example:
