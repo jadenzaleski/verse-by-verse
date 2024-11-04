@@ -16,6 +16,7 @@ import ThemeContext from '../context/ThemeContext';
 import CustomTextInput from './CustomTextInputs';
 import {useRefreshToken} from '../utils/api/APICalls';
 import postRefresh from '../utils/api/PostRefresh';
+import {createUser} from '../utils/db/Users';
 
 export const LoginModal = () => {
   const {isModalVisible, hideLoginModal} = useContext(AuthContext);
@@ -54,7 +55,17 @@ export const LoginModal = () => {
 
   async function attemptRegister() {
     setShowRegLoader(true);
-
+    if (regPassword !== regPasswordConfirm) {
+      setRegFeedback('Passwords do not match.');
+      return;
+    }
+    const create = await createUser(regName, regEmail, regPassword);
+    if (!create.ok) {
+      setRegFeedback(create.error || 'Unable to create your profile.');
+    } else {
+      setRegFeedback('');
+      hideLoginModal();
+    }
     setShowRegLoader(false);
   }
 
@@ -87,6 +98,14 @@ export const LoginModal = () => {
       fontSize: theme.fontSizes.large,
       ...theme.fonts.regular,
       alignSelf: 'flex-start',
+    },
+
+    caption: {
+      color: theme.colors.text,
+      fontSize: theme.fontSizes.small,
+      ...theme.fonts.light,
+      alignSelf: 'flex-start',
+      marginBottom: 5,
     },
 
     textInput: {
@@ -134,124 +153,125 @@ export const LoginModal = () => {
       presentationStyle="fullScreen">
       <SafeAreaView style={loginModalStyles.container}>
         <KeyboardAvoidingView style={{width: '100%'}} behavior="padding">
-          {!showRegister ? (
-            <View style={loginModalStyles.modalContainer}>
-              <Image style={loginModalStyles.img} source={require('../../assets/images/VerseByVerseLogo.png')} />
-              <Text style={loginModalStyles.login}>Login:</Text>
-              <CustomTextInput
-                onChangeText={text => setEmail(text)}
-                style={loginModalStyles.textInput}
-                borderColor={theme.colors.text}
-                textBackgroundColor={theme.colors.secondary}
-                placeholder="your.email@example.com"
-                label="Email"
-                autoComplete="email"
-                returnKeyType="next"
-                onSubmitEditing={() => passwordRef.current.focus()}
-              />
-              <CustomTextInput
-                onSubmitEditing={() => attemptLogin()}
-                onChangeText={text => setPassword(text)}
-                style={loginModalStyles.textInput}
-                borderColor={theme.colors.text}
-                textBackgroundColor={theme.colors.secondary}
-                placeholder="Your password"
-                label="Password"
-                autoComplete="current-password"
-                secureTextEntry={true}
-                ref={passwordRef}
-              />
-              <View style={loginModalStyles.buttonContainer}>
-                <TouchableOpacity
-                  onPress={() => setShowRegister(true)}
-                  style={{...loginModalStyles.button, ...{backgroundColor: theme.colors.blue}}}>
+          {/*{!showRegister ? (*/}
+          {/*  <View style={loginModalStyles.modalContainer}>*/}
+          {/*    <Image style={loginModalStyles.img} source={require('../../assets/images/VerseByVerseLogo.png')} />*/}
+          {/*    <Text style={loginModalStyles.login}>Login:</Text>*/}
+          {/*    <CustomTextInput*/}
+          {/*      onChangeText={text => setEmail(text)}*/}
+          {/*      style={loginModalStyles.textInput}*/}
+          {/*      borderColor={theme.colors.text}*/}
+          {/*      textBackgroundColor={theme.colors.secondary}*/}
+          {/*      placeholder="your.email@example.com"*/}
+          {/*      label="Email"*/}
+          {/*      autoComplete="email"*/}
+          {/*      returnKeyType="next"*/}
+          {/*      onSubmitEditing={() => passwordRef.current.focus()}*/}
+          {/*    />*/}
+          {/*    <CustomTextInput*/}
+          {/*      onSubmitEditing={() => attemptLogin()}*/}
+          {/*      onChangeText={text => setPassword(text)}*/}
+          {/*      style={loginModalStyles.textInput}*/}
+          {/*      borderColor={theme.colors.text}*/}
+          {/*      textBackgroundColor={theme.colors.secondary}*/}
+          {/*      placeholder="Your password"*/}
+          {/*      label="Password"*/}
+          {/*      autoComplete="current-password"*/}
+          {/*      secureTextEntry={true}*/}
+          {/*      ref={passwordRef}*/}
+          {/*    />*/}
+          {/*    <View style={loginModalStyles.buttonContainer}>*/}
+          {/*      <TouchableOpacity*/}
+          {/*        onPress={() => setShowRegister(true)}*/}
+          {/*        style={{...loginModalStyles.button, ...{backgroundColor: theme.colors.blue}}}>*/}
+          {/*        <Text style={{...loginModalStyles.buttonText, ...{color: theme.colors.textLight}}}>Register</Text>*/}
+          {/*      </TouchableOpacity>*/}
+          {/*      <TouchableOpacity*/}
+          {/*        onPress={() => attemptLogin()}*/}
+          {/*        disabled={showLoader}*/}
+          {/*        style={{...loginModalStyles.button, ...{backgroundColor: theme.colors.green}}}>*/}
+          {/*        {showLoader ? (*/}
+          {/*          <ActivityIndicator size="small" color={theme.colors.textLight.toString()} />*/}
+          {/*        ) : (*/}
+          {/*          <Text style={{...loginModalStyles.buttonText, ...{color: theme.colors.textLight}}}>Login</Text>*/}
+          {/*        )}*/}
+          {/*      </TouchableOpacity>*/}
+          {/*    </View>*/}
+          {/*    <Text style={loginModalStyles.feedback}>{feedback} </Text>*/}
+          {/*  </View>*/}
+          {/*) : (*/}
+          <View style={loginModalStyles.modalContainer}>
+            <Image
+              style={{width: 150, height: 150, marginTop: 5}}
+              source={require('../../assets/images/VerseByVerseLogo.png')}
+            />
+            <Text style={loginModalStyles.login}>Welcome!</Text>
+            <Text style={loginModalStyles.caption}>Please sign up to begin.</Text>
+            <CustomTextInput
+              onChangeText={text => setRegName(text)}
+              style={loginModalStyles.textInput}
+              borderColor={theme.colors.text}
+              textBackgroundColor={theme.colors.secondary}
+              placeholder="John Smith"
+              label="Name"
+              autoComplete="Name"
+              returnKeyType="next"
+            />
+            <CustomTextInput
+              onChangeText={text => setRegEmail(text)}
+              style={loginModalStyles.textInput}
+              borderColor={theme.colors.text}
+              textBackgroundColor={theme.colors.secondary}
+              placeholder="email@example.com"
+              label="Email"
+              keyboardType="email-address"
+              ref={regEmailRef}
+              returnKeyType="next"
+            />
+            <CustomTextInput
+              onChangeText={text => setRegPassword(text)}
+              style={loginModalStyles.textInput}
+              borderColor={theme.colors.text}
+              textBackgroundColor={theme.colors.secondary}
+              placeholder="Your password"
+              label="Password"
+              secureTextEntry={true}
+              ref={regPasswordRef}
+              returnKeyType="next"
+              autoComplete="new-password"
+            />
+            <CustomTextInput
+              onSubmitEditing={() => attemptRegister()}
+              onChangeText={text => setRegPasswordConfirm(text)}
+              style={loginModalStyles.textInput}
+              borderColor={theme.colors.text}
+              textBackgroundColor={theme.colors.secondary}
+              placeholder="Confirm Password"
+              label="Your Confirmed Password"
+              secureTextEntry={true}
+              ref={regPasswordConfirmRef}
+              autoComplete="new-password"
+            />
+            <View style={loginModalStyles.buttonContainer}>
+              {/*<TouchableOpacity*/}
+              {/*  onPress={() => setShowRegister(false)}*/}
+              {/*  style={{...loginModalStyles.button, ...{backgroundColor: theme.colors.blue}}}>*/}
+              {/*  <Text style={{...loginModalStyles.buttonText, ...{color: theme.colors.textLight}}}>Back</Text>*/}
+              {/*</TouchableOpacity>*/}
+              <TouchableOpacity
+                onPress={() => attemptRegister()}
+                disabled={showRegLoader}
+                style={{...loginModalStyles.button, ...{backgroundColor: theme.colors.green}}}>
+                {showRegLoader ? (
+                  <ActivityIndicator size="small" color={theme.colors.textLight.toString()} />
+                ) : (
                   <Text style={{...loginModalStyles.buttonText, ...{color: theme.colors.textLight}}}>Register</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => attemptLogin()}
-                  disabled={showLoader}
-                  style={{...loginModalStyles.button, ...{backgroundColor: theme.colors.green}}}>
-                  {showLoader ? (
-                    <ActivityIndicator size="small" color={theme.colors.textLight.toString()} />
-                  ) : (
-                    <Text style={{...loginModalStyles.buttonText, ...{color: theme.colors.textLight}}}>Login</Text>
-                  )}
-                </TouchableOpacity>
-              </View>
-              <Text style={loginModalStyles.feedback}>{feedback} </Text>
+                )}
+              </TouchableOpacity>
             </View>
-          ) : (
-            <View style={loginModalStyles.modalContainer}>
-              <Image
-                style={{width: 150, height: 150, marginTop: 5}}
-                source={require('../../assets/images/VerseByVerseLogo.png')}
-              />
-              <Text style={loginModalStyles.login}>Register:</Text>
-              <CustomTextInput
-                onChangeText={text => setRegName(text)}
-                style={loginModalStyles.textInput}
-                borderColor={theme.colors.text}
-                textBackgroundColor={theme.colors.secondary}
-                placeholder="John Smith"
-                label="Name"
-                autoComplete="Name"
-                returnKeyType="next"
-              />
-              <CustomTextInput
-                onChangeText={text => setRegEmail(text)}
-                style={loginModalStyles.textInput}
-                borderColor={theme.colors.text}
-                textBackgroundColor={theme.colors.secondary}
-                placeholder="youremail@example.com"
-                label="Email"
-                keyboardType="email-address"
-                ref={regEmailRef}
-                returnKeyType="next"
-              />
-              <CustomTextInput
-                onChangeText={text => setRegPassword(text)}
-                style={loginModalStyles.textInput}
-                borderColor={theme.colors.text}
-                textBackgroundColor={theme.colors.secondary}
-                placeholder="Your password"
-                label="Password"
-                secureTextEntry={true}
-                ref={regPasswordRef}
-                returnKeyType="next"
-                autoComplete="new-password"
-              />
-              <CustomTextInput
-                onSubmitEditing={() => attemptRegister()}
-                onChangeText={text => setRegPasswordConfirm(text)}
-                style={loginModalStyles.textInput}
-                borderColor={theme.colors.text}
-                textBackgroundColor={theme.colors.secondary}
-                placeholder="Confirm Password"
-                label="Your Confirmed Password"
-                secureTextEntry={true}
-                ref={regPasswordConfirmRef}
-                autoComplete="new-password"
-              />
-              <View style={loginModalStyles.buttonContainer}>
-                <TouchableOpacity
-                  onPress={() => setShowRegister(false)}
-                  style={{...loginModalStyles.button, ...{backgroundColor: theme.colors.blue}}}>
-                  <Text style={{...loginModalStyles.buttonText, ...{color: theme.colors.textLight}}}>Back</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => attemptRegister()}
-                  disabled={showRegLoader}
-                  style={{...loginModalStyles.button, ...{backgroundColor: theme.colors.green}}}>
-                  {showRegLoader ? (
-                    <ActivityIndicator size="small" color={theme.colors.textLight.toString()} />
-                  ) : (
-                    <Text style={{...loginModalStyles.buttonText, ...{color: theme.colors.textLight}}}>Register</Text>
-                  )}
-                </TouchableOpacity>
-              </View>
-              <Text style={loginModalStyles.feedback}>{regFeedback} </Text>
-            </View>
-          )}
+            <Text style={loginModalStyles.feedback}>{regFeedback} </Text>
+          </View>
+          {/*)}*/}
         </KeyboardAvoidingView>
       </SafeAreaView>
     </Modal>

@@ -81,7 +81,6 @@ export async function getUser() {
     );
 
     if (result.rows.length > 0) {
-      log.debug('[DB] GET USER:', result.rows[0]);
       return {ok: true, response: result.rows[0]};
     } else {
       log.error(`[DB] No user found in the database when attempting to retrieve the user`);
@@ -215,5 +214,17 @@ export async function updateUser(data, increments) {
   } catch (error) {
     log.error(`[DB] Error updating user: ${error}`);
     return {ok: false, error: error};
+  }
+}
+
+export async function userExists() {
+  const db = await getDBInstance();
+  try {
+    const result = await db.execute(`SELECT 1 FROM Users LIMIT 1;`);
+    // If a row exists, the user exists in the database
+    return result.rows.length > 0;
+  } catch (error) {
+    console.error(`[DB] Error checking if user exists: ${error}`);
+    throw error;
   }
 }
