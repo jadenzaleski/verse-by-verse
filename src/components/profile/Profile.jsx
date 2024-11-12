@@ -1,13 +1,4 @@
-import {
-  Image,
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  ActivityIndicator,
-  RefreshControl,
-} from 'react-native';
+import {Image, StyleSheet, View, Text, ScrollView, ActivityIndicator, RefreshControl} from 'react-native';
 import * as React from 'react';
 import {useCallback, useContext, useState} from 'react';
 import ThemeContext from '../../context/ThemeContext';
@@ -20,48 +11,46 @@ import {useFocusEffect} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useGetUser} from '../../utils/api/APICalls';
 import AuthContext from '../../context/AuthContext';
+import {getUser} from '../../utils/db/Users';
+import log from '../../utils/Logger';
 
 const ProfileScreen = () => {
   const {theme} = useContext(ThemeContext);
   const [user, setUser] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
-  const {getUser} = useGetUser();
   const avatarImages = {
     0: require('../../../assets/images/avatars/crab.png'),
     5: require('../../../assets/images/avatars/crab.png'),
     6: require('../../../assets/images/avatars/crab.png'),
   };
 
-  const updateUser = async () => {
-    console.log('Attempting to fetch user...');
-    try {
-      // pull from api, if it fails get the latest from the device
-      const result = await getUser();
-      if (result?.user) {
-        console.log('Got user from API!');
-        setUser(result.user);
-      } else {
-        const userData = await AsyncStorage.getItem('user');
-        if (userData) {
-          setUser(JSON.parse(userData));
-        }
-      }
-    } catch (error) {
-      console.error('Failed to load user data from AsyncStorage', error);
+  const updateUser = useCallback(async () => {
+    const data = await getUser();
+    if (data.ok) {
+      log.debug('[Profile] Got user:', data);
+      setUser(data.response);
+    } else {
+      log.error('[Profile] Error getting user:', data);
     }
-  };
+  }, []);
 
   // useFocusEffect to call updateUser when the screen is focused
   useFocusEffect(
     useCallback(() => {
-      updateUser(); // No need for async/await here since the function handles it
-    }, []),
+      const fetchData = async () => {
+        await updateUser();
+      };
+
+      fetchData().then(r => {
+        log.debug('[Profile] Fetched user');
+      }); // Call the async function inside useFocusEffect
+    }, [updateUser]),
   );
 
   // onRefresh function with async/await
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    console.log('Refreshing...');
+    log.debug('[Profile] Refreshing...');
     await updateUser(); // Wait for updateUser to complete
     setRefreshing(false); // Set refreshing to false after updateUser completes
   }, [updateUser]);

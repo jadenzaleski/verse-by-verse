@@ -1,14 +1,46 @@
-import {StyleSheet, View, Text} from 'react-native';
+import {StyleSheet, Text, View} from 'react-native';
 import * as React from 'react';
-import {useContext} from 'react';
+import {useContext, useState, useEffect} from 'react';
 import ThemeContext from '../../context/ThemeContext';
 import ProgressBar from 'react-native-progress/Bar';
 import Icon from '@react-native-vector-icons/ionicons';
+import {currentLevelXp, level, nextLevelXp} from '../../utils/db/Users';
+import log from '../../utils/Logger';
 
 const XPBar = ({user}) => {
   const {theme} = useContext(ThemeContext);
-  const levelProgress = (user.xp - user.current_level_xp) / (user.next_level_xp - user.current_level_xp);
-  const neededXp = user.next_level_xp - user.xp;
+  const [levelProgress, setLevelProgress] = useState(0);
+  const [neededXp, setNeededXp] = useState(0);
+  const [calculatedLevel, setCalculatedLevel] = useState(0); // Default to 0 initially
+
+  useEffect(() => {
+    const calculateLevelProgress = async () => {
+      try {
+        const clxp = await currentLevelXp();
+        const nlxp = await nextLevelXp();
+        const progress = nlxp > clxp ? Math.max(0, Math.min(1, (user.xp - clxp) / (nlxp - clxp))) : 0;
+        setLevelProgress(progress);
+        setNeededXp(nlxp - user.xp);
+      } catch (error) {
+        log.error('[XPBar] Error calculating level progress:', error);
+      }
+    };
+
+    const fetchCalculatedLevel = async () => {
+      try {
+        const fetchedLevel = await level();
+        if (typeof fetchedLevel === 'number') {
+          setCalculatedLevel(fetchedLevel);
+        }
+      } catch (error) {
+        log.error('[XPBar] Error fetching user level:', error);
+      }
+    };
+
+    calculateLevelProgress();
+    fetchCalculatedLevel();
+  }, [user.xp]);
+
   const xpStyles = StyleSheet.create({
     container: {
       flexDirection: 'row',
@@ -67,7 +99,7 @@ const XPBar = ({user}) => {
   return (
     <View style={xpStyles.container}>
       <View style={xpStyles.numberContainer}>
-        <Text style={xpStyles.numberText}>{user.level}</Text>
+        <Text style={xpStyles.numberText}>{calculatedLevel}</Text>
       </View>
       <View style={xpStyles.detailsContainer}>
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -81,14 +113,14 @@ const XPBar = ({user}) => {
           color={theme.colors.accent}
           borderWidth={0}
           borderRadius={5}
-          animated={true} // Enable animation
-          animationType="timing" // Optional: you can also try 'timing'
+          animated={true}
+          animationType="timing"
           style={xpStyles.progressBar}
         />
         <View style={xpStyles.levelContainer}>
-          <Text style={xpStyles.levelText}>Level {user.level}</Text>
+          <Text style={xpStyles.levelText}>Level {calculatedLevel}</Text>
           <Text style={xpStyles.levelText}>
-            {neededXp} xp until Level {user.level + 1}
+            {neededXp} xp until Level {calculatedLevel + 1}
           </Text>
         </View>
       </View>
