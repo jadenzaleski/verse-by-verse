@@ -11,7 +11,7 @@ import {useFocusEffect} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useGetUser} from '../../utils/api/APICalls';
 import AuthContext from '../../context/AuthContext';
-import {getUser} from '../../utils/db/Users';
+import Users from '../../utils/db/Users';
 import log from '../../utils/Logger';
 
 const ProfileScreen = () => {
@@ -25,7 +25,7 @@ const ProfileScreen = () => {
   };
 
   const updateUser = useCallback(async () => {
-    const data = await getUser();
+    const data = await Users.getUser();
     if (data.ok) {
       log.debug('[Profile] Got user:', data);
       setUser(data.response);
