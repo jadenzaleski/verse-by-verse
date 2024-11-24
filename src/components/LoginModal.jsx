@@ -14,9 +14,8 @@ import {
 import AuthContext from '../context/AuthContext';
 import ThemeContext from '../context/ThemeContext';
 import CustomTextInput from './CustomTextInputs';
-import {useRefreshToken} from '../utils/api/APICalls';
 import postRefresh from '../utils/api/PostRefresh';
-import {createUser} from '../utils/db/Users';
+import Users from '../utils/db/Users';
 
 export const LoginModal = () => {
   const {isModalVisible, hideLoginModal} = useContext(AuthContext);
@@ -59,7 +58,7 @@ export const LoginModal = () => {
       setRegFeedback('Passwords do not match.');
       return;
     }
-    const create = await createUser(regName, regEmail, regPassword);
+    const create = await Users.createUser(regName, regEmail, regPassword);
     if (!create.ok) {
       setRegFeedback(create.error || 'Unable to create your profile.');
     } else {

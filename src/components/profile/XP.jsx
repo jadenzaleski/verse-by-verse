@@ -4,7 +4,7 @@ import {useContext, useState, useEffect} from 'react';
 import ThemeContext from '../../context/ThemeContext';
 import ProgressBar from 'react-native-progress/Bar';
 import Icon from '@react-native-vector-icons/ionicons';
-import {currentLevelXp, level, nextLevelXp} from '../../utils/db/Users';
+import Users from '../../utils/db/Users';
 import log from '../../utils/Logger';
 
 const XPBar = ({user}) => {
@@ -16,8 +16,8 @@ const XPBar = ({user}) => {
   useEffect(() => {
     const calculateLevelProgress = async () => {
       try {
-        const clxp = await currentLevelXp();
-        const nlxp = await nextLevelXp();
+        const clxp = await Users.currentLevelXp();
+        const nlxp = await Users.nextLevelXp();
         const progress = nlxp > clxp ? Math.max(0, Math.min(1, (user.xp - clxp) / (nlxp - clxp))) : 0;
         setLevelProgress(progress);
         setNeededXp(nlxp - user.xp);
@@ -28,7 +28,7 @@ const XPBar = ({user}) => {
 
     const fetchCalculatedLevel = async () => {
       try {
-        const fetchedLevel = await level();
+        const fetchedLevel = await Users.level();
         if (typeof fetchedLevel === 'number') {
           setCalculatedLevel(fetchedLevel);
         }

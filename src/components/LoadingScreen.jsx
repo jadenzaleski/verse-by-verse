@@ -5,7 +5,7 @@ import * as Globals from '../utils/Globals';
 import * as PrintAsyncStorage from '../utils/PrintAsyncStorage';
 import AuthContext from '../context/AuthContext';
 import {initTables} from '../utils/db/TablesInit';
-import {currentLevelXp, level, nextLevelXp, getUser, createUser, updateUser, userExists} from '../utils/db/Users';
+import Users, {currentLevelXp, level, nextLevelXp, getUser, createUser, updateUser, userExists} from '../utils/db/Users';
 import log from '../utils/Logger';
 
 const LoadingScreen = ({onFinishLoading}) => {
@@ -17,8 +17,8 @@ const LoadingScreen = ({onFinishLoading}) => {
     const performLoadingTasks = async () => {
       setLoadingMessage('Grabbing your data');
       const init = await initTables();
-      log.debug('init.users:', init.users);
-      if (!(await userExists())) {
+      log.debug('init:', init);
+      if (!(await Users.userExists())) {
         log.debug('User does not exist. Prompting register screen...');
         showLoginModal(true);
       }
