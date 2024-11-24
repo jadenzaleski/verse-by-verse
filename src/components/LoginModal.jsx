@@ -14,20 +14,11 @@ import {
 import AuthContext from '../context/AuthContext';
 import ThemeContext from '../context/ThemeContext';
 import CustomTextInput from './CustomTextInputs';
-import postRefresh from '../utils/api/PostRefresh';
 import Users from '../utils/db/Users';
 
 export const LoginModal = () => {
   const { isModalVisible, hideLoginModal } = useContext(AuthContext);
   const { theme } = useContext(ThemeContext);
-
-  const passwordRef = useRef();
-  const [showLoader, setShowLoader] = useState(false);
-  const [email, setEmail] = React.useState(' ');
-  const [password, setPassword] = React.useState(' ');
-  const [feedback, setFeedback] = React.useState(null);
-
-  const [showRegister, setShowRegister] = React.useState(false);
   const regEmailRef = useRef();
   const regPasswordRef = useRef();
   const regPasswordConfirmRef = useRef();
@@ -35,22 +26,8 @@ export const LoginModal = () => {
   const [regEmail, setRegEmail] = React.useState(null);
   const [regPassword, setRegPassword] = React.useState(null);
   const [regPasswordConfirm, setRegPasswordConfirm] = React.useState(null);
-  const [regFeedback, setRegFeedback] = React.useState(null);
+  const [regFeedback, setRegFeedback] = React.useState("");
   const [showRegLoader, setShowRegLoader] = useState(false);
-
-  async function attemptLogin() {
-    setShowLoader(true); // Show a loading indicator
-    const result = await postRefresh(email, password); // This returns the token data or null
-    console.log('tried token and got result:', result);
-    if (result?.jwt) {
-      hideLoginModal(); // Hide the login modal on successful token refresh
-      setFeedback(''); // Clear any feedback message
-    } else {
-      setFeedback(result.message || `Login failed, code: ${result.message}`); // Set feedback message if available
-    }
-
-    setShowLoader(false); // Hide the loading indicator
-  }
 
   async function attemptRegister() {
     setShowRegLoader(true);
@@ -152,53 +129,6 @@ export const LoginModal = () => {
       presentationStyle="fullScreen">
       <SafeAreaView style={loginModalStyles.container}>
         <KeyboardAvoidingView style={{ width: '100%' }} behavior="padding">
-          {/*{!showRegister ? (*/}
-          {/*  <View style={loginModalStyles.modalContainer}>*/}
-          {/*    <Image style={loginModalStyles.img} source={require('../../assets/images/VerseByVerseLogo.png')} />*/}
-          {/*    <Text style={loginModalStyles.login}>Login:</Text>*/}
-          {/*    <CustomTextInput*/}
-          {/*      onChangeText={text => setEmail(text)}*/}
-          {/*      style={loginModalStyles.textInput}*/}
-          {/*      borderColor={theme.colors.text}*/}
-          {/*      textBackgroundColor={theme.colors.secondary}*/}
-          {/*      placeholder="your.email@example.com"*/}
-          {/*      label="Email"*/}
-          {/*      autoComplete="email"*/}
-          {/*      returnKeyType="next"*/}
-          {/*      onSubmitEditing={() => passwordRef.current.focus()}*/}
-          {/*    />*/}
-          {/*    <CustomTextInput*/}
-          {/*      onSubmitEditing={() => attemptLogin()}*/}
-          {/*      onChangeText={text => setPassword(text)}*/}
-          {/*      style={loginModalStyles.textInput}*/}
-          {/*      borderColor={theme.colors.text}*/}
-          {/*      textBackgroundColor={theme.colors.secondary}*/}
-          {/*      placeholder="Your password"*/}
-          {/*      label="Password"*/}
-          {/*      autoComplete="current-password"*/}
-          {/*      secureTextEntry={true}*/}
-          {/*      ref={passwordRef}*/}
-          {/*    />*/}
-          {/*    <View style={loginModalStyles.buttonContainer}>*/}
-          {/*      <TouchableOpacity*/}
-          {/*        onPress={() => setShowRegister(true)}*/}
-          {/*        style={{...loginModalStyles.button, ...{backgroundColor: theme.colors.blue}}}>*/}
-          {/*        <Text style={{...loginModalStyles.buttonText, ...{color: theme.colors.textLight}}}>Register</Text>*/}
-          {/*      </TouchableOpacity>*/}
-          {/*      <TouchableOpacity*/}
-          {/*        onPress={() => attemptLogin()}*/}
-          {/*        disabled={showLoader}*/}
-          {/*        style={{...loginModalStyles.button, ...{backgroundColor: theme.colors.green}}}>*/}
-          {/*        {showLoader ? (*/}
-          {/*          <ActivityIndicator size="small" color={theme.colors.textLight.toString()} />*/}
-          {/*        ) : (*/}
-          {/*          <Text style={{...loginModalStyles.buttonText, ...{color: theme.colors.textLight}}}>Login</Text>*/}
-          {/*        )}*/}
-          {/*      </TouchableOpacity>*/}
-          {/*    </View>*/}
-          {/*    <Text style={loginModalStyles.feedback}>{feedback} </Text>*/}
-          {/*  </View>*/}
-          {/*) : (*/}
           <View style={loginModalStyles.modalContainer}>
             <Image
               style={{ width: 150, height: 150, marginTop: 5 }}
@@ -252,11 +182,6 @@ export const LoginModal = () => {
               autoComplete="new-password"
             />
             <View style={loginModalStyles.buttonContainer}>
-              {/*<TouchableOpacity*/}
-              {/*  onPress={() => setShowRegister(false)}*/}
-              {/*  style={{...loginModalStyles.button, ...{backgroundColor: theme.colors.blue}}}>*/}
-              {/*  <Text style={{...loginModalStyles.buttonText, ...{color: theme.colors.textLight}}}>Back</Text>*/}
-              {/*</TouchableOpacity>*/}
               <TouchableOpacity
                 onPress={() => attemptRegister()}
                 disabled={showRegLoader}
@@ -268,9 +193,8 @@ export const LoginModal = () => {
                 )}
               </TouchableOpacity>
             </View>
-            <Text style={loginModalStyles.feedback}>{regFeedback} </Text>
+            <Text style={loginModalStyles.feedback}>{regFeedback}</Text>
           </View>
-          {/*)}*/}
         </KeyboardAvoidingView>
       </SafeAreaView>
     </Modal>

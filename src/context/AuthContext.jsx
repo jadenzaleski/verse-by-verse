@@ -1,6 +1,6 @@
 import React, { createContext, useState } from 'react';
 
-const AuthContext = createContext();
+const AuthContext = createContext(undefined);
 
 export const AuthProvider = ({ children }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
