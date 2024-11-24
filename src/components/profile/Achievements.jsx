@@ -1,11 +1,11 @@
-import {StyleSheet, View, Text, Image, TouchableOpacity} from 'react-native';
+import { StyleSheet, View, Text, Image, TouchableOpacity } from 'react-native';
 import * as React from 'react';
-import {useContext} from 'react';
+import { useContext } from 'react';
 import ThemeContext from '../../context/ThemeContext';
 import Icon from '@react-native-vector-icons/ionicons';
 
 const Achievements = () => {
-  const {theme} = useContext(ThemeContext);
+  const { theme } = useContext(ThemeContext);
 
   const achievementsStyles = StyleSheet.create({
     container: {

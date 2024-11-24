@@ -1,4 +1,4 @@
-import React, {forwardRef, useContext} from 'react';
+import React, { forwardRef, useContext } from 'react';
 import { View, TextInput, Text, StyleSheet, Platform } from 'react-native';
 import ThemeContext from '../context/ThemeContext';
 
@@ -19,7 +19,7 @@ const CustomTextInput = forwardRef(
     },
     ref,
   ) => {
-    const {theme} = useContext(ThemeContext);
+    const { theme } = useContext(ThemeContext);
 
     const CTIStyles = StyleSheet.create({
       container: {
@@ -49,7 +49,7 @@ const CustomTextInput = forwardRef(
     });
 
     return (
-      <View style={{...style, ...CTIStyles.container}}>
+      <View style={{ ...style, ...CTIStyles.container }}>
         {label && <Text style={CTIStyles.label}>{label}</Text>}
         <TextInput
           ref={ref}

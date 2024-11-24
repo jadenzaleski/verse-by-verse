@@ -1,17 +1,17 @@
-import React, {useContext, useEffect, useState} from 'react';
-import {View, Text, StyleSheet, ActivityIndicator, Image} from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ActivityIndicator, Image } from 'react-native';
 import ThemeContext from '../context/ThemeContext';
 import * as Globals from '../utils/Globals';
 import * as PrintAsyncStorage from '../utils/PrintAsyncStorage';
 import AuthContext from '../context/AuthContext';
-import {initTables} from '../utils/db/TablesInit';
-import Users, {currentLevelXp, level, nextLevelXp, getUser, createUser, updateUser, userExists} from '../utils/db/Users';
+import { initTables } from '../utils/db/TablesInit';
+import Users from '../utils/db/Users';
 import log from '../utils/Logger';
 
-const LoadingScreen = ({onFinishLoading}) => {
+const LoadingScreen = ({ onFinishLoading }) => {
   const [loadingMessage, setLoadingMessage] = useState('Initializing...');
-  const {theme} = useContext(ThemeContext);
-  const {showLoginModal} = useContext(AuthContext);
+  const { theme } = useContext(ThemeContext);
+  const { showLoginModal } = useContext(AuthContext);
 
   useEffect(() => {
     const performLoadingTasks = async () => {
@@ -34,7 +34,7 @@ const LoadingScreen = ({onFinishLoading}) => {
     };
 
     performLoadingTasks();
-  }, [onFinishLoading]);
+  }, [onFinishLoading, showLoginModal]);
 
   const styles = StyleSheet.create({
     container: {

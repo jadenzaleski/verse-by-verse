@@ -1,5 +1,3 @@
-const accent = '#A2C2BA';
-
 const primaryDark = '#2d2d38';
 const secondaryDark = '#676670';
 

@@ -1,12 +1,12 @@
-import React, {createContext, useState, useEffect} from 'react';
-import {useColorScheme} from 'react-native';
+import React, { createContext, useState, useEffect } from 'react';
+import { useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {getCustomTheme} from '../styles/Theme';
+import { getCustomTheme } from '../styles/Theme';
 import log from '../utils/Logger';
 
 const ThemeContext = createContext(undefined);
 
-export const ThemeProvider = ({children}) => {
+export const ThemeProvider = ({ children }) => {
   const colorScheme = useColorScheme();
   const [themeName, setThemeName] = useState(colorScheme || 'light');
   const [isBold, setIsBold] = useState(false); // State for font boldness
@@ -72,7 +72,7 @@ export const ThemeProvider = ({children}) => {
 
   return (
     <ThemeContext.Provider
-      value={{theme, themeName, toggleTheme, useSystemTheme, isBold, toggleBold, accentColor, updateAccentColor}}>
+      value={{ theme, themeName, toggleTheme, useSystemTheme, isBold, toggleBold, accentColor, updateAccentColor }}>
       {children}
     </ThemeContext.Provider>
   );

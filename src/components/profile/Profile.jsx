@@ -1,21 +1,17 @@
-import {Image, StyleSheet, View, Text, ScrollView, ActivityIndicator, RefreshControl} from 'react-native';
+import { Image, StyleSheet, View, Text, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
 import * as React from 'react';
-import {useCallback, useContext, useState} from 'react';
+import { useCallback, useContext, useState } from 'react';
 import ThemeContext from '../../context/ThemeContext';
-import Svg, {Defs, RadialGradient, Rect, Stop} from 'react-native-svg';
+import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 import XPBar from './XP';
-import Icon from '@react-native-vector-icons/ionicons';
 import Achievements from './Achievements';
 import RecentVerses from './RecentVerses';
-import {useFocusEffect} from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useGetUser} from '../../utils/api/APICalls';
-import AuthContext from '../../context/AuthContext';
+import { useFocusEffect } from '@react-navigation/native';
 import Users from '../../utils/db/Users';
 import log from '../../utils/Logger';
 
 const ProfileScreen = () => {
-  const {theme} = useContext(ThemeContext);
+  const { theme } = useContext(ThemeContext);
   const [user, setUser] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const avatarImages = {
@@ -148,11 +144,11 @@ const ProfileScreen = () => {
           </View>
         </View>
         <Text style={profileStyles.title}>{user.name}</Text>
-        <View style={{...profileStyles.container, ...{paddingHorizontal: 30}}}>
+        <View style={{ ...profileStyles.container, ...{ paddingHorizontal: 30 } }}>
           <XPBar user={user} />
           {/*<Achievements />*/}
           {/*<RecentVerses />*/}
-          <View style={{backgroundColor: theme.colors.primary, paddingVertical: 100}} />
+          <View style={{ backgroundColor: theme.colors.primary, paddingVertical: 100 }} />
         </View>
       </View>
     </ScrollView>

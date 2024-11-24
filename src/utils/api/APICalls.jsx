@@ -1,4 +1,4 @@
-import {useCallback, useContext} from 'react';
+import { useCallback, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import * as Globals from '../Globals'; // Import global constants (like API base URL)
@@ -37,7 +37,7 @@ const apiCall = async (endpoint, method = 'GET', body = null, headers = {}, show
     // Handle non-OK responses
     if (!response.ok) {
       const errorMessage = responseJSON.message || `Failed to ${method} ${endpoint}`; // Set the error message
-      Toast.show({type: 'error', text1: errorMessage}); // Show an error toast message
+      Toast.show({ type: 'error', text1: errorMessage }); // Show an error toast message
       return responseJSON; // Return null for non-OK responses
     }
 
@@ -49,27 +49,28 @@ const apiCall = async (endpoint, method = 'GET', body = null, headers = {}, show
     return responseJSON; // Return the parsed response data
   } catch (error) {
     console.error(`[API] Error calling: ${method} ${endpoint}:`, error); // Log the error
-    Toast.show({type: 'error', text1: error.toString()}); // Show an error toast message
+    Toast.show({ type: 'error', text1: error.toString() }); // Show an error toast message
     return null; // Return null in case of error
   }
 };
 
 export const useApi = () => {
-  const {showLoginModal, isModalVisible} = useContext(AuthContext); // Get the showLoginModal function from AuthContext
+  // Get the showLoginModal function from AuthContext
+  const { showLoginModal, isModalVisible } = useContext(AuthContext);
   // Wrapper function for making API calls
   const callApi = async (endpoint, method = 'GET', body = null, headers = {}) => {
     return await apiCall(endpoint, method, body, headers, showLoginModal, isModalVisible); // Call the apiCall function
   };
 
-  return {callApi}; // Return the callApi function for external use
+  return { callApi }; // Return the callApi function for external use
 };
 
 export const useRefreshToken = () => {
-  const {callApi} = useApi();
+  const { callApi } = useApi();
   const refreshToken = useCallback(
     async (email, password) => {
       console.log('[API] Refreshing token...');
-      const result = await callApi('/refresh', 'POST', {email: email, password: password});
+      const result = await callApi('/refresh', 'POST', { email: email, password: password });
       if (result && result.jwt) {
         await AsyncStorage.setItem('jwt', JSON.stringify(result.jwt));
         console.log('[AS] Set jwt:', result.jwt);
@@ -79,11 +80,11 @@ export const useRefreshToken = () => {
     [callApi],
   );
 
-  return {refreshToken};
+  return { refreshToken };
 };
 
 export const useGetUser = () => {
-  const {callApi} = useApi(); // Use the callApi function from the useApi hook
+  const { callApi } = useApi(); // Use the callApi function from the useApi hook
 
   // Memoized getUser function to prevent re-creation on each render
   const getUser = useCallback(async () => {
@@ -96,17 +97,17 @@ export const useGetUser = () => {
     return result; // Return the user data
   }, [callApi]); // Add callApi as dependency since it's used in getUser
 
-  return {getUser}; // Return the memoized getUser function
+  return { getUser }; // Return the memoized getUser function
 };
 
 export const usePostUser = () => {
-  const {callApi} = useApi(); // Use the callApi function from the useApi hook
+  const { callApi } = useApi(); // Use the callApi function from the useApi hook
 
   // Function to post user data
   const postUser = async (name, email, password) => {
-    const body = {name, email, password}; // Create the body object
+    const body = { name, email, password }; // Create the body object
     return await callApi('/user', 'POST', body); // Call the API to post user data
   };
 
-  return {postUser}; // Return the postUser function for external use
+  return { postUser }; // Return the postUser function for external use
 };

@@ -1,12 +1,12 @@
-import {useContext} from 'react';
+import { useContext } from 'react';
 import ThemeContext from '../../context/ThemeContext';
 import * as React from 'react';
-import {Image, Text, View, StyleSheet} from 'react-native';
+import { Image, Text, View, StyleSheet } from 'react-native';
 import ProgressBar from 'react-native-progress/Bar';
 import Icon from '@react-native-vector-icons/ionicons';
 
 const RecentVerses = () => {
-  const {theme} = useContext(ThemeContext);
+  const { theme } = useContext(ThemeContext);
 
   const favoriteVerses = StyleSheet.create({
     container: {
@@ -99,8 +99,8 @@ const RecentVerses = () => {
   );
 };
 
-const Verse = ({title, verse, trans}) => {
-  const {theme} = useContext(ThemeContext);
+const Verse = ({ title, verse, trans }) => {
+  const { theme } = useContext(ThemeContext);
 
   const verseStyles = StyleSheet.create({
     container: {

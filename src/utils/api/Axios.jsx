@@ -1,5 +1,5 @@
 import Axios from 'axios';
-import {buildStorage, setupCache} from 'axios-cache-interceptor';
+import { buildStorage, setupCache } from 'axios-cache-interceptor';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const asyncStorage = buildStorage({
@@ -64,10 +64,10 @@ axiosInstance.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
+  error => {
     console.error(error);
     return Promise.reject(error);
-  }
+  },
 );
 
 export const axios = axiosInstance;

@@ -1,4 +1,4 @@
-import {getDBInstance} from './Instance';
+import { getDBInstance } from './Instance';
 import log from '../Logger';
 
 class Verses {
@@ -41,10 +41,10 @@ class Verses {
     `,
       );
 
-      return {ok: true, response: result};
+      return { ok: true, response: result };
     } catch (error) {
       log.error(`[DB] Error creating Verses table: ${error}`);
-      return {ok: false, error: error};
+      return { ok: false, error: error };
     }
   }
 

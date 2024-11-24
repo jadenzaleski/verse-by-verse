@@ -1,6 +1,6 @@
-import {getDBInstance} from './Instance';
+import { getDBInstance } from './Instance';
 import log from '../Logger';
-import {EMAIL_REGEX, EXPONENT, PASSWORD_REGEX, SCALING_FACTOR} from '../Globals';
+import { EMAIL_REGEX, EXPONENT, PASSWORD_REGEX, SCALING_FACTOR } from '../Globals';
 
 class Users {
   static instance;
@@ -41,10 +41,10 @@ class Users {
     `,
       );
 
-      return {ok: true, response: result};
+      return { ok: true, response: result };
     } catch (error) {
       log.error(`[DB] Error creating Users table: ${error}`);
-      return {ok: false, error: error};
+      return { ok: false, error: error };
     }
   }
 
@@ -62,11 +62,11 @@ class Users {
         return Math.floor(Math.pow(xp / SCALING_FACTOR, 1 / EXPONENT));
       } else {
         log.error(`[DB] No user found in the database when attempting to retrieve the level`);
-        return {ok: false, error: `No user found in the database when attempting to retrieve the level`};
+        return { ok: false, error: `No user found in the database when attempting to retrieve the level` };
       }
     } catch (error) {
       log.error(`[DB] Error while retrieving user level: ${error}`);
-      return {ok: false, error: error};
+      return { ok: false, error: error };
     }
   }
 
@@ -93,14 +93,14 @@ class Users {
       );
 
       if (result.rows.length > 0) {
-        return {ok: true, response: result.rows[0]};
+        return { ok: true, response: result.rows[0] };
       } else {
         log.error(`[DB] No user found in the database when attempting to retrieve the user`);
-        return {ok: false, error: `No user found in the database when attempting to retrieve the user`};
+        return { ok: false, error: `No user found in the database when attempting to retrieve the user` };
       }
     } catch (error) {
       log.error(`[DB] Error while getting the user: ${error}`);
-      return {ok: false, error: error};
+      return { ok: false, error: error };
     }
   }
 
@@ -127,12 +127,12 @@ class Users {
 
     try {
       if (!this._validateEmail(emailLower)) {
-        return {ok: false, error: `Invalid email address: ${email}`};
+        return { ok: false, error: `Invalid email address: ${email}` };
       }
 
       //requires at least one digit (0-9) or a non-word character
       if (!this._validatePassword(password)) {
-        return {ok: false, error: `Password must be 8 >= characters and contain at least one digit or symbol`};
+        return { ok: false, error: `Password must be 8 >= characters and contain at least one digit or symbol` };
       }
 
       let hashedPassword = 'hashed_password';
@@ -144,14 +144,14 @@ class Users {
       );
 
       log.debug(`[DB] User ${name} created successfully`);
-      return {ok: true, response: result};
+      return { ok: true, response: result };
     } catch (error) {
       if (error.message && error.message.includes('UNIQUE constraint failed: Users.email')) {
         log.warn(`[DB] User creation failed: Email already exists`);
-        return {ok: false, error: 'This email is already in use. Please choose another one.'};
+        return { ok: false, error: 'This email is already in use. Please choose another one.' };
       } else {
         log.error(`[DB] Error creating the user: ${error}`);
-        return {ok: false, error: error.message || 'Unknown error'};
+        return { ok: false, error: error.message || 'Unknown error' };
       }
     }
   }
@@ -168,12 +168,12 @@ class Users {
 
       // Validate email if provided
       if (data.email && !this._validateEmail(data.email)) {
-        return {ok: false, error: `Invalid email address: ${data.email}`};
+        return { ok: false, error: `Invalid email address: ${data.email}` };
       }
 
       // Validate password if provided
       if (data.password && !this._validatePassword(data.password)) {
-        return {ok: false, error: `Password must contain at least one digit or symbol`};
+        return { ok: false, error: `Password must contain at least one digit or symbol` };
       }
 
       // Hash the password if it needs to be updated
@@ -202,14 +202,14 @@ class Users {
 
       if (setClause.trim() === '') {
         log.warn(`[DB] No allowed fields provided to update`);
-        return {ok: false, error: `No allowed fields provided to update`};
+        return { ok: false, error: `No allowed fields provided to update` };
       }
 
       const userResult = await this.db.execute(`SELECT user_id FROM Users LIMIT 1;`);
 
       if (userResult.rows.length === 0) {
         log.warn(`[DB] No user found in the database`);
-        return {ok: false, error: `No user found in the database when updating the user`};
+        return { ok: false, error: `No user found in the database when updating the user` };
       }
 
       const userId = userResult.rows[0].user_id;
@@ -219,10 +219,10 @@ class Users {
       const result = await this.db.execute(query, values);
 
       log.debug(`[DB] Updated user with ID ${userId}: ${JSON.stringify(setClause)}`);
-      return {ok: true, response: result};
+      return { ok: true, response: result };
     } catch (error) {
       log.error(`[DB] Error updating user: ${error}`);
-      return {ok: false, error: error};
+      return { ok: false, error: error };
     }
   }
 

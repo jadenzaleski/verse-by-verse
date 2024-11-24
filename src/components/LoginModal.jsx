@@ -1,4 +1,4 @@
-import React, {useContext, useRef, useState} from 'react';
+import React, { useContext, useRef, useState } from 'react';
 import {
   Modal,
   View,
@@ -18,8 +18,8 @@ import postRefresh from '../utils/api/PostRefresh';
 import Users from '../utils/db/Users';
 
 export const LoginModal = () => {
-  const {isModalVisible, hideLoginModal} = useContext(AuthContext);
-  const {theme} = useContext(ThemeContext);
+  const { isModalVisible, hideLoginModal } = useContext(AuthContext);
+  const { theme } = useContext(ThemeContext);
 
   const passwordRef = useRef();
   const [showLoader, setShowLoader] = useState(false);
@@ -151,7 +151,7 @@ export const LoginModal = () => {
       animationType="fade" // slide fade or none.
       presentationStyle="fullScreen">
       <SafeAreaView style={loginModalStyles.container}>
-        <KeyboardAvoidingView style={{width: '100%'}} behavior="padding">
+        <KeyboardAvoidingView style={{ width: '100%' }} behavior="padding">
           {/*{!showRegister ? (*/}
           {/*  <View style={loginModalStyles.modalContainer}>*/}
           {/*    <Image style={loginModalStyles.img} source={require('../../assets/images/VerseByVerseLogo.png')} />*/}
@@ -201,7 +201,7 @@ export const LoginModal = () => {
           {/*) : (*/}
           <View style={loginModalStyles.modalContainer}>
             <Image
-              style={{width: 150, height: 150, marginTop: 5}}
+              style={{ width: 150, height: 150, marginTop: 5 }}
               source={require('../../assets/images/VerseByVerseLogo.png')}
             />
             <Text style={loginModalStyles.login}>Welcome!</Text>
@@ -260,11 +260,11 @@ export const LoginModal = () => {
               <TouchableOpacity
                 onPress={() => attemptRegister()}
                 disabled={showRegLoader}
-                style={{...loginModalStyles.button, ...{backgroundColor: theme.colors.green}}}>
+                style={{ ...loginModalStyles.button, ...{ backgroundColor: theme.colors.green } }}>
                 {showRegLoader ? (
                   <ActivityIndicator size="small" color={theme.colors.textLight.toString()} />
                 ) : (
-                  <Text style={{...loginModalStyles.buttonText, ...{color: theme.colors.textLight}}}>Register</Text>
+                  <Text style={{ ...loginModalStyles.buttonText, ...{ color: theme.colors.textLight } }}>Register</Text>
                 )}
               </TouchableOpacity>
             </View>

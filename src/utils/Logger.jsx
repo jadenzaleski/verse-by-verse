@@ -1,6 +1,6 @@
-import {logger, consoleTransport} from 'react-native-logs';
+import { logger, consoleTransport } from 'react-native-logs';
 import RNFS from 'react-native-fs';
-import {LOGS_FOLDER, MAX_LOG_DAYS} from './Globals';
+import { LOGS_FOLDER, MAX_LOG_DAYS } from './Globals';
 
 /**
  * Creates the logs folder if it does not already exist.

@@ -1,4 +1,4 @@
-import {axios} from './Axios';
+import { axios } from './Axios';
 import * as Globals from '../Globals';
 import Toast from 'react-native-toast-message';
 
@@ -24,9 +24,9 @@ export default async function getUser(showLoginModal) {
       return getUser(showLoginModal); // Retry after successful login
     } else if (error.code === 'ERR_NETWORK') {
       console.error(error.code);
-      Toast.show({type: 'network_error'});
+      Toast.show({ type: 'network_error' });
     } else {
-      Toast.show({type: 'error', text1: error.toString()});
+      Toast.show({ type: 'error', text1: error.toString() });
       console.error('[GET /user] Error fetching user data:', error);
       throw error; // Rethrow other errors for higher-level handling
     }

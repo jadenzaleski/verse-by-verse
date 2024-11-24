@@ -1,15 +1,15 @@
-import {StyleSheet, Text, View, FlatList, TouchableOpacity, SafeAreaView} from 'react-native';
+import { StyleSheet, Text, View, FlatList, SafeAreaView } from 'react-native';
 import * as React from 'react';
-import {useContext} from 'react';
+import { useContext } from 'react';
 import ThemeContext from '../../context/ThemeContext';
 
 const VersesScreen = () => {
-  const {theme} = useContext(ThemeContext);
+  const { theme } = useContext(ThemeContext);
 
   const data = [
-    {id: '1', title: 'List 1', targetScreen: 'List1Screen'},
-    {id: '2', title: 'List 2', targetScreen: 'List2Screen'},
-    {id: '3', title: 'List 3', targetScreen: 'List3Screen'},
+    { id: '1', title: 'List 1', targetScreen: 'List1Screen' },
+    { id: '2', title: 'List 2', targetScreen: 'List2Screen' },
+    { id: '3', title: 'List 3', targetScreen: 'List3Screen' },
   ];
 
   const versesStyles = StyleSheet.create({
@@ -41,13 +41,13 @@ const VersesScreen = () => {
   });
 
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: theme.colors.background}}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <View style={versesStyles.container}>
         <Text style={versesStyles.title}>Collections</Text>
         <FlatList
           data={data}
           keyExtractor={item => item.id}
-          renderItem={({item}) => (
+          renderItem={({ item }) => (
             // <TouchableOpacity
             //   style={versesStyles.itemContainer}
             //   onPress={() => navigation.navigate(item.targetScreen)}

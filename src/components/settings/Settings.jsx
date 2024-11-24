@@ -1,11 +1,11 @@
-import {ScrollView, StyleSheet, Text, TouchableOpacity, View, Image, RefreshControl, Switch} from 'react-native';
-import {useCallback, useContext, useState} from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Image, RefreshControl, Switch } from 'react-native';
+import { useCallback, useContext, useState } from 'react';
 import ThemeContext from '../../context/ThemeContext';
 import * as React from 'react';
 import Icon from '@react-native-vector-icons/ionicons';
 
-const SettingsScreen = ({navigation}) => {
-  const {theme, themeName, toggleTheme, useSystemTheme, isBold, toggleBold} = useContext(ThemeContext);
+const SettingsScreen = ({ navigation }) => {
+  const { theme, themeName, toggleTheme, useSystemTheme, isBold, toggleBold } = useContext(ThemeContext);
   const [themeNum, setThemeNum] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -153,7 +153,7 @@ const SettingsScreen = ({navigation}) => {
           <Text style={settingsStyles.itemText}>Bold text</Text>
           <Switch
             style={settingsStyles.itemButton}
-            trackColor={{true: theme.colors.green, false: theme.colors.primary}}
+            trackColor={{ true: theme.colors.green, false: theme.colors.primary }}
             thumbColor={theme.colors.textLight}
             ios_backgroundColor={themeName === 'light' ? theme.colors.secondary : theme.colors.primary}
             onValueChange={toggleBold}
@@ -167,7 +167,7 @@ const SettingsScreen = ({navigation}) => {
           <Text style={settingsStyles.itemText}>Practice Reminders</Text>
           <Switch
             style={settingsStyles.itemButton}
-            trackColor={{true: theme.colors.green, false: theme.colors.primary}}
+            trackColor={{ true: theme.colors.green, false: theme.colors.primary }}
             thumbColor={theme.colors.textLight}
             ios_backgroundColor={themeName === 'light' ? theme.colors.secondary : theme.colors.primary}
             value={false}
@@ -177,11 +177,11 @@ const SettingsScreen = ({navigation}) => {
           <Icon style={settingsStyles.itemIcon} color={theme.colors.text} name={'time-outline'} size={25} />
           <Text style={settingsStyles.itemText}>Daily Verse: </Text>
           <TouchableOpacity activeOpacity={0.6}>
-            <Text style={{...settingsStyles.itemText, ...{color: theme.colors.blue}}}>23:59pm</Text>
+            <Text style={{ ...settingsStyles.itemText, ...{ color: theme.colors.blue } }}>23:59pm</Text>
           </TouchableOpacity>
           <Switch
             style={settingsStyles.itemButton}
-            trackColor={{true: theme.colors.green, false: theme.colors.primary}}
+            trackColor={{ true: theme.colors.green, false: theme.colors.primary }}
             thumbColor={theme.colors.textLight}
             ios_backgroundColor={themeName === 'light' ? theme.colors.secondary : theme.colors.primary}
             value={false}
@@ -238,7 +238,7 @@ const SettingsScreen = ({navigation}) => {
         </TouchableOpacity>
 
         {/*bottom padding*/}
-        <View style={{marginVertical: 50}} />
+        <View style={{ marginVertical: 50 }} />
       </View>
     </ScrollView>
   );

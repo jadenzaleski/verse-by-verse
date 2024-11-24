@@ -1,8 +1,8 @@
-import React, {createContext, useState} from 'react';
+import React, { createContext, useState } from 'react';
 
 const AuthContext = createContext();
 
-export const AuthProvider = ({children}) => {
+export const AuthProvider = ({ children }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalPromise, setModalPromise] = useState(null); // To hold the promise resolver
   // Show login modal and return a Promise
@@ -23,7 +23,7 @@ export const AuthProvider = ({children}) => {
   };
 
   return (
-    <AuthContext.Provider value={{isModalVisible, showLoginModal, hideLoginModal}}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ isModalVisible, showLoginModal, hideLoginModal }}>{children}</AuthContext.Provider>
   );
 };
 

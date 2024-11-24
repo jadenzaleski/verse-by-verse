@@ -1,4 +1,4 @@
-import {open} from '@op-engineering/op-sqlite';
+import { open } from '@op-engineering/op-sqlite';
 import log from '../Logger';
 
 let dbInstance = null;

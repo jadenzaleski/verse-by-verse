@@ -1,20 +1,19 @@
 import * as React from 'react';
 import 'react-native-gesture-handler';
-import {NavigationContainer} from '@react-navigation/native';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {View, StyleSheet, TouchableOpacity, StatusBar} from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { View, StyleSheet, TouchableOpacity, StatusBar } from 'react-native';
 import Icon from '@react-native-vector-icons/ionicons';
-import ThemeContext, {ThemeProvider} from '../context/ThemeContext';
+import ThemeContext, { ThemeProvider } from '../context/ThemeContext';
 import HomeScreen from './home/Home';
 import VersesScreen from './verses/Verses';
 import ProfileScreen from './profile/Profile';
-import SettingsScreen from './settings/Settings';
-import {useContext, useEffect, useState} from 'react';
+import { useContext, useEffect, useState } from 'react';
 import LoadingScreen from './LoadingScreen';
 import CustomToasts from './Toasts';
 import SettingsNavigator from './settings/SettingsNavigator';
-import {AuthProvider} from '../context/AuthContext';
-import {LoginModal} from './LoginModal';
+import { AuthProvider } from '../context/AuthContext';
+import { LoginModal } from './LoginModal';
 import log from '../utils/Logger';
 
 const Tab = createBottomTabNavigator();
@@ -39,8 +38,8 @@ const ICONS = {
 };
 
 // Custom Tab Bar
-function MyTabBar({state, descriptors, navigation}) {
-  const {theme} = useContext(ThemeContext);
+function MyTabBar({ state, descriptors, navigation }) {
+  const { theme } = useContext(ThemeContext);
 
   const tabStyles = StyleSheet.create({
     tabContainer: {
@@ -60,10 +59,10 @@ function MyTabBar({state, descriptors, navigation}) {
   });
 
   return (
-    <View style={{...theme.shadows.small, ...{backgroundColor: theme.colors.secondary}, ...tabStyles.tabContainer}}>
+    <View style={{ ...theme.shadows.small, ...{ backgroundColor: theme.colors.secondary }, ...tabStyles.tabContainer }}>
       <StatusBar hidden={false} translucent={true} backgroundColor={'transparent'} />
       {state.routes.map((route, index) => {
-        const {options} = descriptors[route.key];
+        const { options } = descriptors[route.key];
         const isFocused = state.index === index;
 
         // Determine the icon based on focus state

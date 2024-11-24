@@ -1,14 +1,14 @@
-import {StyleSheet, Text, View} from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import * as React from 'react';
-import {useContext, useState, useEffect} from 'react';
+import { useContext, useEffect, useState } from 'react';
 import ThemeContext from '../../context/ThemeContext';
 import ProgressBar from 'react-native-progress/Bar';
 import Icon from '@react-native-vector-icons/ionicons';
 import Users from '../../utils/db/Users';
 import log from '../../utils/Logger';
 
-const XPBar = ({user}) => {
-  const {theme} = useContext(ThemeContext);
+const XPBar = ({ user }) => {
+  const { theme } = useContext(ThemeContext);
   const [levelProgress, setLevelProgress] = useState(0);
   const [neededXp, setNeededXp] = useState(0);
   const [calculatedLevel, setCalculatedLevel] = useState(0); // Default to 0 initially
@@ -102,7 +102,7 @@ const XPBar = ({user}) => {
         <Text style={xpStyles.numberText}>{calculatedLevel}</Text>
       </View>
       <View style={xpStyles.detailsContainer}>
-        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Text style={xpStyles.xpNumber}>{user.xp}</Text>
           <Icon name="sparkles" color={theme.colors.accent.toString()} size={14} />
         </View>

@@ -24,7 +24,7 @@ export default async function postRefresh(email, password) {
     }
     return response;
   } catch (error) {
-    Toast.show({type: 'error', text1: error.toString()});
+    Toast.show({ type: 'error', text1: error.toString() });
     console.error(`[POST ${route}] Error fetching user data:`, error);
     console.error(JSON.parse(error.response));
     return JSON.parse(error.response);

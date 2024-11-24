@@ -1,10 +1,10 @@
-import React, {useContext, useState} from 'react';
-import {View, StyleSheet, ActivityIndicator, TouchableOpacity, Text} from 'react-native';
+import React, { useContext, useState } from 'react';
+import { View, StyleSheet, ActivityIndicator, TouchableOpacity, Text } from 'react-native';
 import ThemeContext from '../../context/ThemeContext';
 import ColorPicker from 'react-native-wheel-color-picker';
 
-const ColorPickerScreen = ({navigation}) => {
-  const {theme, updateAccentColor} = useContext(ThemeContext);
+const ColorPickerScreen = ({ navigation }) => {
+  const { theme, updateAccentColor } = useContext(ThemeContext);
 
   // Initialize state using useState hook
   const [currentColor, setCurrentColor] = useState(theme.colors.accent);
@@ -121,7 +121,9 @@ const ColorPickerScreen = ({navigation}) => {
         />
       </View>
       <View style={colorPickerStyles.buttonContainer}>
-        <TouchableOpacity style={[colorPickerStyles.setBox, {backgroundColor: currentColor}]} onPress={handleSetColor}>
+        <TouchableOpacity
+          style={[colorPickerStyles.setBox, { backgroundColor: currentColor }]}
+          onPress={handleSetColor}>
           <Text style={colorPickerStyles.selectionText}>Set Color</Text>
         </TouchableOpacity>
         <TouchableOpacity style={colorPickerStyles.resetBox} onPress={handleResetColor}>
