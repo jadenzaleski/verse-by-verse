@@ -41,23 +41,21 @@ const VersesScreen = () => {
   });
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <View style={versesStyles.container}>
-        <Text style={versesStyles.title}>Collections</Text>
-        <FlatList
-          data={data}
-          keyExtractor={item => item.id}
-          renderItem={({ item }) => (
-            // <TouchableOpacity
-            //   style={versesStyles.itemContainer}
-            //   onPress={() => navigation.navigate(item.targetScreen)}
-            // >
-            <Text style={versesStyles.itemText}>{item.title}</Text>
-            // </TouchableOpacity>
-          )}
-        />
-      </View>
-    </SafeAreaView>
+    <View style={versesStyles.container}>
+      <Text style={versesStyles.title}>Collections</Text>
+      <FlatList
+        data={data}
+        keyExtractor={item => item.id}
+        renderItem={({ item }) => (
+          // <TouchableOpacity
+          //   style={versesStyles.itemContainer}
+          //   onPress={() => navigation.navigate(item.targetScreen)}
+          // >
+          <Text style={versesStyles.itemText}>{item.title}</Text>
+          // </TouchableOpacity>
+        )}
+      />
+    </View>
   );
 };
 

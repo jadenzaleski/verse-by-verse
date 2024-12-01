@@ -57,18 +57,18 @@ const cleanupOldLogs = async () => {
   try {
     const logFiles = await RNFS.readDir(LOGS_FOLDER);
 
-    logFiles.forEach(file => {
+    for (const file of logFiles) {
       const fileName = file.name;
       const match = fileName.match(/log-(\d{4})-(\d{2})-(\d{2})\.txt/);
       if (match) {
         const logDate = new Date(`${match[1]}-${match[2]}-${match[3]}`);
-        if (logDate < cutoffDate) {
+        if (logDate < cutoffDate && (await RNFS.exists(file.path))) {
           RNFS.unlink(file.path)
             .then(() => console.log('[LOGGER]', `Deleted old log file: ${fileName}`))
             .catch(err => console.error('[LOGGER]', `Failed to delete old log file: ${fileName}`, err));
         }
       }
-    });
+    }
   } catch (err) {
     console.error('[LOGGER]', 'Failed to read log directory or delete files:', err);
   }
@@ -131,7 +131,7 @@ const config = {
     warn: 2,
     error: 3,
   },
-  severity: __DEV__ ? 'debug' : 'error',
+  severity: __DEV__ ? 'debug' : 'info',
   transport: customTransport,
   transportOptions: {
     colors: {

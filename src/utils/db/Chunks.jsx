@@ -1,15 +1,15 @@
 import { getDBInstance } from './Instance';
 import log from '../Logger';
 
-class Verses {
+class Chunks {
   static instance;
 
   constructor() {
-    if (!Verses.instance) {
+    if (!Chunks.instance) {
       this.db = null;
-      Verses.instance = this;
+      Chunks.instance = this;
     }
-    return Verses.instance;
+    return Chunks.instance;
   }
 
   async init() {
@@ -19,21 +19,14 @@ class Verses {
   }
 
   async initTable() {
-    log.debug('[DB] Creating Verses table if it doesnt exist');
+    log.debug('[DB] Creating Chunks table if it doesnt exist');
     try {
       const result = await this.db.execute(
         `
-      CREATE TABLE IF NOT EXISTS Verses (
-          verse_id INTEGER PRIMARY KEY AUTOINCREMENT,
+      CREATE TABLE IF NOT EXISTS Chunks (
+          chunk_id INTEGER PRIMARY KEY AUTOINCREMENT,
           user_id INTEGER NOT NULL,
-          book_id INTEGER NOT NULL,
-          translation TEXT NOT NULL,
-          book TEXT NOT NULL,
-          chapter INTEGER NOT NULL,
-          verse INTEGER NOT NULL,
-          text TEXT NOT NULL,
-          progress REAL DEFAULT 0.0,
-          last_practiced INTEGER,
+          chunk_name TEXT NOT NULL,
           created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
           updated_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
           FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
@@ -43,11 +36,11 @@ class Verses {
 
       return { ok: true, response: result };
     } catch (error) {
-      log.error(`[DB] Error creating Verses table: ${error}`);
+      log.error(`[DB] Error creating Chunks table: ${error}`);
       return { ok: false, error: error };
     }
   }
 }
 
-const verses = new Verses();
-export default verses;
+const chunks = new Chunks();
+export default chunks;
