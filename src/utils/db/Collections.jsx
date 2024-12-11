@@ -25,12 +25,10 @@ class Collections {
         `
             CREATE TABLE IF NOT EXISTS Collections
             (
-                collection_id   INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                user_id         INT UNSIGNED NOT NULL,
-                collection_name VARCHAR(255) NOT NULL,
+                collection_id   INTEGER PRIMARY KEY AUTOINCREMENT,
+                collection_name TEXT NOT NULL,
                 created_at      TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
-                updated_at      TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
-                FOREIGN KEY (user_id) REFERENCES Users (user_id) ON DELETE CASCADE
+                updated_at      TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
             );
         `,
       );

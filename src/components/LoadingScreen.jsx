@@ -7,6 +7,7 @@ import AuthContext from '../context/AuthContext';
 import { initTables } from '../utils/db/TablesInit';
 import Users from '../utils/db/Users';
 import log from '../utils/Logger';
+import Logger from '../utils/Logger';
 
 const LoadingScreen = ({ onFinishLoading }) => {
   const [loadingMessage, setLoadingMessage] = useState('Initializing...');
@@ -33,7 +34,7 @@ const LoadingScreen = ({ onFinishLoading }) => {
       onFinishLoading();
     };
 
-    performLoadingTasks();
+    performLoadingTasks().then(() => log.debug('[LoadingScreen] Finished loading tasks.'));
   }, [onFinishLoading, showLoginModal]);
 
   const styles = StyleSheet.create({

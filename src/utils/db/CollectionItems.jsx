@@ -25,10 +25,10 @@ class CollectionItems {
         `
             CREATE TABLE IF NOT EXISTS CollectionItems
             (
-                item_id       INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                collection_id INT UNSIGNED NOT NULL,
-                verse_id      INT UNSIGNED,
-                chunk_id      INT UNSIGNED,
+                item_id       INTEGER PRIMARY KEY AUTOINCREMENT,
+                collection_id INTEGER NOT NULL,
+                verse_id      INTEGER,
+                chunk_id      INTEGER,
                 created_at      TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
                 updated_at      TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
                 UNIQUE (collection_id, verse_id),

@@ -25,7 +25,6 @@ class Verses {
         `
       CREATE TABLE IF NOT EXISTS Verses (
           verse_id INTEGER PRIMARY KEY AUTOINCREMENT,
-          user_id INTEGER NOT NULL,
           book_id INTEGER NOT NULL,
           translation TEXT NOT NULL,
           book TEXT NOT NULL,
@@ -35,8 +34,7 @@ class Verses {
           progress REAL DEFAULT 0.0,
           last_practiced INTEGER,
           created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
-          updated_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
-          FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+          updated_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
       );
     `,
       );

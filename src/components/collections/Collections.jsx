@@ -3,7 +3,7 @@ import * as React from 'react';
 import { useContext } from 'react';
 import ThemeContext from '../../context/ThemeContext';
 
-const VersesScreen = () => {
+const CollectionsScreen = () => {
   const { theme } = useContext(ThemeContext);
 
   const data = [
@@ -12,7 +12,7 @@ const VersesScreen = () => {
     { id: '3', title: 'List 3', targetScreen: 'List3Screen' },
   ];
 
-  const versesStyles = StyleSheet.create({
+  const collectionsStyles = StyleSheet.create({
     container: {
       flex: 1,
       alignItems: 'center',
@@ -41,17 +41,17 @@ const VersesScreen = () => {
   });
 
   return (
-    <View style={versesStyles.container}>
-      <Text style={versesStyles.title}>Collections</Text>
+    <View style={collectionsStyles.container}>
+      <Text style={collectionsStyles.title}>Collections</Text>
       <FlatList
         data={data}
         keyExtractor={item => item.id}
         renderItem={({ item }) => (
           // <TouchableOpacity
-          //   style={versesStyles.itemContainer}
+          //   style={collectionsStyles.itemContainer}
           //   onPress={() => navigation.navigate(item.targetScreen)}
           // >
-          <Text style={versesStyles.itemText}>{item.title}</Text>
+          <Text style={collectionsStyles.itemText}>{item.title}</Text>
           // </TouchableOpacity>
         )}
       />
@@ -59,4 +59,4 @@ const VersesScreen = () => {
   );
 };
 
-export default VersesScreen;
+export default CollectionsScreen;

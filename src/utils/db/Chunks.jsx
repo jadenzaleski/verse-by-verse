@@ -25,11 +25,9 @@ class Chunks {
         `
       CREATE TABLE IF NOT EXISTS Chunks (
           chunk_id INTEGER PRIMARY KEY AUTOINCREMENT,
-          user_id INTEGER NOT NULL,
           chunk_name TEXT NOT NULL,
           created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
-          updated_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
-          FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+          updated_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
       );
     `,
       );

@@ -6,7 +6,7 @@ import { View, StyleSheet, TouchableOpacity, StatusBar } from 'react-native';
 import Icon from '@react-native-vector-icons/ionicons';
 import ThemeContext, { ThemeProvider } from '../context/ThemeContext';
 import HomeScreen from './home/Home';
-import VersesScreen from './verses/Verses';
+import CollectionsScreen from './collections/Collections';
 import ProfileScreen from './profile/Profile';
 import { useContext, useEffect, useState } from 'react';
 import LoadingScreen from './LoadingScreen';
@@ -140,7 +140,7 @@ const App = () => {
               }}
               tabBar={renderTabBar}>
               <Tab.Screen name="Home" component={HomeScreen} />
-              <Tab.Screen name="Verses" component={VersesScreen} />
+              <Tab.Screen name="Verses" component={CollectionsScreen} />
               <Tab.Screen name="Profile" component={ProfileScreen} />
               <Tab.Screen name="Settings" component={SettingsNavigator} />
             </Tab.Navigator>
