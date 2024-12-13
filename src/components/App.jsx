@@ -15,6 +15,7 @@ import SettingsNavigator from './settings/SettingsNavigator';
 import { AuthProvider } from '../context/AuthContext';
 import { LoginModal } from './LoginModal';
 import log from '../utils/Logger';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const Tab = createBottomTabNavigator();
 // Define icon mapping for each screen
@@ -127,30 +128,32 @@ const App = () => {
   });
 
   return (
-    <AuthProvider>
-      <ThemeProvider>
-        <NavigationContainer>
-          {isLoading ? (
-            <LoadingScreen onFinishLoading={handleFinishLoading} />
-          ) : (
-            <Tab.Navigator
-              screenOptions={{
-                headerShown: false,
-                tabBarShowLabel: false,
-              }}
-              tabBar={renderTabBar}>
-              <Tab.Screen name="Home" component={HomeScreen} />
-              <Tab.Screen name="Verses" component={CollectionsScreen} />
-              <Tab.Screen name="Profile" component={ProfileScreen} />
-              <Tab.Screen name="Settings" component={SettingsNavigator} />
-            </Tab.Navigator>
-          )}
-        </NavigationContainer>
-        <LoginModal />
-        {/*Allow for Toast displays*/}
-        <CustomToasts />
-      </ThemeProvider>
-    </AuthProvider>
+    <GestureHandlerRootView>
+      <AuthProvider>
+        <ThemeProvider>
+          <NavigationContainer>
+            {isLoading ? (
+              <LoadingScreen onFinishLoading={handleFinishLoading} />
+            ) : (
+              <Tab.Navigator
+                screenOptions={{
+                  headerShown: false,
+                  tabBarShowLabel: false,
+                }}
+                tabBar={renderTabBar}>
+                <Tab.Screen name="Home" component={HomeScreen} />
+                <Tab.Screen name="Verses" component={CollectionsScreen} />
+                <Tab.Screen name="Profile" component={ProfileScreen} />
+                <Tab.Screen name="Settings" component={SettingsNavigator} />
+              </Tab.Navigator>
+            )}
+          </NavigationContainer>
+          <LoginModal />
+          {/*Allow for Toast displays*/}
+          <CustomToasts />
+        </ThemeProvider>
+      </AuthProvider>
+    </GestureHandlerRootView>
   );
 };
 

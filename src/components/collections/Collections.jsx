@@ -14,34 +14,35 @@ import * as React from 'react';
 import { useCallback, useContext, useState } from 'react';
 import ThemeContext from '../../context/ThemeContext';
 import Icon from '@react-native-vector-icons/ionicons';
+import CollectionsListItem from './CollectionsListItem';
 
 const CollectionsScreen = () => {
   const { theme } = useContext(ThemeContext);
 
-  const data = [
+  const [data, setData] = useState([
     { id: '1', title: 'List 1', targetScreen: 'List1Screen' },
     { id: '2', title: 'List 2', targetScreen: 'List2Screen' },
-    { id: '3', title: 'List 3', targetScreen: 'List3Screen' },
-    { id: '4', title: 'List 3', targetScreen: 'List3Screen' },
-    { id: '5', title: 'List 3', targetScreen: 'List3Screen' },
-    { id: '6', title: 'List 3', targetScreen: 'List3Screen' },
-    { id: '7', title: 'List 3', targetScreen: 'List3Screen' },
-    { id: '8', title: 'List 3', targetScreen: 'List3Screen' },
-    { id: '9', title: 'List 3', targetScreen: 'List3Screen' },
-    { id: '10', title: 'List 3', targetScreen: 'List3Screen' },
-    { id: '11', title: 'List 3', targetScreen: 'List3Screen' },
-    { id: '12', title: 'List 3', targetScreen: 'List3Screen' },
-    { id: '13', title: 'List 3', targetScreen: 'List3Screen' },
-  ];
+    { id: '3', title: 'List 4', targetScreen: 'List3Screen' },
+    { id: '4', title: 'List 5', targetScreen: 'List3Screen' },
+    { id: '5', title: 'List 6', targetScreen: 'List3Screen' },
+    { id: '6', title: 'List 7', targetScreen: 'List3Screen' },
+    { id: '7', title: 'List 8', targetScreen: 'List3Screen' },
+    { id: '8', title: 'List 9', targetScreen: 'List3Screen' },
+    { id: '9', title: 'List 10', targetScreen: 'List3Screen' },
+    { id: '10', title: 'List 11', targetScreen: 'List3Screen' },
+    { id: '11', title: 'List 12', targetScreen: 'List3Screen' },
+    { id: '12', title: 'List 13', targetScreen: 'List3Screen' },
+    { id: '13', title: 'List 14', targetScreen: 'List3Screen' },
+  ]);
 
   const collectionsStyles = StyleSheet.create({
     container: {
       flex: 1,
       flexDirection: 'column',
       justifyContent: 'center',
-      paddingHorizontal: 30,
       paddingTop: 75,
       backgroundColor: theme.colors.primary,
+      overflow: 'visible',
     },
     title: {
       marginBottom: 5,
@@ -54,6 +55,7 @@ const CollectionsScreen = () => {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
+      marginHorizontal: 30,
     },
     titleButtonBox: {
       flexDirection: 'row',
@@ -68,40 +70,21 @@ const CollectionsScreen = () => {
     divider: {
       borderBottomColor: theme.colors.secondary,
       borderBottomWidth: 2,
+      marginHorizontal: 30,
     },
-
     list: {
       paddingTop: 15,
       gap: 15,
-    },
-
-    collectionBox: {
-      flexDirection: 'row',
-      alignSelf: 'stretch',
-      backgroundColor: theme.colors.secondary,
-      padding: 25,
-      borderRadius: 20,
-      alignItems: 'center',
-      justifyContent: 'space-between',
-    },
-
-    collectionTitle: {
-      color: theme.colors.text,
-      ...theme.fonts.medium,
-      fontSize: theme.fontSizes.subtitle,
-    },
-
-    chevronIcon: {
-      color: theme.colors.accent,
+      overflow: 'visible',
     },
   });
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity activeOpacity={0.6} style={collectionsStyles.collectionBox}>
-      <Text style={collectionsStyles.collectionTitle}>TESTER collection</Text>
-      <Icon color={theme.colors.accent} name={'chevron-forward-outline'} size={25} />
-    </TouchableOpacity>
-  );
+  const handleDeleteItem = id => {
+    const updatedData = data.filter(item => item.id !== id);
+    setData(updatedData);
+  };
+
+  const renderItem = ({ item }) => <CollectionsListItem item={item} onDelete={handleDeleteItem} />;
 
   return (
     <View style={collectionsStyles.container}>
@@ -122,7 +105,6 @@ const CollectionsScreen = () => {
         </View>
       </View>
       <View style={collectionsStyles.divider} />
-
       <FlatList
         data={data}
         renderItem={renderItem}
