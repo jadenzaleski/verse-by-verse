@@ -61,6 +61,19 @@ export default function CollectionsListItem({ item, onDelete }) {
     };
   });
 
+  const handlePress = () => {
+    // Implement navigation logic here
+    log.info('FIRED');
+  };
+
+  const handleDelete = async () => {
+    onDelete(item.collection_id);
+  };
+
+  const handleEdit = () => {
+    console.log('Edit action triggered for:', item.title);
+  };
+
   const collectionsStyles = StyleSheet.create({
     container: {
       position: 'relative',
@@ -113,19 +126,6 @@ export default function CollectionsListItem({ item, onDelete }) {
     },
   });
 
-  const handlePress = () => {
-    // Implement navigation logic here
-    log.info('FIRED');
-  };
-
-  const handleDelete = () => {
-    onDelete(item.id);
-  };
-
-  const handleEdit = () => {
-    console.log('Edit action triggered for:', item.title);
-  };
-
   return (
     <View style={collectionsStyles.container}>
       <View style={collectionsStyles.optionButtons}>
@@ -147,7 +147,7 @@ export default function CollectionsListItem({ item, onDelete }) {
       <GestureDetector gesture={pan}>
         <Animated.View style={[animatedStyles, collectionsStyles.collectionBox]}>
           <TouchableOpacity style={{ flex: 1 }} onPress={handlePress} activeOpacity={0.7}>
-            <Text style={collectionsStyles.collectionTitle}>{item.title}</Text>
+            <Text style={collectionsStyles.collectionTitle}>{item.collection_name}</Text>
           </TouchableOpacity>
           <Icon color={theme.colors.accent} name={'chevron-forward-outline'} size={25} />
         </Animated.View>

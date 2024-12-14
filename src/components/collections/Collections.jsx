@@ -1,39 +1,32 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  FlatList,
-  SafeAreaView,
-  RefreshControl,
-  TouchableOpacity,
-  Image,
-  Switch,
-  ScrollView,
-} from 'react-native';
+import { StyleSheet, Text, View, FlatList, TouchableOpacity } from 'react-native';
 import * as React from 'react';
-import { useCallback, useContext, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import ThemeContext from '../../context/ThemeContext';
 import Icon from '@react-native-vector-icons/ionicons';
 import CollectionsListItem from './CollectionsListItem';
+import Collections from '../../utils/db/Collections';
+import { useFocusEffect } from '@react-navigation/native';
+import log from '../../utils/Logger';
 
 const CollectionsScreen = () => {
   const { theme } = useContext(ThemeContext);
+  const [collections, setCollections] = useState([]);
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        const result = await Collections.getAll();
+        if (result.ok) {
+          const rowsArray = Object.values(result.response.rows).filter(item => typeof item === 'object');
+          setCollections(rowsArray);
+        } else {
+          log.error('[Collections] Failed to fetch collections:', result);
+          setCollections([]);
+        }
+      };
 
-  const [data, setData] = useState([
-    { id: '1', title: 'List 1', targetScreen: 'List1Screen' },
-    { id: '2', title: 'List 2', targetScreen: 'List2Screen' },
-    { id: '3', title: 'List 4', targetScreen: 'List3Screen' },
-    { id: '4', title: 'List 5', targetScreen: 'List3Screen' },
-    { id: '5', title: 'List 6', targetScreen: 'List3Screen' },
-    { id: '6', title: 'List 7', targetScreen: 'List3Screen' },
-    { id: '7', title: 'List 8', targetScreen: 'List3Screen' },
-    { id: '8', title: 'List 9', targetScreen: 'List3Screen' },
-    { id: '9', title: 'List 10', targetScreen: 'List3Screen' },
-    { id: '10', title: 'List 11', targetScreen: 'List3Screen' },
-    { id: '11', title: 'List 12', targetScreen: 'List3Screen' },
-    { id: '12', title: 'List 13', targetScreen: 'List3Screen' },
-    { id: '13', title: 'List 14', targetScreen: 'List3Screen' },
-  ]);
+      fetchData().then(() => log.debug('[Collections] Fetched collections'));
+    }, []),
+  );
 
   const collectionsStyles = StyleSheet.create({
     container: {
@@ -79,9 +72,19 @@ const CollectionsScreen = () => {
     },
   });
 
-  const handleDeleteItem = id => {
-    const updatedData = data.filter(item => item.id !== id);
-    setData(updatedData);
+  const handleDeleteItem = async collection_id => {
+    try {
+      // Perform the delete operation
+      const result = await Collections.delete(collection_id);
+      if (result.ok) {
+        // Update state after successful delete
+        setCollections(prevCollections => prevCollections.filter(item => item.collection_id !== collection_id));
+      } else {
+        log.error('[Collections] Failed to delete collection');
+      }
+    } catch (error) {
+      log.error('[Collections] Error deleting collection:', error);
+    }
   };
 
   const renderItem = ({ item }) => <CollectionsListItem item={item} onDelete={handleDeleteItem} />;
@@ -106,9 +109,9 @@ const CollectionsScreen = () => {
       </View>
       <View style={collectionsStyles.divider} />
       <FlatList
-        data={data}
+        data={collections}
         renderItem={renderItem}
-        keyExtractor={item => item.id}
+        keyExtractor={item => item.collection_id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={collectionsStyles.list}
       />

@@ -39,6 +39,40 @@ class Collections {
       return { ok: false, error: error };
     }
   }
+
+  async getAll() {
+    log.debug('[DB] Getting all collections');
+
+    try {
+      const result = await this.db.execute(
+        `
+            SELECT * FROM Collections;
+        `,
+      );
+
+      return { ok: true, response: result };
+    } catch (error) {
+      log.error(`[DB] Error getting all collections: ${error}`);
+      return { ok: false, error: error };
+    }
+  }
+
+  async delete(collection_id) {
+    log.debug('[DB] Deleting collection ' + collection_id);
+
+    try {
+      const result = await this.db.execute(
+        `
+            DELETE FROM Collections WHERE collection_id = ${collection_id};
+        `,
+      );
+
+      return { ok: true, response: result };
+    } catch (error) {
+      log.error(`[DB] Error deleting collection: ${error}`);
+      return { ok: false, error: error };
+    }
+  }
 }
 
 const collections = new Collections();
