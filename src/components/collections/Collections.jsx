@@ -11,7 +11,7 @@ import {
   ScrollView,
 } from 'react-native';
 import * as React from 'react';
-import { useCallback, useContext, useState } from 'react';
+import { useCallback, useContext, useRef, useState } from 'react';
 import ThemeContext from '../../context/ThemeContext';
 import Icon from '@react-native-vector-icons/ionicons';
 import CollectionsListItem from './CollectionsListItem';

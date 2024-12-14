@@ -1,65 +1,157 @@
-import { StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Icon from '@react-native-vector-icons/ionicons';
 import * as React from 'react';
 import { useContext } from 'react';
 import ThemeContext from '../../context/ThemeContext';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, { interpolate, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import * as Globals from '../../utils/Globals';
+import log from '../../utils/Logger';
 
 export default function CollectionsListItem({ item, onDelete }) {
   const { theme } = useContext(ThemeContext);
   const offset = useSharedValue(0);
+  const editButtonVisibility = useSharedValue(0);
+  const deleteButtonVisibility = useSharedValue(0);
 
   const pan = Gesture.Pan()
     .onChange(event => {
-      // Update offset incrementally based on gesture movement
       const newOffset = offset.value + event.changeX;
-      // Clamp the offset between 0 and -100
-      if (newOffset >= -100 && newOffset <= 0) {
+      if (newOffset >= -Globals.ITEM_MAX_OFFSET && newOffset <= 0) {
         offset.value = newOffset;
+
+        // Individual button visibility logic
+        deleteButtonVisibility.value = withSpring(newOffset < -Globals.ITEM_MAX_OFFSET / 2 ? 1 : 0);
+        editButtonVisibility.value = withSpring(newOffset < -Globals.ITEM_MAX_OFFSET + 15 ? 1 : 0);
       }
     })
     .onFinalize(() => {
-      // If swiped more than halfway left, snap to -100; otherwise, snap back to 0
-      if (offset.value < -50) {
-        offset.value = withTiming(-100);
-      } else {
-        offset.value = withTiming(0);
+      // Snap to either fully open (-150) or closed (0)
+      const finalPosition = offset.value < -Globals.ITEM_MAX_OFFSET / 2 ? -Globals.ITEM_MAX_OFFSET : 0;
+      offset.value = withSpring(finalPosition);
+
+      // Ensure both buttons are fully visible if fully open
+      if (finalPosition === -Globals.ITEM_MAX_OFFSET) {
+        deleteButtonVisibility.value = withSpring(1);
+        editButtonVisibility.value = withSpring(1);
       }
-    });
+    })
+    .activeOffsetX([-10, 10])
+    .simultaneousWithExternalGesture();
+
   const animatedStyles = useAnimatedStyle(() => ({
     transform: [{ translateX: offset.value }],
   }));
 
+  const editButtonStyle = useAnimatedStyle(() => {
+    const opacity = interpolate(editButtonVisibility.value, [0, 1], [0, 1]);
+    const scale = interpolate(editButtonVisibility.value, [0, 1], [0.8, 1]);
+    return {
+      opacity,
+      transform: [{ scale }],
+    };
+  });
+
+  const deleteButtonStyle = useAnimatedStyle(() => {
+    const opacity = interpolate(deleteButtonVisibility.value, [0, 1], [0, 1]);
+    const scale = interpolate(deleteButtonVisibility.value, [0, 1], [0.8, 1]);
+    return {
+      opacity,
+      transform: [{ scale }],
+    };
+  });
+
   const collectionsStyles = StyleSheet.create({
+    container: {
+      position: 'relative',
+      marginHorizontal: 30,
+    },
+    optionButtons: {
+      flexDirection: 'row',
+      position: 'absolute',
+      right: 10,
+      top: 0,
+      bottom: 0,
+      alignItems: 'center',
+      justifyContent: 'flex-end',
+      overflow: 'hidden',
+      gap: 15,
+    },
+    deleteButton: {
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: 50,
+      height: 50,
+      padding: 5,
+      backgroundColor: theme.colors.red,
+      borderRadius: 25,
+    },
+    editButton: {
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: 50,
+      height: 50,
+      padding: 5,
+      backgroundColor: theme.colors.blue,
+      borderRadius: 25,
+    },
     collectionBox: {
       flexDirection: 'row',
-      alignSelf: 'stretch',
+      alignItems: 'center',
+      justifyContent: 'space-between',
       backgroundColor: theme.colors.secondary,
       padding: 25,
       borderRadius: 20,
-      marginHorizontal: 30,
-      alignItems: 'center',
-      justifyContent: 'space-between',
     },
-
     collectionTitle: {
       color: theme.colors.text,
       ...theme.fonts.medium,
       fontSize: theme.fontSizes.subtitle,
     },
-
     chevronIcon: {
       color: theme.colors.accent,
     },
   });
 
+  const handlePress = () => {
+    // Implement navigation logic here
+    log.info('FIRED');
+  };
+
+  const handleDelete = () => {
+    onDelete(item.id);
+  };
+
+  const handleEdit = () => {
+    console.log('Edit action triggered for:', item.title);
+  };
+
   return (
-    <GestureDetector gesture={pan}>
-      <Animated.View style={[animatedStyles, collectionsStyles.collectionBox]}>
-        <Text style={collectionsStyles.collectionTitle}>{item.title}</Text>
-        <Icon color={theme.colors.accent} name={'chevron-forward-outline'} size={25} />
-      </Animated.View>
-    </GestureDetector>
+    <View style={collectionsStyles.container}>
+      <View style={collectionsStyles.optionButtons}>
+        {/* Independent Edit Button Animation */}
+        <Animated.View style={editButtonStyle}>
+          <TouchableOpacity style={collectionsStyles.editButton} onPress={handleEdit}>
+            <Icon name="create-outline" size={24} color="white" />
+          </TouchableOpacity>
+        </Animated.View>
+
+        {/* Independent Delete Button Animation */}
+        <Animated.View style={deleteButtonStyle}>
+          <TouchableOpacity style={collectionsStyles.deleteButton} onPress={handleDelete}>
+            <Icon name="trash-outline" size={24} color="white" />
+          </TouchableOpacity>
+        </Animated.View>
+      </View>
+
+      <GestureDetector gesture={pan}>
+        <Animated.View style={[animatedStyles, collectionsStyles.collectionBox]}>
+          <TouchableOpacity style={{ flex: 1 }} onPress={handlePress} activeOpacity={0.7}>
+            <Text style={collectionsStyles.collectionTitle}>{item.title}</Text>
+          </TouchableOpacity>
+          <Icon color={theme.colors.accent} name={'chevron-forward-outline'} size={25} />
+        </Animated.View>
+      </GestureDetector>
+    </View>
   );
 }
