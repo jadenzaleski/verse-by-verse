@@ -57,6 +57,25 @@ class Collections {
     }
   }
 
+  async add(name) {
+    log.debug('[DB] Adding ' + name + ' to collections');
+
+    try {
+      const result = await this.db.execute(
+        `
+            INSERT INTO Collections (collection_name)
+            VALUES (?)
+        `,
+        [name],
+      );
+
+      return { ok: true, response: result };
+    } catch (error) {
+      log.error(`[DB] Error adding ${name} to collections: ${error}`);
+      return { ok: false, error: error };
+    }
+  }
+
   async delete(collection_id) {
     log.debug('[DB] Deleting collection ' + collection_id);
 

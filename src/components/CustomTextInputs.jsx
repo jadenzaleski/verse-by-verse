@@ -8,8 +8,8 @@ const CustomTextInput = forwardRef(
       label,
       value,
       onChangeText,
-      borderColor = '#000', // Default border color
-      textBackgroundColor = '#000',
+      borderColor,
+      textBackgroundColor,
       placeholder,
       style = {},
       secureTextEntry = false, // Option to hide text (for password fields)
@@ -29,7 +29,7 @@ const CustomTextInput = forwardRef(
         position: 'absolute',
         top: -8,
         left: 10,
-        backgroundColor: textBackgroundColor, // Ensure label doesn't overlap the border
+        backgroundColor: textBackgroundColor || theme.colors.primary,
         paddingHorizontal: 5,
         zIndex: 1,
         fontSize: theme.fontSizes.small,
@@ -39,7 +39,7 @@ const CustomTextInput = forwardRef(
       input: {
         borderWidth: 1,
         borderRadius: 15,
-        borderColor: borderColor,
+        borderColor: borderColor || theme.colors.secondary,
         paddingHorizontal: 15,
         paddingVertical: 15,
         fontSize: theme.fontSizes.medium,

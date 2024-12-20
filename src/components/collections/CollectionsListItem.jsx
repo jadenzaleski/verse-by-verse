@@ -129,14 +129,12 @@ export default function CollectionsListItem({ item, onDelete }) {
   return (
     <View style={collectionsStyles.container}>
       <View style={collectionsStyles.optionButtons}>
-        {/* Independent Edit Button Animation */}
         <Animated.View style={editButtonStyle}>
           <TouchableOpacity style={collectionsStyles.editButton} onPress={handleEdit}>
-            <Icon name="create-outline" size={24} color="white" />
+            <Icon name="create-outline" style={{ right: -1 }} size={24} color="white" />
           </TouchableOpacity>
         </Animated.View>
 
-        {/* Independent Delete Button Animation */}
         <Animated.View style={deleteButtonStyle}>
           <TouchableOpacity style={collectionsStyles.deleteButton} onPress={handleDelete}>
             <Icon name="trash-outline" size={24} color="white" />
