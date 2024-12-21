@@ -3,7 +3,7 @@ import { View, StyleSheet, ActivityIndicator, TouchableOpacity, Text } from 'rea
 import ThemeContext from '../../context/ThemeContext';
 import ColorPicker from 'react-native-wheel-color-picker';
 
-const ColorPickerScreen = ({ navigation }) => {
+const ColorPickerScreen = () => {
   const { theme, updateAccentColor } = useContext(ThemeContext);
 
   // Initialize state using useState hook

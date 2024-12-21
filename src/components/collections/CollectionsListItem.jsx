@@ -8,7 +8,7 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import * as Globals from '../../utils/Globals';
 import log from '../../utils/Logger';
 
-export default function CollectionsListItem({ item, onDelete }) {
+export default function CollectionsListItem({ navigation, item, onDelete }) {
   const { theme } = useContext(ThemeContext);
   const offset = useSharedValue(0);
   const editButtonVisibility = useSharedValue(0);
@@ -62,8 +62,7 @@ export default function CollectionsListItem({ item, onDelete }) {
   });
 
   const handlePress = () => {
-    // Implement navigation logic here
-    log.info('FIRED');
+    navigation.navigate('CollectionDetail', { item });
   };
 
   const handleDelete = async () => {
@@ -113,8 +112,11 @@ export default function CollectionsListItem({ item, onDelete }) {
       alignItems: 'center',
       justifyContent: 'space-between',
       backgroundColor: theme.colors.secondary,
-      padding: 25,
       borderRadius: 20,
+    },
+    TO: {
+      padding: 25,
+      flex: 1,
     },
     collectionTitle: {
       color: theme.colors.text,
@@ -144,7 +146,7 @@ export default function CollectionsListItem({ item, onDelete }) {
 
       <GestureDetector gesture={pan}>
         <Animated.View style={[animatedStyles, collectionsStyles.collectionBox]}>
-          <TouchableOpacity style={{ flex: 1 }} onPress={handlePress} activeOpacity={0.7}>
+          <TouchableOpacity style={collectionsStyles.TO} onPress={handlePress} activeOpacity={0.7}>
             <Text style={collectionsStyles.collectionTitle}>{item.collection_name}</Text>
           </TouchableOpacity>
           <Icon color={theme.colors.accent} name={'chevron-forward-outline'} size={25} />

@@ -16,6 +16,7 @@ import { AuthProvider } from '../context/AuthContext';
 import { LoginModal } from './LoginModal';
 import log from '../utils/Logger';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import CollectionsNavigator from './collections/CollectionsNavigator';
 
 const Tab = createBottomTabNavigator();
 // Define icon mapping for each screen
@@ -24,7 +25,7 @@ const ICONS = {
     focused: 'home',
     unfocused: 'home-outline',
   },
-  Verses: {
+  Collections: {
     focused: 'book',
     unfocused: 'book-outline',
   },
@@ -142,7 +143,7 @@ const App = () => {
                 }}
                 tabBar={renderTabBar}>
                 <Tab.Screen name="Home" component={HomeScreen} />
-                <Tab.Screen name="Verses" component={CollectionsScreen} />
+                <Tab.Screen name="Collections" component={CollectionsNavigator} />
                 <Tab.Screen name="Profile" component={ProfileScreen} />
                 <Tab.Screen name="Settings" component={SettingsNavigator} />
               </Tab.Navigator>

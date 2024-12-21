@@ -10,7 +10,7 @@ import log from '../../utils/Logger';
 import CustomSheetModal from '../CustomSheetModal';
 import CustomTextInput from '../CustomTextInputs';
 
-const CollectionsScreen = () => {
+const CollectionsScreen = ({ navigation }) => {
   const { theme } = useContext(ThemeContext);
   const [collections, setCollections] = useState([]);
   const [isAddModalVisible, setAddModalVisible] = useState(false);
@@ -127,7 +127,9 @@ const CollectionsScreen = () => {
     },
   });
 
-  const renderItem = ({ item }) => <CollectionsListItem item={item} onDelete={handleDeleteItem} />;
+  const renderItem = ({ item }) => (
+    <CollectionsListItem navigation={navigation} item={item} onDelete={handleDeleteItem} />
+  );
 
   return (
     <View style={collectionsStyles.container}>
