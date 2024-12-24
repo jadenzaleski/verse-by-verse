@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, FlatList, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, Alert } from 'react-native';
 import * as React from 'react';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import ThemeContext from '../../context/ThemeContext';
@@ -48,18 +48,25 @@ const CollectionsScreen = ({ navigation }) => {
   };
 
   const handleDeleteItem = async collection_id => {
-    try {
-      // Perform the delete operation
-      const result = await Collections.delete(collection_id);
-      if (result.ok) {
-        // Update state after successful delete
-        setCollections(prevCollections => prevCollections.filter(item => item.collection_id !== collection_id));
-      } else {
-        log.error('[Collections] Failed to delete collection');
-      }
-    } catch (error) {
-      log.error('[Collections] Error deleting collection:', error);
-    }
+    Alert.alert('Are you sure?', 'Deleting this collection will not delete any verses it contains.', [
+      {
+        text: 'Delete',
+        onPress: async () => {
+          try {
+            const result = await Collections.delete(collection_id);
+            if (result.ok) {
+              setCollections(prevCollections => prevCollections.filter(item => item.collection_id !== collection_id));
+            } else {
+              log.error('[Collections] Failed to delete collection');
+            }
+          } catch (error) {
+            log.error('[Collections] Error deleting collection:', error);
+          }
+        },
+        style: 'destructive',
+      },
+      { text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
+    ]);
   };
 
   const handleAddCollection = async collectionName => {

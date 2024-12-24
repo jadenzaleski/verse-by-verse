@@ -113,10 +113,7 @@ export default function CollectionsListItem({ navigation, item, onDelete }) {
       justifyContent: 'space-between',
       backgroundColor: theme.colors.secondary,
       borderRadius: 20,
-    },
-    TO: {
       padding: 25,
-      flex: 1,
     },
     collectionTitle: {
       color: theme.colors.text,
@@ -145,11 +142,11 @@ export default function CollectionsListItem({ navigation, item, onDelete }) {
       </View>
 
       <GestureDetector gesture={pan}>
-        <Animated.View style={[animatedStyles, collectionsStyles.collectionBox]}>
-          <TouchableOpacity style={collectionsStyles.TO} onPress={handlePress} activeOpacity={0.7}>
+        <Animated.View style={[animatedStyles]}>
+          <TouchableOpacity style={collectionsStyles.collectionBox} onPress={handlePress} activeOpacity={0.7}>
             <Text style={collectionsStyles.collectionTitle}>{item.collection_name}</Text>
+            <Icon color={theme.colors.accent} name={'chevron-forward-outline'} size={25} />
           </TouchableOpacity>
-          <Icon color={theme.colors.accent} name={'chevron-forward-outline'} size={25} />
         </Animated.View>
       </GestureDetector>
     </View>
