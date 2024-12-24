@@ -9,6 +9,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import log from '../../utils/Logger';
 import CustomSheetModal from '../CustomSheetModal';
 import CustomTextInput from '../CustomTextInputs';
+import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 const CollectionsScreen = ({ navigation }) => {
   const { theme } = useContext(ThemeContext);
@@ -40,7 +41,9 @@ const CollectionsScreen = ({ navigation }) => {
   const updateCollectionSet = async () => {
     const result = await Collections.getAll();
     if (result.ok) {
-      const rowsArray = Object.values(result.response.rows).filter(item => typeof item === 'object');
+      // This is where we always make sure to show the ALL verses option. It's a fake db record.
+      const rowsArray = [{ collection_id: -1, collection_name: 'All Verses' }];
+      rowsArray.push(...Object.values(result.response.rows).filter(item => typeof item === 'object'));
       setCollections(rowsArray);
     } else {
       log.error('[Collections] Failed to get all collections:', result);
@@ -132,11 +135,59 @@ const CollectionsScreen = ({ navigation }) => {
       gap: 15,
       overflow: 'visible',
     },
+    allBox: {
+      flex: 1,
+      marginHorizontal: 30,
+    },
+    gradientWrapper: {
+      flex: 1,
+      overflow: 'hidden',
+      zIndex: -1,
+      position: 'absolute',
+      borderRadius: 20,
+    },
+    allTitle: {
+      color: theme.colors.text,
+      ...theme.fonts.medium,
+      fontSize: theme.fontSizes.subtitle,
+      zIndex: 1,
+    },
+    allDetails: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      zIndex: 1,
+      margin: 25,
+
+    },
   });
 
-  const renderItem = ({ item }) => (
-    <CollectionsListItem navigation={navigation} item={item} onDelete={handleDeleteItem} />
-  );
+  const renderItem = ({ item }) => {
+    if (item.collection_id === -1) {
+      return (
+        <TouchableOpacity
+          activeOpacity={0.6}
+          onPress={() => navigation.navigate('CollectionDetail', { item })}
+          style={collectionsStyles.allBox}>
+          <Svg height="100%" width="100%" style={collectionsStyles.gradientWrapper}>
+            <Defs>
+              <LinearGradient id="grad" x1="0%" y1="0%" x2="90%" y2="0%">
+                <Stop offset="0" stopColor={theme.colors.accent} />
+                <Stop offset="1" stopColor={theme.colors.secondary} />
+              </LinearGradient>
+            </Defs>
+            <Rect width="100%" height="100%" fill="url(#grad)" />
+          </Svg>
+          <View style={collectionsStyles.allDetails}>
+            <Text style={collectionsStyles.allTitle}>{item.collection_name}</Text>
+            <Icon color={theme.colors.accent} name={'chevron-forward-outline'} size={25} />
+          </View>
+        </TouchableOpacity>
+      );
+    }
+
+    return <CollectionsListItem navigation={navigation} item={item} onDelete={handleDeleteItem} />;
+  };
 
   return (
     <View style={collectionsStyles.container}>

@@ -143,7 +143,7 @@ export default function CollectionsListItem({ navigation, item, onDelete }) {
 
       <GestureDetector gesture={pan}>
         <Animated.View style={[animatedStyles]}>
-          <TouchableOpacity style={collectionsStyles.collectionBox} onPress={handlePress} activeOpacity={0.7}>
+          <TouchableOpacity style={collectionsStyles.collectionBox} onPress={handlePress} activeOpacity={0.6}>
             <Text style={collectionsStyles.collectionTitle}>{item.collection_name}</Text>
             <Icon color={theme.colors.accent} name={'chevron-forward-outline'} size={25} />
           </TouchableOpacity>
