@@ -32,7 +32,7 @@ class Verses {
           verse INTEGER NOT NULL,
           text TEXT NOT NULL,
           progress REAL DEFAULT 0.0,
-          last_practiced INTEGER,
+          last_practiced TEXT,
           created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
           updated_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
       );

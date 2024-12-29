@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import ThemeContext from '../../context/ThemeContext';
 import Icon from '@react-native-vector-icons/ionicons';
@@ -10,6 +10,7 @@ const Stack = createStackNavigator();
 
 const CollectionsNavigator = () => {
   const { theme } = useContext(ThemeContext);
+  const DEFAULT_COLLECTION_TITLE = 'Collection Detail';
 
   const navigatorStyles = StyleSheet.create({
     headerTitle: {
@@ -31,17 +32,44 @@ const CollectionsNavigator = () => {
     backButtonIcon: {
       marginLeft: 0,
     },
+    headerButtonsContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 7,
+      marginRight: 10,
+    },
   });
-
-  const DEFAULT_COLLECTION_TITLE = 'Collection Detail';
 
   const renderHeaderTitle = (route, styles) => {
     const collectionName = route.params.item.collection_name ?? DEFAULT_COLLECTION_TITLE;
-    return <Text style={styles.headerTitle}>{collectionName}</Text>;
+    // Truncate the title if it's too long
+    const truncateTitle = (title, maxLength) => (title.length > maxLength ? `${title.slice(0, maxLength)}...` : title);
+
+    const truncatedName = truncateTitle(collectionName, 20); // Limit to 20 characters
+
+    return (
+      <Text style={styles.headerTitle}>
+        {truncatedName}
+      </Text>
+    );
   };
 
   const renderBackImage = () => (
     <Icon style={navigatorStyles.backButtonIcon} color={theme.colors.accent} name={'chevron-back-outline'} size={25} />
+  );
+
+  const renderButtons = () => (
+    <View style={navigatorStyles.headerButtonsContainer}>
+      <TouchableOpacity onPress={() => console.log('Add button pressed')}>
+        <Icon name="add-outline" size={32} color={theme.colors.accent} />
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => console.log('Filter button pressed')}>
+        <Icon name="filter-circle-outline" size={32} color={theme.colors.accent} />
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => console.log('Info button pressed')} style={navigatorStyles.infoButton}>
+        <Icon name="information-outline" size={32} color={theme.colors.accent} />
+      </TouchableOpacity>
+    </View>
   );
 
   return (
@@ -55,6 +83,7 @@ const CollectionsNavigator = () => {
           headerBackTitleStyle: navigatorStyles.backButton,
           headerTintColor: theme.colors.accent,
           headerBackImage: renderBackImage,
+          headerRight: renderButtons,
         })}
         name="CollectionDetail"
         component={CollectionDetail}

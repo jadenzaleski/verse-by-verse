@@ -8,7 +8,7 @@ import log from '../../utils/Logger';
 const CollectionDetail = ({ route }) => {
   const { theme } = useContext(ThemeContext);
   const [refreshing, setRefreshing] = useState(false);
-  const { item } = route.params || {}; // Extract the passed `item` data from `route.params`
+  const { item } = route.params || {};
 
   const handleRefresh = async () => {
     setRefreshing(true);

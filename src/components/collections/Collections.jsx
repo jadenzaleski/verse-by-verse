@@ -158,7 +158,6 @@ const CollectionsScreen = ({ navigation }) => {
       alignItems: 'center',
       zIndex: 1,
       margin: 25,
-
     },
   });
 
