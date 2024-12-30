@@ -92,6 +92,65 @@ class Collections {
       return { ok: false, error: error };
     }
   }
+
+  async getContents(collection_id) {
+    log.debug('[DB] Getting contents of collection: ' + collection_id);
+
+    try {
+      const result = await this.db.execute(
+        `
+            WITH Combined AS (
+                SELECT
+                    'verse' AS type,
+                    v.verse_id AS id_value,
+                    v.book,
+                    v.chapter,
+                    v.verse,
+                    v.updated_at,
+                    v.created_at,
+                    NULL AS chunk_name
+                FROM Verses v
+                         LEFT JOIN CollectionItems ci ON v.verse_id = ci.verse_id
+                WHERE (ci.collection_id = ? OR ? = -1)
+                  AND v.verse_id NOT IN (SELECT cv.verse_id FROM ChunkVerses cv)
+
+                UNION ALL
+
+                SELECT
+                    'chunk' AS type,
+                    c.chunk_id AS id_value,
+                    NULL AS book,
+                    NULL AS chapter,
+                    NULL AS verse,
+                    c.updated_at,
+                    c.created_at,
+                    c.chunk_name
+                FROM Chunks c
+                         LEFT JOIN CollectionItems ci ON c.chunk_id = ci.chunk_id
+                WHERE (ci.collection_id = ? OR ? = -1)
+            )
+            SELECT
+                row_number() OVER (ORDER BY id_value) AS id,
+                type,
+                id_value,
+                book,
+                chapter,
+                verse,
+                updated_at,
+                created_at,
+                chunk_name
+            FROM Combined ORDER BY created_at;
+
+        `,
+        [collection_id, collection_id, collection_id, collection_id],
+      );
+
+      return { ok: true, response: result };
+    } catch (error) {
+      log.error(`[DB] Error getting contents for collection: ${error}`);
+      return { ok: false, error: error };
+    }
+  }
 }
 
 const collections = new Collections();
