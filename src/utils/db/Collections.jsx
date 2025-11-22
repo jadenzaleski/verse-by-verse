@@ -82,8 +82,10 @@ class Collections {
     try {
       const result = await this.db.execute(
         `
-            DELETE FROM Collections WHERE collection_id = ${collection_id};
+            DELETE FROM Collections WHERE collection_id = ?;
+            DELETE FROM CollectionItems WHERE collection_id = ?;
         `,
+        [collection_id, collection_id],
       );
 
       return { ok: true, response: result };

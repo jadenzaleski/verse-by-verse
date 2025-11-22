@@ -63,14 +63,15 @@ const CollectionDetail = ({ route }) => {
     },
   });
 
-  // Render each item in the FlatList
   const renderItem = ({ item }) => (
     <TouchableOpacity
       activeOpacity={0.6}
       onPress={() => log.debug('[CollectionDetail] Clicked on item with id:', item.id)}
       style={collectionsStyles.allBox}>
       <View style={collectionsStyles.allDetails}>
-        <Text style={collectionsStyles.allTitle}>{item.id} - {item.type}</Text>
+        <Text style={collectionsStyles.allTitle}>
+          {item.id} - {item.type}
+        </Text>
         <Icon color={theme.colors.accent} name={'chevron-forward-outline'} size={25} />
       </View>
     </TouchableOpacity>

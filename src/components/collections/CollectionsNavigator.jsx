@@ -1,16 +1,19 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import ThemeContext from '../../context/ThemeContext';
 import Icon from '@react-native-vector-icons/ionicons';
 import CollectionsScreen from './Collections';
 import CollectionDetail from './CollectionDetail';
+import log from '../../utils/Logger';
+import AddModal from './AddModal';
 
 const Stack = createStackNavigator();
 
 const CollectionsNavigator = () => {
   const { theme } = useContext(ThemeContext);
   const DEFAULT_COLLECTION_TITLE = 'Collection Detail';
+  const [add, setAdd] = useState(false);
 
   const navigatorStyles = StyleSheet.create({
     headerTitle: {
@@ -47,11 +50,7 @@ const CollectionsNavigator = () => {
 
     const truncatedName = truncateTitle(collectionName, 20); // Limit to 20 characters
 
-    return (
-      <Text style={styles.headerTitle}>
-        {truncatedName}
-      </Text>
-    );
+    return <Text style={styles.headerTitle}>{truncatedName}</Text>;
   };
 
   const renderBackImage = () => (
@@ -60,15 +59,17 @@ const CollectionsNavigator = () => {
 
   const renderButtons = () => (
     <View style={navigatorStyles.headerButtonsContainer}>
-      <TouchableOpacity onPress={() => console.log('Add button pressed')}>
+      <TouchableOpacity onPress={() => setAdd(true)}>
         <Icon name="add-outline" size={32} color={theme.colors.accent} />
       </TouchableOpacity>
       <TouchableOpacity onPress={() => console.log('Filter button pressed')}>
         <Icon name="filter-circle-outline" size={32} color={theme.colors.accent} />
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => console.log('Info button pressed')} style={navigatorStyles.infoButton}>
+      <TouchableOpacity onPress={() => console.log('Info button pressed')}>
         <Icon name="information-outline" size={32} color={theme.colors.accent} />
       </TouchableOpacity>
+
+      <AddModal visible={add} onClose={() => setAdd(false)} />
     </View>
   );
 
