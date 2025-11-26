@@ -8,14 +8,35 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var selectedTab = 0
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        TabView(selection: $selectedTab) {
+            NavigationStack {
+                HomeView()
+            }
+            .tabItem {
+                Label("Home", image: "lucide.house")
+            }
+            .tag(0)
+
+            NavigationStack {
+                BibleView()
+            }
+            .tabItem {
+                Label("Bible", image: "lucide.book.open.text")
+            }
+            .tag(1)
+
+            NavigationStack {
+                ProfileView()
+            }
+            .tabItem {
+                Label("Profile", image: "lucide.user")
+            }
+            .tag(2)
         }
-        .padding()
+        .tabBarMinimizeBehavior(.onScrollDown)
     }
 }
 

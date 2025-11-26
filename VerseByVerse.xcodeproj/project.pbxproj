@@ -6,32 +6,26 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXContainerItemProxy section */
-		D75E3E9B2ED2653B00B0DDC8 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = D75E3E852ED2653A00B0DDC8 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = D75E3E8C2ED2653A00B0DDC8;
-			remoteInfo = VerseByVerse;
-		};
-		D75E3EA52ED2653B00B0DDC8 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = D75E3E852ED2653A00B0DDC8 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = D75E3E8C2ED2653A00B0DDC8;
-			remoteInfo = VerseByVerse;
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXFileReference section */
 		D75E3E8D2ED2653A00B0DDC8 /* VerseByVerse.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VerseByVerse.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		D75E3E9A2ED2653B00B0DDC8 /* VerseByVerseTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VerseByVerseTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		D75E3EA42ED2653B00B0DDC8 /* VerseByVerseUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VerseByVerseUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		D75E3FB72ED6540000B0DDC8 /* Exceptions for "VerseByVerse" folder in "VerseByVerse" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = D75E3E8C2ED2653A00B0DDC8 /* VerseByVerse */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		D75E3E8F2ED2653A00B0DDC8 /* VerseByVerse */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				D75E3FB72ED6540000B0DDC8 /* Exceptions for "VerseByVerse" folder in "VerseByVerse" target */,
+			);
 			path = VerseByVerse;
 			sourceTree = "<group>";
 		};
@@ -39,20 +33,6 @@
 
 /* Begin PBXFrameworksBuildPhase section */
 		D75E3E8A2ED2653A00B0DDC8 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		D75E3E972ED2653B00B0DDC8 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		D75E3EA12ED2653B00B0DDC8 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -74,8 +54,6 @@
 			isa = PBXGroup;
 			children = (
 				D75E3E8D2ED2653A00B0DDC8 /* VerseByVerse.app */,
-				D75E3E9A2ED2653B00B0DDC8 /* VerseByVerseTests.xctest */,
-				D75E3EA42ED2653B00B0DDC8 /* VerseByVerseUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -105,46 +83,6 @@
 			productReference = D75E3E8D2ED2653A00B0DDC8 /* VerseByVerse.app */;
 			productType = "com.apple.product-type.application";
 		};
-		D75E3E992ED2653B00B0DDC8 /* VerseByVerseTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = D75E3EB12ED2653B00B0DDC8 /* Build configuration list for PBXNativeTarget "VerseByVerseTests" */;
-			buildPhases = (
-				D75E3E962ED2653B00B0DDC8 /* Sources */,
-				D75E3E972ED2653B00B0DDC8 /* Frameworks */,
-				D75E3E982ED2653B00B0DDC8 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				D75E3E9C2ED2653B00B0DDC8 /* PBXTargetDependency */,
-			);
-			name = VerseByVerseTests;
-			packageProductDependencies = (
-			);
-			productName = VerseByVerseTests;
-			productReference = D75E3E9A2ED2653B00B0DDC8 /* VerseByVerseTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		D75E3EA32ED2653B00B0DDC8 /* VerseByVerseUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = D75E3EB42ED2653B00B0DDC8 /* Build configuration list for PBXNativeTarget "VerseByVerseUITests" */;
-			buildPhases = (
-				D75E3EA02ED2653B00B0DDC8 /* Sources */,
-				D75E3EA12ED2653B00B0DDC8 /* Frameworks */,
-				D75E3EA22ED2653B00B0DDC8 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				D75E3EA62ED2653B00B0DDC8 /* PBXTargetDependency */,
-			);
-			name = VerseByVerseUITests;
-			packageProductDependencies = (
-			);
-			productName = VerseByVerseUITests;
-			productReference = D75E3EA42ED2653B00B0DDC8 /* VerseByVerseUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -157,14 +95,6 @@
 				TargetAttributes = {
 					D75E3E8C2ED2653A00B0DDC8 = {
 						CreatedOnToolsVersion = 26.1.1;
-					};
-					D75E3E992ED2653B00B0DDC8 = {
-						CreatedOnToolsVersion = 26.1.1;
-						TestTargetID = D75E3E8C2ED2653A00B0DDC8;
-					};
-					D75E3EA32ED2653B00B0DDC8 = {
-						CreatedOnToolsVersion = 26.1.1;
-						TestTargetID = D75E3E8C2ED2653A00B0DDC8;
 					};
 				};
 			};
@@ -183,28 +113,12 @@
 			projectRoot = "";
 			targets = (
 				D75E3E8C2ED2653A00B0DDC8 /* VerseByVerse */,
-				D75E3E992ED2653B00B0DDC8 /* VerseByVerseTests */,
-				D75E3EA32ED2653B00B0DDC8 /* VerseByVerseUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		D75E3E8B2ED2653A00B0DDC8 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		D75E3E982ED2653B00B0DDC8 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		D75E3EA22ED2653B00B0DDC8 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -221,34 +135,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		D75E3E962ED2653B00B0DDC8 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		D75E3EA02ED2653B00B0DDC8 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		D75E3E9C2ED2653B00B0DDC8 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = D75E3E8C2ED2653A00B0DDC8 /* VerseByVerse */;
-			targetProxy = D75E3E9B2ED2653B00B0DDC8 /* PBXContainerItemProxy */;
-		};
-		D75E3EA62ED2653B00B0DDC8 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = D75E3E8C2ED2653A00B0DDC8 /* VerseByVerse */;
-			targetProxy = D75E3EA52ED2653B00B0DDC8 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		D75E3EAC2ED2653B00B0DDC8 /* Debug */ = {
@@ -375,18 +262,23 @@
 		D75E3EAF2ED2653B00B0DDC8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = logo;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = A6M3VA78J8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = VerseByVerse/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Verse;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -407,18 +299,23 @@
 		D75E3EB02ED2653B00B0DDC8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = logo;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = A6M3VA78J8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = VerseByVerse/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Verse;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -433,90 +330,6 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
-		D75E3EB22ED2653B00B0DDC8 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = A6M3VA78J8;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.jadenzaleski.VerseByVerseTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VerseByVerse.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/VerseByVerse";
-			};
-			name = Debug;
-		};
-		D75E3EB32ED2653B00B0DDC8 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = A6M3VA78J8;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.jadenzaleski.VerseByVerseTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VerseByVerse.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/VerseByVerse";
-			};
-			name = Release;
-		};
-		D75E3EB52ED2653B00B0DDC8 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = A6M3VA78J8;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.jadenzaleski.VerseByVerseUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = VerseByVerse;
-			};
-			name = Debug;
-		};
-		D75E3EB62ED2653B00B0DDC8 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = A6M3VA78J8;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.jadenzaleski.VerseByVerseUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = VerseByVerse;
 			};
 			name = Release;
 		};
@@ -537,24 +350,6 @@
 			buildConfigurations = (
 				D75E3EAF2ED2653B00B0DDC8 /* Debug */,
 				D75E3EB02ED2653B00B0DDC8 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		D75E3EB12ED2653B00B0DDC8 /* Build configuration list for PBXNativeTarget "VerseByVerseTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				D75E3EB22ED2653B00B0DDC8 /* Debug */,
-				D75E3EB32ED2653B00B0DDC8 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		D75E3EB42ED2653B00B0DDC8 /* Build configuration list for PBXNativeTarget "VerseByVerseUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				D75E3EB52ED2653B00B0DDC8 /* Debug */,
-				D75E3EB62ED2653B00B0DDC8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
