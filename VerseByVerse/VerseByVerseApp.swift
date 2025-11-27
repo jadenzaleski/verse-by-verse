@@ -27,6 +27,7 @@ struct VerseByVerseApp: App {
                 }
             }
             .animation(.easeOut(duration: 0.35), value: isReady)
+            .environment(\.font, .app())
         }
     }
 

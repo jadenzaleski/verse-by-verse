@@ -5,9 +5,13 @@
 	<key>UIAppFonts</key>
 	<array>
 		<string>Montserrat-VariableFont_wght.ttf</string>
+		<string>Montserrat-Italic-VariableFont_wght.ttf</string>
 		<string>FunnelSans-VariableFont_wght.ttf</string>
+		<string>FunnelSans-Italic-VariableFont_wght.ttf</string>
 		<string>Roboto-VariableFont_wdth,wght.ttf</string>
+		<string>Roboto-Italic-VariableFont_wdth,wght.ttf</string>
 		<string>Rubik-VariableFont_wght.ttf</string>
+		<string>Rubik-Italic-VariableFont_wght.ttf</string>
 	</array>
 </dict>
 </plist>

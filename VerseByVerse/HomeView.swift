@@ -14,15 +14,9 @@ struct HomeView: View {
 
         VStack(alignment: .leading) {
             Text("HomeView - System")
-                .font(.system(size: 24))
-            Text("HomeView - Funnel Sans")
-                .font(.custom("Funnel Sans", size: 24))
+                .font(.body)
             Text("HomeView - Montserrat")
-                .font(.custom("Montserrat", size: 24))
-            Text("HomeView - Roboto")
-                .font(.custom("Roboto", size: 24))
-            Text("HomeView - Rubik")
-                .font(.custom("Rubik", size: 24))
+
         }
         .padding()
     }
@@ -30,4 +24,5 @@ struct HomeView: View {
 
 #Preview {
     HomeView()
+        .environment(\.font, .app())
 }
