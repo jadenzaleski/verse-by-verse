@@ -40,16 +40,15 @@ struct VerseByVerseApp: App {
                 }
             }
         }
-        try? await Task.sleep(nanoseconds: 600_000_000)
+        try? await Task.sleep(nanoseconds: 200_000_000)
 
         await MainActor.run { statusText = "Fetching data…" }
-        try? await Task.sleep(nanoseconds: 900_000_000)
+        try? await Task.sleep(nanoseconds: 200_000_000)
 
         await MainActor.run { statusText = "Configuring…" }
-        try? await Task.sleep(nanoseconds: 900_000_000)
+        try? await Task.sleep(nanoseconds: 200_000_000)
 
         await MainActor.run { statusText = "Almost there…" }
-        try? await Task.sleep(nanoseconds: 900_000_000)
-        await MainActor.run { statusText = "I am Done." }
+        try? await Task.sleep(nanoseconds: 200_000_000)
     }
 }
