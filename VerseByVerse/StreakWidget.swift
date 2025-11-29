@@ -8,6 +8,10 @@
 import SwiftUI
 
 struct StreakWidget: View {
+    @State private var segmentProgress: [CGFloat] = []
+    @State private var showLabel = false
+    @State private var showFlame = false
+    @State private var showNumber = false
     let completed: [Bool] = [true, true, true, false, true, true, true]
     let dayLetters: [String] = ["S", "M", "T", "W", "T", "F", "S"]
     let streakCount: Int = 1675
@@ -15,9 +19,10 @@ struct StreakWidget: View {
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
             GeometryReader { geo in
-                let circleSize: CGFloat = 20
+                let pillHeight: CGFloat = 20
+                let circleDiameter: CGFloat = 8
                 let totalWidth = geo.size.width
-                let itemWidth = totalWidth / CGFloat(completed.count) // each letter/circle gets same width
+                let itemWidth = totalWidth / CGFloat(completed.count)
 
                 let segments = computeSegments(completed: completed)
 
@@ -37,7 +42,7 @@ struct StreakWidget: View {
                         // Draw streak pills
                         ForEach(segments.indices, id: \.self) { i in
                             let seg = segments[i]
-                            let lineWidth = CGFloat(seg.end - seg.start) * itemWidth + circleSize
+                            let lineWidth = CGFloat(seg.end - seg.start) * itemWidth + pillHeight
                             let startCenter = itemWidth * CGFloat(seg.start + 1) + itemWidth / 2
                             let xOffset = startCenter - lineWidth / 2
 
@@ -49,21 +54,53 @@ struct StreakWidget: View {
                                         endPoint: .trailing
                                     )
                                 )
-                                .frame(width: lineWidth, height: circleSize)
+                                .frame(width: lineWidth * (i < segmentProgress.count ? segmentProgress[i] : 0), height: pillHeight, alignment: .leading)
+                                .opacity({
+                                    if i == 0 { return 1 }
+                                    guard i - 1 < segmentProgress.count else { return 0 }
+                                    return segmentProgress[i - 1] >= 1 ? 1 : 0
+                                }())
                                 .offset(x: xOffset)
                         }
+                        .zIndex(2)
 
-                        // Circles on top
+                        // Circles
                         HStack(spacing: 0) {
                             ForEach(0..<completed.count, id: \.self) { i in
                                 Circle()
-                                    .strokeBorder(!completed[i] ? .secondary : Color.clear, lineWidth: 2)
-//                                    .frame(width: circleSize, height: circleSize)
-//                                    .frame(width: itemWidth, alignment: .center)
+                                    .fill(.secondary)
+                                    .frame(width: circleDiameter, height: circleDiameter)
+                                    .frame(width: itemWidth, alignment: .center)
                             }
                         }
                     }
-                    .frame(height: circleSize)
+                    .onAppear {
+                        if segmentProgress.count != segments.count {
+                            segmentProgress = Array(repeating: 0, count: segments.count)
+                        }
+
+                        for i in segments.indices {
+                            let delay = Double(i) * 0.4
+                            withAnimation(.easeOut(duration: 0.4).delay(delay)) {
+                                if i < segmentProgress.count { segmentProgress[i] = 1 }
+                            }
+                        }
+
+                        let totalDelay = Double(segments.count) * 0.4
+
+                        DispatchQueue.main.asyncAfter(deadline: .now() + totalDelay) {
+                            // Flame bounce-in
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.55)) {
+                                showFlame = true
+                            }
+
+                            // Number comes in shortly after flame
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.65).delay(0.12)) {
+                                showNumber = true
+                            }
+                        }
+                    }
+                    .frame(height: max(pillHeight, circleDiameter))
                 }
             }
             .frame(height: 50)
@@ -72,9 +109,14 @@ struct StreakWidget: View {
             Label {
                 Text("\(streakCount)")
                     .foregroundColor(.orange)
+                    .opacity(showNumber ? 1 : 0)
+                    .scaleEffect(showNumber ? 1 : 0.4)
             } icon: {
                 Image(systemName: "flame.fill")
                     .foregroundColor(.orange)
+//                    .opacity(showFlame ? 1 : 0)
+//                    .scaleEffect(showFlame ? 1 : 0.2)
+                    .symbolEffect(.drawOn.byLayer, options: .nonRepeating, isActive: !showFlame)
             }
             .font(.app(.title2, weight: .semibold))
         }
