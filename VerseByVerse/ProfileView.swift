@@ -28,7 +28,7 @@ struct ProfileView: View {
                 .font(.app(.body, weight: .medium))
             Text("Since November 14th, 2025")
                 .font(.app(.footnote))
-                .foregroundStyle(.primary.opacity(0.5))
+                .foregroundStyle(.secondary)
 
             HStack(spacing: 60) {
                 VStack {
@@ -82,7 +82,7 @@ struct ProfileView: View {
             }
         }
         .refreshable {
-            print("hey")
+            print("refreshed")
         }
 
     }
