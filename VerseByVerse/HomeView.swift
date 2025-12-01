@@ -9,7 +9,7 @@ import SwiftUI
 
 struct HomeView: View {
     var body: some View {
-        VStack() {
+        VStack {
             HStack {
                 Text("Good evening Jaden!")
                     .font(.app(.title, weight: .medium))

@@ -54,14 +54,11 @@ struct ProfileView: View {
             }
             .padding(10)
 
-
-            Button(action: {
+            Button {
                 toggler.toggle()
-            }) {
+            } label: {
                 Text("toggle: \(toggler.description)")
             }
-
-
             Spacer()
         }
 
