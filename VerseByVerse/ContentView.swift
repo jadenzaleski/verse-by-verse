@@ -21,10 +21,10 @@ struct ContentView: View {
             .tag(0)
 
             NavigationStack {
-                BibleView()
+                MemoryView()
             }
             .tabItem {
-                Label("Bible", image: "lucide.book.open.text")
+                Label("Memory", image: "lucide.brain")
             }
             .tag(1)
 

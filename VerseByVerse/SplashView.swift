@@ -56,12 +56,10 @@ struct SplashView: View {
                 Text(statusText)
                 if appVersionString() != nil {
                     Text(appVersionString()!)
-                        .padding(.top, 5)
                 }
             }
             .font(.footnote)
             .foregroundStyle(.secondary)
-            .padding(.bottom, 5)
         }
     }
 

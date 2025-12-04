@@ -12,7 +12,7 @@ struct HomeView: View {
         VStack {
             HStack {
                 Text("Good evening Jaden!")
-                    .font(.app(.title, weight: .medium))
+                    .font(.app(.title2, weight: .semibold))
                 Spacer()
             }
             StreakWidget()
@@ -22,14 +22,6 @@ struct HomeView: View {
 
         }
         .padding(10)
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Text("Good evening Jaden!")
-                    .font(.app(.title2, weight: .semibold))
-                    .fixedSize()
-            }
-            .sharedBackgroundVisibility(.hidden)
-        }
         .refreshable {
             print("refreshed")
         }
