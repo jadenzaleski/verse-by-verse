@@ -61,7 +61,6 @@ struct ProfileView: View {
             }
             Spacer()
         }
-
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Text("Jaden Zaleski")
@@ -81,7 +80,6 @@ struct ProfileView: View {
         .refreshable {
             print("refreshed")
         }
-
     }
 }
 

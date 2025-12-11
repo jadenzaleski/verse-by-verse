@@ -11,7 +11,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		D75E3FB72ED6540000B0DDC8 /* Exceptions for "VerseByVerse" folder in "VerseByVerse" target */ = {
+		D75E3FD02EE1FD5700B0DDC8 /* Exceptions for "VerseByVerse" folder in "VerseByVerse" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -24,7 +24,7 @@
 		D75E3E8F2ED2653A00B0DDC8 /* VerseByVerse */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				D75E3FB72ED6540000B0DDC8 /* Exceptions for "VerseByVerse" folder in "VerseByVerse" target */,
+				D75E3FD02EE1FD5700B0DDC8 /* Exceptions for "VerseByVerse" folder in "VerseByVerse" target */,
 			);
 			path = VerseByVerse;
 			sourceTree = "<group>";

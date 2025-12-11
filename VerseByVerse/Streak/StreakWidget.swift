@@ -80,8 +80,9 @@ struct StreakWidget: View {
             Spacer()
             // Now show the number with the icon
             streakBadge()
+                .padding(.trailing, 5)
         }
-        .padding(25)
+        .padding(20)
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + startAnimationDelaySeconds) {
                 // Initialize revealed array to false for each day
@@ -116,7 +117,6 @@ struct StreakWidget: View {
                 }
             }
         }
-        .padding()
     }
 
     // Animated streak badge: flame appears, then digits flip in sequence
