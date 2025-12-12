@@ -8,20 +8,13 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @Environment(\.dismiss) private var dismiss
-
-    let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
-    let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "Unknown"
-
-    @State private var selectedURL: String = "Chocolate"
-
-    let URLs = ["Chocolate", "Vanilla", "Strawberry"]
+    @State private var selectedURL: String = APIConfig.shared.baseURL.absoluteString
 
     var body: some View {
         List {
             Section {
                 Label {
-                    Text("v\(version) (\(build))")
+                    Text(AppFunctions.versionString() ?? "")
                 } icon: {
                     Image("lucide.circle")
                 }
@@ -43,9 +36,19 @@ struct SettingsView: View {
                     Image("lucide.circle")
                 }
                 Label {
+                    Button("Clear Logs", action: {})
+                } icon: {
+                    Image("lucide.circle")
+                }
+                Label {
                     Picker("API URL", selection: $selectedURL) {
-                        ForEach(URLs, id: \.self) { url in
+                        ForEach(APIConfig.shared.urls, id: \.self) { url in
                             Text(url).tag(url)
+                        }
+                    }
+                    .onChange(of: selectedURL) { oldValue, newValue in
+                        if let url = URL(string: newValue) {
+                            APIConfig.shared.baseURL = url
                         }
                     }
                 } icon: {
@@ -54,18 +57,6 @@ struct SettingsView: View {
             } header: {
                 Text("ADMIN")
                     .font(Font.app(.footnote, weight: .semibold))
-            }
-        }
-        .navigationBarBackButtonHidden(true)
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button {
-                    dismiss()
-                } label: {
-                    Image("lucide.chevron.left")
-                        .font(.app(.footnote))
-                }
-
             }
         }
     }

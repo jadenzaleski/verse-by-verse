@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import os
 
 struct SplashView: View {
     @Binding var statusText: String
@@ -13,6 +14,7 @@ struct SplashView: View {
     let startupTasks: () async -> Void
     @State private var playOn = true
     @State private var playOff = false
+    private let log = AppLog.category("Init")
 
     var body: some View {
         ZStack {
@@ -38,9 +40,9 @@ struct SplashView: View {
                     try? await Task.sleep(nanoseconds: 100_000_000)
 
                     playOn = false // stop draw-on
-                    print("Running startupTasks")
+                    log.info("Running startupTasks")
                     await startupTasks()
-                    print("startupTasks finished, playing drawOff")
+                    log.debug("startupTasks finished, playing drawOff")
                     playOff = true
 
                     // Wait long enough for drawOff animation to finish
@@ -54,9 +56,7 @@ struct SplashView: View {
                 Spacer()
                 ProgressView()
                 Text(statusText)
-                if appVersionString() != nil {
-                    Text(appVersionString()!)
-                }
+                Text(AppFunctions.versionString() ?? "")
             }
             .font(.footnote)
             .foregroundStyle(.secondary)

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import os
 
 struct StreakWidget: View {
     // Inputs
@@ -16,6 +17,7 @@ struct StreakWidget: View {
     private let dayDelaySeconds: Double = 0.1
     private let startAnimationDelaySeconds: Double = 0.75
     private let todaysDateInt: Int = Calendar.current.component(.weekday, from: Date())
+    private let log = AppLog.category("StreakWidget")
 
     // Animation state: one per day
     @State private var revealed: [Bool] = []

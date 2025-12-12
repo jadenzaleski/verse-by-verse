@@ -10,7 +10,8 @@ import Foundation
 import SwiftUI
 
 struct ProfileView: View {
-    @State var toggler: Bool = false
+    @State private var logs: String = ""
+    private let log = AppLog.category("ProfileView")
 
     var body: some View {
         ScrollView {
@@ -55,11 +56,26 @@ struct ProfileView: View {
             .padding(10)
 
             Button {
-                toggler.toggle()
+                log.info("Button pressed")
+                Task {
+                    do {
+                        try await handleAPIHealth()
+                    } catch {
+                        log.error("API Health check failed: \(String(describing: error))")
+                    }
+                    logs = LoggingService.shared.readAllLogs()
+
+                }
             } label: {
-                Text("toggle: \(toggler.description)")
+                Text("Call API Health")
             }
             Spacer()
+            Text("LOGS")
+                .font(.app(.headline))
+            Text(logs)
+                .font(.system(.footnote, design: .monospaced))
+                .padding()
+
         }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
@@ -78,8 +94,19 @@ struct ProfileView: View {
             }
         }
         .refreshable {
-            print("refreshed")
+            log.debug("refreshed")
+            logs = LoggingService.shared.readAllLogs()
         }
+        .onAppear {
+            logs = LoggingService.shared.readAllLogs()
+        }
+    }
+
+    // MARK: - Helpers
+    private func handleAPIHealth() async throws {
+        let result = try await APIService.shared.getHealth()
+        log.info("API Healthy: \(result)")
+        logs = LoggingService.shared.readAllLogs()
     }
 }
 
