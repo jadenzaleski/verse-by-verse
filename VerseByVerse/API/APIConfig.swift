@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// This class is used to hold configuration for the ``APIEndpoint`` and its ``request`` function.
 final class APIConfig {
     static let shared = APIConfig()
 

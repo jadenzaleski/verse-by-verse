@@ -14,6 +14,7 @@ struct VerseByVerseApp: App {
     @State private var isReady = false
     @State private var statusText = "Loading…"
     private let log = AppLog.category("Init")
+    private let cache = Cache.shared
 
     init() {
         log.info("--- Verse By Verse \(AppFunctions.versionString() ?? "") ---")
@@ -41,7 +42,9 @@ struct VerseByVerseApp: App {
     }
 
     private func runStartup() async {
-        await MainActor.run { statusText = "Preparing…"
+        await MainActor.run {
+            statusText = "Preparing…"
+            log.info("Cache URL: \(cache.cacheDirectory)")
 //            for family in UIFont.familyNames {
 //                print("\(family)")
 //                for name in UIFont.fontNames(forFamilyName: family) {

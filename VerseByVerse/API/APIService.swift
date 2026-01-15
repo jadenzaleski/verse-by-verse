@@ -10,7 +10,7 @@ import Foundation
 final class APIService {
     static let shared = APIService()
 
-    private let cache = CacheService.shared
+    private let cache = Cache.shared
     private let network = NetworkClient.shared
     private let log = AppLog.category("APIService")
 
@@ -21,21 +21,31 @@ final class APIService {
     ) async throws -> APIResponse<T> {
         log.debug("Fetch:\nurl: \(request)\nkey: \(key)")
 
-        // 1. Cache
-        if let cached: APIResponse<T> = cache.get(key) {
+        // Cache
+        if let cached = cache.get(key, decode: T.self) {
             log.debug("Found key \"\(key)\" in cache")
             return cached
         }
 
-        // 2. Network
-        log.debug("Did not find key \"\(key)\" in cache")
-        let result: APIResponse = try await network.send(request, decode: T.self)
+        // Network
+        log.debug("Did not find key \"\(key)\" in cache, making network request")
+        let (data, response) = try await network.raw(request)
 
-        // 3. Store
+        let apiResponse = try network.decode(
+            data: data,
+            response: response,
+            as: T.self
+        )
+
         log.debug("Adding key \"\(key)\" to cache")
-        cache.set(key, value: result, expiresIn: expiresIn)
+        cache.set(
+            key: key,
+            data: data,
+            statusCode: apiResponse.statusCode,
+            expiresIn: expiresIn
+        )
 
-        return result
+        return apiResponse
     }
 
     func getHealth() async throws -> Bool {

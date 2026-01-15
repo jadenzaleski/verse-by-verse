@@ -8,20 +8,18 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @State private var selectedURL: String = APIConfig.shared.baseURL.absoluteString
-
     var body: some View {
         List {
             Section {
                 Label {
                     Text(AppFunctions.versionString() ?? "")
                 } icon: {
-                    Image("lucide.circle")
+                    Image("lucide.rocket")
                 }
                 Label {
                     Text("123-1234-12333435-23423-4234")
                 } icon: {
-                    Image("lucide.circle")
+                    Image("lucide.id.card.lanyard")
                 }
 
             } header: {
@@ -30,35 +28,15 @@ struct SettingsView: View {
             }
 
             Section {
-                Label {
-                    Button("Clear Cache", action: {})
-                } icon: {
-                    Image("lucide.circle")
+                NavigationLink {
+                    DeveloperView()
+                } label: {
+                    Label("Developer", image: "lucide.hammer")
                 }
-                Label {
-                    Button("Clear Logs", action: {})
-                } icon: {
-                    Image("lucide.circle")
-                }
-                Label {
-                    Picker("API URL", selection: $selectedURL) {
-                        ForEach(APIConfig.shared.urls, id: \.self) { url in
-                            Text(url).tag(url)
-                        }
-                    }
-                    .onChange(of: selectedURL) { oldValue, newValue in
-                        if let url = URL(string: newValue) {
-                            APIConfig.shared.baseURL = url
-                        }
-                    }
-                } icon: {
-                    Image("lucide.circle")
-                }
-            } header: {
-                Text("ADMIN")
-                    .font(Font.app(.footnote, weight: .semibold))
             }
         }
+        .navigationTitle("Settings")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

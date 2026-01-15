@@ -6,8 +6,6 @@
 //
 
 import Foundation
-import Foundation
-
 enum AppFunctions {
     static func versionString() -> String? {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String

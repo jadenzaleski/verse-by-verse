@@ -18,19 +18,45 @@ final class NetworkClient {
     }
 
     func send<T: Decodable>(_ request: URLRequest, decode: T.Type) async throws -> APIResponse<T> {
+        let (data, response) = try await raw(request)
+
+        let apiResponse = try self.decode(
+            data: data,
+            response: response,
+            as: T.self
+        )
+
+        if !(200..<300).contains(apiResponse.statusCode) {
+            throw NetworkError.httpStatus(apiResponse.statusCode)
+        }
+
+        return apiResponse
+    }
+
+    /// Lowest-level request (used for disk caching)
+    func raw(_ request: URLRequest) async throws -> (Data, HTTPURLResponse) {
         let (data, response) = try await session.data(for: request)
 
         guard let http = response as? HTTPURLResponse else {
             throw NetworkError.httpStatus(0)
         }
 
+        return (data, http)
+    }
+
+    /// Decode helper so decoding logic lives in one place
+    func decode<T: Decodable>(
+        data: Data,
+        response: HTTPURLResponse,
+        as type: T.Type
+    ) throws -> APIResponse<T> {
+
         let decodedBody = try JSONDecoder().decode(T.self, from: data)
 
-        if !(200..<300).contains(http.statusCode) {
-            throw NetworkError.httpStatus(http.statusCode)
-        }
-
-        return APIResponse(statusCode: http.statusCode, body: decodedBody)
+        return APIResponse(
+            statusCode: response.statusCode,
+            body: decodedBody
+        )
     }
 }
 

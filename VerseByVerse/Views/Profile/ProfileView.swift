@@ -10,7 +10,6 @@ import Foundation
 import SwiftUI
 
 struct ProfileView: View {
-    @State private var logs: String = ""
     private let log = AppLog.category("ProfileView")
 
     var body: some View {
@@ -63,18 +62,11 @@ struct ProfileView: View {
                     } catch {
                         log.error("API Health check failed: \(String(describing: error))")
                     }
-                    logs = LoggingService.shared.readAllLogs()
-
                 }
             } label: {
                 Text("Call API Health")
             }
             Spacer()
-            Text("LOGS")
-                .font(.app(.headline))
-            Text(logs)
-                .font(.system(.footnote, design: .monospaced))
-                .padding()
 
         }
         .toolbar {
@@ -93,20 +85,12 @@ struct ProfileView: View {
                 }
             }
         }
-        .refreshable {
-            log.debug("refreshed")
-            logs = LoggingService.shared.readAllLogs()
-        }
-        .onAppear {
-            logs = LoggingService.shared.readAllLogs()
-        }
     }
 
     // MARK: - Helpers
     private func handleAPIHealth() async throws {
         let result = try await APIService.shared.getHealth()
         log.info("API Healthy: \(result)")
-        logs = LoggingService.shared.readAllLogs()
     }
 }
 
