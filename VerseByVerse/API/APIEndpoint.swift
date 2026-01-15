@@ -15,26 +15,26 @@ enum APIEndpoint {
 
     var path: String {
         switch self {
-        case .fetchUser(let id): return "/users/\(id)"
-        case .listPlants: return "/plants"
-        case .login: return "/login"
-        case .healthcheck: return "/health"
+        case let .fetchUser(id): "/users/\(id)"
+        case .listPlants: "/plants"
+        case .login: "/login"
+        case .healthcheck: "/health"
         }
     }
 
     var method: String {
         switch self {
-        case .login: return "POST"
-        default: return "GET"
+        case .login: "POST"
+        default: "GET"
         }
     }
 
     var body: Data? {
         switch self {
-        case .login(let email, let password):
-            return try? JSONEncoder().encode(["email": email, "password": password])
+        case let .login(email, password):
+            try? JSONEncoder().encode(["email": email, "password": password])
         default:
-            return nil
+            nil
         }
     }
 

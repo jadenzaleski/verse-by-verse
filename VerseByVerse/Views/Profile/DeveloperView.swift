@@ -12,32 +12,30 @@ struct DeveloperView: View {
 
     var body: some View {
         List {
-                Button("Clear Logs", action: {})
+            Button("Clear Logs", action: {})
 
-                Button("Clear Cache") {
-                    Cache.shared.removeAll()
+            Button("Clear Cache") {
+                Cache.shared.removeAll()
+            }
+
+            Picker("API URL", selection: $selectedURL) {
+                ForEach(APIConfig.shared.urls, id: \.self) { url in
+                    Text(url).tag(url)
+                }
+            }
+            .onChange(of: selectedURL) { _, newValue in
+                if let url = URL(string: newValue) {
+                    APIConfig.shared.baseURL = url
                 }
 
-                Picker("API URL", selection: $selectedURL) {
-                    ForEach(APIConfig.shared.urls, id: \.self) { url in
-                        Text(url).tag(url)
-                    }
-                }
-                .onChange(of: selectedURL) { _, newValue in
-                    if let url = URL(string: newValue) {
-                        APIConfig.shared.baseURL = url
-                    }
-
-                    Cache.shared.removeAll()
-                }
-
+                Cache.shared.removeAll()
+            }
 
             NavigationLink {
                 LogsView()
             } label: {
                 Text("Logs")
             }
-
         }
         .navigationTitle("Developer")
     }

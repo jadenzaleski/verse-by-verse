@@ -17,7 +17,7 @@ final class APIService {
     func fetch<T: Codable>(
         key: String,
         expiresIn: TimeInterval? = nil,
-        request: URLRequest
+        request: URLRequest,
     ) async throws -> APIResponse<T> {
         log.debug("Fetch:\nurl: \(request)\nkey: \(key)")
 
@@ -34,7 +34,7 @@ final class APIService {
         let apiResponse = try network.decode(
             data: data,
             response: response,
-            as: T.self
+            as: T.self,
         )
 
         log.debug("Adding key \"\(key)\" to cache")
@@ -42,7 +42,7 @@ final class APIService {
             key: key,
             data: data,
             statusCode: apiResponse.statusCode,
-            expiresIn: expiresIn
+            expiresIn: expiresIn,
         )
 
         return apiResponse
@@ -54,12 +54,12 @@ final class APIService {
             let response: APIResponse<HealthCheckResponse> = try await fetch(
                 key: "health",
                 expiresIn: 60,
-                request: APIEndpoint.healthcheck.request
+                request: APIEndpoint.healthcheck.request,
             )
 
             return response.statusCode == 200 &&
-            response.body.status == "ok" &&
-            response.body.db == "ok"
+                response.body.status == "ok" &&
+                response.body.db == "ok"
         } catch {
             return false
         }

@@ -17,16 +17,16 @@ final class NetworkClient {
         log.debug("URLSession initialized")
     }
 
-    func send<T: Decodable>(_ request: URLRequest, decode: T.Type) async throws -> APIResponse<T> {
+    func send<T: Decodable>(_ request: URLRequest, decode _: T.Type) async throws -> APIResponse<T> {
         let (data, response) = try await raw(request)
 
-        let apiResponse = try self.decode(
+        let apiResponse = try decode(
             data: data,
             response: response,
-            as: T.self
+            as: T.self,
         )
 
-        if !(200..<300).contains(apiResponse.statusCode) {
+        if !(200 ..< 300).contains(apiResponse.statusCode) {
             throw NetworkError.httpStatus(apiResponse.statusCode)
         }
 
@@ -48,14 +48,13 @@ final class NetworkClient {
     func decode<T: Decodable>(
         data: Data,
         response: HTTPURLResponse,
-        as type: T.Type
+        as _: T.Type,
     ) throws -> APIResponse<T> {
-
         let decodedBody = try JSONDecoder().decode(T.self, from: data)
 
         return APIResponse(
             statusCode: response.statusCode,
-            body: decodedBody
+            body: decodedBody,
         )
     }
 }

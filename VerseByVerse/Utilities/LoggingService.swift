@@ -5,8 +5,8 @@
 //  Created by Jaden Zaleski on 12/11/25.
 //
 
-import SwiftUI
 import Foundation
+import SwiftUI
 
 final class LoggingService {
     static let shared = LoggingService()
@@ -70,7 +70,9 @@ final class LoggingService {
         }
 
         let excess = sorted.dropFirst(maxLogFiles)
-        for file in excess { try? FileManager.default.removeItem(at: file) }
+        for file in excess {
+            try? FileManager.default.removeItem(at: file)
+        }
     }
 
     func readAllLogs() -> String {

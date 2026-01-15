@@ -5,8 +5,8 @@
 //  Created by Jaden Zaleski on 11/27/25.
 //
 
-import SwiftUI
 import os
+import SwiftUI
 
 struct StreakWidget: View {
     // Inputs
@@ -34,7 +34,7 @@ struct StreakWidget: View {
         HStack {
             HStack(spacing: 0) {
                 // Display each day
-                ForEach(0..<completed.count, id: \.self) { i in
+                ForEach(0 ..< completed.count, id: \.self) { i in
                     // The instensity will build so we calculate that
                     let intensity = (0.4 + Double(i) * 0.1)
                     VStack(alignment: .center, spacing: 1) {
@@ -52,21 +52,26 @@ struct StreakWidget: View {
                                 .opacity(revealed[safe: i] == true ? 1.0 : 0.0)
                                 .animation(
                                     completed[i] ? .spring(response: 0.3, dampingFraction: 0.40)
-                                    : .smooth(duration: dayDelaySeconds), value: revealed)
+                                        : .smooth(duration: dayDelaySeconds), value: revealed,
+                                )
                                 .sensoryFeedback(
                                     .impact(
                                         flexibility: .rigid,
-                                        intensity: intensity),
-                                    trigger: revealed[safe: i] == true && completed[i])
+                                        intensity: intensity,
+                                    ),
+                                    trigger: revealed[safe: i] == true && completed[i],
+                                )
                                 .zIndex(1)
 
                             // I have hidden this for now
-                            // Particle burst when a completed day is revealed
-                            //                            if completed[i] && (revealed[safe: i] == true) {
-                            //                                ParticleBurst(count: 10, baseColor: .orange, duration: 0.45)
-                            //                                    .transition(.opacity)
-                            //                                    .zIndex(2)
-                            //                            }
+                            /*
+                             // Particle burst when a completed day is revealed
+                             if completed[i] && (revealed[safe: i] == true) {
+                                 ParticleBurst(count: 10, baseColor: .orange, duration: 0.45)
+                                     .transition(.opacity)
+                                     .zIndex(2)
+                             }
+                              */
                         }
                     }
                     .frame(minWidth: 22)
@@ -74,7 +79,7 @@ struct StreakWidget: View {
                     .padding([.top, .bottom], 5)
                     .overlay(
                         todaysDateInt == i + 1 ?
-                        TodayOutline(draw: drawTodayStroke) : nil
+                            TodayOutline(draw: drawTodayStroke) : nil,
                     )
                 }
             }
@@ -108,9 +113,9 @@ struct StreakWidget: View {
                     showBadge = true
                     // Sequentially reveal each numeric digit with a small cadence
                     let chars = Array(streakCount.formatted(.number.grouping(.automatic)))
-                    let totalDigits = chars.filter { Int(String($0)) != nil }.count
+                    let totalDigits = chars.count(where: { Int(String($0)) != nil })
                     revealedDigits = 0
-                    for step in 0..<totalDigits {
+                    for step in 0 ..< totalDigits {
                         let delay = Double(step) * 0.08
                         DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
                             revealedDigits = step + 1
@@ -158,7 +163,7 @@ struct StreakWidget: View {
                             .degrees(order < revealedDigits ? 0 : -90),
                             axis: (x: 1, y: 0, z: 0),
                             anchor: .bottom,
-                            perspective: 0.6
+                            perspective: 0.6,
                         )
                         .animation(.spring(response: 0.35, dampingFraction: 0.7), value: revealedDigits)
                         .sensoryFeedback(.impact(weight: .light, intensity: 0.3), trigger: revealedDigits)
@@ -199,7 +204,7 @@ private extension Array {
 
 extension Date {
     func dayNumberOfWeek() -> Int? {
-        return Calendar.current.dateComponents([.weekday], from: self).weekday
+        Calendar.current.dateComponents([.weekday], from: self).weekday
     }
 }
 

@@ -43,5 +43,4 @@ struct SettingsView: View {
 #Preview {
     SettingsView()
         .environment(\.font, .app())
-
 }

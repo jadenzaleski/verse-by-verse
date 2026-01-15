@@ -65,6 +65,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = D75E3EAE2ED2653B00B0DDC8 /* Build configuration list for PBXNativeTarget "VerseByVerse" */;
 			buildPhases = (
+				D73362E92F198D58005ACCD9 /* Run SwiftFormat */,
 				D75E3FC02EDE56C200B0DDC8 /* Run SwiftLint */,
 				D75E3E892ED2653A00B0DDC8 /* Sources */,
 				D75E3E8A2ED2653A00B0DDC8 /* Frameworks */,
@@ -129,6 +130,25 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		D73362E92F198D58005ACCD9 /* Run SwiftFormat */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Run SwiftFormat";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [[ \"$(uname -m)\" == arm64 ]]\nthen\n    export PATH=\"/opt/homebrew/bin:$PATH\"\nfi\n\nif command -v swiftformat >/dev/null 2>&1\nthen\n    swiftformat .\nelse\n    echo \"warning: `swiftformat` command not found - See https://github.com/nicklockwood/SwiftFormat\"\nfi\n";
+		};
 		D75E3FC02EDE56C200B0DDC8 /* Run SwiftLint */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;

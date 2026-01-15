@@ -5,8 +5,8 @@
 //  Created by Jaden Zaleski on 11/22/25.
 //
 
-import SwiftUI
 import os
+import SwiftUI
 
 struct SplashView: View {
     @Binding var statusText: String
@@ -27,11 +27,10 @@ struct SplashView: View {
                         LinearGradient(
                             gradient: Gradient(colors: [Color("CustomPurple"), Color("CustomGreen")]),
                             startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
+                            endPoint: .bottomTrailing,
+                        ),
                     )
                     .shadow(color: .black.opacity(0.25), radius: 4, x: 2, y: 2)
-
             }
             .zIndex(1)
             .onAppear {

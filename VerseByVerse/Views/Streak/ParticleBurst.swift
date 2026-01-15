@@ -29,14 +29,14 @@ struct ParticleBurst: View {
         self.duration = duration
         // Precompute particles with random directions and distances
         var parts: [Particle] = []
-        for i in 0..<count {
-            let angle = Angle(degrees: Double(i) / Double(max(1, count)) * 360.0 + Double.random(in: -8...8))
-            let distance = CGFloat.random(in: 15...25)
-            let size = CGFloat.random(in: 2.5...4.5)
-            let color = baseColor.opacity(Double.random(in: 1.0...1.0))
+        for i in 0 ..< count {
+            let angle = Angle(degrees: Double(i) / Double(max(1, count)) * 360.0 + Double.random(in: -8 ... 8))
+            let distance = CGFloat.random(in: 15 ... 25)
+            let size = CGFloat.random(in: 2.5 ... 4.5)
+            let color = baseColor.opacity(Double.random(in: 1.0 ... 1.0))
             parts.append(Particle(angle: angle, distance: distance, size: size, color: color))
         }
-        self.particles = parts
+        particles = parts
     }
 
     var body: some View {
@@ -47,7 +47,7 @@ struct ParticleBurst: View {
                     .frame(width: particle.size, height: particle.size)
                     .offset(
                         x: cos(CGFloat(particle.angle.radians)) * particle.distance * progress,
-                        y: sin(CGFloat(particle.angle.radians)) * particle.distance * progress
+                        y: sin(CGFloat(particle.angle.radians)) * particle.distance * progress,
                     )
                     .opacity(1 - Double(progress))
             }

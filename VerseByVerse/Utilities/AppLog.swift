@@ -7,7 +7,7 @@
 
 import os
 
-struct AppLog {
+enum AppLog {
     static let subsystem = "com.jadenzaleski.vbv"
 
     static func category(_ category: String) -> Logger {
@@ -23,36 +23,36 @@ extension Logger {
     func log(_ message: String) {
         let string = "\(message)"
         AppLog.logToFile("\(string)")
-        self.log("\(message, privacy: .public)")
+        log("\(message, privacy: .public)")
     }
 
     func info(_ message: String) {
         let string = "\(message)"
         AppLog.logToFile("[INFO] \(string)")
-        self.info("\(message, privacy: .public)")
+        info("\(message, privacy: .public)")
     }
 
     func debug(_ message: String) {
         let string = "\(message)"
         AppLog.logToFile("[DEBUG] \(string)")
-        self.debug("\(message, privacy: .public)")
+        debug("\(message, privacy: .public)")
     }
 
     func warning(_ message: String) {
         let string = "\(message)"
         AppLog.logToFile("[WARNING] \(string)")
-        self.warning("\(message, privacy: .public)")
+        warning("\(message, privacy: .public)")
     }
 
     func error(_ message: String) {
         let string = "\(message)"
         AppLog.logToFile("[ERROR] \(string)")
-        self.error("\(message, privacy: .public)")
+        error("\(message, privacy: .public)")
     }
 
     func fault(_ message: String) {
         let string = "\(message)"
         AppLog.logToFile("[FAULT] \(string)")
-        self.fault("\(message, privacy: .public)")
+        fault("\(message, privacy: .public)")
     }
 }

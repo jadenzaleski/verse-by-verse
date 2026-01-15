@@ -10,7 +10,6 @@ import UIKit
 
 @main
 struct VerseByVerseApp: App {
-
     @State private var isReady = false
     @State private var statusText = "Loading…"
     private let log = AppLog.category("Init")

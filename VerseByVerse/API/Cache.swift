@@ -26,9 +26,9 @@ final class Cache {
 }
 
 // MARK: - Public API
-extension Cache {
 
-    func get<T: Decodable>(_ key: String, decode type: T.Type) -> APIResponse<T>? {
+extension Cache {
+    func get<T: Decodable>(_ key: String, decode _: T.Type) -> APIResponse<T>? {
         queue.sync {
             // 1. Memory
             if let entry = memory[key] {
@@ -62,14 +62,14 @@ extension Cache {
         key: String,
         data: Data,
         statusCode: Int,
-        expiresIn: TimeInterval?
+        expiresIn: TimeInterval?,
     ) {
         queue.async {
             let expiry = expiresIn.map { Date().addingTimeInterval($0) }
             let entry = DiskCacheEntry(
                 data: data,
                 statusCode: statusCode,
-                expiresAt: expiry
+                expiresAt: expiry,
             )
 
             self.memory[key] = entry
@@ -97,15 +97,15 @@ extension Cache {
             try? FileManager.default.removeItem(at: self.cacheDirectory)
             try? FileManager.default.createDirectory(
                 at: self.cacheDirectory,
-                withIntermediateDirectories: true
+                withIntermediateDirectories: true,
             )
         }
     }
 }
 
 // MARK: - Helpers
-private extension Cache {
 
+private extension Cache {
     func fileURL(for key: String) -> URL {
         let safeKey = key.replacingOccurrences(of: "/", with: "_")
         return cacheDirectory.appendingPathComponent(safeKey)
@@ -116,7 +116,7 @@ private extension Cache {
         return expiresAt < Date()
     }
 
-    func decode<T: Decodable>(_ entry: DiskCacheEntry, as type: T.Type) -> APIResponse<T>? {
+    func decode<T: Decodable>(_ entry: DiskCacheEntry, as _: T.Type) -> APIResponse<T>? {
         do {
             let body = try JSONDecoder().decode(T.self, from: entry.data)
             return APIResponse(statusCode: entry.statusCode, body: body)
@@ -127,7 +127,7 @@ private extension Cache {
     }
 }
 
-nonisolated private struct DiskCacheEntry: Codable, Sendable {
+private nonisolated struct DiskCacheEntry: Codable, Sendable {
     let data: Data
     let statusCode: Int
     let expiresAt: Date?

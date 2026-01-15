@@ -38,8 +38,8 @@ struct ProfileView: View {
                             LinearGradient(
                                 gradient: Gradient(colors: [Color("CustomPurple"), Color("CustomGreen")]),
                                 startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
+                                endPoint: .bottomTrailing,
+                            ),
                         )
                     Text("Best Streak")
                         .font(.app(.footnote))
@@ -67,7 +67,6 @@ struct ProfileView: View {
                 Text("Call API Health")
             }
             Spacer()
-
         }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
@@ -88,6 +87,7 @@ struct ProfileView: View {
     }
 
     // MARK: - Helpers
+
     private func handleAPIHealth() async throws {
         let result = try await APIService.shared.getHealth()
         log.info("API Healthy: \(result)")

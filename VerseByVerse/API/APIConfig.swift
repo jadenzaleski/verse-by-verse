@@ -13,10 +13,10 @@ final class APIConfig {
 
     let urls = [
         "http://127.0.0.1:8000",
-        "https://vbv-api-dev.jadenzaleski.com"
+        "https://vbv-api-dev.jadenzaleski.com",
     ]
 
-    lazy var baseURL: URL = URL(string: urls[0])!
+    lazy var baseURL: URL = .init(string: urls[0])!
 
     private init() {}
 }
