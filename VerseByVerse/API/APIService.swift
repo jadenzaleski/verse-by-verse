@@ -59,8 +59,10 @@ final class APIService {
 
             return response.statusCode == 200 &&
                 response.body.status == "ok" &&
-                response.body.db == "ok"
+                response.body.db == "ok" &&
+                response.body.redis == "ok"
         } catch {
+            log.error("getHealth faild: \(error)")
             return false
         }
     }
@@ -71,4 +73,5 @@ struct HealthCheckResponse: Codable {
     let status: String
     // swiftlint:disable:next identifier_name
     let db: String
+    let redis: String
 }

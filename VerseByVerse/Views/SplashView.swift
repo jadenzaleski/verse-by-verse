@@ -76,4 +76,5 @@ struct SplashView: View {
 
 #Preview {
     SplashView(statusText: .constant("Loading…"), isDone: .constant(true)) {}
+        .environment(\.font, .app())
 }

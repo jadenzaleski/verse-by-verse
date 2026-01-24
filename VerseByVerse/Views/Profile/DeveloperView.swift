@@ -9,6 +9,9 @@ import SwiftUI
 
 struct DeveloperView: View {
     @State private var selectedURL: String = APIConfig.shared.baseURL.absoluteString
+    @State private var showAlert = false
+    @State private var alertMessage: String? = ""
+    private let log = AppLog.category("DeveloperView")
 
     var body: some View {
         List {
@@ -16,6 +19,22 @@ struct DeveloperView: View {
 
             Button("Clear Cache") {
                 Cache.shared.removeAll()
+            }
+
+            Button {
+                Task {
+                    do {
+                        let result = try await APIService.shared.getHealth()
+                        alertMessage = "API Health: \(String(describing: result))"
+                        showAlert = true
+                    } catch {
+                        log.error("API Health check failed: \(String(describing: error))")
+                        alertMessage = "API Health check failed: \(String(describing: error))"
+                        showAlert = true
+                    }
+                }
+            } label: {
+                Text("API Healthcheck")
             }
 
             Picker("API URL", selection: $selectedURL) {
@@ -38,6 +57,9 @@ struct DeveloperView: View {
             }
         }
         .navigationTitle("Developer")
+        .alert(isPresented: $showAlert, content: {
+            Alert(title: Text("Health Check"), message: Text(alertMessage ?? "No message"), dismissButton: .default(Text("OK")))
+        })
     }
 }
 

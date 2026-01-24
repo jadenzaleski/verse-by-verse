@@ -12,6 +12,8 @@ import UIKit
 struct VerseByVerseApp: App {
     @State private var isReady = false
     @State private var statusText = "Loading…"
+    @State private var showLogin = false
+    @State private var readyForMain = false
     private let log = AppLog.category("Init")
     private let cache = Cache.shared
 
@@ -25,7 +27,7 @@ struct VerseByVerseApp: App {
     var body: some Scene {
         WindowGroup {
             ZStack {
-                if isReady {
+                if readyForMain {
                     ContentView()
                         .transition(.opacity)
                 } else {
@@ -33,8 +35,16 @@ struct VerseByVerseApp: App {
                         await runStartup()
                     }
                     .transition(.opacity)
+                    .fullScreenCover(isPresented: $showLogin) {
+                        LoginOrRegisterView(isLoggedIn: .constant(true))
+                            .onDisappear {
+                                // After login completes and the sheet is dismissed, continue tasks
+                                Task { await runPostLoginStartup() }
+                            }
+                    }
                 }
             }
+            .animation(.easeOut(duration: 0.35), value: readyForMain)
             .animation(.easeOut(duration: 0.35), value: isReady)
             .environment(\.font, .app())
         }
@@ -44,22 +54,30 @@ struct VerseByVerseApp: App {
         await MainActor.run {
             statusText = "Preparing…"
             log.info("Cache URL: \(cache.cacheDirectory)")
-//            for family in UIFont.familyNames {
-//                print("\(family)")
-//                for name in UIFont.fontNames(forFamilyName: family) {
-//                    print("  \(name)")
-//                }
-//            }
         }
         try? await Task.sleep(nanoseconds: 200_000_000)
 
-        await MainActor.run { statusText = "Fetching data…" }
-        try? await Task.sleep(nanoseconds: 200_000_000)
+        await MainActor.run { statusText = "Checking login…" }
+        // Present login over the splash if needed
+        await MainActor.run { showLogin = true }
+        // Do not mark ready yet; post-login tasks will continue after dismissal
+        try? await Task.sleep(nanoseconds: 3_000_000_000)
+        await MainActor.run { showLogin = false }
 
+    }
+
+    private func runPostLoginStartup() async {
         await MainActor.run { statusText = "Configuring…" }
         try? await Task.sleep(nanoseconds: 200_000_000)
 
         await MainActor.run { statusText = "Almost there…" }
         try? await Task.sleep(nanoseconds: 200_000_000)
+
+        // Fade into main content
+        await MainActor.run {
+            withAnimation(.easeInOut) {
+                readyForMain = true
+            }
+        }
     }
 }
