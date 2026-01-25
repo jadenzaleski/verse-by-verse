@@ -51,15 +51,16 @@ struct VerseByVerseApp: App {
             statusText = "Preparing…"
             log.info("Cache URL: \(cache.cacheDirectory)")
         }
-        await MainActor.run { statusText = "Logging in…" }
         // Present login over the splash if needed
-        await MainActor.run { showLogin = true }
+        await MainActor.run {
+            statusText = "Logging in…"
+            showLogin = true
+        }
         // Do not mark ready yet; post-login tasks will continue after dismissal
 //        try? await Task.sleep(nanoseconds: 3_000_000_000)
 //        await MainActor.run { showLogin = false }
         while showLogin {
             try? await Task.sleep(nanoseconds: 200_000_000)
-            log.debug("waiting...")
         }
 
         await MainActor.run { statusText = "Configuring…" }
@@ -74,6 +75,5 @@ struct VerseByVerseApp: App {
                 isReady = true
             }
         }
-
     }
 }

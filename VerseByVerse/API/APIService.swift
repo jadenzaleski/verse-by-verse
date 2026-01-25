@@ -7,6 +7,38 @@
 
 import Foundation
 
+/// A standardized error for all API calls.
+/// Contains HTTP status code when available and a human-readable message when possible.
+enum APIError: Error, LocalizedError {
+    case http(statusCode: Int, message: String?, data: Data?)
+    case network(underlying: URLError)
+    case decoding(underlying: DecodingError)
+    case cancelled
+    case unknown(underlying: Error)
+
+    /// A human-readable description suitable for UI.
+    var errorDescription: String? {
+        switch self {
+        case let .http(statusCode, message, _):
+            message ?? "Server returned status code \(statusCode)."
+        case let .network(underlying):
+            underlying.localizedDescription
+        case let .decoding(underlying):
+            "Failed to decode response: \(underlying.localizedDescription)"
+        case .cancelled:
+            "Request was cancelled."
+        case let .unknown(underlying):
+            underlying.localizedDescription
+        }
+    }
+
+    /// The HTTP status code, if this is an HTTP error.
+    var statusCode: Int? {
+        if case let .http(statusCode, _, _) = self { return statusCode }
+        return nil
+    }
+}
+
 final class APIService {
     static let shared = APIService()
 
@@ -14,38 +46,76 @@ final class APIService {
     private let network = NetworkClient.shared
     private let log = AppLog.category("APIService")
 
+    /// Fetches and decodes an API response, using cache unless `ignoreCache` is true.
+    /// - Returns: A decoded `APIResponse<T>` on success.
+    /// - Throws: `APIError` for HTTP, network, decoding, cancellation, or unknown errors.
     func fetch<T: Codable>(
         key: String,
         expiresIn: TimeInterval? = nil,
         request: URLRequest,
+        ignoreCache: Bool = false,
     ) async throws -> APIResponse<T> {
         log.debug("Fetch:\nurl: \(request)\nkey: \(key)")
 
         // Cache
-        if let cached = cache.get(key, decode: T.self) {
+        if !ignoreCache, let cached = cache.get(key, decode: T.self) {
             log.debug("Found key \"\(key)\" in cache")
             return cached
         }
 
-        // Network
-        log.debug("Did not find key \"\(key)\" in cache, making network request")
-        let (data, response) = try await network.raw(request)
+        do {
+            // Network
+            log.debug("Did not find key \"\(key)\" in cache, making network request")
+            let (data, response) = try await network.raw(request)
 
-        let apiResponse = try network.decode(
-            data: data,
-            response: response,
-            as: T.self,
-        )
+            if !(200 ... 299).contains(response.statusCode) {
+                log.error("API returned code: \(response.statusCode)")
+                if let jsonString = String(data: data, encoding: .utf8) {
+                    log.debug("API error response body:\n\(jsonString)")
+                }
+                let message = parseServerErrorMessage(from: data)
+                throw APIError.http(statusCode: response.statusCode, message: message, data: data)
+            }
 
-        log.debug("Adding key \"\(key)\" to cache")
-        cache.set(
-            key: key,
-            data: data,
-            statusCode: apiResponse.statusCode,
-            expiresIn: expiresIn,
-        )
+            let apiResponse = try network.decode(
+                data: data,
+                response: response,
+                as: T.self,
+            )
 
-        return apiResponse
+            if !ignoreCache {
+                log.debug("Adding key \"\(key)\" to cache")
+                cache.set(
+                    key: key,
+                    data: data,
+                    statusCode: apiResponse.statusCode,
+                    expiresIn: expiresIn,
+                )
+            }
+
+            return apiResponse
+        } catch {
+            // Preserve APIError thrown above
+            if let apiError = error as? APIError { throw apiError }
+
+            // Map common error types
+            if let urlError = error as? URLError {
+                if urlError.code == .cancelled {
+                    throw APIError.cancelled
+                } else {
+                    log.error("Network error: \(urlError)")
+                    throw APIError.network(underlying: urlError)
+                }
+            }
+
+            if let decodingError = error as? DecodingError {
+                log.error("Decoding error: \(decodingError)")
+                throw APIError.decoding(underlying: decodingError)
+            }
+
+            log.error("Unknown error: \(error)")
+            throw APIError.unknown(underlying: error)
+        }
     }
 
     func getHealth() async throws -> Bool {
@@ -55,16 +125,72 @@ final class APIService {
                 key: "health",
                 expiresIn: 60,
                 request: APIEndpoint.healthcheck.request,
+                ignoreCache: true,
             )
 
             return response.statusCode == 200 &&
                 response.body.status == "ok" &&
                 response.body.db == "ok" &&
                 response.body.redis == "ok"
+        } catch let apiError as APIError {
+            let code = apiError.statusCode.map(String.init) ?? "n/a"
+            log.error("getHealth failed — statusCode: \(code), error: \(apiError.localizedDescription)")
+            return false
         } catch {
-            log.error("getHealth faild: \(error)")
+            log.error("getHealth failed — unknown error: \(error.localizedDescription)")
             return false
         }
+    }
+
+    func postLogin(email: String, password: String) async throws -> LoginResponse {
+        log.debug("postLogin called for email: \(email)")
+
+        do {
+            log.debug("postLogin making network request")
+            let response: APIResponse<LoginResponse> = try await fetch(
+                key: "login",
+                expiresIn: 60 * 30,
+                request: APIEndpoint.login(email: email, password: password).request,
+            )
+
+            log.debug(
+                "postLogin succeeded — statusCode: \(response.statusCode), tokenType: \(response.body.tokenType)",
+            )
+
+            return response.body
+        } catch let apiError as APIError {
+            let code = apiError.statusCode.map(String.init) ?? "n/a"
+            log.error("postLogin failed for email \(email) — statusCode: \(code), error: \(apiError.localizedDescription)")
+            throw apiError
+        } catch {
+            log.error("postLogin failed for email \(email) — unknown error: \(error.localizedDescription)")
+            throw error
+        }
+    }
+
+    // Attempts to extract a human-readable message from a server error payload.
+    private func parseServerErrorMessage(from data: Data) -> String? {
+        // Try common JSON shapes first
+        struct ErrorEnvelope: Decodable {
+            let message: String?
+            let error: String?
+            let detail: String?
+            let errors: [String]?
+        }
+
+        if let envelope = try? JSONDecoder().decode(ErrorEnvelope.self, from: data) {
+            if let msg = envelope.message, !msg.isEmpty { return msg }
+            if let err = envelope.error, !err.isEmpty { return err }
+            if let detail = envelope.detail, !detail.isEmpty { return detail }
+            if let list = envelope.errors, let first = list.first, !first.isEmpty { return first }
+        }
+
+        // Fallback to plain text if present
+        if let text = String(data: data, encoding: .utf8) {
+            let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmed.isEmpty { return trimmed }
+        }
+        return nil
     }
 }
 
@@ -74,4 +200,14 @@ struct HealthCheckResponse: Codable {
     // swiftlint:disable:next identifier_name
     let db: String
     let redis: String
+}
+
+struct LoginResponse: Codable {
+    let accessToken, tokenType, refreshToken: String
+
+    enum CodingKeys: String, CodingKey {
+        case accessToken = "access_token"
+        case tokenType = "token_type"
+        case refreshToken = "refresh_token"
+    }
 }

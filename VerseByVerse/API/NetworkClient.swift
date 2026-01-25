@@ -50,6 +50,11 @@ final class NetworkClient {
         response: HTTPURLResponse,
         as _: T.Type,
     ) throws -> APIResponse<T> {
+        if let jsonString = String(data: data, encoding: .utf8) {
+            log.debug("RAW RESPONSE BODY:\n\(jsonString)")
+            log.debug("CODE: \(response.statusCode)")
+        }
+
         let decodedBody = try JSONDecoder().decode(T.self, from: data)
 
         return APIResponse(

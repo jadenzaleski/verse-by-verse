@@ -12,8 +12,8 @@ final class APIConfig {
     static let shared = APIConfig()
 
     let urls = [
-        "http://127.0.0.1:8000",
         "https://vbv-api-dev.jadenzaleski.com",
+        "http://127.0.0.1:8000",
     ]
 
     lazy var baseURL: URL = .init(string: urls[0])!

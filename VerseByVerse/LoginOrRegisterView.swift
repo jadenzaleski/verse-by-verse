@@ -2,14 +2,15 @@ import SwiftUI
 
 struct LoginOrRegisterView: View {
     @Binding var showLogin: Bool
-    @State var email: String = ""
-    @State var password: String = ""
-    @State var confirmedPassword: String = ""
-    @State var name: String = ""
-    @State var isRegistering: Bool = false
-    @State var isAttemptingLogin: Bool = false
-    @State var isAttemptingRegistration: Bool = false
-
+    @State private var email: String = ""
+    @State private var password: String = ""
+    @State private var confirmedPassword: String = ""
+    @State private var name: String = ""
+    @State private var isRegistering: Bool = false
+    @State private var isAttemptingLogin: Bool = false
+    @State private var isAttemptingRegistration: Bool = false
+    @State private var submitState: SubmitState = .idle
+    @State private var successTrigger = 0
     private let log = AppLog.category("LoginOrRegisterView")
 
     var body: some View {
@@ -59,26 +60,34 @@ struct LoginOrRegisterView: View {
             }
 
             Button {
-                loginOrRegister()
+                Task { await loginOrRegister() }
             } label: {
                 ZStack {
                     Text(isRegistering ? "Sign Up" : "Log In")
-                        .opacity(0) // invisible but participates in layout
-                        .frame(maxWidth: .infinity)
+                        .opacity(submitState == .idle ? 1 : 0)
 
-                    if isAttemptingLogin || isAttemptingRegistration {
+                    if submitState == .loading {
                         ProgressView()
-                    } else {
-                        Text(isRegistering ? "Sign Up" : "Log In")
+                            .transition(.opacity)
+                    }
+
+                    if submitState == .success {
+                        Image("lucide.circle.check.fill")
+                            .scaleEffect(1.3)
+                            .transition(.scale.combined(with: .opacity))
                     }
                 }
+                .frame(maxWidth: .infinity)
+                .animation(.bouncy, value: submitState)
                 .padding(.vertical, 12)
                 .tint(.white)
+                .sensoryFeedback(.success, trigger: successTrigger)
             }
             .background(
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .fill(Color.accent),
             )
+            .disabled(submitState == .loading)
 
             Button {
                 withAnimation(.spring(.snappy)) {
@@ -99,18 +108,26 @@ struct LoginOrRegisterView: View {
         .padding(.horizontal)
     }
 
-    private func loginOrRegister() {
-        log.info("Logging in or registering...")
-        if isRegistering {
-            isAttemptingRegistration = true
-        } else {
-            isAttemptingLogin = true
-        }
-        // Simulate a delay before login
+    private func loginOrRegister() async {
+        submitState = .loading
+
+        let result = try? await APIService.shared.postLogin(email: "test", password: "test")
+
+        log.debug("result accessToken: \(result?.accessToken ?? "error")")
+        log.debug("result refreshToken: \(result?.refreshToken ?? "error")")
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-            isAttemptingLogin = false
-            isAttemptingRegistration = false
-            showLogin = false
+            withAnimation {
+                submitState = .success
+                successTrigger += 1
+            }
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                withAnimation {
+                    submitState = .idle
+//                    showLogin = false
+                }
+            }
         }
     }
 }
@@ -134,6 +151,10 @@ private struct RoundedTextFieldStyle: ViewModifier {
 
 private extension View {
     func roundedInput() -> some View { modifier(RoundedTextFieldStyle()) }
+}
+
+enum SubmitState {
+    case idle, loading, success, error
 }
 
 #Preview {
