@@ -37,8 +37,9 @@ struct SplashView: View {
                 Task {
                     // Allow a tiny delay before playing the draw-on
                     try? await Task.sleep(nanoseconds: 100_000_000)
-
                     playOn = false // stop draw-on
+                    try? await Task.sleep(nanoseconds: 600_000_000)
+                    // Now that the logo has drawn, continue on
                     log.info("Running startupTasks")
                     await startupTasks()
                     log.debug("startupTasks finished, playing drawOff")

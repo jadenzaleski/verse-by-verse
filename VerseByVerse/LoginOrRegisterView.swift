@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct LoginOrRegisterView: View {
-    @Binding var isLoggedIn: Bool
+    @Binding var showLogin: Bool
     @State var email: String = ""
     @State var password: String = ""
     @State var confirmedPassword: String = ""
@@ -110,7 +110,7 @@ struct LoginOrRegisterView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
             isAttemptingLogin = false
             isAttemptingRegistration = false
-            isLoggedIn = true
+            showLogin = false
         }
     }
 }
@@ -137,6 +137,6 @@ private extension View {
 }
 
 #Preview {
-    LoginOrRegisterView(isLoggedIn: .constant(false))
+    LoginOrRegisterView(showLogin: .constant(false))
         .environment(\.font, .app())
 }
