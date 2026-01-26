@@ -12,6 +12,55 @@ struct LoginOrRegisterView: View {
     @State private var submitState: SubmitState = .idle
     @State private var successTrigger = 0
     private let log = AppLog.category("LoginOrRegisterView")
+    @State private var showValidationResults = false
+    private var isNameValid: Bool {
+        name.count > 0
+    }
+    private var isEmailValid: Bool {
+        email.contains("@") && email.contains(".")
+    }
+    private var isPasswordValid: Bool {
+        password.count >= 8
+    }
+    private var isConfirmedPasswordValid: Bool {
+        password == confirmedPassword
+    }
+    private var canSubmit: Bool {
+        if isRegistering {
+            isNameValid && isEmailValid && isPasswordValid && isConfirmedPasswordValid
+        } else {
+            isEmailValid && isPasswordValid
+        }
+    }
+
+    private var validationError: String {
+        if isRegistering {
+            if !isNameValid {
+                return "You must enter a name."
+            }
+            if !isConfirmedPasswordValid {
+                return "Your passwords do not match."
+            }
+        }
+
+        if !isEmailValid {
+            return "You must enter a valid email."
+        }
+        // Last one is the passoword
+        return "Your password must be at least 8 characters long."
+    }
+
+    @State private var loginError: String = ""
+
+    private var errorText: String {
+        if showValidationResults && !canSubmit {
+            return validationError
+        } else if !loginError.isEmpty {
+            return loginError
+        }
+        // No errors, return a space to avoid spacing issues
+        return " "
+    }
 
     var body: some View {
         VStack(spacing: 15) {
@@ -38,17 +87,27 @@ struct LoginOrRegisterView: View {
                     .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity),
                                             removal: .move(edge: .leading).combined(with: .opacity)))
                     .animation(.spring(.snappy), value: isRegistering)
+                    .overlay(alignment: .trailing) {
+                        validationIcon(isNameValid)
+                    }
             }
+
             TextField("Email", text: $email)
                 .keyboardType(.emailAddress)
                 .textContentType(.username)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled(true)
                 .roundedInput()
+                .overlay(alignment: .trailing) {
+                    validationIcon(isEmailValid)
+                }
 
             SecureField("Password", text: $password)
                 .textContentType(isRegistering ? .newPassword : .password)
                 .roundedInput()
+                .overlay(alignment: .trailing) {
+                    validationIcon(isPasswordValid)
+                }
 
             if isRegistering {
                 SecureField("Confirm Password", text: $confirmedPassword)
@@ -57,10 +116,20 @@ struct LoginOrRegisterView: View {
                     .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity),
                                             removal: .move(edge: .leading).combined(with: .opacity)))
                     .animation(.spring(.snappy), value: isRegistering)
+                    .overlay(alignment: .trailing) {
+                        validationIcon(isConfirmedPasswordValid)
+                    }
             }
 
             Button {
-                Task { await loginOrRegister() }
+                withAnimation(.spring(.bouncy(duration: 0.25))) {
+                    showValidationResults = true
+                }
+                if canSubmit {
+                    Task { await login() }
+                } else {
+                    log.warning("Attempted to submit Login/Register with invalid form data")
+                }
             } label: {
                 ZStack {
                     Text(isRegistering ? "Sign Up" : "Log In")
@@ -73,6 +142,12 @@ struct LoginOrRegisterView: View {
 
                     if submitState == .success {
                         Image("lucide.circle.check.fill")
+                            .scaleEffect(1.3)
+                            .transition(.scale.combined(with: .opacity))
+                    }
+
+                    if submitState == .error {
+                        Image("lucide.circle.x.fill")
                             .scaleEffect(1.3)
                             .transition(.scale.combined(with: .opacity))
                     }
@@ -92,6 +167,7 @@ struct LoginOrRegisterView: View {
             Button {
                 withAnimation(.spring(.snappy)) {
                     isRegistering.toggle()
+                    showValidationResults = false
                 }
             } label: {
                 Text(isRegistering ? "Already have an account? Log in!" : "Don't have an account? Sign up!")
@@ -104,29 +180,54 @@ struct LoginOrRegisterView: View {
                     .font(.app(.caption2))
                     .foregroundStyle(.secondary)
             }
+
+            Text("\(errorText)")
+                .font(.app(.footnote))
+                .foregroundStyle(.red)
         }
         .padding(.horizontal)
     }
 
-    private func loginOrRegister() async {
+    @ViewBuilder
+    private func validationIcon(_ isValid: Bool) -> some View {
+        if showValidationResults {
+            Image(isValid ? "lucide.circle.check" : "lucide.circle.x")
+                .scaleEffect(1.3)
+                .foregroundStyle(isValid ? .green : .red)
+                .transition(.scale.combined(with: .opacity))
+                .padding(.horizontal, 12)
+        }
+    }
+
+    private func login() async {
         submitState = .loading
-
-        let result = try? await APIService.shared.postLogin(email: "test", password: "test")
-
-        log.debug("result accessToken: \(result?.accessToken ?? "error")")
-        log.debug("result refreshToken: \(result?.refreshToken ?? "error")")
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-            withAnimation {
-                submitState = .success
-                successTrigger += 1
+        do {
+            let result = try await APIService.shared.postLogin(email: email, password: password)
+            // if we get here, loging was a success, so react to that
+            successTrigger += 1
+            loginError = ""
+            submitState = .success
+            try? await Task.sleep(nanoseconds: 400_000_000)
+            showLogin = false
+        } catch let apiError as APIError {
+            log.error("API Error: \(apiError)")
+            submitState = .error
+            if apiError.localizedDescription == "LOGIN_BAD_CREDENTIALS" {
+                loginError = "Invalid email or password."
+            } else if apiError.statusCode == 422 {
+                loginError = "Validation error, pleasure ensure proper credentials."
+            } else {
+                loginError = apiError.localizedDescription
             }
+        } catch {
+            log.error("Unexpected Error: \(error)")
+            loginError = "Unknown error, please try again."
+            submitState = .error
+        }
 
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                withAnimation {
-                    submitState = .idle
-//                    showLogin = false
-                }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            withAnimation {
+                submitState = .idle
             }
         }
     }

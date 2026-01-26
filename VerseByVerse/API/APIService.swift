@@ -65,7 +65,7 @@ final class APIService {
 
         do {
             // Network
-            log.debug("Did not find key \"\(key)\" in cache, making network request")
+            log.debug("Making network request")
             let (data, response) = try await network.raw(request)
 
             if !(200 ... 299).contains(response.statusCode) {
@@ -151,6 +151,7 @@ final class APIService {
                 key: "login",
                 expiresIn: 60 * 30,
                 request: APIEndpoint.login(email: email, password: password).request,
+                ignoreCache: true
             )
 
             log.debug(
