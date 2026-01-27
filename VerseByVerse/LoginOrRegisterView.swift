@@ -16,15 +16,19 @@ struct LoginOrRegisterView: View {
     private var isNameValid: Bool {
         name.count > 0
     }
+
     private var isEmailValid: Bool {
         email.contains("@") && email.contains(".")
     }
+
     private var isPasswordValid: Bool {
         password.count >= 8
     }
+
     private var isConfirmedPasswordValid: Bool {
         password == confirmedPassword
     }
+
     private var canSubmit: Bool {
         if isRegistering {
             isNameValid && isEmailValid && isPasswordValid && isConfirmedPasswordValid
@@ -53,7 +57,7 @@ struct LoginOrRegisterView: View {
     @State private var loginError: String = ""
 
     private var errorText: String {
-        if showValidationResults && !canSubmit {
+        if showValidationResults, !canSubmit {
             return validationError
         } else if !loginError.isEmpty {
             return loginError
@@ -203,6 +207,9 @@ struct LoginOrRegisterView: View {
         submitState = .loading
         do {
             let result = try await APIService.shared.postLogin(email: email, password: password)
+            // save the tokens
+            try KeychainManager.saveAccessToken(result.accessToken)
+            try KeychainManager.saveRefreshToken(result.refreshToken)
             // if we get here, loging was a success, so react to that
             successTrigger += 1
             loginError = ""

@@ -58,7 +58,9 @@ struct DeveloperView: View {
         }
         .navigationTitle("Developer")
         .alert(isPresented: $showAlert, content: {
-            Alert(title: Text("Health Check"), message: Text(alertMessage ?? "No message"), dismissButton: .default(Text("OK")))
+            Alert(title: Text("Health Check"),
+                  message: Text(alertMessage ?? "No message"),
+                  dismissButton: .default(Text("OK")))
         })
     }
 }

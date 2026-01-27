@@ -50,6 +50,9 @@ struct VerseByVerseApp: App {
         await MainActor.run {
             statusText = "Preparing…"
             log.info("Cache URL: \(cache.cacheDirectory)")
+            #if DEBUG
+                KeychainManager.debugDump()
+            #endif
         }
         // Present login over the splash if needed
         await MainActor.run {

@@ -151,7 +151,7 @@ final class APIService {
                 key: "login",
                 expiresIn: 60 * 30,
                 request: APIEndpoint.login(email: email, password: password).request,
-                ignoreCache: true
+                ignoreCache: true,
             )
 
             log.debug(
@@ -161,7 +161,8 @@ final class APIService {
             return response.body
         } catch let apiError as APIError {
             let code = apiError.statusCode.map(String.init) ?? "n/a"
-            log.error("postLogin failed for email \(email) — statusCode: \(code), error: \(apiError.localizedDescription)")
+            log.error("postLogin failed for email \(email) — statusCode: \(code)," +
+                      "error: \(apiError.localizedDescription)")
             throw apiError
         } catch {
             log.error("postLogin failed for email \(email) — unknown error: \(error.localizedDescription)")

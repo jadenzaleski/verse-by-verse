@@ -61,7 +61,10 @@ final class LoggingService {
     }
 
     private func cleanupOldLogs() {
-        let files = (try? FileManager.default.contentsOfDirectory(at: logsDirectory, includingPropertiesForKeys: [.creationDateKey])) ?? []
+        let files = (
+            try? FileManager.default
+                .contentsOfDirectory(at: logsDirectory, includingPropertiesForKeys: [.creationDateKey])
+        ) ?? []
 
         let sorted = files.sorted {
             let aFile = (try? $0.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? .distantPast
@@ -76,7 +79,9 @@ final class LoggingService {
     }
 
     func readAllLogs() -> String {
-        let files = (try? FileManager.default.contentsOfDirectory(at: logsDirectory, includingPropertiesForKeys: nil)) ?? []
+        let files = (
+            try? FileManager.default.contentsOfDirectory(at: logsDirectory, includingPropertiesForKeys: nil)
+        ) ?? []
         let sorted = files.sorted { $0.lastPathComponent < $1.lastPathComponent }
 
         return sorted.compactMap { try? String(contentsOf: $0, encoding: .utf8) }.joined(separator: "\n-----\n")
