@@ -63,7 +63,7 @@ final class LoggingService {
     private func cleanupOldLogs() {
         let files = (
             try? FileManager.default
-                .contentsOfDirectory(at: logsDirectory, includingPropertiesForKeys: [.creationDateKey])
+                .contentsOfDirectory(at: logsDirectory, includingPropertiesForKeys: [.creationDateKey]),
         ) ?? []
 
         let sorted = files.sorted {
@@ -80,7 +80,7 @@ final class LoggingService {
 
     func readAllLogs() -> String {
         let files = (
-            try? FileManager.default.contentsOfDirectory(at: logsDirectory, includingPropertiesForKeys: nil)
+            try? FileManager.default.contentsOfDirectory(at: logsDirectory, includingPropertiesForKeys: nil),
         ) ?? []
         let sorted = files.sorted { $0.lastPathComponent < $1.lastPathComponent }
 

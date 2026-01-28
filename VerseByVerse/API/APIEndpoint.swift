@@ -9,11 +9,13 @@ import Foundation
 
 enum APIEndpoint {
     case login(email: String, password: String)
+    case register(name: String, email: String, password: String)
     case healthcheck
 
     var path: String {
         switch self {
         case .login: "/auth/redis/login"
+        case .register: "/auth/register"
         case .healthcheck: "/health"
         }
     }
@@ -21,6 +23,7 @@ enum APIEndpoint {
     var method: String {
         switch self {
         case .login: "POST"
+        case .register: "POST"
         default: "GET"
         }
     }
@@ -37,6 +40,13 @@ enum APIEndpoint {
         case let .login(email, password):
             let parameters = "username=\(email)&password=\(password)"
             return parameters.data(using: .utf8)
+        case let .register(name, email, password):
+            let json: [String: Any] = [
+                "email": email,
+                "password": password,
+                "first_name": name,
+            ]
+            return try? JSONSerialization.data(withJSONObject: json, options: [])
         default:
             return nil
         }

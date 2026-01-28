@@ -149,7 +149,6 @@ final class APIService {
             log.debug("postLogin making network request")
             let response: APIResponse<LoginResponse> = try await fetch(
                 key: "login",
-                expiresIn: 60 * 30,
                 request: APIEndpoint.login(email: email, password: password).request,
                 ignoreCache: true,
             )
@@ -162,10 +161,37 @@ final class APIService {
         } catch let apiError as APIError {
             let code = apiError.statusCode.map(String.init) ?? "n/a"
             log.error("postLogin failed for email \(email) — statusCode: \(code)," +
-                      "error: \(apiError.localizedDescription)")
+                "error: \(apiError.localizedDescription)")
             throw apiError
         } catch {
             log.error("postLogin failed for email \(email) — unknown error: \(error.localizedDescription)")
+            throw error
+        }
+    }
+
+    func postRegister(name: String, email: String, password: String) async throws -> RegisterResponse {
+        log.debug("postRegister called for email: \(email)")
+
+        do {
+            log.debug("postRegister making network request")
+            let response: APIResponse<RegisterResponse> = try await fetch(
+                key: "register",
+                request: APIEndpoint.register(name: name, email: email, password: password).request,
+                ignoreCache: true,
+            )
+
+            log.debug(
+                "postRegister succeeded — statusCode: \(response.statusCode), id: \(response.body.id)",
+            )
+
+            return response.body
+        } catch let apiError as APIError {
+            let code = apiError.statusCode.map(String.init) ?? "n/a"
+            log.error("postRegister failed for email \(email) — statusCode: \(code)," +
+                "error: \(apiError.localizedDescription)")
+            throw apiError
+        } catch {
+            log.error("postRegister failed for email \(email) — unknown error: \(error.localizedDescription)")
             throw error
         }
     }
@@ -211,5 +237,21 @@ struct LoginResponse: Codable {
         case accessToken = "access_token"
         case tokenType = "token_type"
         case refreshToken = "refresh_token"
+    }
+}
+
+struct RegisterResponse: Codable {
+    let id, email: String
+    let isActive, isSuperuser, isVerified: Bool
+    let firstName, lastName, lastLogin: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, email
+        case isActive = "is_active"
+        case isSuperuser = "is_superuser"
+        case isVerified = "is_verified"
+        case firstName = "first_name"
+        case lastName = "last_name"
+        case lastLogin = "last_login"
     }
 }

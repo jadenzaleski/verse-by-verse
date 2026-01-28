@@ -19,6 +19,7 @@ struct VerseByVerseApp: App {
 
     init() {
         log.info("--- Verse By Verse \(AppFunctions.versionString() ?? "") ---")
+        log.log("Log level: \(AppLog.minimumLevel)")
         let backImage = UIImage(named: "lucide.chevron.left")
         UINavigationBar.appearance().backIndicatorImage = backImage
         UINavigationBar.appearance().backIndicatorTransitionMaskImage = backImage
@@ -50,9 +51,9 @@ struct VerseByVerseApp: App {
         await MainActor.run {
             statusText = "Preparing…"
             log.info("Cache URL: \(cache.cacheDirectory)")
-            #if DEBUG
+            if AppLog.minimumLevel == .debug {
                 KeychainManager.debugDump()
-            #endif
+            }
         }
         // Present login over the splash if needed
         await MainActor.run {

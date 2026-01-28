@@ -10,6 +10,7 @@ import Foundation
 import SwiftUI
 
 struct ProfileView: View {
+    @AppStorage("name") private var name: String?
     private let log = AppLog.category("ProfileView")
 
     var body: some View {
@@ -70,7 +71,7 @@ struct ProfileView: View {
         }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                Text("Jaden Zaleski")
+                Text(name ?? "Unknown")
                     .font(.app(.title2, weight: .semibold))
                     .fixedSize()
             }
