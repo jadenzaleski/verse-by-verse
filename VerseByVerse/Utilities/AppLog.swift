@@ -5,9 +5,10 @@
 //  Created by Jaden Zaleski on 12/11/25.
 //
 
+import Foundation
 import os
 
-enum LogLevel: Int, Comparable {
+enum LogLevel: Int, Comparable, CaseIterable {
     case debug = 0
     case info = 1
     case warning = 2
@@ -15,19 +16,40 @@ enum LogLevel: Int, Comparable {
     case fault = 4
 
     static func < (lhs: LogLevel, rhs: LogLevel) -> Bool { lhs.rawValue < rhs.rawValue }
+
+    var displayName: String {
+        switch self {
+        case .debug: "Debug"
+        case .info: "Info"
+        case .warning: "Warning"
+        case .error: "Error"
+        case .fault: "Fault"
+        }
+    }
 }
 
 enum AppLog {
     static let subsystem = "com.jadenzaleski.vbv"
 
-    // Global minimum log level; messages below this level are dropped
-    static var minimumLevel: LogLevel = {
+    /// Read the persisted minimum level from UserDefaults if present,
+    /// otherwise provide a sensible default based on build configuration.
+    private static var persistedMinimumLevel: LogLevel {
+        if let raw = UserDefaults.standard.object(forKey: StorageKeys.logLevel.rawValue) as? Int,
+           let level = LogLevel(rawValue: raw) {
+            return level
+        }
         #if DEBUG
             return .debug
         #else
             return .info
         #endif
-    }()
+    }
+
+    static var minimumLevel: LogLevel = persistedMinimumLevel {
+        didSet {
+            UserDefaults.standard.set(minimumLevel.rawValue, forKey: StorageKeys.logLevel.rawValue)
+        }
+    }
 
     static func setMinimumLevel(_ level: LogLevel) {
         minimumLevel = level

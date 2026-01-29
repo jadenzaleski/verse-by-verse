@@ -53,6 +53,12 @@ struct VerseByVerseApp: App {
             log.info("Cache URL: \(cache.cacheDirectory)")
             if AppLog.minimumLevel == .debug {
                 KeychainManager.debugDump()
+                // dump AppStorage/UserDefaults
+                log.debug("App UserDefaults:")
+                let appDomain = Bundle.main.bundleIdentifier!
+                if let mySettings = UserDefaults.standard.persistentDomain(forName: appDomain) {
+                    log.debug("\(mySettings)")
+                }
             }
         }
         // Present login over the splash if needed
@@ -64,7 +70,7 @@ struct VerseByVerseApp: App {
 //        try? await Task.sleep(nanoseconds: 3_000_000_000)
 //        await MainActor.run { showLogin = false }
         while showLogin {
-            try? await Task.sleep(nanoseconds: 200_000_000)
+            try? await Task.sleep(nanoseconds: 250_000_000)
         }
 
         await MainActor.run { statusText = "Configuring…" }

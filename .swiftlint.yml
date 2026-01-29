@@ -8,3 +8,8 @@ identifier_name:
 
 trailing_comma:
   mandatory_comma: true
+
+type_body_length:
+  warning: 400
+  error: 600
+

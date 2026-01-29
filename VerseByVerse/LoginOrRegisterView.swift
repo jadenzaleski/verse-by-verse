@@ -1,9 +1,9 @@
 import SwiftUI
 
 struct LoginOrRegisterView: View {
-    @AppStorage("id") private var id: String?
-    @AppStorage("name") private var name: String?
-    @AppStorage("email") private var email: String?
+    @AppStorage(.id) private var id: String?
+    @AppStorage(.name) private var name: String?
+    @AppStorage(.email) private var email: String?
     @Binding var showLogin: Bool
     @State private var formEmail: String = ""
     @State private var password: String = ""

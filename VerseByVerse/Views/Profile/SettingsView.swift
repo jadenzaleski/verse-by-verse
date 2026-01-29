@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @AppStorage("id") private var id: String?
+    @AppStorage(.id) private var id: String?
     var body: some View {
         List {
             Section {} header: {

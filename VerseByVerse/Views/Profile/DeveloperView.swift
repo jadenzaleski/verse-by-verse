@@ -11,6 +11,7 @@ struct DeveloperView: View {
     @State private var selectedURL: String = APIConfig.shared.baseURL.absoluteString
     @State private var showAlert = false
     @State private var alertMessage: String? = ""
+    @State private var selectedLogLevel: LogLevel = AppLog.minimumLevel
     private let log = AppLog.category("DeveloperView")
 
     var body: some View {
@@ -48,6 +49,15 @@ struct DeveloperView: View {
                 }
 
                 Cache.shared.removeAll()
+            }
+
+            Picker("Log Level", selection: $selectedLogLevel) {
+                ForEach(LogLevel.allCases, id: \.self) { level in
+                    Text(level.displayName).tag(level)
+                }
+            }
+            .onChange(of: selectedLogLevel) { _, newValue in
+                AppLog.setMinimumLevel(newValue)
             }
 
             NavigationLink {

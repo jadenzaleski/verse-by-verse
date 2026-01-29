@@ -10,7 +10,7 @@ import Foundation
 import SwiftUI
 
 struct ProfileView: View {
-    @AppStorage("name") private var name: String?
+    @AppStorage(.name) private var name: String?
     private let log = AppLog.category("ProfileView")
 
     var body: some View {
@@ -54,19 +54,6 @@ struct ProfileView: View {
                 }
             }
             .padding(10)
-
-            Button {
-                log.info("Button pressed")
-                Task {
-                    do {
-                        try await handleAPIHealth()
-                    } catch {
-                        log.error("API Health check failed: \(String(describing: error))")
-                    }
-                }
-            } label: {
-                Text("Call API Health")
-            }
             Spacer()
         }
         .toolbar {
@@ -85,13 +72,6 @@ struct ProfileView: View {
                 }
             }
         }
-    }
-
-    // MARK: - Helpers
-
-    private func handleAPIHealth() async throws {
-        let result = try await APIService.shared.getHealth()
-        log.info("API Healthy: \(result)")
     }
 }
 
