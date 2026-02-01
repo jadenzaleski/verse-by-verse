@@ -62,14 +62,27 @@ struct VerseByVerseApp: App {
             }
         }
         // Present login over the splash if needed
-        await MainActor.run {
-            statusText = "Logging in…"
-            showLogin = true
+        do {
+            await MainActor.run {
+                statusText = "Logging in…"
+            }
+            // Perform potentially throwing work off the main actor if needed
+            let api = APIService()
+            let user = try await api.getUser()
+            await MainActor.run {
+                log.debug("setting showLogin to:" + (user.id.isEmpty ? "true" : "false"))
+                // Present login if no cached/authenticated user
+                showLogin = (user.id.isEmpty)
+            }
+        } catch {
+            // If fetching user fails, show login
+            await MainActor.run {
+                showLogin = true
+                statusText = "Login required"
+            }
         }
-        // Do not mark ready yet; post-login tasks will continue after dismissal
-//        try? await Task.sleep(nanoseconds: 3_000_000_000)
-//        await MainActor.run { showLogin = false }
-        while showLogin {
+
+        while await MainActor.run(body: { showLogin }) {
             try? await Task.sleep(nanoseconds: 250_000_000)
         }
 

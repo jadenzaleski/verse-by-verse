@@ -8,39 +8,65 @@
 import Foundation
 
 enum APIEndpoint {
-    case login(email: String, password: String)
-    case register(name: String, email: String, password: String)
-    case healthcheck
+    case postLogin(email: String, password: String)
+    case postRegister(name: String, email: String, password: String)
+    case postRefresh(accessToken: String, refreshToken: String)
+    case getUser
+    case getHealth
 
     var path: String {
         switch self {
-        case .login: "/auth/redis/login"
-        case .register: "/auth/register"
-        case .healthcheck: "/health"
+        case .postLogin: "/auth/redis/login"
+        case .postRegister: "/auth/register"
+        case .postRefresh: "/auth/refresh"
+        case .getUser: "/user/me"
+        case .getHealth: "/health"
         }
     }
 
     var method: String {
         switch self {
-        case .login: "POST"
-        case .register: "POST"
+        case .postLogin: "POST"
+        case .postRegister: "POST"
+        case .postRefresh: "POST"
         default: "GET"
         }
     }
 
     var contentType: String {
         switch self {
-        case .login: "application/x-www-form-urlencoded"
+        case .postLogin: "application/x-www-form-urlencoded"
         default: "application/json"
+        }
+    }
+
+    var token: String? {
+        switch self {
+        case .getUser:
+            (try? KeychainManager.getAccessToken()) ?? nil
+        default:
+            nil
+        }
+    }
+
+    var queryItems: [URLQueryItem]? {
+        switch self {
+        case let .postRefresh(accessToken, refreshToken):
+            [
+                URLQueryItem(name: "access_token", value: accessToken),
+                URLQueryItem(name: "refresh_token", value: refreshToken),
+            ]
+        default:
+            nil
         }
     }
 
     var body: Data? {
         switch self {
-        case let .login(email, password):
+        case let .postLogin(email, password):
             let parameters = "username=\(email)&password=\(password)"
             return parameters.data(using: .utf8)
-        case let .register(name, email, password):
+        case let .postRegister(name, email, password):
             let json: [String: Any] = [
                 "email": email,
                 "password": password,
@@ -54,10 +80,19 @@ enum APIEndpoint {
 
     var request: URLRequest {
         let log = AppLog.category("APIEndpoint.request")
-        let url = APIConfig.shared.baseURL.appendingPathComponent(path)
-        var req = URLRequest(url: url)
+        let base = APIConfig.shared.baseURL.appendingPathComponent(path)
+
+        var components = URLComponents(url: base, resolvingAgainstBaseURL: false)
+        components?.queryItems = queryItems
+
+        let finalURL = components?.url ?? base
+        var req = URLRequest(url: finalURL)
         req.httpMethod = method
         req.setValue(contentType, forHTTPHeaderField: "Content-Type")
+
+        if token != nil {
+            req.setValue("Bearer \(token!)", forHTTPHeaderField: "Authorization")
+        }
 
         if let body {
             req.httpBody = body

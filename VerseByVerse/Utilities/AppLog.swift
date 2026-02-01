@@ -15,7 +15,9 @@ enum LogLevel: Int, Comparable, CaseIterable {
     case error = 3
     case fault = 4
 
-    static func < (lhs: LogLevel, rhs: LogLevel) -> Bool { lhs.rawValue < rhs.rawValue }
+    static func < (lhs: LogLevel, rhs: LogLevel) -> Bool {
+        lhs.rawValue < rhs.rawValue
+    }
 
     var displayName: String {
         switch self {
@@ -35,7 +37,8 @@ enum AppLog {
     /// otherwise provide a sensible default based on build configuration.
     private static var persistedMinimumLevel: LogLevel {
         if let raw = UserDefaults.standard.object(forKey: StorageKeys.logLevel.rawValue) as? Int,
-           let level = LogLevel(rawValue: raw) {
+           let level = LogLevel(rawValue: raw)
+        {
             return level
         }
         #if DEBUG

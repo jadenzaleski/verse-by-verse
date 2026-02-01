@@ -126,7 +126,7 @@ struct StreakWidget: View {
         }
     }
 
-    // Animated streak badge: flame appears, then digits flip in sequence
+    /// Animated streak badge: flame appears, then digits flip in sequence
     @ViewBuilder
     private func streakBadge() -> some View {
         let chars = Array(streakCount.formatted(.number.grouping(.automatic)))
@@ -195,7 +195,7 @@ private struct TodayOutline: View {
     }
 }
 
-// Safe index helper to avoid out-of-bounds during animation initialization
+/// Safe index helper to avoid out-of-bounds during animation initialization
 private extension Array {
     subscript(safe index: Index) -> Element? {
         indices.contains(index) ? self[index] : nil

@@ -324,7 +324,9 @@ private struct RoundedTextFieldStyle: ViewModifier {
 }
 
 private extension View {
-    func roundedInput() -> some View { modifier(RoundedTextFieldStyle()) }
+    func roundedInput() -> some View {
+        modifier(RoundedTextFieldStyle())
+    }
 }
 
 enum SubmitState {

@@ -16,7 +16,9 @@ final class LoggingService {
     private let maxLogFiles: Int = 5
 
     private let logsDirectory: URL
-    private var currentLogURL: URL { logsDirectory.appendingPathComponent("vbv.log") }
+    private var currentLogURL: URL {
+        logsDirectory.appendingPathComponent("vbv.log")
+    }
 
     private init() {
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!

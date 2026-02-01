@@ -54,6 +54,7 @@ final class APIService {
         expiresIn: TimeInterval? = nil,
         request: URLRequest,
         ignoreCache: Bool = false,
+        attemptRefresh: Bool = false,
     ) async throws -> APIResponse<T> {
         log.debug("Fetch:\nurl: \(request)\nkey: \(key)")
 
@@ -66,7 +67,30 @@ final class APIService {
         do {
             // Network
             log.debug("Making network request")
-            let (data, response) = try await network.raw(request)
+            var (data, response) = try await network.raw(request)
+
+            if attemptRefresh, response.statusCode == 401 {
+                log.warning("API returned code \(response.statusCode), attemping to refresh access token")
+                // Grab the tokens
+                let accessToken = try KeychainManager.getAccessToken()
+                let refreshToken = try KeychainManager.getRefreshToken()
+                // make sure they exist
+                if accessToken == nil || refreshToken == nil {
+                    throw APIError.http(statusCode: response.statusCode,
+                                        message: "No access token or refresh token",
+                                        data: Data())
+                }
+                // Call refresh route
+                let postRefreshResponse = try await postRefresh(accessToken: accessToken!, refreshToken: refreshToken!)
+                // Save them
+                try KeychainManager.saveAccessToken(postRefreshResponse.accessToken)
+                try KeychainManager.saveRefreshToken(postRefreshResponse.refreshToken)
+                log.info("Tokens have been refreshed. Attempting original request again.")
+                // Attempt original request again
+                var newRequest = request
+                newRequest.setValue("Bearer \(postRefreshResponse.accessToken)", forHTTPHeaderField: "Authorization")
+                (data, response) = try await network.raw(newRequest)
+            }
 
             if !(200 ... 299).contains(response.statusCode) {
                 log.error("API returned code: \(response.statusCode)")
@@ -121,10 +145,10 @@ final class APIService {
     func getHealth() async throws -> Bool {
         log.debug("getHealth called")
         do {
-            let response: APIResponse<HealthCheckResponse> = try await fetch(
+            let response: APIResponse<GetHealthResponse> = try await fetch(
                 key: "health",
                 expiresIn: 60,
-                request: APIEndpoint.healthcheck.request,
+                request: APIEndpoint.getHealth.request,
                 ignoreCache: true,
             )
 
@@ -142,14 +166,14 @@ final class APIService {
         }
     }
 
-    func postLogin(email: String, password: String) async throws -> LoginResponse {
+    func postLogin(email: String, password: String) async throws -> PostLoginResponse {
         log.debug("postLogin called for email: \(email)")
 
         do {
             log.debug("postLogin making network request")
-            let response: APIResponse<LoginResponse> = try await fetch(
-                key: "login",
-                request: APIEndpoint.login(email: email, password: password).request,
+            let response: APIResponse<PostLoginResponse> = try await fetch(
+                key: "postLogin",
+                request: APIEndpoint.postLogin(email: email, password: password).request,
                 ignoreCache: true,
             )
 
@@ -160,7 +184,7 @@ final class APIService {
             return response.body
         } catch let apiError as APIError {
             let code = apiError.statusCode.map(String.init) ?? "n/a"
-            log.error("postLogin failed for email \(email) — statusCode: \(code)," +
+            log.error("postLogin failed for email \(email) — statusCode: \(code), " +
                 "error: \(apiError.localizedDescription)")
             throw apiError
         } catch {
@@ -169,14 +193,14 @@ final class APIService {
         }
     }
 
-    func postRegister(name: String, email: String, password: String) async throws -> RegisterResponse {
+    func postRegister(name: String, email: String, password: String) async throws -> UserResponse {
         log.debug("postRegister called for email: \(email)")
 
         do {
             log.debug("postRegister making network request")
-            let response: APIResponse<RegisterResponse> = try await fetch(
-                key: "register",
-                request: APIEndpoint.register(name: name, email: email, password: password).request,
+            let response: APIResponse<UserResponse> = try await fetch(
+                key: "postRegister",
+                request: APIEndpoint.postRegister(name: name, email: email, password: password).request,
                 ignoreCache: true,
             )
 
@@ -187,7 +211,7 @@ final class APIService {
             return response.body
         } catch let apiError as APIError {
             let code = apiError.statusCode.map(String.init) ?? "n/a"
-            log.error("postRegister failed for email \(email) — statusCode: \(code)," +
+            log.error("postRegister failed for email \(email) — statusCode: \(code), " +
                 "error: \(apiError.localizedDescription)")
             throw apiError
         } catch {
@@ -196,7 +220,61 @@ final class APIService {
         }
     }
 
-    // Attempts to extract a human-readable message from a server error payload.
+    func postRefresh(accessToken: String, refreshToken: String) async throws -> PostRefreshResponse {
+        log.debug("postRefresh called")
+
+        do {
+            log.debug("postRefresh making network request")
+            let response: APIResponse<PostRefreshResponse> = try await fetch(
+                key: "postRefresh",
+                request: APIEndpoint.postRefresh(accessToken: accessToken, refreshToken: refreshToken).request,
+                ignoreCache: true,
+            )
+
+            log.debug("postRefresh succeeded — statusCode: \(response.statusCode)")
+
+            return response.body
+        } catch let apiError as APIError {
+            let code = apiError.statusCode.map(String.init) ?? "n/a"
+            log.error("postRefresh failed, statusCode: \(code), " +
+                "error: \(apiError.localizedDescription)")
+            throw apiError
+        } catch {
+            log.error("postRefresh failed, unknown error: \(error.localizedDescription)")
+            throw error
+        }
+    }
+
+    func getUser() async throws -> UserResponse {
+        log.debug("getUser called")
+
+        do {
+            log.debug("getUser making network request")
+            let response: APIResponse<UserResponse> = try await fetch(
+                key: "getUser",
+                expiresIn: 15 * 60,
+                request: APIEndpoint.getUser.request,
+                ignoreCache: true,
+                attemptRefresh: true,
+            )
+
+            log.debug(
+                "getUser succeeded — statusCode: \(response.statusCode), id: \(response.body.id)",
+            )
+
+            return response.body
+        } catch let apiError as APIError {
+            let code = apiError.statusCode.map(String.init) ?? "n/a"
+            log.error("getUser failed, statusCode: \(code), " +
+                "error: \(apiError.localizedDescription)")
+            throw apiError
+        } catch {
+            log.error("getUser failed, unknown error: \(error.localizedDescription)")
+            throw error
+        }
+    }
+
+    /// Attempts to extract a human-readable message from a server error payload.
     private func parseServerErrorMessage(from data: Data) -> String? {
         // Try common JSON shapes first
         struct ErrorEnvelope: Decodable {
@@ -222,15 +300,15 @@ final class APIService {
     }
 }
 
-// https://app.quicktype.io
-struct HealthCheckResponse: Codable {
+/// https://app.quicktype.io
+struct GetHealthResponse: Codable {
     let status: String
     // swiftlint:disable:next identifier_name
     let db: String
     let redis: String
 }
 
-struct LoginResponse: Codable {
+struct PostLoginResponse: Codable {
     let accessToken, tokenType, refreshToken: String
 
     enum CodingKeys: String, CodingKey {
@@ -240,7 +318,7 @@ struct LoginResponse: Codable {
     }
 }
 
-struct RegisterResponse: Codable {
+struct UserResponse: Codable {
     let id, email: String
     let isActive, isSuperuser, isVerified: Bool
     let firstName, lastName, lastLogin: String?
@@ -253,5 +331,14 @@ struct RegisterResponse: Codable {
         case firstName = "first_name"
         case lastName = "last_name"
         case lastLogin = "last_login"
+    }
+}
+
+struct PostRefreshResponse: Codable {
+    let accessToken, refreshToken: String
+
+    enum CodingKeys: String, CodingKey {
+        case accessToken = "access_token"
+        case refreshToken = "refresh_token"
     }
 }
