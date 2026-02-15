@@ -55,14 +55,8 @@ struct ProfileView: View {
             .padding(10)
             Spacer()
         }
+        .navigationTitle(name ?? "Unknown")
         .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Text(name ?? "Unknown")
-                    .font(.app(.title2, weight: .semibold))
-                    .fixedSize()
-            }
-            .sharedBackgroundVisibility(.hidden)
-
             ToolbarItem(placement: .topBarTrailing) {
                 NavigationLink {
                     SettingsView()
@@ -71,6 +65,7 @@ struct ProfileView: View {
                 }
             }
         }
+        .toolbarTitleDisplayMode(.inlineLarge)
     }
 }
 

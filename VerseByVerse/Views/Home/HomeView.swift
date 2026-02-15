@@ -17,7 +17,7 @@ struct HomeView: View {
                     .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
                 Spacer()
             }
-            .padding([.leading, .trailing], 10)
+            .padding(.horizontal, 10)
         }
         .refreshable {
             log.debug("refreshed")

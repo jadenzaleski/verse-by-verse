@@ -5,6 +5,9 @@ identifier_name:
     - i
     - j
     - k
+    - x
+    - y
+    - z
 
 trailing_comma:
   mandatory_comma: true
