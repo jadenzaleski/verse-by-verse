@@ -13,8 +13,9 @@ struct ProfileView: View {
     @State private var user: UserResponse?
 
     var body: some View {
-        let firstName = user?.firstName ?? "Uknown"
+        let firstName = user?.firstName ?? "Unknown"
         let lastName = user?.lastName ?? ""
+        let sinceDate = "Since " + (user?.createdAt?.formatted(date: .long, time: .omitted) ?? " an unknown date")
         ScrollView {
             Image("headshot")
                 .resizable()
@@ -25,7 +26,7 @@ struct ProfileView: View {
                 .shadow(color: .black.opacity(0.35), radius: 6, x: 2, y: 2)
                 .padding(20)
 
-            Text("Since November 14th, 2025")
+            Text(sinceDate)
                 .font(.app(.footnote))
                 .foregroundStyle(.secondary)
 
@@ -52,14 +53,13 @@ struct ProfileView: View {
                 }
             }
             .padding(10)
-            Text(user?.lastLogin?.formatted(date: .long, time: .complete) ?? "Never logged in")
             Spacer()
         }
         .navigationTitle("\(firstName) \(lastName)")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 NavigationLink {
-                    SettingsView()
+                    SettingsView(id: user?.id)
                 } label: {
                     Image("lucide.settings")
                 }

@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct SettingsView: View {
+    var id: String?
+
     var body: some View {
         List {
             Section {} header: {
@@ -27,7 +29,9 @@ struct SettingsView: View {
                     Image("lucide.rocket")
                 }
                 Label {
-                    Text("Unknown id")
+                    Text(id ?? "Unknown id")
+                        .lineLimit(1)
+                        .textSelection(.enabled)
                 } icon: {
                     Image("lucide.id.card.lanyard")
                 }
