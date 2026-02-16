@@ -8,7 +8,7 @@
 import SwiftUI
 
 enum StorageKeys: String, CaseIterable {
-    case id, email, name, logLevel
+    case logLevel
 }
 
 extension AppStorage {

@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @AppStorage(.id) private var id: String?
     var body: some View {
         List {
             Section {} header: {
@@ -28,7 +27,7 @@ struct SettingsView: View {
                     Image("lucide.rocket")
                 }
                 Label {
-                    Text(id ?? "Unknown id")
+                    Text("Unknown id")
                 } icon: {
                     Image("lucide.id.card.lanyard")
                 }

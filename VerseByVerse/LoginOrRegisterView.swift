@@ -1,9 +1,6 @@
 import SwiftUI
 
 struct LoginOrRegisterView: View {
-    @AppStorage(.id) private var id: String?
-    @AppStorage(.name) private var name: String?
-    @AppStorage(.email) private var email: String?
     @Binding var showLogin: Bool
     @State private var formEmail: String = ""
     @State private var password: String = ""
@@ -223,6 +220,7 @@ struct LoginOrRegisterView: View {
             // save the tokens
             try KeychainManager.saveAccessToken(result.accessToken)
             try KeychainManager.saveRefreshToken(result.refreshToken)
+
             // if we get here, loging was a success, so react to that
             successTrigger += 1
             loginRegisterError = ""
@@ -256,13 +254,10 @@ struct LoginOrRegisterView: View {
         submitState = .loading
 
         do {
-            let registerResult = try await APIService.shared.postRegister(name: formName,
+            _ = try await APIService.shared.postRegister(name: formName,
                                                                           email: formEmail,
                                                                           password: password)
 
-            id = registerResult.id
-            name = registerResult.firstName
-            email = registerResult.email
             // Now attempt to login to get the tokens
             let loginResult = try await APIService.shared.postLogin(email: formEmail, password: password)
             // save the tokens

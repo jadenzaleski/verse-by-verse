@@ -16,3 +16,6 @@ type_body_length:
   warning: 400
   error: 600
 
+function_body_length:
+  warning: 100
+  error: 200

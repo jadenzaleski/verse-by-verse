@@ -55,7 +55,30 @@ final class NetworkClient {
             log.debug("CODE: \(response.statusCode)")
         }
 
-        let decodedBody = try JSONDecoder().decode(T.self, from: data)
+        let decoder = JSONDecoder()
+
+        // Use ISO8601 with fractional seconds
+        let isoFormatter = ISO8601DateFormatter()
+        isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            let string = try container.decode(String.self)
+            if let date = isoFormatter.date(from: string) {
+                return date
+            }
+            // Fallback to plain ISO8601 without fractional seconds if needed
+            let fallback = ISO8601DateFormatter()
+            fallback.formatOptions = [.withInternetDateTime]
+            if let date = fallback.date(from: string) {
+                return date
+            }
+            throw DecodingError.dataCorruptedError(
+                in: container,
+                debugDescription: "Invalid ISO8601 date: \(string)",
+            )
+        }
+
+        let decodedBody = try decoder.decode(T.self, from: data)
 
         return APIResponse(
             statusCode: response.statusCode,
@@ -64,9 +87,14 @@ final class NetworkClient {
     }
 }
 
-struct APIResponse<T: Decodable> {
+struct APIResponse<T: Codable>: Codable {
     let statusCode: Int
     let body: T
+
+    enum CodingKeys: String, CodingKey {
+        case statusCode
+        case body
+    }
 }
 
 enum NetworkError: Error {

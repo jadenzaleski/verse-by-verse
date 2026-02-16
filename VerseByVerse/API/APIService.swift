@@ -46,22 +46,28 @@ final class APIService {
     private let network = NetworkClient.shared
     private let log = AppLog.category("APIService")
 
-    /// Fetches and decodes an API response, using cache unless `ignoreCache` is true.
+    /// Fetches and decodes an API response.
     /// - Returns: A decoded `APIResponse<T>` on success.
     /// - Throws: `APIError` for HTTP, network, decoding, cancellation, or unknown errors.
     func fetch<T: Codable>(
         key: String,
         expiresIn: TimeInterval? = nil,
         request: URLRequest,
-        ignoreCache: Bool = false,
+        lookInCache: Bool = false,
+        saveToCache: Bool = true,
         attemptRefresh: Bool = false,
     ) async throws -> APIResponse<T> {
-        log.debug("Fetch:\nurl: \(request)\nkey: \(key)")
+        log.debug("Fetch:\n- url: \(request)\n- key: \(key)\n"
+            + "- expiresIn: \(String(describing: expiresIn))\n"
+            + "- lookInCache: \(lookInCache)\n- saveToCache: \(saveToCache)\n"
+            + "- attemptRefresh: \(attemptRefresh)")
 
         // Cache
-        if !ignoreCache, let cached = cache.get(key, decode: T.self) {
+        if lookInCache, let cached = cache.get(key, decode: T.self) {
             log.debug("Found key \"\(key)\" in cache")
             return cached
+        } else {
+            log.debug("\"\(key)\" not found in cache, or cache ignored.")
         }
 
         do {
@@ -107,14 +113,15 @@ final class APIService {
                 as: T.self,
             )
 
-            if !ignoreCache {
+            if saveToCache {
                 log.debug("Adding key \"\(key)\" to cache")
                 cache.set(
                     key: key,
-                    data: data,
-                    statusCode: apiResponse.statusCode,
+                    response: apiResponse,
                     expiresIn: expiresIn,
                 )
+            } else {
+                log.debug("\"\(key)\" not being saved to cache")
             }
 
             return apiResponse
@@ -149,7 +156,8 @@ final class APIService {
                 key: "health",
                 expiresIn: 60,
                 request: APIEndpoint.getHealth.request,
-                ignoreCache: true,
+                lookInCache: false,
+                saveToCache: false,
             )
 
             return response.statusCode == 200 &&
@@ -170,11 +178,11 @@ final class APIService {
         log.debug("postLogin called for email: \(email)")
 
         do {
-            log.debug("postLogin making network request")
             let response: APIResponse<PostLoginResponse> = try await fetch(
                 key: "postLogin",
                 request: APIEndpoint.postLogin(email: email, password: password).request,
-                ignoreCache: true,
+                lookInCache: false,
+                saveToCache: false,
             )
 
             log.debug(
@@ -197,11 +205,11 @@ final class APIService {
         log.debug("postRegister called for email: \(email)")
 
         do {
-            log.debug("postRegister making network request")
             let response: APIResponse<UserResponse> = try await fetch(
                 key: "postRegister",
                 request: APIEndpoint.postRegister(name: name, email: email, password: password).request,
-                ignoreCache: true,
+                lookInCache: false,
+                saveToCache: false,
             )
 
             log.debug(
@@ -224,11 +232,11 @@ final class APIService {
         log.debug("postRefresh called")
 
         do {
-            log.debug("postRefresh making network request")
             let response: APIResponse<PostRefreshResponse> = try await fetch(
                 key: "postRefresh",
                 request: APIEndpoint.postRefresh(accessToken: accessToken, refreshToken: refreshToken).request,
-                ignoreCache: true,
+                lookInCache: false,
+                saveToCache: false,
             )
 
             log.debug("postRefresh succeeded — statusCode: \(response.statusCode)")
@@ -245,16 +253,16 @@ final class APIService {
         }
     }
 
-    func getUser() async throws -> UserResponse {
+    func getUser(lookInCache: Bool = true, saveToCache: Bool = true) async throws -> UserResponse {
         log.debug("getUser called")
 
         do {
-            log.debug("getUser making network request")
             let response: APIResponse<UserResponse> = try await fetch(
                 key: "getUser",
                 expiresIn: 15 * 60,
                 request: APIEndpoint.getUser.request,
-                ignoreCache: true,
+                lookInCache: lookInCache,
+                saveToCache: saveToCache,
                 attemptRefresh: true,
             )
 
@@ -321,7 +329,8 @@ struct PostLoginResponse: Codable {
 struct UserResponse: Codable {
     let id, email: String
     let isActive, isSuperuser, isVerified: Bool
-    let firstName, lastName, lastLogin: String?
+    let firstName, lastName: String?
+    let lastLogin, createdAt, modifiedAt: Date?
 
     enum CodingKeys: String, CodingKey {
         case id, email
@@ -331,6 +340,8 @@ struct UserResponse: Codable {
         case firstName = "first_name"
         case lastName = "last_name"
         case lastLogin = "last_login"
+        case createdAt = "created_at"
+        case modifiedAt = "modified_at"
     }
 }
 

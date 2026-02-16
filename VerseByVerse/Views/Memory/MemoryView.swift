@@ -60,7 +60,7 @@ struct MemoryView: View {
             }
             .scrollIndicators(.hidden)
             .coordinateSpace(name: "scroll")
-            .onPreferenceChange(ScrollOffsetKey.self) { scrollOffset = $0; print("Offset:", scrollOffset) }
+            .onPreferenceChange(ScrollOffsetKey.self) { scrollOffset = $0 }
         }
         .navigationTitle("Memory")
         .toolbar {
@@ -174,7 +174,8 @@ struct MemoryView: View {
                                 passageCount: 24,
                                 verseCount: 120,
                                 positionSeed: 1,
-                                colorShuffleSeed: 123)
+                                colorShuffleSeed: 123,
+                                colorPallette: .ocean)
                             .frame(width: horizontalSetSize)
                     }
                 }
@@ -189,7 +190,8 @@ struct MemoryView: View {
                                 passageCount: 24,
                                 verseCount: 120,
                                 positionSeed: 1,
-                                colorShuffleSeed: 123)
+                                colorShuffleSeed: 67,
+                                colorPallette: .ocean)
                             .frame(width: horizontalSetSize)
                         SetCard(title: "Paul's Epistles",
                                 passageCount: 13,
@@ -215,7 +217,11 @@ struct MemoryView: View {
                 Text("All")
                     .font(.app(.title3))
                 ScrollView {
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: gridSetSize), spacing: 20)], spacing: 20) {
+                    LazyVGrid(
+                        columns: [
+                            GridItem(.adaptive(minimum: gridSetSize, maximum: 250), spacing: 20)
+                        ],
+                        spacing: 20) {
                         SetCard(title: "The Gospels",
                                 passageCount: 24,
                                 verseCount: 120,

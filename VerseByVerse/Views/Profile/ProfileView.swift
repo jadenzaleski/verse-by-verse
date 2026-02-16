@@ -9,10 +9,12 @@ import Foundation
 import SwiftUI
 
 struct ProfileView: View {
-    @AppStorage(.name) private var name: String?
     private let log = AppLog.category("ProfileView")
+    @State private var user: UserResponse?
 
     var body: some View {
+        let firstName = user?.firstName ?? "Uknown"
+        let lastName = user?.lastName ?? ""
         ScrollView {
             Image("headshot")
                 .resizable()
@@ -23,9 +25,6 @@ struct ProfileView: View {
                 .shadow(color: .black.opacity(0.35), radius: 6, x: 2, y: 2)
                 .padding(20)
 
-            Text("@jadenzaleski")
-                .padding(.bottom, 1)
-                .font(.app(.body, weight: .medium))
             Text("Since November 14th, 2025")
                 .font(.app(.footnote))
                 .foregroundStyle(.secondary)
@@ -53,9 +52,10 @@ struct ProfileView: View {
                 }
             }
             .padding(10)
+            Text(user?.lastLogin?.formatted(date: .long, time: .complete) ?? "Never logged in")
             Spacer()
         }
-        .navigationTitle(name ?? "Unknown")
+        .navigationTitle("\(firstName) \(lastName)")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 NavigationLink {
@@ -66,6 +66,13 @@ struct ProfileView: View {
             }
         }
         .toolbarTitleDisplayMode(.inlineLarge)
+        .task {
+            do {
+                user = try await APIService.shared.getUser()
+            } catch {
+                log.error("Failed to load user: \(String(describing: error))")
+            }
+        }
     }
 }
 

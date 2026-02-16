@@ -48,6 +48,9 @@ struct VerseByVerseApp: App {
     }
 
     private func runStartup() async {
+        var user: UserResponse
+        var attemptGetUserAgain = false
+
         await MainActor.run {
             statusText = "Preparing…"
             log.info("Cache URL: \(cache.cacheDirectory)")
@@ -67,12 +70,12 @@ struct VerseByVerseApp: App {
                 statusText = "Logging in…"
             }
             // Perform potentially throwing work off the main actor if needed
-            let api = APIService()
-            let user = try await api.getUser()
+            user = try await APIService.shared.getUser(lookInCache: false)
             await MainActor.run {
-                log.debug("setting showLogin to:" + (user.id.isEmpty ? "true" : "false"))
+                log.debug("setting showLogin to: " + (user.id.isEmpty ? "true" : "false"))
                 // Present login if no cached/authenticated user
                 showLogin = (user.id.isEmpty)
+                attemptGetUserAgain = (user.id.isEmpty)
             }
         } catch {
             // If fetching user fails, show login
@@ -84,6 +87,14 @@ struct VerseByVerseApp: App {
 
         while await MainActor.run(body: { showLogin }) {
             try? await Task.sleep(nanoseconds: 250_000_000)
+        }
+
+        if attemptGetUserAgain {
+            do {
+                user = try await APIService.shared.getUser(lookInCache: false)
+            } catch {
+                log.error("\(error.localizedDescription)")
+            }
         }
 
         await MainActor.run { statusText = "Configuring…" }
