@@ -201,13 +201,17 @@ final class APIService {
         }
     }
 
-    func postRegister(name: String, email: String, password: String) async throws -> UserResponse {
+    func postRegister(firstName: String, lastName: String, email: String, password: String)
+    async throws -> UserResponse {
         log.debug("postRegister called for email: \(email)")
 
         do {
             let response: APIResponse<UserResponse> = try await fetch(
                 key: "postRegister",
-                request: APIEndpoint.postRegister(name: name, email: email, password: password).request,
+                request: APIEndpoint.postRegister(firstName: firstName,
+                                                  lastName: lastName,
+                                                  email: email,
+                                                  password: password).request,
                 lookInCache: false,
                 saveToCache: false,
             )

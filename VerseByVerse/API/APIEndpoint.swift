@@ -9,7 +9,7 @@ import Foundation
 
 enum APIEndpoint {
     case postLogin(email: String, password: String)
-    case postRegister(name: String, email: String, password: String)
+    case postRegister(firstName: String, lastName: String, email: String, password: String)
     case postRefresh(accessToken: String, refreshToken: String)
     case getUser
     case getHealth
@@ -66,11 +66,12 @@ enum APIEndpoint {
         case let .postLogin(email, password):
             let parameters = "username=\(email)&password=\(password)"
             return parameters.data(using: .utf8)
-        case let .postRegister(name, email, password):
+        case let .postRegister(firstName, lastName, email, password):
             let json: [String: Any] = [
                 "email": email,
                 "password": password,
-                "first_name": name,
+                "first_name": firstName,
+                "last_name": lastName,
             ]
             return try? JSONSerialization.data(withJSONObject: json, options: [])
         default:

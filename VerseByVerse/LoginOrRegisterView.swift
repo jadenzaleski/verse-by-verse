@@ -5,7 +5,8 @@ struct LoginOrRegisterView: View {
     @State private var formEmail: String = ""
     @State private var password: String = ""
     @State private var confirmedPassword: String = ""
-    @State private var formName: String = ""
+    @State private var firstName: String = ""
+    @State private var lastName: String = ""
     @State private var isRegistering: Bool = true
     @State private var isAttemptingLogin: Bool = false
     @State private var isAttemptingRegistration: Bool = false
@@ -13,17 +14,6 @@ struct LoginOrRegisterView: View {
     @State private var successTrigger = 0
     private let log = AppLog.category("LoginOrRegisterView")
     @State private var showValidationResults = false
-    private var isNameValid: Bool {
-        let trimmed = formName.trimmingCharacters(in: .whitespacesAndNewlines)
-        // Minimum length after trimming
-        guard trimmed.count >= 2 else { return false }
-
-        let allowed = CharacterSet.letters
-            .union(.whitespaces)
-            .union(.urlQueryAllowed)
-            .union(CharacterSet(charactersIn: "-'"))
-        return trimmed.unicodeScalars.allSatisfy { allowed.contains($0) }
-    }
 
     private var isPasswordValid: Bool {
         password.count >= 8
@@ -35,7 +25,11 @@ struct LoginOrRegisterView: View {
 
     private var canSubmit: Bool {
         if isRegistering {
-            isNameValid && isEmailValid(formEmail) && isPasswordValid && isConfirmedPasswordValid
+            isNameValid(firstName)
+            && isNameValid(lastName)
+            && isEmailValid(formEmail)
+            && isPasswordValid
+            && isConfirmedPasswordValid
         } else {
             isEmailValid(formEmail) && isPasswordValid
         }
@@ -43,7 +37,7 @@ struct LoginOrRegisterView: View {
 
     private var validationError: String {
         if isRegistering {
-            if !isNameValid {
+            if !isNameValid(firstName) || !isNameValid(lastName) {
                 return "You must enter a valid name without special characters."
             }
             if !isConfirmedPasswordValid {
@@ -89,14 +83,24 @@ struct LoginOrRegisterView: View {
             }
 
             if isRegistering {
-                TextField("Name", text: $formName)
-                    .textContentType(.name)
+                TextField("First Name", text: $firstName)
+                    .textContentType(.givenName)
                     .roundedInput()
                     .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity),
                                             removal: .move(edge: .leading).combined(with: .opacity)))
                     .animation(.spring(.snappy), value: isRegistering)
                     .overlay(alignment: .trailing) {
-                        validationIcon(isNameValid)
+                        validationIcon(isNameValid(firstName))
+                    }
+
+                TextField("Last Name", text: $lastName)
+                    .textContentType(.familyName)
+                    .roundedInput()
+                    .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity),
+                                            removal: .move(edge: .leading).combined(with: .opacity)))
+                    .animation(.spring(.snappy), value: isRegistering)
+                    .overlay(alignment: .trailing) {
+                        validationIcon(isNameValid(lastName))
                     }
             }
 
@@ -119,7 +123,7 @@ struct LoginOrRegisterView: View {
 
             if isRegistering {
                 SecureField("Confirm Password", text: $confirmedPassword)
-                    .textContentType(.newPassword)
+                    .textContentType(.password)
                     .roundedInput()
                     .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity),
                                             removal: .move(edge: .leading).combined(with: .opacity)))
@@ -254,7 +258,8 @@ struct LoginOrRegisterView: View {
         submitState = .loading
 
         do {
-            _ = try await APIService.shared.postRegister(name: formName,
+            _ = try await APIService.shared.postRegister(firstName: firstName,
+                                                         lastName: lastName,
                                                          email: formEmail,
                                                          password: password)
 
@@ -298,6 +303,18 @@ struct LoginOrRegisterView: View {
         let emailRegex = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,64}$"
         let emailPredicate = NSPredicate(format: "SELF MATCHES[c] %@", emailRegex)
         return emailPredicate.evaluate(with: email)
+    }
+
+    private func isNameValid(_ name: String) -> Bool {
+        let trimmed = firstName.trimmingCharacters(in: .whitespacesAndNewlines)
+        // Minimum length after trimming
+        guard trimmed.count >= 2 else { return false }
+
+        let allowed = CharacterSet.letters
+            .union(.whitespaces)
+            .union(.urlQueryAllowed)
+            .union(CharacterSet(charactersIn: "-'"))
+        return trimmed.unicodeScalars.allSatisfy { allowed.contains($0) }
     }
 }
 
