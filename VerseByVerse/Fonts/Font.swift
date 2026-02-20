@@ -46,11 +46,14 @@ enum AppFontStyle {
 extension Font {
     static func app(
         _ style: AppFontStyle = .body,
+        size: CGFloat? = nil,
         weight: Font.Weight? = nil,
-        italic: Bool = false,
+        italic: Bool = false
     ) -> Font {
         let name = "Montserrat"
         let resolvedWeight: Font.Weight = weight ?? (style == .headline ? .semibold : .regular)
-        return .custom(name, size: style.baseSize, relativeTo: style.relative).italic(italic).weight(resolvedWeight)
+        let resolvedSize: CGFloat = size ?? style.baseSize
+        return .custom(name, size: resolvedSize, relativeTo: style.relative).italic(italic).weight(resolvedWeight)
     }
 }
+

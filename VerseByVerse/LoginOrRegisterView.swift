@@ -255,8 +255,8 @@ struct LoginOrRegisterView: View {
 
         do {
             _ = try await APIService.shared.postRegister(name: formName,
-                                                                          email: formEmail,
-                                                                          password: password)
+                                                         email: formEmail,
+                                                         password: password)
 
             // Now attempt to login to get the tokens
             let loginResult = try await APIService.shared.postLogin(email: formEmail, password: password)

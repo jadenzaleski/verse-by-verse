@@ -219,9 +219,10 @@ struct MemoryView: View {
                 ScrollView {
                     LazyVGrid(
                         columns: [
-                            GridItem(.adaptive(minimum: gridSetSize, maximum: 250), spacing: 20)
+                            GridItem(.adaptive(minimum: gridSetSize, maximum: 250), spacing: 20),
                         ],
-                        spacing: 20) {
+                        spacing: 20,
+                    ) {
                         SetCard(title: "The Gospels",
                                 passageCount: 24,
                                 verseCount: 120,

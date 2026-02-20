@@ -217,7 +217,8 @@ private extension JSONDecoder.DateDecodingStrategy {
             }
             throw DecodingError.dataCorruptedError(
                 in: container,
-                debugDescription: "Cannot decode date string \(dateStr)")
+                debugDescription: "Cannot decode date string \(dateStr)",
+            )
         }
     }
 }
