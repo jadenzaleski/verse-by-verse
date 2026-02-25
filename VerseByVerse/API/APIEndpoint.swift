@@ -12,6 +12,7 @@ enum APIEndpoint {
     case postRegister(firstName: String, lastName: String, email: String, password: String)
     case postRefresh(accessToken: String, refreshToken: String)
     case getUser
+    case patchUser(firstName: String?, lastName: String?, email: String?, password: String?)
     case getHealth
 
     var path: String {
@@ -20,6 +21,7 @@ enum APIEndpoint {
         case .postRegister: "/auth/register"
         case .postRefresh: "/auth/refresh"
         case .getUser: "/user/me"
+        case .patchUser: "/user/me"
         case .getHealth: "/health"
         }
     }
@@ -29,6 +31,7 @@ enum APIEndpoint {
         case .postLogin: "POST"
         case .postRegister: "POST"
         case .postRefresh: "POST"
+        case .patchUser: "PATCH"
         default: "GET"
         }
     }
@@ -42,10 +45,10 @@ enum APIEndpoint {
 
     var token: String? {
         switch self {
-        case .getUser:
-            (try? KeychainManager.getAccessToken()) ?? nil
-        default:
+        case .postLogin, .postRegister, .postRefresh, .getHealth:
             nil
+        default:
+            (try? KeychainManager.getAccessToken()) ?? nil
         }
     }
 
@@ -73,6 +76,23 @@ enum APIEndpoint {
                 "first_name": firstName,
                 "last_name": lastName,
             ]
+            return try? JSONSerialization.data(withJSONObject: json, options: [])
+        case let .patchUser(firstName, lastName, email, password):
+            var json: [String: Any] = [:]
+            // if values are not null, add to body
+            if firstName != nil {
+                json["first_name"] = firstName
+            }
+            if lastName != nil {
+                json["last_name"] = lastName
+            }
+            if email != nil {
+                json["email"] = email
+            }
+            if password != nil {
+                json["password"] = password
+            }
+            print(json)
             return try? JSONSerialization.data(withJSONObject: json, options: [])
         default:
             return nil

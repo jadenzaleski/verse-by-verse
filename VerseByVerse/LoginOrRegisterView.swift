@@ -26,10 +26,10 @@ struct LoginOrRegisterView: View {
     private var canSubmit: Bool {
         if isRegistering {
             isNameValid(firstName)
-            && isNameValid(lastName)
-            && isEmailValid(formEmail)
-            && isPasswordValid
-            && isConfirmedPasswordValid
+                && isNameValid(lastName)
+                && isEmailValid(formEmail)
+                && isPasswordValid
+                && isConfirmedPasswordValid
         } else {
             isEmailValid(formEmail) && isPasswordValid
         }
@@ -305,7 +305,7 @@ struct LoginOrRegisterView: View {
         return emailPredicate.evaluate(with: email)
     }
 
-    private func isNameValid(_ name: String) -> Bool {
+    private func isNameValid(_: String) -> Bool {
         let trimmed = firstName.trimmingCharacters(in: .whitespacesAndNewlines)
         // Minimum length after trimming
         guard trimmed.count >= 2 else { return false }

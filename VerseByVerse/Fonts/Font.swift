@@ -48,7 +48,7 @@ extension Font {
         _ style: AppFontStyle = .body,
         size: CGFloat? = nil,
         weight: Font.Weight? = nil,
-        italic: Bool = false
+        italic: Bool = false,
     ) -> Font {
         let name = "Montserrat"
         let resolvedWeight: Font.Weight = weight ?? (style == .headline ? .semibold : .regular)
@@ -56,4 +56,3 @@ extension Font {
         return .custom(name, size: resolvedSize, relativeTo: style.relative).italic(italic).weight(resolvedWeight)
     }
 }
-

@@ -90,7 +90,7 @@ struct ProfileView: View {
                     ),
                 ],
                 colors: shuffledColors(from: MeshPalette.all.randomElement(using: &themeGenerator)
-                                       ?? .ocean, seed: userIdInt),
+                    ?? .ocean, seed: userIdInt),
             )
 //                .resizable()
             .scaledToFill()
