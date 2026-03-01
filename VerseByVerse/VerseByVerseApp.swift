@@ -13,7 +13,7 @@ struct VerseByVerseApp: App {
     @State private var isReady = false
     @State private var statusText = "Loading…"
     @State private var showLogin = false
-//    @State private var readyForMain = false
+    @State private var userStore = UserStore.shared
     private let log = AppLog.category("Init")
     private let cache = Cache.shared
 
@@ -36,21 +36,28 @@ struct VerseByVerseApp: App {
                         await runStartup()
                     }
                     .transition(.opacity)
-                    .fullScreenCover(isPresented: $showLogin) {
-                        LoginOrRegisterView(showLogin: $showLogin)
+                }
+            }
+            .fullScreenCover(isPresented: $showLogin) {
+                LoginOrRegisterView(showLogin: $showLogin)
+            }
+            .onChange(of: userStore.currentUser != nil) { wasLoggedIn, isLoggedIn in
+                // If the user was logged in (wasLoggedIn == true) and is now logged out (isLoggedIn == false)
+                // and the app is past the initial splash phase (isReady == true)
+                log.debug("userStore.currentUser change detected: wasLoggedIn: \(wasLoggedIn) isLoggedIn: \(isLoggedIn) isReady: \(isReady)")
+                if wasLoggedIn && !isLoggedIn && isReady {
+                    withAnimation {
+                        showLogin = true
                     }
                 }
             }
-//            .animation(.easeOut(duration: 0.35), value: readyForMain)
             .animation(.easeOut(duration: 0.35), value: isReady)
             .environment(\.font, .app())
+            .environment(userStore)
         }
     }
 
     private func runStartup() async {
-        var user: UserResponse
-        var attemptGetUserAgain = false
-
         await MainActor.run {
             statusText = "Preparing…"
             log.info("Cache URL: \(cache.cacheDirectory)")
@@ -65,23 +72,23 @@ struct VerseByVerseApp: App {
             }
         }
         // Present login over the splash if needed
-        do {
-            await MainActor.run {
-                statusText = "Logging in…"
-            }
-            // Perform potentially throwing work off the main actor if needed
-            user = try await APIService.shared.getUser(lookInCache: false)
-            await MainActor.run {
-                log.debug("setting showLogin to: " + (user.id.isEmpty ? "true" : "false"))
-                // Present login if no cached/authenticated user
-                showLogin = (user.id.isEmpty)
-                attemptGetUserAgain = (user.id.isEmpty)
-            }
-        } catch {
-            // If fetching user fails, show login
-            await MainActor.run {
-                showLogin = true
-                statusText = "Login required"
+        await MainActor.run {
+            statusText = "Logging in…"
+        }
+
+        let hasAccessToken = (try? KeychainManager.getAccessToken()) != nil
+        let hasRefreshToken = (try? KeychainManager.getRefreshToken()) != nil
+        if hasAccessToken && hasRefreshToken {
+            log.debug("There is a access token and refresh token, so we can attempt to load the user.")
+            await userStore.loadUser(lookInCache: false)
+        }
+
+        await MainActor.run {
+            let userLoaded = userStore.currentUser != nil
+            log.debug("setting showLogin to: " + (!userLoaded ? "true" : "false"))
+            showLogin = !userLoaded
+            if showLogin {
+                userStore.resetState()
             }
         }
 
@@ -89,19 +96,8 @@ struct VerseByVerseApp: App {
             try? await Task.sleep(nanoseconds: 250_000_000)
         }
 
-        if attemptGetUserAgain {
-            do {
-                user = try await APIService.shared.getUser(lookInCache: false)
-            } catch {
-                log.error("\(error.localizedDescription)")
-            }
-        }
-
-        await MainActor.run { statusText = "Configuring…" }
-        try? await Task.sleep(nanoseconds: 1_000_000_000)
-
-        await MainActor.run { statusText = "Almost there…" }
-        try? await Task.sleep(nanoseconds: 1_000_000_000)
+//        await MainActor.run { statusText = "Configuring…" }
+//        try? await Task.sleep(nanoseconds: 1_000_000_000)
 
         // Fade into main content
         await MainActor.run {
@@ -111,3 +107,4 @@ struct VerseByVerseApp: App {
         }
     }
 }
+

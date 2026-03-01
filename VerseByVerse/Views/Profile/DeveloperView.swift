@@ -41,6 +41,7 @@ struct DeveloperView: View {
             Picker("API URL", selection: $selectedURL) {
                 ForEach(APIConfig.shared.urls, id: \.self) { url in
                     Text(url).tag(url)
+                        .lineLimit(1)
                 }
             }
             .onChange(of: selectedURL) { _, newValue in
@@ -48,7 +49,7 @@ struct DeveloperView: View {
                     APIConfig.shared.baseURL = url
                 }
 
-                Cache.shared.removeAll()
+                UserStore.shared.logout()
             }
 
             Picker("Log Level", selection: $selectedLogLevel) {

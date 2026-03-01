@@ -9,6 +9,7 @@ import SwiftUI
 
 enum StorageKeys: String, CaseIterable {
     case logLevel
+    case firstLaunch
 }
 
 extension AppStorage {

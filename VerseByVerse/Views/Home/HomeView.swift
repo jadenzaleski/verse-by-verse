@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct HomeView: View {
-    @State private var user: UserResponse?
+    @Environment(UserStore.self) private var userStore
     private let log = AppLog.category("HomeView")
     private var greeting: String {
         let hour = Calendar.current.component(.hour, from: Date())
@@ -35,21 +35,15 @@ struct HomeView: View {
         }
         .refreshable {
             log.debug("refreshed")
+            await userStore.loadUser(lookInCache: false)
         }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                Text("\(greeting) \(user?.firstName ?? "")")
+                Text("\(greeting) \(userStore.currentUser?.firstName ?? "")")
                     .font(.app(.title2, weight: .semibold))
                     .fixedSize()
             }
             .sharedBackgroundVisibility(.hidden)
-        }
-        .task {
-            do {
-                user = try await APIService.shared.getUser()
-            } catch {
-                log.error("Failed to load user: \(String(describing: error))")
-            }
         }
     }
 }

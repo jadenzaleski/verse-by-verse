@@ -12,9 +12,10 @@ import SwiftUI
 struct ProfileView: View {
     private let log = AppLog.category("ProfileView")
     private let jitter: Float = 0.5
-    @State private var user: UserResponse?
+    @Environment(UserStore.self) private var userStore
 
     var body: some View {
+        let user = userStore.currentUser
         let firstName = user?.firstName ?? "Unknown"
         let lastName = user?.lastName ?? "User"
         let sinceDate = "Since " + (user?.createdAt?.formatted(date: .long, time: .omitted) ?? " an unknown date")
@@ -127,7 +128,7 @@ struct ProfileView: View {
                 VStack {
                     Text("456")
                         .font(.app(.body, weight: .bold))
-                    Text("Verses")
+                    Text("Passages")
                         .font(.app(.footnote))
                 }
             }
@@ -138,7 +139,7 @@ struct ProfileView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 NavigationLink {
-                    SettingsView(id: user?.id)
+                    SettingsView()
                 } label: {
                     Image("lucide.settings")
                 }
@@ -146,11 +147,7 @@ struct ProfileView: View {
         }
         .toolbarTitleDisplayMode(.inlineLarge)
         .task {
-            do {
-                user = try await APIService.shared.getUser()
-            } catch {
-                log.error("Failed to load user: \(String(describing: error))")
-            }
+            await userStore.loadUser()
         }
     }
 

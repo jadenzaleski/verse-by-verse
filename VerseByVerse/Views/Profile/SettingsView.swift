@@ -8,14 +8,14 @@
 import SwiftUI
 
 struct SettingsView: View {
-    var id: String?
     private let log = AppLog.category("SettingsView")
+    @Environment(UserStore.self) private var userStore
 
     @State private var activeSheet: Sheet?
-    @State private var user: UserResponse?
     @State private var firstName: String = ""
     @State private var lastName: String = ""
     @State private var email: String = ""
+    @State private var showSignOutConfirm = false
 
     private enum Sheet: String, Identifiable {
         case name, email, password
@@ -25,6 +25,7 @@ struct SettingsView: View {
     }
 
     var body: some View {
+        let user = userStore.currentUser
         let displayFirstName = (firstName.isEmpty ? (user?.firstName ?? "Unknown") : firstName)
         let displayLastName = (lastName.isEmpty ? (user?.lastName ?? "User") : lastName)
         let displayEmail = (email.isEmpty ? (user?.email ?? "Unknown@unknown.com") : email)
@@ -39,6 +40,7 @@ struct SettingsView: View {
                         Spacer()
                         Text(displayFirstName + " " + displayLastName)
                             .foregroundStyle(.secondary)
+                            .lineLimit(1)
                         Image(systemName: "chevron.right")
                             .font(.app(.footnote))
                             .foregroundStyle(.tertiary)
@@ -53,6 +55,7 @@ struct SettingsView: View {
                         Spacer()
                         Text(verbatim: displayEmail)
                             .foregroundStyle(.secondary)
+                            .lineLimit(1)
                         Image(systemName: "chevron.right")
                             .font(.app(.footnote))
                             .foregroundStyle(.tertiary)
@@ -90,7 +93,7 @@ struct SettingsView: View {
                     Image("lucide.rocket")
                 }
                 Label {
-                    Text(id ?? "Unknown id")
+                    Text(user?.id ?? "Unknown id")
                         .lineLimit(1)
                         .textSelection(.enabled)
                 } icon: {
@@ -109,6 +112,18 @@ struct SettingsView: View {
                     Label("Developer", image: "lucide.hammer")
                 }
             }
+
+            Section {
+                Button(role: .destructive) {
+                    showSignOutConfirm = true
+                } label: {
+                    HStack {
+                        Spacer()
+                        Text("Sign Out")
+                        Spacer()
+                    }
+                }
+            }
         }
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.inline)
@@ -116,47 +131,48 @@ struct SettingsView: View {
             switch type {
             case .name:
                 NameEditorView(
-                    firstName: user?.firstName ?? "",
-                    lastName: user?.lastName ?? "",
+                    firstName: userStore.currentUser?.firstName ?? "",
+                    lastName: userStore.currentUser?.lastName ?? "",
                 ) { newFirst, newLast in
-                    Task {
-                        do {
-                            _ = try await APIService.shared.patchUser(firstName: newFirst, lastName: newLast)
-                            Cache.shared.remove("getUser")
-                            firstName = newFirst
-                            lastName = newLast
-                        } catch {
-                            log.error("patchUser error: \(error.localizedDescription)")
-                        }
-                    }
+                    try await userStore.patchUser(firstName: newFirst, lastName: newLast)
+                    firstName = newFirst
+                    lastName = newLast
                 }
 
             case .email:
                 EmailEditorView(
-                    email: user?.email ?? "",
+                    email: userStore.currentUser?.email ?? "",
                 ) { newEmail in
-                    do {
-                        _ = try await APIService.shared.patchUser(email: newEmail)
-                        Cache.shared.remove("getUser")
-                        await MainActor.run { email = newEmail }
-                    } catch {
-                        log.error("patchUser error: \(error.localizedDescription)")
-                        throw error
-                    }
+                    try await userStore.patchUser(email: newEmail)
+                    await MainActor.run { email = newEmail }
                 }
 
             case .password:
-                PasswordEditorView { _, _ in
-                    // TODO: Call your API to update password
-                    // e.g., try await APIService.shared.updatePassword(current: current, new: new)
+                PasswordEditorView { current, new in
+                    try await userStore.patchUser(password: new)
                 }
             }
         }
         .task {
-            do {
-                user = try await APIService.shared.getUser()
-            } catch {
-                log.error("Failed to load user: \(String(describing: error))")
+            await userStore.loadUser()
+        }
+        .alert("Sign Out", isPresented: $showSignOutConfirm) {
+            Button("Cancel", role: .cancel) {}
+            Button("Sign Out", role: .destructive) {
+                userStore.logout()
+                try? KeychainManager.clearAll()
+            }
+        } message: {
+            Text("Are you sure you want to sign out?")
+        }
+        .alert("Error", isPresented: Binding(
+            get: { userStore.lastError != nil && activeSheet == nil },
+            set: { _ in userStore.clearError() },
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            if let error = userStore.lastError {
+                Text(error.localizedDescription)
             }
         }
     }
@@ -164,6 +180,7 @@ struct SettingsView: View {
 
 private struct NameEditorView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(UserStore.self) private var userStore
 
     @State var firstName: String
     @State var lastName: String
@@ -188,6 +205,21 @@ private struct NameEditorView: View {
                         .textContentType(.familyName)
                         .autocorrectionDisabled()
                         .textInputAutocapitalization(.words)
+                } footer: {
+                    if case .loading = userStore.state {
+                        HStack {
+                            Spacer()
+                            ProgressView()
+                                .font(.app(.footnote))
+                            Spacer()
+                        }
+                    }
+
+                    if let errorMessage = userStore.lastError?.localizedDescription {
+                        Text(errorMessage)
+                            .font(.app(.footnote))
+                            .foregroundStyle(.red)
+                    }
                 }
             }
             .navigationTitle("Name")
@@ -203,15 +235,23 @@ private struct NameEditorView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
                         Task {
-                            try? await onSave(firstName, lastName)
-                            dismiss()
+                            do {
+                                try await onSave(firstName, lastName)
+                                dismiss()
+                            } catch {
+                                // Error is handled by UserStore
+                            }
                         }
                     } label: {
-                        Image(systemName: "checkmark")
+                        if case .loading = userStore.state {
+                            ProgressView()
+                        } else {
+                            Image(systemName: "checkmark")
+                        }
                     }
                     .buttonStyle(.glassProminent)
                     .tint(.accent)
-                    .disabled(!isValid)
+                    .disabled(!isValid || userStore.state == .loading)
                 }
             }
         }
@@ -220,10 +260,9 @@ private struct NameEditorView: View {
 
 private struct EmailEditorView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(UserStore.self) private var userStore
 
     @State var email: String
-    @State private var isSaving: Bool = false
-    @State private var errorMessage: String?
 
     var onSave: (_ email: String) async throws -> Void
 
@@ -242,7 +281,7 @@ private struct EmailEditorView: View {
                         .autocorrectionDisabled()
                         .textInputAutocapitalization(.never)
                 } footer: {
-                    if isSaving {
+                    if case .loading = userStore.state {
                         HStack {
                             Spacer()
                             ProgressView()
@@ -251,7 +290,7 @@ private struct EmailEditorView: View {
                         }
                     }
 
-                    if let errorMessage {
+                    if let errorMessage = userStore.lastError?.errorDescription {
                         Text(errorMessage)
                             .font(.app(.footnote))
                             .foregroundStyle(.red)
@@ -271,29 +310,23 @@ private struct EmailEditorView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
                         Task {
-                            guard !isSaving else { return }
-                            isSaving = true
-                            errorMessage = nil
                             do {
                                 try await onSave(email)
                                 dismiss()
                             } catch {
-                                // Map specific backend error code to a user-friendly message
-                                let message = error.localizedDescription
-                                if message.contains("UPDATE_USER_EMAIL_ALREADY_EXISTS") {
-                                    errorMessage = "That email is already in use. Please try a different email."
-                                } else {
-                                    errorMessage = "We couldn't update your email. Please try again."
-                                }
+                                // Error handled by UserStore
                             }
-                            isSaving = false
                         }
                     } label: {
-                        Image(systemName: "checkmark")
+                        if case .loading = userStore.state {
+                            ProgressView()
+                        } else {
+                            Image(systemName: "checkmark")
+                        }
                     }
                     .buttonStyle(.glassProminent)
                     .tint(.accent)
-                    .disabled(!isValid || isSaving)
+                    .disabled(!isValid || userStore.state == .loading)
                 }
             }
         }
@@ -302,6 +335,7 @@ private struct EmailEditorView: View {
 
 private struct PasswordEditorView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(UserStore.self) private var userStore
 
     @State private var currentPassword: String = ""
     @State private var newPassword: String = ""
@@ -325,12 +359,27 @@ private struct PasswordEditorView: View {
                         .textContentType(.newPassword)
                     SecureField("Confirm new password", text: $confirmPassword)
                         .textContentType(.newPassword)
-                }
+                } footer: {
+                    if case .loading = userStore.state {
+                        HStack {
+                            Spacer()
+                            ProgressView()
+                                .font(.app(.footnote))
+                            Spacer()
+                        }
+                    }
 
-                if !confirmPassword.isEmpty, newPassword != confirmPassword {
-                    Text("Passwords do not match")
-                        .font(.app(.footnote))
-                        .foregroundStyle(.red)
+                    if let errorMessage = userStore.lastError?.localizedDescription {
+                        Text(errorMessage)
+                            .font(.app(.footnote))
+                            .foregroundStyle(.red)
+                    }
+
+                    if !confirmPassword.isEmpty, newPassword != confirmPassword {
+                        Text("Passwords do not match")
+                            .font(.app(.footnote))
+                            .foregroundStyle(.red)
+                    }
                 }
             }
             .navigationTitle("Password")
@@ -346,15 +395,23 @@ private struct PasswordEditorView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
                         Task {
-                            try? await onSave(currentPassword, newPassword)
-                            dismiss()
+                            do {
+                                try await onSave(currentPassword, newPassword)
+                                dismiss()
+                            } catch {
+                                // Error handled by UserStore and shown in footer
+                            }
                         }
                     } label: {
-                        Image(systemName: "checkmark")
+                        if case .loading = userStore.state {
+                            ProgressView()
+                        } else {
+                            Image(systemName: "checkmark")
+                        }
                     }
                     .buttonStyle(.glassProminent)
                     .tint(.accent)
-                    .disabled(!isValid)
+                    .disabled(!isValid || userStore.state == .loading)
                 }
             }
         }

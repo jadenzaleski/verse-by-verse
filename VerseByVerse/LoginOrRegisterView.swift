@@ -2,18 +2,17 @@ import SwiftUI
 
 struct LoginOrRegisterView: View {
     @Binding var showLogin: Bool
+    @Environment(UserStore.self) private var userStore
     @State private var formEmail: String = ""
     @State private var password: String = ""
     @State private var confirmedPassword: String = ""
     @State private var firstName: String = ""
     @State private var lastName: String = ""
     @State private var isRegistering: Bool = true
-    @State private var isAttemptingLogin: Bool = false
-    @State private var isAttemptingRegistration: Bool = false
-    @State private var submitState: SubmitState = .idle
     @State private var successTrigger = 0
     private let log = AppLog.category("LoginOrRegisterView")
     @State private var showValidationResults = false
+    @AppStorage(StorageKeys.firstLaunch.rawValue) private var isFirstLaunch: Bool = true
 
     private var isPasswordValid: Bool {
         password.count >= 8
@@ -52,16 +51,34 @@ struct LoginOrRegisterView: View {
         return "Your password must be at least 8 characters long."
     }
 
-    @State private var loginRegisterError: String = ""
-
     private var errorText: String {
         if showValidationResults, !canSubmit {
             return validationError
-        } else if !loginRegisterError.isEmpty {
-            return loginRegisterError
+        } else if let apiError = userStore.lastError {
+            // Map common API errors to user-friendly messages
+            let desc = apiError.localizedDescription
+            if desc == "LOGIN_BAD_CREDENTIALS" {
+                return "Invalid email or password."
+            } else if desc == "REGISTER_USER_ALREADY_EXISTS" {
+                return "User with this email already exists."
+            } else if apiError.statusCode == 422 {
+                return "Validation error, please ensure fields are valid."
+            }
+            log.error("Error: \(apiError.errorDescription ?? "")")
+            return "An unexpected error occurred."
         }
         // No errors, return a space to avoid spacing issues
         return " "
+    }
+
+    init(showLogin: Binding<Bool>) {
+        self._showLogin = showLogin
+        let key = StorageKeys.firstLaunch.rawValue
+        let first = UserDefaults.standard.object(forKey: key) as? Bool ?? true
+        self._isRegistering = State(initialValue: first)
+        if first {
+            UserDefaults.standard.set(false, forKey: key)
+        }
     }
 
     var body: some View {
@@ -139,10 +156,31 @@ struct LoginOrRegisterView: View {
                 }
                 if canSubmit {
                     Task {
-                        if isRegistering {
-                            await register()
-                        } else {
-                            await login()
+                        do {
+                            if isRegistering {
+                                try await userStore.register(firstName: firstName,
+                                                             lastName: lastName,
+                                                             email: formEmail,
+                                                             password: password)
+                            } else {
+                                try await userStore.login(email: formEmail, password: password)
+                            }
+
+                            successTrigger += 1
+                            try? await Task.sleep(nanoseconds: 400_000_000)
+                            showLogin = false
+
+                            // Reset state after success and delay
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                                userStore.resetState()
+                            }
+                        } catch {
+                            // Error is handled by UserStore and displayed via errorText
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                                withAnimation {
+                                    userStore.resetState()
+                                }
+                            }
                         }
                     }
                 } else {
@@ -151,27 +189,27 @@ struct LoginOrRegisterView: View {
             } label: {
                 ZStack {
                     Text(isRegistering ? "Sign Up" : "Log In")
-                        .opacity(submitState == .idle ? 1 : 0)
+                        .opacity(userStore.state != .idle ? 0.0 : 1.0)
 
-                    if submitState == .loading {
+                    if case .loading = userStore.state {
                         ProgressView()
                             .transition(.opacity)
                     }
 
-                    if submitState == .success {
+                    if case .success = userStore.state {
                         Image("lucide.circle.check.fill")
                             .scaleEffect(1.3)
                             .transition(.scale.combined(with: .opacity))
                     }
 
-                    if submitState == .error {
+                    if case .error = userStore.state {
                         Image("lucide.circle.x.fill")
                             .scaleEffect(1.3)
                             .transition(.scale.combined(with: .opacity))
                     }
                 }
                 .frame(maxWidth: .infinity)
-                .animation(.bouncy, value: submitState)
+                .animation(.bouncy, value: userStore.state)
                 .padding(.vertical, 12)
                 .tint(.white)
                 .sensoryFeedback(.success, trigger: successTrigger)
@@ -180,15 +218,16 @@ struct LoginOrRegisterView: View {
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .fill(Color.accent),
             )
-            .disabled(submitState == .loading)
+            .disabled(userStore.state == .loading)
 
             Button {
                 withAnimation(.spring(.snappy)) {
                     isRegistering.toggle()
                     showValidationResults = false
+                    userStore.resetState()
                 }
             } label: {
-                Text(isRegistering ? "Already have an account? Log in!" : "Don't have an account? Sign up!")
+                Text(isRegistering ? "Already have an account? Log in." : "Don't have an account? Sign up.")
             }
             .transition(.opacity)
             .animation(.spring(response: 0.35, dampingFraction: 0.9, blendDuration: 0.1), value: isRegistering)
@@ -217,96 +256,14 @@ struct LoginOrRegisterView: View {
         }
     }
 
-    private func login() async {
-        submitState = .loading
-        do {
-            let result = try await APIService.shared.postLogin(email: formEmail, password: password)
-            // save the tokens
-            try KeychainManager.saveAccessToken(result.accessToken)
-            try KeychainManager.saveRefreshToken(result.refreshToken)
-
-            // if we get here, loging was a success, so react to that
-            successTrigger += 1
-            loginRegisterError = ""
-            submitState = .success
-            try? await Task.sleep(nanoseconds: 400_000_000)
-            showLogin = false
-        } catch let apiError as APIError {
-            log.error("API Error: \(apiError)")
-            submitState = .error
-            if apiError.localizedDescription == "LOGIN_BAD_CREDENTIALS" {
-                loginRegisterError = "Invalid email or password."
-            } else if apiError.statusCode == 422 {
-                loginRegisterError = "Validation error, pleasure ensure proper credentials."
-            } else {
-                loginRegisterError = apiError.localizedDescription
-            }
-        } catch {
-            log.error("Unexpected Error: \(error)")
-            loginRegisterError = "Unknown error, please try again."
-            submitState = .error
-        }
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            withAnimation {
-                submitState = .idle
-            }
-        }
-    }
-
-    private func register() async {
-        submitState = .loading
-
-        do {
-            _ = try await APIService.shared.postRegister(firstName: firstName,
-                                                         lastName: lastName,
-                                                         email: formEmail,
-                                                         password: password)
-
-            // Now attempt to login to get the tokens
-            let loginResult = try await APIService.shared.postLogin(email: formEmail, password: password)
-            // save the tokens
-            try KeychainManager.saveAccessToken(loginResult.accessToken)
-            try KeychainManager.saveRefreshToken(loginResult.refreshToken)
-            // if we get here, registering was a success, so react to that
-            successTrigger += 1
-            loginRegisterError = ""
-            submitState = .success
-            try? await Task.sleep(nanoseconds: 400_000_000)
-            showLogin = false
-        } catch let apiError as APIError {
-            log.error("API Error: \(apiError)")
-            submitState = .error
-            if apiError.localizedDescription == "REGISTER_USER_ALREADY_EXISTS" {
-                loginRegisterError = "User with this email already exists."
-            } else if apiError.localizedDescription == "REGISTER_INVALID_PASSWORD" {
-                loginRegisterError = "Password should beat least 3 characters"
-            } else if apiError.statusCode == 422 {
-                loginRegisterError = "Validation error, please ensure fields are valid."
-            } else {
-                loginRegisterError = apiError.localizedDescription
-            }
-        } catch {
-            log.error("Unexpected Error: \(error)")
-            loginRegisterError = "Unknown error, please try again."
-            submitState = .error
-        }
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            withAnimation {
-                submitState = .idle
-            }
-        }
-    }
-
     private func isEmailValid(_ email: String) -> Bool {
         let emailRegex = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,64}$"
         let emailPredicate = NSPredicate(format: "SELF MATCHES[c] %@", emailRegex)
         return emailPredicate.evaluate(with: email)
     }
 
-    private func isNameValid(_: String) -> Bool {
-        let trimmed = firstName.trimmingCharacters(in: .whitespacesAndNewlines)
+    private func isNameValid(_ name: String) -> Bool {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         // Minimum length after trimming
         guard trimmed.count >= 2 else { return false }
 
@@ -339,10 +296,6 @@ private extension View {
     func roundedInput() -> some View {
         modifier(RoundedTextFieldStyle())
     }
-}
-
-enum SubmitState {
-    case idle, loading, success, error
 }
 
 #Preview {

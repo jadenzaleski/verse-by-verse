@@ -20,15 +20,15 @@ enum APIError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case let .http(statusCode, message, _):
-            message ?? "Server returned status code \(statusCode)."
+            return message ?? "Server returned status code \(statusCode)."
         case let .network(underlying):
-            underlying.localizedDescription
+            return underlying.localizedDescription
         case let .decoding(underlying):
-            "Failed to decode response: \(underlying.localizedDescription)"
+            return "Failed to decode response: \(underlying.localizedDescription)"
         case .cancelled:
-            "Request was cancelled."
+            return "Request was cancelled."
         case let .unknown(underlying):
-            underlying.localizedDescription
+            return underlying.localizedDescription
         }
     }
 
@@ -73,30 +73,7 @@ final class APIService {
         do {
             // Network
             log.debug("Making network request")
-            var (data, response) = try await network.raw(request)
-
-            if attemptRefresh, response.statusCode == 401 {
-                log.warning("API returned code \(response.statusCode), attemping to refresh access token")
-                // Grab the tokens
-                let accessToken = try KeychainManager.getAccessToken()
-                let refreshToken = try KeychainManager.getRefreshToken()
-                // make sure they exist
-                if accessToken == nil || refreshToken == nil {
-                    throw APIError.http(statusCode: response.statusCode,
-                                        message: "No access token or refresh token",
-                                        data: Data())
-                }
-                // Call refresh route
-                let postRefreshResponse = try await postRefresh(accessToken: accessToken!, refreshToken: refreshToken!)
-                // Save them
-                try KeychainManager.saveAccessToken(postRefreshResponse.accessToken)
-                try KeychainManager.saveRefreshToken(postRefreshResponse.refreshToken)
-                log.info("Tokens have been refreshed. Attempting original request again.")
-                // Attempt original request again
-                var newRequest = request
-                newRequest.setValue("Bearer \(postRefreshResponse.accessToken)", forHTTPHeaderField: "Authorization")
-                (data, response) = try await network.raw(newRequest)
-            }
+            let (data, response) = try await performRequestWithOptionalRefresh(for: request, attemptRefresh: attemptRefresh)
 
             if !(200 ... 299).contains(response.statusCode) {
                 log.error("API returned code: \(response.statusCode)")
@@ -129,6 +106,11 @@ final class APIService {
             // Preserve APIError thrown above
             if let apiError = error as? APIError { throw apiError }
 
+            // Map explicit Task cancellation
+            if error is CancellationError {
+                throw APIError.cancelled
+            }
+
             // Map common error types
             if let urlError = error as? URLError {
                 if urlError.code == .cancelled {
@@ -148,6 +130,85 @@ final class APIService {
             throw APIError.unknown(underlying: error)
         }
     }
+
+    private func performRequestWithOptionalRefresh(
+        for request: URLRequest,
+        attemptRefresh: Bool
+    ) async throws -> (Data, HTTPURLResponse) {
+        var (data, response) = try await network.raw(request)
+
+        guard attemptRefresh, response.statusCode == 401 else {
+            return (data, response)
+        }
+
+        log.warning("API returned 401, attempting to refresh access token")
+
+        let newAccessToken = try await refreshTokensOrSignalUnauthorized()
+
+        var retried = request
+        retried.setValue("Bearer \(newAccessToken)", forHTTPHeaderField: "Authorization")
+
+        (data, response) = try await network.raw(retried)
+
+        if response.statusCode == 401 {
+            NotificationCenter.default.post(name: .unauthorized, object: nil)
+        }
+
+        return (data, response)
+    }
+
+    private func refreshTokensOrSignalUnauthorized() async throws -> String {
+        let accessToken = try KeychainManager.getAccessToken()
+        let refreshToken = try KeychainManager.getRefreshToken()
+
+        // Ensure tokens exist
+        if accessToken == nil || refreshToken == nil {
+            NotificationCenter.default.post(name: .unauthorized, object: nil)
+            throw APIError.http(statusCode: 401,
+                                message: "No access token or refresh token",
+                                data: Data())
+        }
+
+        do {
+            let refreshed = try await postRefresh(accessToken: accessToken!, refreshToken: refreshToken!)
+            try KeychainManager.saveAccessToken(refreshed.accessToken)
+            try KeychainManager.saveRefreshToken(refreshed.refreshToken)
+            log.info("Tokens have been refreshed.")
+            return refreshed.accessToken
+        } catch {
+            // ANY error during refresh means our session is likely dead or irrecoverable
+            log.error("Refresh failed: \(error.localizedDescription). Signaling unauthorized.")
+            NotificationCenter.default.post(name: .unauthorized, object: nil)
+            throw error
+        }
+    }
+
+    /// Attempts to extract a human-readable message from a server error payload.
+    private func parseServerErrorMessage(from data: Data) -> String? {
+        // Try common JSON shapes first
+        struct ErrorEnvelope: Decodable {
+            let message: String?
+            let error: String?
+            let detail: String?
+            let errors: [String]?
+        }
+
+        if let envelope = try? JSONDecoder().decode(ErrorEnvelope.self, from: data) {
+            if let msg = envelope.message, !msg.isEmpty { return msg }
+            if let err = envelope.error, !err.isEmpty { return err }
+            if let detail = envelope.detail, !detail.isEmpty { return detail }
+            if let list = envelope.errors, let first = list.first, !first.isEmpty { return first }
+        }
+
+        // Fallback to plain text if present
+        if let text = String(data: data, encoding: .utf8) {
+            let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmed.isEmpty { return trimmed }
+        }
+        return nil
+    }
+
+    // MARK: API Call Functions
 
     func getHealth() async throws -> Bool {
         log.debug("getHealth called")
@@ -316,32 +377,9 @@ final class APIService {
             throw error
         }
     }
-
-    /// Attempts to extract a human-readable message from a server error payload.
-    private func parseServerErrorMessage(from data: Data) -> String? {
-        // Try common JSON shapes first
-        struct ErrorEnvelope: Decodable {
-            let message: String?
-            let error: String?
-            let detail: String?
-            let errors: [String]?
-        }
-
-        if let envelope = try? JSONDecoder().decode(ErrorEnvelope.self, from: data) {
-            if let msg = envelope.message, !msg.isEmpty { return msg }
-            if let err = envelope.error, !err.isEmpty { return err }
-            if let detail = envelope.detail, !detail.isEmpty { return detail }
-            if let list = envelope.errors, let first = list.first, !first.isEmpty { return first }
-        }
-
-        // Fallback to plain text if present
-        if let text = String(data: data, encoding: .utf8) {
-            let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !trimmed.isEmpty { return trimmed }
-        }
-        return nil
-    }
 }
+
+// MARK: Response Formats
 
 /// https://app.quicktype.io
 struct GetHealthResponse: Codable {
@@ -388,3 +426,4 @@ struct PostRefreshResponse: Codable {
         case refreshToken = "refresh_token"
     }
 }
+
