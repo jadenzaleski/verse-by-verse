@@ -229,7 +229,8 @@ private struct NameEditorView: View {
                     Button {
                         dismiss()
                     } label: {
-                        Image(systemName: "xmark")
+                        Image("lucide.x")
+                            .scaleEffect(0.80)
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
@@ -246,7 +247,8 @@ private struct NameEditorView: View {
                         if case .loading = userStore.state {
                             ProgressView()
                         } else {
-                            Image(systemName: "checkmark")
+                            Image("lucide.check")
+                                .scaleEffect(0.80)
                         }
                     }
                     .buttonStyle(.glassProminent)
@@ -304,7 +306,8 @@ private struct EmailEditorView: View {
                     Button {
                         dismiss()
                     } label: {
-                        Image(systemName: "xmark")
+                        Image("lucide.x")
+                            .scaleEffect(0.80)
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
@@ -321,7 +324,8 @@ private struct EmailEditorView: View {
                         if case .loading = userStore.state {
                             ProgressView()
                         } else {
-                            Image(systemName: "checkmark")
+                            Image("lucide.check")
+                                .scaleEffect(0.80)
                         }
                     }
                     .buttonStyle(.glassProminent)
@@ -389,7 +393,8 @@ private struct PasswordEditorView: View {
                     Button {
                         dismiss()
                     } label: {
-                        Image(systemName: "xmark")
+                        Image("lucide.x")
+                            .scaleEffect(0.80)
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
@@ -406,7 +411,8 @@ private struct PasswordEditorView: View {
                         if case .loading = userStore.state {
                             ProgressView()
                         } else {
-                            Image(systemName: "checkmark")
+                            Image("lucide.check")
+                                .scaleEffect(0.80)
                         }
                     }
                     .buttonStyle(.glassProminent)
