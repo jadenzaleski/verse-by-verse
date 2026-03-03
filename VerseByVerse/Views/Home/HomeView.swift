@@ -52,5 +52,6 @@ struct HomeView: View {
     NavigationStack {
         HomeView()
             .environment(\.font, .app())
+            .environment(UserStore.shared)
     }
 }

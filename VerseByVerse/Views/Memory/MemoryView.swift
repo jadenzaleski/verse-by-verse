@@ -34,7 +34,7 @@ struct MemoryView: View {
     @Namespace private var tabIndicator
     @State private var tabFrames: [MemoryTopTab: CGRect] = [:]
     @State private var scrollOffset: CGFloat = 0
-
+    @State private var isAddingPassage: Bool = false
     private let horizontalSetSize: CGFloat = 135
     private let gridSetSize: CGFloat = 170
 
@@ -65,8 +65,8 @@ struct MemoryView: View {
         .navigationTitle("Memory")
         .toolbar {
             ToolbarItem {
-                NavigationLink {
-                    EmptyView()
+                Button {
+                    isAddingPassage = true
                 } label: {
                     Image("lucide.plus")
                 }
@@ -84,6 +84,9 @@ struct MemoryView: View {
             //            }
         }
         .toolbarTitleDisplayMode(.inlineLarge)
+        .sheet(isPresented: $isAddingPassage) {
+            AddPassageView()
+        }
     }
 
     private var topTabs: some View {
@@ -142,26 +145,26 @@ struct MemoryView: View {
         switch selectedTab {
         case .all:
             VStack(spacing: 10) {
-                VerseCard()
-                VerseCard()
-                VerseCard()
-                VerseCard()
-                VerseCard()
-                VerseCard()
-                VerseCard()
-                VerseCard()
-                VerseCard()
-                VerseCard()
-                VerseCard()
-                VerseCard()
-                VerseCard()
-                VerseCard()
-                VerseCard()
-                VerseCard()
-                VerseCard()
-                VerseCard()
-                VerseCard()
-                VerseCard()
+                PassageCard()
+                PassageCard()
+                PassageCard()
+                PassageCard()
+                PassageCard()
+                PassageCard()
+                PassageCard()
+                PassageCard()
+                PassageCard()
+                PassageCard()
+                PassageCard()
+                PassageCard()
+                PassageCard()
+                PassageCard()
+                PassageCard()
+                PassageCard()
+                PassageCard()
+                PassageCard()
+                PassageCard()
+                PassageCard()
             }
 
         case .sets:
@@ -259,4 +262,5 @@ struct MemoryView: View {
 #Preview {
     MemoryView()
         .environment(\.font, .app())
+        .environment(UserStore.shared)
 }

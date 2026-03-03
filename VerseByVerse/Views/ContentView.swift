@@ -42,4 +42,6 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .environment(\.font, .app())
+        .environment(UserStore.shared)
 }

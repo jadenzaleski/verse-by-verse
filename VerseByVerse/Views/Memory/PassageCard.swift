@@ -1,5 +1,5 @@
 //
-//  VerseCard.swift
+//  PassageCard.swift
 //  VerseByVerse
 //
 //  Created by Jaden Zaleski on 2/8/26.
@@ -7,7 +7,8 @@
 
 import SwiftUI
 
-struct VerseCard: View {
+struct PassageCard: View {
+    
     var body: some View {
         VStack(alignment: .leading) {
             HStack {
@@ -39,7 +40,7 @@ struct VerseCard: View {
 }
 
 #Preview {
-    VerseCard()
+    PassageCard()
         .padding()
         .environment(\.font, .app())
 }
