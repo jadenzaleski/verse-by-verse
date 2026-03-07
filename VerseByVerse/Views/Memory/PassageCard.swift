@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct PassageCard: View {
-    
     var body: some View {
         VStack(alignment: .leading) {
             HStack {

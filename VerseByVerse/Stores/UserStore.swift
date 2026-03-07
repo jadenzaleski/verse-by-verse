@@ -42,7 +42,7 @@ final class UserStore {
         NotificationCenter.default.addObserver(
             forName: .unauthorized,
             object: nil,
-            queue: .main
+            queue: .main,
         ) { [weak self] _ in
             self?.logout()
         }
@@ -86,7 +86,7 @@ final class UserStore {
                 firstName: firstName,
                 lastName: lastName,
                 email: email,
-                password: password
+                password: password,
             )
 
             currentUser = updatedUser

@@ -20,15 +20,15 @@ enum APIError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case let .http(statusCode, message, _):
-            return message ?? "Server returned status code \(statusCode)."
+            message ?? "Server returned status code \(statusCode)."
         case let .network(underlying):
-            return underlying.localizedDescription
+            underlying.localizedDescription
         case let .decoding(underlying):
-            return "Failed to decode response: \(underlying.localizedDescription)"
+            "Failed to decode response: \(underlying.localizedDescription)"
         case .cancelled:
-            return "Request was cancelled."
+            "Request was cancelled."
         case let .unknown(underlying):
-            return underlying.localizedDescription
+            underlying.localizedDescription
         }
     }
 
@@ -133,7 +133,7 @@ final class APIService {
 
     private func performRequestWithOptionalRefresh(
         for request: URLRequest,
-        attemptRefresh: Bool
+        attemptRefresh: Bool,
     ) async throws -> (Data, HTTPURLResponse) {
         var (data, response) = try await network.raw(request)
 
@@ -426,4 +426,3 @@ struct PostRefreshResponse: Codable {
         case refreshToken = "refresh_token"
     }
 }
-

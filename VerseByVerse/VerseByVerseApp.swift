@@ -45,7 +45,7 @@ struct VerseByVerseApp: App {
                 // If the user was logged in (wasLoggedIn == true) and is now logged out (isLoggedIn == false)
                 // and the app is past the initial splash phase (isReady == true)
                 log.debug("userStore.currentUser change detected: wasLoggedIn: \(wasLoggedIn) isLoggedIn: \(isLoggedIn) isReady: \(isReady)")
-                if wasLoggedIn && !isLoggedIn && isReady {
+                if wasLoggedIn, !isLoggedIn, isReady {
                     withAnimation {
                         showLogin = true
                     }
@@ -78,7 +78,7 @@ struct VerseByVerseApp: App {
 
         let hasAccessToken = (try? KeychainManager.getAccessToken()) != nil
         let hasRefreshToken = (try? KeychainManager.getRefreshToken()) != nil
-        if hasAccessToken && hasRefreshToken {
+        if hasAccessToken, hasRefreshToken {
             log.debug("There is a access token and refresh token, so we can attempt to load the user.")
             await userStore.loadUser(lookInCache: false)
         }
@@ -107,4 +107,3 @@ struct VerseByVerseApp: App {
         }
     }
 }
-

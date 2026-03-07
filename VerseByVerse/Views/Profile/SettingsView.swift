@@ -148,7 +148,7 @@ struct SettingsView: View {
                 }
 
             case .password:
-                PasswordEditorView { current, new in
+                PasswordEditorView { _, new in
                     try await userStore.patchUser(password: new)
                 }
             }

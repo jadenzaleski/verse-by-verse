@@ -51,18 +51,18 @@ struct AddPassageView: View {
                             .padding(.vertical, 5)
                             .background(
                                 RoundedRectangle(cornerRadius: textFieldCornerRadius, style: .continuous)
-                                    .fill(Color(.secondarySystemBackground))
+                                    .fill(Color(.secondarySystemBackground)),
                             )
                             .overlay(
                                 RoundedRectangle(cornerRadius: textFieldCornerRadius, style: .continuous)
-                                    .stroke(focusedField == .startChapter ? Color.accentColor.opacity(0.5) : Color.secondary.opacity(0.2), lineWidth: 1)
+                                    .stroke(focusedField == .startChapter ? Color.accentColor.opacity(0.5) : Color.secondary.opacity(0.2), lineWidth: 1),
                             )
                             .multilineTextAlignment(.center)
                             .focused($focusedField, equals: .startChapter)
                             .submitLabel(.next)
                             .onSubmit { focusNext() }
                             .onChange(of: startChapter) { newValue in
-                                let filtered = newValue.filter { $0.isNumber }
+                                let filtered = newValue.filter(\.isNumber)
                                 if filtered != newValue { startChapter = filtered }
                                 if startChapter.count > 3 { startChapter = String(startChapter.prefix(3)) }
                                 if startChapter.count == 3 { focusNext() }
@@ -75,18 +75,18 @@ struct AddPassageView: View {
                             .padding(.vertical, 5)
                             .background(
                                 RoundedRectangle(cornerRadius: textFieldCornerRadius, style: .continuous)
-                                    .fill(Color(.secondarySystemBackground))
+                                    .fill(Color(.secondarySystemBackground)),
                             )
                             .overlay(
                                 RoundedRectangle(cornerRadius: textFieldCornerRadius, style: .continuous)
-                                    .stroke(focusedField == .startVerse ? Color.accentColor.opacity(0.5) : Color.secondary.opacity(0.2), lineWidth: 1)
+                                    .stroke(focusedField == .startVerse ? Color.accentColor.opacity(0.5) : Color.secondary.opacity(0.2), lineWidth: 1),
                             )
                             .multilineTextAlignment(.center)
                             .focused($focusedField, equals: .startVerse)
                             .submitLabel(.next)
                             .onSubmit { focusNext() }
                             .onChange(of: startVerse) { newValue in
-                                let filtered = newValue.filter { $0.isNumber }
+                                let filtered = newValue.filter(\.isNumber)
                                 if filtered != newValue { startVerse = filtered }
                                 if startVerse.count > 3 { startVerse = String(startVerse.prefix(3)) }
                                 if startVerse.count == 3 { focusNext() }
@@ -99,18 +99,18 @@ struct AddPassageView: View {
                             .padding(.vertical, 5)
                             .background(
                                 RoundedRectangle(cornerRadius: textFieldCornerRadius, style: .continuous)
-                                    .fill(Color(.secondarySystemBackground))
+                                    .fill(Color(.secondarySystemBackground)),
                             )
                             .overlay(
                                 RoundedRectangle(cornerRadius: textFieldCornerRadius, style: .continuous)
-                                    .stroke(focusedField == .endChapter ? Color.accentColor.opacity(0.5) : Color.secondary.opacity(0.2), lineWidth: 1)
+                                    .stroke(focusedField == .endChapter ? Color.accentColor.opacity(0.5) : Color.secondary.opacity(0.2), lineWidth: 1),
                             )
                             .multilineTextAlignment(.center)
                             .focused($focusedField, equals: .endChapter)
                             .submitLabel(.next)
                             .onSubmit { focusNext() }
                             .onChange(of: endChapter) { newValue in
-                                let filtered = newValue.filter { $0.isNumber }
+                                let filtered = newValue.filter(\.isNumber)
                                 if filtered != newValue { endChapter = filtered }
                                 if endChapter.count > 3 { endChapter = String(endChapter.prefix(3)) }
                                 if endChapter.count == 3 { focusNext() }
@@ -123,18 +123,18 @@ struct AddPassageView: View {
                             .padding(.vertical, 5)
                             .background(
                                 RoundedRectangle(cornerRadius: textFieldCornerRadius, style: .continuous)
-                                    .fill(Color(.secondarySystemBackground))
+                                    .fill(Color(.secondarySystemBackground)),
                             )
                             .overlay(
                                 RoundedRectangle(cornerRadius: textFieldCornerRadius, style: .continuous)
-                                    .stroke(focusedField == .endVerse ? Color.accentColor.opacity(0.5) : Color.secondary.opacity(0.2), lineWidth: 1)
+                                    .stroke(focusedField == .endVerse ? Color.accentColor.opacity(0.5) : Color.secondary.opacity(0.2), lineWidth: 1),
                             )
                             .multilineTextAlignment(.center)
                             .focused($focusedField, equals: .endVerse)
                             .submitLabel(.done)
                             .onSubmit { focusNext() }
                             .onChange(of: endVerse) { newValue in
-                                let filtered = newValue.filter { $0.isNumber }
+                                let filtered = newValue.filter(\.isNumber)
                                 if filtered != newValue { endVerse = filtered }
                                 if endVerse.count > 3 { endVerse = String(endVerse.prefix(3)) }
                             }
@@ -179,45 +179,7 @@ struct AddPassageView: View {
             }
             .safeAreaInset(edge: .bottom) {
                 if focusedField != nil {
-                    HStack {
-                        GlassEffectContainer(spacing: 15) {
-                            HStack(spacing: 0) {
-                                Button {
-                                    focusPrevious()
-                                } label: {
-                                    Image("lucide.chevron.left")
-                                        .frame(width: 20, height: 20)
-                                        .padding()
-                                        .glassEffect()
-                                        .glassEffectUnion(id: 1, namespace: namespace)
-                                }
-
-                                Button {
-                                    focusNext()
-                                } label: {
-                                    Image("lucide.chevron.left")
-                                        .rotationEffect(.degrees(180))
-                                        .frame(width: 20, height: 20)
-                                        .padding()
-                                        .glassEffect()
-                                        .glassEffectUnion(id: 1, namespace: namespace)
-
-                                }
-                            }
-                        }
-                        Spacer()
-                        Button("Done") {
-                            withAnimation {
-                                focusedField = nil
-                            }
-                        }
-                        .padding()
-                        .glassEffect(.regular.interactive(), in: .capsule)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .padding(.horizontal)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    keyboardBar()
                 }
             }
         }
@@ -252,10 +214,86 @@ struct AddPassageView: View {
             focusedField = nil
         }
     }
+
+    func keyboardBar() -> some View {
+        HStack {
+            GlassEffectContainer {
+                HStack {
+                    Button {
+                        focusPrevious()
+                    } label: {
+                        Image("lucide.chevron.left")
+                            .frame(width: 20, height: 20)
+                            .padding()
+                            .glassEffect(.regular.interactive())
+                            .glassEffectUnion(id: 1, namespace: namespace)
+                    }
+
+                    Button {
+                        focusNext()
+                    } label: {
+                        Image("lucide.chevron.left")
+                            .rotationEffect(.degrees(180))
+                            .frame(width: 20, height: 20)
+                            .padding()
+                            .glassEffect(.regular.interactive())
+                            .glassEffectUnion(id: 1, namespace: namespace)
+                    }
+                }
+            }
+
+            Spacer()
+
+            GlassEffectContainer {
+                HStack {
+                    Button {
+                        print("TODO 1")
+                    } label: {
+                        Text("1")
+                            .padding()
+                            .padding(.leading, 10)
+                            .glassEffect(.regular.interactive())
+                            .glassEffectUnion(id: 2, namespace: namespace)
+                    }
+
+                    Divider()
+                        .frame(width: 1, height: 20)
+                        .overlay(.separator)
+                        .glassEffect()
+                        .glassEffectUnion(id: 2, namespace: namespace)
+
+                    Button {
+                        print("TODO 2")
+                    } label: {
+                        Text("19")
+                            .padding()
+                            .padding(.trailing, 10)
+                            .glassEffect(.regular.interactive())
+                            .glassEffectUnion(id: 2, namespace: namespace)
+                    }
+                }
+            }
+
+            Button {
+                withAnimation {
+                    focusedField = nil
+                }
+            } label: {
+                Image("lucide.check")
+                    .frame(width: 20, height: 20)
+                    .padding()
+                    .glassEffect(.regular.interactive())
+                    .glassEffectUnion(id: 3, namespace: namespace)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 10)
+        .padding(.horizontal)
+        .transition(.move(edge: .bottom).combined(with: .opacity))
+    }
 }
 
 #Preview {
     AddPassageView()
         .environment(\.font, .app())
 }
-

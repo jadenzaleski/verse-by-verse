@@ -72,10 +72,10 @@ struct LoginOrRegisterView: View {
     }
 
     init(showLogin: Binding<Bool>) {
-        self._showLogin = showLogin
+        _showLogin = showLogin
         let key = StorageKeys.firstLaunch.rawValue
         let first = UserDefaults.standard.object(forKey: key) as? Bool ?? true
-        self._isRegistering = State(initialValue: first)
+        _isRegistering = State(initialValue: first)
         if first {
             UserDefaults.standard.set(false, forKey: key)
         }
