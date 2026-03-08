@@ -377,6 +377,30 @@ final class APIService {
             throw error
         }
     }
+
+    func getBibleBooks() async throws -> BibleBooksResponse {
+        log.debug("getBibleBooks called")
+
+        do {
+            let response: APIResponse<BibleBooksResponse> = try await fetch(
+                key: "bibleBooks",
+                expiresIn: 15 * 24 * 60 * 60, // 15 days
+                request: APIEndpoint.getBibleBooks.request,
+                lookInCache: true,
+                saveToCache: true,
+            )
+
+            log.debug("getBibleBooks succeeded")
+
+            return response.body
+        } catch let apiError as APIError {
+            log.error("getBibleBooks failed, error: \(apiError.localizedDescription)")
+            throw apiError
+        } catch {
+            log.error("getBibleBooks failed, unknown error: \(error.localizedDescription)")
+            throw error
+        }
+    }
 }
 
 // MARK: Response Formats

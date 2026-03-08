@@ -14,6 +14,7 @@ enum APIEndpoint {
     case getUser
     case patchUser(firstName: String?, lastName: String?, email: String?, password: String?)
     case getHealth
+    case getBibleBooks
 
     var path: String {
         switch self {
@@ -23,6 +24,7 @@ enum APIEndpoint {
         case .getUser: "/user/me"
         case .patchUser: "/user/me"
         case .getHealth: "/health"
+        case .getBibleBooks: "/static/bible_books_array.min.json"
         }
     }
 
@@ -45,7 +47,7 @@ enum APIEndpoint {
 
     var token: String? {
         switch self {
-        case .postLogin, .postRegister, .postRefresh, .getHealth:
+        case .postLogin, .postRegister, .postRefresh, .getHealth, .getBibleBooks:
             nil
         default:
             (try? KeychainManager.getAccessToken()) ?? nil

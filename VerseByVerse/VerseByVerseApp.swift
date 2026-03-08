@@ -14,6 +14,7 @@ struct VerseByVerseApp: App {
     @State private var statusText = "Loading…"
     @State private var showLogin = false
     @State private var userStore = UserStore.shared
+    @State private var bibleStore = BibleStore.shared
     private let log = AppLog.category("Init")
     private let cache = Cache.shared
 
@@ -54,6 +55,7 @@ struct VerseByVerseApp: App {
             .animation(.easeOut(duration: 0.35), value: isReady)
             .environment(\.font, .app())
             .environment(userStore)
+            .environment(bibleStore)
         }
     }
 
@@ -96,8 +98,10 @@ struct VerseByVerseApp: App {
             try? await Task.sleep(nanoseconds: 250_000_000)
         }
 
-//        await MainActor.run { statusText = "Configuring…" }
-//        try? await Task.sleep(nanoseconds: 1_000_000_000)
+        await MainActor.run { statusText = "Configuring…" }
+        Task {
+            await bibleStore.loadBibleData()
+        }
 
         // Fade into main content
         await MainActor.run {

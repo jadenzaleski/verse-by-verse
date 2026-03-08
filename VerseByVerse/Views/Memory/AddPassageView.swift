@@ -9,8 +9,10 @@ import SwiftUI
 
 struct AddPassageView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(BibleStore.self) private var bibleStore
 
     @State private var passageText: String = ""
+    @State private var selectedBook = "John"
     @State private var startChapter: String = ""
     @State private var startVerse: String = ""
     @State private var endChapter: String = ""
@@ -34,9 +36,9 @@ struct AddPassageView: View {
                         }
                     }
                     .pickerStyle(.menu)
-                    Picker("Book", selection: $selectedTranslation) {
-                        ForEach(translations, id: \.self) { code in
-                            Text(code).tag(code)
+                    Picker("Book", selection: $selectedBook) {
+                        ForEach(bibleStore.bibleBooksOrder, id: \.self) { book in
+                            Text(book).tag(book)
                         }
                     }
                     .pickerStyle(.menu)
@@ -61,10 +63,17 @@ struct AddPassageView: View {
                             .focused($focusedField, equals: .startChapter)
                             .submitLabel(.next)
                             .onSubmit { focusNext() }
-                            .onChange(of: startChapter) { newValue in
+                            .onChange(of: startChapter) { _, newValue in
                                 let filtered = newValue.filter(\.isNumber)
                                 if filtered != newValue { startChapter = filtered }
                                 if startChapter.count > 3 { startChapter = String(startChapter.prefix(3)) }
+
+                                // Validate against BibleStore
+                                if let ch = Int(startChapter) {
+                                    let maxChapters = bibleStore.chapterCount(for: selectedBook)
+                                    if ch > maxChapters { startChapter = String(maxChapters) }
+                                }
+
                                 if startChapter.count == 3 { focusNext() }
                             }
                         Text(":")
@@ -85,10 +94,17 @@ struct AddPassageView: View {
                             .focused($focusedField, equals: .startVerse)
                             .submitLabel(.next)
                             .onSubmit { focusNext() }
-                            .onChange(of: startVerse) { newValue in
+                            .onChange(of: startVerse) { _, newValue in
                                 let filtered = newValue.filter(\.isNumber)
                                 if filtered != newValue { startVerse = filtered }
                                 if startVerse.count > 3 { startVerse = String(startVerse.prefix(3)) }
+
+                                // Validate against BibleStore
+                                if let ch = Int(startChapter), let vs = Int(startVerse) {
+                                    let maxVerses = bibleStore.verseCount(for: selectedBook, chapter: ch)
+                                    if vs > maxVerses { startVerse = String(maxVerses) }
+                                }
+
                                 if startVerse.count == 3 { focusNext() }
                             }
                         Text("-")
@@ -109,10 +125,17 @@ struct AddPassageView: View {
                             .focused($focusedField, equals: .endChapter)
                             .submitLabel(.next)
                             .onSubmit { focusNext() }
-                            .onChange(of: endChapter) { newValue in
+                            .onChange(of: endChapter) { _, newValue in
                                 let filtered = newValue.filter(\.isNumber)
                                 if filtered != newValue { endChapter = filtered }
                                 if endChapter.count > 3 { endChapter = String(endChapter.prefix(3)) }
+
+                                // Validate against BibleStore
+                                if let ch = Int(endChapter) {
+                                    let maxChapters = bibleStore.chapterCount(for: selectedBook)
+                                    if ch > maxChapters { endChapter = String(maxChapters) }
+                                }
+
                                 if endChapter.count == 3 { focusNext() }
                             }
                         Text(":")
@@ -133,16 +156,25 @@ struct AddPassageView: View {
                             .focused($focusedField, equals: .endVerse)
                             .submitLabel(.done)
                             .onSubmit { focusNext() }
-                            .onChange(of: endVerse) { newValue in
+                            .onChange(of: endVerse) { _, newValue in
                                 let filtered = newValue.filter(\.isNumber)
                                 if filtered != newValue { endVerse = filtered }
                                 if endVerse.count > 3 { endVerse = String(endVerse.prefix(3)) }
+
+                                // Validate against BibleStore
+                                if let ch = Int(endChapter), let vs = Int(endVerse) {
+                                    let maxVerses = bibleStore.verseCount(for: selectedBook, chapter: ch)
+                                    if vs > maxVerses { endVerse = String(maxVerses) }
+                                }
                             }
                     }
 
                 } footer: {
-                    Text(" ")
-                        .font(.app(.footnote))
+                    Group {
+                        ProgressView()
+                        Text(" ")
+                    }
+                    .font(.app(.footnote))
                 }
 
                 Section {
@@ -153,7 +185,6 @@ struct AddPassageView: View {
 
                 } footer: {
                     Text(" ")
-                        .font(.app(.footnote))
                 }
             }
             .navigationTitle("Add Passage")
@@ -181,6 +212,15 @@ struct AddPassageView: View {
                 if focusedField != nil {
                     keyboardBar()
                 }
+            }
+            .task {
+                await bibleStore.loadBibleData()
+            }
+            .onChange(of: selectedBook) {
+                startChapter = ""
+                startVerse = ""
+                endChapter = ""
+                endVerse = ""
             }
         }
     }
@@ -215,8 +255,58 @@ struct AddPassageView: View {
         }
     }
 
+    private var currentFieldLimits: (min: Int, max: Int) {
+        let maxChapters = bibleStore.chapterCount(for: selectedBook)
+
+        switch focusedField {
+        case .startChapter:
+            let max = Int(endChapter) ?? maxChapters
+            return (1, max)
+
+        case .startVerse:
+            let ch = Int(startChapter) ?? 1
+            let bookVsMax = bibleStore.verseCount(for: selectedBook, chapter: ch)
+            // If start and end chapters are the same, limit startVerse by endVerse
+            if let endChVal = Int(endChapter), ch == endChVal, let endVsVal = Int(endVerse) {
+                return (1, endVsVal)
+            }
+            return (1, bookVsMax)
+
+        case .endChapter:
+            let min = Int(startChapter) ?? 1
+            return (min, maxChapters)
+
+        case .endVerse:
+            let ch = Int(endChapter) ?? 1
+            let bookVsMax = bibleStore.verseCount(for: selectedBook, chapter: ch)
+            // If end and start chapters are the same, limit endVerse by startVerse
+            if let startChVal = Int(startChapter), ch == startChVal, let startVsVal = Int(startVerse) {
+                return (startVsVal, bookVsMax)
+            }
+            return (1, bookVsMax)
+
+        case .none:
+            return (1, 1)
+        }
+    }
+
+    private func setFieldValue(_ value: Int) {
+        let stringValue = String(value)
+        switch focusedField {
+        case .startChapter: startChapter = stringValue
+        case .startVerse: startVerse = stringValue
+        case .endChapter: endChapter = stringValue
+        case .endVerse: endVerse = stringValue
+        case .none: break
+        }
+
+        // Auto-advance to next field
+        focusNext()
+    }
+
     func keyboardBar() -> some View {
-        HStack {
+        let limits = currentFieldLimits
+        return HStack {
             GlassEffectContainer {
                 HStack {
                     Button {
@@ -247,9 +337,9 @@ struct AddPassageView: View {
             GlassEffectContainer {
                 HStack {
                     Button {
-                        print("TODO 1")
+                        setFieldValue(limits.min)
                     } label: {
-                        Text("1")
+                        Text("\(limits.min)")
                             .padding()
                             .padding(.leading, 10)
                             .glassEffect(.regular.interactive())
@@ -263,9 +353,9 @@ struct AddPassageView: View {
                         .glassEffectUnion(id: 2, namespace: namespace)
 
                     Button {
-                        print("TODO 2")
+                        setFieldValue(limits.max)
                     } label: {
-                        Text("19")
+                        Text("\(limits.max)")
                             .padding()
                             .padding(.trailing, 10)
                             .glassEffect(.regular.interactive())
@@ -296,4 +386,5 @@ struct AddPassageView: View {
 #Preview {
     AddPassageView()
         .environment(\.font, .app())
+        .environment(BibleStore.shared)
 }
