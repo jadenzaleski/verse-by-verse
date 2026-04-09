@@ -15,6 +15,7 @@ enum APIEndpoint {
     case patchUser(firstName: String?, lastName: String?, email: String?, password: String?)
     case getHealth
     case getBibleBooks
+    case getBibleTranslations
 
     var path: String {
         switch self {
@@ -25,6 +26,7 @@ enum APIEndpoint {
         case .patchUser: "/user/me"
         case .getHealth: "/health"
         case .getBibleBooks: "/static/bible_books_array.min.json"
+        case .getBibleTranslations: "/bible/translations"
         }
     }
 

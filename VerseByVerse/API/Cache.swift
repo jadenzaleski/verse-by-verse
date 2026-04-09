@@ -188,7 +188,7 @@ private extension Cache {
     }
 }
 
-private nonisolated struct DiskCacheEntry: Codable, Sendable {
+private nonisolated struct DiskCacheEntry: Codable {
     let data: Data
     let statusCode: Int
     let expiresAt: Date?

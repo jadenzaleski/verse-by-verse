@@ -11,7 +11,7 @@ struct AddPassageView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(BibleStore.self) private var bibleStore
 
-    @State private var selectedTranslation = "ESV"
+    @AppStorage(.lastUsedTranslation) private var selectedTranslation = "KJV"
     @State private var passageText: String = ""
     @State private var selectedBook = "John"
     @State private var startChapter: String = ""
@@ -23,9 +23,7 @@ struct AddPassageView: View {
 
     @FocusState private var focusedField: Field?
 
-    private enum Field: Hashable { case startChapter, startVerse, endChapter, endVerse }
-    private let translations = ["ESV", "NIV", "KJV", "NASB", "CSB"]
-    private let textFieldCornerRadius: CGFloat = 5
+    enum Field: Hashable { case startChapter, startVerse, endChapter, endVerse }
 
     private var reference: String {
         guard !startChapter.isEmpty, !startVerse.isEmpty else {
@@ -113,186 +111,15 @@ struct AddPassageView: View {
         NavigationStack {
             Form {
                 Section {
-                    Picker("Translation", selection: $selectedTranslation) {
-                        ForEach(translations, id: \.self) { code in
-                            Text(code).tag(code)
-                        }
-                    }
-                    .pickerStyle(.menu)
-                    Picker("Book", selection: $selectedBook) {
-                        ForEach(bibleStore.bibleBooksOrder, id: \.self) { book in
-                            Text(book).tag(book)
-                        }
-                    }
-                    .pickerStyle(.menu)
-
-                    HStack {
-                        Text("Ref")
-                        Spacer(minLength: 3)
-                        TextField("Ch", text: $startChapter)
-                            .keyboardType(.numberPad)
-                            .textFieldStyle(.plain)
-                            .frame(width: 50)
-                            .padding(.vertical, 5)
-                            .background(
-                                RoundedRectangle(cornerRadius: textFieldCornerRadius, style: .continuous)
-                                    .fill(Color(.secondarySystemBackground)),
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: textFieldCornerRadius, style: .continuous)
-                                    .stroke(
-                                        focusedField == .startChapter ? Color.accentColor.opacity(0.8)
-                                            : Color.secondary.opacity(0.2),
-                                        lineWidth: 1.5,
-                                    ),
-                            )
-                            .multilineTextAlignment(.center)
-                            .focused($focusedField, equals: .startChapter)
-                            .submitLabel(.next)
-                            .onSubmit { focusNext() }
-                            .onChange(of: startChapter) { _, newValue in
-                                let filtered = newValue.filter(\.isNumber)
-                                if filtered != newValue { startChapter = filtered }
-                                if startChapter.count > 3 { startChapter = String(startChapter.prefix(3)) }
-
-                                // Force correct to max chapters
-                                if let chapter = Int(startChapter) {
-                                    let max = bibleStore.chapterCount(for: selectedBook)
-                                    if chapter > max { startChapter = String(max) }
-                                }
-
-                                if startChapter.count == 3 { focusNext() }
-                            }
-                        Text(":")
-                        TextField("Vs", text: $startVerse)
-                            .keyboardType(.numberPad)
-                            .textFieldStyle(.plain)
-                            .frame(width: 50)
-                            .padding(.vertical, 5)
-                            .background(
-                                RoundedRectangle(cornerRadius: textFieldCornerRadius, style: .continuous)
-                                    .fill(Color(.secondarySystemBackground)),
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: textFieldCornerRadius, style: .continuous)
-                                    .stroke(
-                                        focusedField == .startVerse ? Color.accentColor.opacity(0.8)
-                                            : Color.secondary.opacity(0.2),
-                                        lineWidth: 1.5,
-                                    ),
-                            )
-                            .multilineTextAlignment(.center)
-                            .focused($focusedField, equals: .startVerse)
-                            .submitLabel(.next)
-                            .onSubmit { focusNext() }
-                            .onChange(of: startVerse) { _, newValue in
-                                let filtered = newValue.filter(\.isNumber)
-                                if filtered != newValue { startVerse = filtered }
-                                if startVerse.count > 3 { startVerse = String(startVerse.prefix(3)) }
-
-                                // Force correct to max verses
-                                if let chapter = Int(startChapter),
-                                   let verse = Int(startVerse)
-                                {
-                                    let max = bibleStore.verseCount(for: selectedBook, chapter: chapter)
-                                    if verse > max { startVerse = String(max) }
-                                }
-
-                                if startVerse.count == 3 { focusNext() }
-                            }
-                        Text("-")
-                        TextField("Ch", text: $endChapter)
-                            .keyboardType(.numberPad)
-                            .textFieldStyle(.plain)
-                            .frame(width: 50)
-                            .padding(.vertical, 5)
-                            .background(
-                                RoundedRectangle(cornerRadius: textFieldCornerRadius, style: .continuous)
-                                    .fill(Color(.secondarySystemBackground)),
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: textFieldCornerRadius, style: .continuous)
-                                    .stroke(
-                                        focusedField == .endChapter ? Color.accentColor.opacity(0.8)
-                                            : Color.secondary.opacity(0.2),
-                                        lineWidth: 1.5,
-                                    ),
-                            )
-                            .multilineTextAlignment(.center)
-                            .focused($focusedField, equals: .endChapter)
-                            .submitLabel(.next)
-                            .onSubmit { focusNext() }
-                            .onChange(of: endChapter) { _, newValue in
-                                let filtered = newValue.filter(\.isNumber)
-                                if filtered != newValue { endChapter = filtered }
-                                if endChapter.count > 3 { endChapter = String(endChapter.prefix(3)) }
-
-                                // Force correct to max chapters
-                                if let chapter = Int(endChapter) {
-                                    let max = bibleStore.chapterCount(for: selectedBook)
-                                    if chapter > max { endChapter = String(max) }
-                                }
-
-                                if endChapter.count == 3 { focusNext() }
-                            }
-                        Text(":")
-                        TextField("Vs", text: $endVerse)
-                            .keyboardType(.numberPad)
-                            .textFieldStyle(.plain)
-                            .frame(width: 50)
-                            .padding(.vertical, 5)
-                            .background(
-                                RoundedRectangle(cornerRadius: textFieldCornerRadius, style: .continuous)
-                                    .fill(Color(.secondarySystemBackground)),
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: textFieldCornerRadius, style: .continuous)
-                                    .stroke(
-                                        focusedField == .endVerse ? Color.accentColor.opacity(0.8)
-                                            : Color.secondary.opacity(0.2),
-                                        lineWidth: 1.5,
-                                    ),
-                            )
-                            .multilineTextAlignment(.center)
-                            .focused($focusedField, equals: .endVerse)
-                            .submitLabel(.done)
-                            .onSubmit { focusNext() }
-                            .onChange(of: endVerse) { _, newValue in
-                                let filtered = newValue.filter(\.isNumber)
-                                if filtered != newValue { endVerse = filtered }
-                                if endVerse.count > 3 { endVerse = String(endVerse.prefix(3)) }
-
-                                // Force correct to max verses
-                                if let chapter = Int(endChapter.isEmpty ? startChapter : endChapter),
-                                   let verse = Int(endVerse)
-                                {
-                                    let max = bibleStore.verseCount(for: selectedBook, chapter: chapter)
-                                    if verse > max { endVerse = String(max) }
-                                }
-                            }
-                    }
-
+                    pickers
+                    referenceInputGroup
                 } footer: {
-                    HStack {
-                        if bibleStore.state == .loading {
-                            ProgressView()
-                                .scaleEffect(0.5)
-                                .frame(width: 15, height: 15)
-                        }
-
-                        if let chapter = Int(startChapter), bibleStore.isValidChapter(chapter, for: selectedBook) {
-                            let verseCount = bibleStore.verseCount(for: selectedBook, chapter: chapter)
-                            Text("\(selectedBook) \(chapter) has \(verseCount) verses.")
-                        } else {
-                            let chapterCount = bibleStore.chapterCount(for: selectedBook)
-                            Text("\(selectedBook) has \(chapterCount) chapters.")
-                        }
-                    }
-                    .font(.app(.footnote))
+                    referenceFooter
                 }
 
                 Section {
-                    Text("...")
+                    Text("Fill out the passage reference above to populate this field.")
+                        .foregroundStyle(.opacity(reference.isEmpty ? 0.5 : 1))
                 } header: {
                     HStack {
                         Text(reference.isEmpty ? "Reference" : reference)
@@ -339,7 +166,31 @@ struct AddPassageView: View {
                 }
             }
             .task {
-                await bibleStore.loadBibleData()
+                await withTaskGroup(of: Void.self) { group in
+                    group.addTask { await bibleStore.loadBibleData() }
+                    group.addTask { await bibleStore.loadTranslations() }
+                }
+            }
+            .onChange(of: bibleStore.availableTranslations) { _, newValue in
+                guard let list = newValue, !list.isEmpty else { return }
+
+                // If our current selection isn't in the list, we need a fallback
+                let hasSelected = list.contains { item in
+                    item.abbreviation == selectedTranslation
+                }
+
+                guard !hasSelected else { return }
+
+                // Prefer KJV if present, otherwise first available
+                let hasKJV = list.contains { item in
+                    item.abbreviation == "KJV"
+                }
+
+                if hasKJV {
+                    selectedTranslation = "KJV"
+                } else if let first = list.first {
+                    selectedTranslation = first.abbreviation
+                }
             }
             .onChange(of: selectedBook) {
                 startChapter = ""
@@ -357,8 +208,139 @@ struct AddPassageView: View {
 }
 
 // MARK: Helper Views
-
 extension AddPassageView {
+    @ViewBuilder
+    private var pickers: some View {
+        Picker("Translation", selection: $selectedTranslation) {
+            if let available = bibleStore.availableTranslations, !available.isEmpty {
+                ForEach(available, id: \.abbreviation) { translation in
+                    Text(translation.abbreviation).tag(translation.abbreviation)
+                }
+                // Ensure the current selection is always a valid tag to avoid Picker warnings
+                if !available.contains(where: { $0.abbreviation == selectedTranslation }) {
+                    Text(selectedTranslation).tag(selectedTranslation)
+                }
+            } else {
+                // While loading or if list is empty, ensure the selection has a tag
+                Text(selectedTranslation).tag(selectedTranslation)
+            }
+        }
+        .pickerStyle(.menu)
+        Picker("Book", selection: $selectedBook) {
+            ForEach(bibleStore.bibleBooksOrder, id: \.self) { book in
+                Text(book).tag(book)
+            }
+        }
+        .pickerStyle(.menu)
+    }
+
+    @ViewBuilder
+    private var referenceInputGroup: some View {
+        HStack {
+            Text("Ref")
+            Spacer(minLength: 3)
+            NumericRefTextField(
+                placeholder: "Ch",
+                text: $startChapter,
+                isFocused: focusedField == .startChapter,
+                focus: $focusedField,
+                thisField: .startChapter,
+                submitLabel: .next,
+                width: 50
+            ) {
+                focusNext()
+            } onChange: { newValue in
+                var value = newValue.filter(\.isNumber)
+                if value.count > 3 { value = String(value.prefix(3)) }
+                if let chapter = Int(value) {
+                    let max = bibleStore.chapterCount(for: selectedBook)
+                    if chapter > max { value = String(max) }
+                }
+                startChapter = value
+            }
+            Text(":")
+            NumericRefTextField(
+                placeholder: "Vs",
+                text: $startVerse,
+                isFocused: focusedField == .startVerse,
+                focus: $focusedField,
+                thisField: .startVerse,
+                submitLabel: .next,
+                width: 50
+            ) {
+                focusNext()
+            } onChange: { newValue in
+                var value = newValue.filter(\.isNumber)
+                if value.count > 3 { value = String(value.prefix(3)) }
+                if let chapter = Int(startChapter), let verse = Int(value) {
+                    let max = bibleStore.verseCount(for: selectedBook, chapter: chapter)
+                    if verse > max { value = String(max) }
+                }
+                startVerse = value
+            }
+            Text("-")
+            NumericRefTextField(
+                placeholder: "Ch",
+                text: $endChapter,
+                isFocused: focusedField == .endChapter,
+                focus: $focusedField,
+                thisField: .endChapter,
+                submitLabel: .next,
+                width: 50
+            ) {
+                focusNext()
+            } onChange: { newValue in
+                var value = newValue.filter(\.isNumber)
+                if value.count > 3 { value = String(value.prefix(3)) }
+                if let chapter = Int(value) {
+                    let max = bibleStore.chapterCount(for: selectedBook)
+                    if chapter > max { value = String(max) }
+                }
+                endChapter = value
+            }
+            Text(":")
+            NumericRefTextField(
+                placeholder: "Vs",
+                text: $endVerse,
+                isFocused: focusedField == .endVerse,
+                focus: $focusedField,
+                thisField: .endVerse,
+                submitLabel: .done,
+                width: 50
+            ) {
+                focusNext()
+            } onChange: { newValue in
+                var value = newValue.filter(\.isNumber)
+                if value.count > 3 { value = String(value.prefix(3)) }
+                if let ch = Int(endChapter.isEmpty ? startChapter : endChapter), let verse = Int(value) {
+                    let max = bibleStore.verseCount(for: selectedBook, chapter: ch)
+                    if verse > max { value = String(max) }
+                }
+                endVerse = value
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var referenceFooter: some View {
+        HStack {
+            if bibleStore.state == .loading {
+                ProgressView()
+                    .scaleEffect(0.5)
+                    .frame(width: 15, height: 15)
+            }
+
+            if let chapter = Int(startChapter), bibleStore.isValidChapter(chapter, for: selectedBook) {
+                let verseCount = bibleStore.verseCount(for: selectedBook, chapter: chapter)
+                Text("\(selectedBook) \(chapter) has \(verseCount) verses.")
+            } else {
+                let chapterCount = bibleStore.chapterCount(for: selectedBook)
+                Text("\(selectedBook) has \(chapterCount) chapters.")
+            }
+        }
+        .font(.app(.footnote))
+    }
+
     func keyboardBar() -> some View {
         let limits = currentFieldLimits
         return HStack {
@@ -485,6 +467,61 @@ extension AddPassageView {
 
         // Auto-advance to next field
         focusNext()
+    }
+}
+
+private struct NumericRefTextField: View {
+    let placeholder: String
+    @Binding var text: String
+    let isFocused: Bool
+    @FocusState.Binding var focus: AddPassageView.Field?
+    let thisField: AddPassageView.Field
+    let submitLabel: SubmitLabel
+    let width: CGFloat
+    let onSubmitAction: () -> Void
+    let onChangeAction: (String) -> Void
+
+    init(placeholder: String,
+         text: Binding<String>,
+         isFocused: Bool,
+         focus: FocusState<AddPassageView.Field?>.Binding,
+         thisField: AddPassageView.Field,
+         submitLabel: SubmitLabel,
+         width: CGFloat,
+         onSubmit: @escaping () -> Void,
+         onChange: @escaping (String) -> Void) {
+        self.placeholder = placeholder
+        self._text = text
+        self.isFocused = isFocused
+        self._focus = focus
+        self.thisField = thisField
+        self.submitLabel = submitLabel
+        self.width = width
+        self.onSubmitAction = onSubmit
+        self.onChangeAction = onChange
+    }
+
+    var body: some View {
+        TextField(placeholder, text: $text)
+            .keyboardType(.numberPad)
+            .textFieldStyle(.plain)
+            .frame(width: width)
+            .padding(.vertical, 5)
+            .background(
+                RoundedRectangle(cornerRadius: 5, style: .continuous)
+                    .fill(Color(.secondarySystemBackground))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 5, style: .continuous)
+                    .stroke(isFocused ? Color.accentColor.opacity(0.8) : Color.secondary.opacity(0.2), lineWidth: 1.5)
+            )
+            .multilineTextAlignment(.center)
+            .focused($focus, equals: thisField)
+            .submitLabel(submitLabel)
+            .onSubmit { onSubmitAction() }
+            .onChange(of: text) { _, newValue in
+                onChangeAction(newValue)
+            }
     }
 }
 

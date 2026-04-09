@@ -101,6 +101,7 @@ struct VerseByVerseApp: App {
         await MainActor.run { statusText = "Configuring…" }
         Task {
             await bibleStore.loadBibleData()
+            await bibleStore.loadTranslations()
         }
 
         // Fade into main content

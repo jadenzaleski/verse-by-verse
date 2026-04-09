@@ -77,7 +77,10 @@ final class UserStore {
     }
 
     @MainActor
-    func patchUser(firstName: String? = nil, lastName: String? = nil, email: String? = nil, password: String? = nil) async throws {
+    func patchUser(firstName: String? = nil,
+                   lastName: String? = nil,
+                   email: String? = nil,
+                   password: String? = nil) async throws {
         state = .loading
         lastError = nil
 

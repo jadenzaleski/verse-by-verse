@@ -29,3 +29,9 @@ struct BibleBooksResponse: Codable {
         return chapters[chapter - 1]
     }
 }
+
+struct BibleTranslation: Codable, Equatable {
+    let id, abbreviation, name, copyright, provider: String
+}
+
+typealias BibleTranslationsResponse = [BibleTranslation]

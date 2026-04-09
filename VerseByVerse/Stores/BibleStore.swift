@@ -13,6 +13,7 @@ final class BibleStore {
     static let shared = BibleStore()
 
     private(set) var bibleData: BibleBooksResponse?
+    private(set) var availableTranslations: BibleTranslationsResponse?
     private(set) var state: DataState = .idle
     private(set) var lastError: APIError?
 
@@ -60,6 +61,31 @@ final class BibleStore {
             lastError = unknownError
             state = .error(unknownError)
             log.error("Unknown error loading Bible data: \(error.localizedDescription)")
+        }
+    }
+
+    @MainActor
+    func loadTranslations() async {
+        // If we already have translations, don't reload unless state is error
+        if availableTranslations != nil, state == .success { return }
+
+        state = .loading
+        lastError = nil
+
+        do {
+            let translations = try await APIService.shared.getBibleTranslations()
+            availableTranslations = translations
+            state = .success
+            log.info("Bible translations loaded successfully")
+        } catch let apiError as APIError {
+            self.lastError = apiError
+            self.state = .error(apiError)
+            log.error("Failed to load Bible translations: \(apiError.localizedDescription)")
+        } catch {
+            let unknownError = APIError.unknown(underlying: error)
+            lastError = unknownError
+            state = .error(unknownError)
+            log.error("Unknown error loading Bible translations: \(error.localizedDescription)")
         }
     }
 

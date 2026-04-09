@@ -73,7 +73,8 @@ final class APIService {
         do {
             // Network
             log.debug("Making network request")
-            let (data, response) = try await performRequestWithOptionalRefresh(for: request, attemptRefresh: attemptRefresh)
+            let (data, response) = try await performRequestWithOptionalRefresh(for: request,
+                                                                               attemptRefresh: attemptRefresh)
 
             if !(200 ... 299).contains(response.statusCode) {
                 log.error("API returned code: \(response.statusCode)")
@@ -263,8 +264,7 @@ final class APIService {
     }
 
     func postRegister(firstName: String, lastName: String, email: String, password: String)
-        async throws -> UserResponse
-    {
+        async throws -> UserResponse {
         log.debug("postRegister called for email: \(email)")
 
         do {
@@ -348,7 +348,10 @@ final class APIService {
         }
     }
 
-    func patchUser(firstName: String? = nil, lastName: String? = nil, email: String? = nil, password: String? = nil) async throws -> UserResponse {
+    func patchUser(firstName: String? = nil,
+                   lastName: String? = nil,
+                   email: String? = nil,
+                   password: String? = nil) async throws -> UserResponse {
         log.debug("patchUser called")
 
         do {
@@ -398,6 +401,31 @@ final class APIService {
             throw apiError
         } catch {
             log.error("getBibleBooks failed, unknown error: \(error.localizedDescription)")
+            throw error
+        }
+    }
+
+    func getBibleTranslations(lookInCache: Bool = true, saveToCache: Bool = true)
+    async throws -> BibleTranslationsResponse {
+        log.debug("getBibleTranslations called")
+
+        do {
+            let response: APIResponse<BibleTranslationsResponse> = try await fetch(
+                key: "bibleTranslations",
+                expiresIn: 15 * 24 * 60 * 60, // 15 days
+                request: APIEndpoint.getBibleTranslations.request,
+                lookInCache: lookInCache,
+                saveToCache: saveToCache,
+            )
+
+            log.debug("getBibleTranslations succeeded")
+
+            return response.body
+        } catch let apiError as APIError {
+            log.error("getBibleTranslations failed, error: \(apiError.localizedDescription)")
+            throw apiError
+        } catch {
+            log.error("getBibleTranslations failed, unknown error: \(error.localizedDescription)")
             throw error
         }
     }
