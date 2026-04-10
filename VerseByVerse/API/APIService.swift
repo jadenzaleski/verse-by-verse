@@ -429,6 +429,42 @@ final class APIService {
             throw error
         }
     }
+
+    func getBiblePassage(
+        translation: String,
+        start: String,
+        end: String? = nil,
+        strip: Bool = true,
+        lookInCache: Bool = true,
+        saveToCache: Bool = true
+    ) async throws -> BiblePassageResponse {
+        log.debug("getBiblePassage called for \(start) in \(translation)")
+
+        do {
+            let response: APIResponse<BiblePassageResponse> = try await fetch(
+                key: "passage-\(translation)-\(start)-\(end ?? "none")-\(strip)",
+                expiresIn: 30 * 24 * 60 * 60, // 30 days
+                request: APIEndpoint.getBiblePassage(
+                    translation: translation,
+                    startReference: start,
+                    endReference: end,
+                    strip: strip
+                ).request,
+                lookInCache: lookInCache,
+                saveToCache: saveToCache
+            )
+
+            log.debug("getBiblePassage succeeded")
+
+            return response.body
+        } catch let apiError as APIError {
+            log.error("getBiblePassage failed, error: \(apiError.localizedDescription)")
+            throw apiError
+        } catch {
+            log.error("getBiblePassage failed, unknown error: \(error.localizedDescription)")
+            throw error
+        }
+    }
 }
 
 // MARK: Response Formats

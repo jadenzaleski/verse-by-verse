@@ -16,6 +16,7 @@ enum APIEndpoint {
     case getHealth
     case getBibleBooks
     case getBibleTranslations
+    case getBiblePassage(translation: String, startReference: String, endReference: String?, strip: Bool)
 
     var path: String {
         switch self {
@@ -27,6 +28,7 @@ enum APIEndpoint {
         case .getHealth: "/health"
         case .getBibleBooks: "/static/bible_books_array.min.json"
         case .getBibleTranslations: "/bible/translations"
+        case .getBiblePassage: "/bible"
         }
     }
 
@@ -62,6 +64,13 @@ enum APIEndpoint {
             [
                 URLQueryItem(name: "access_token", value: accessToken),
                 URLQueryItem(name: "refresh_token", value: refreshToken),
+            ]
+        case let .getBiblePassage(translation, startReference, endReference, strip):
+            [
+                URLQueryItem(name: "translation", value: translation),
+                URLQueryItem(name: "start", value: startReference),
+                URLQueryItem(name: "end", value: endReference),
+                URLQueryItem(name: "strip_formatting", value: String(strip))
             ]
         default:
             nil

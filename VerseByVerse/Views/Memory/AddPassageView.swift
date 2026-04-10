@@ -10,9 +10,9 @@ import SwiftUI
 struct AddPassageView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(BibleStore.self) private var bibleStore
+    @State private var passageStore = PassageStore()
 
     @AppStorage(.lastUsedTranslation) private var selectedTranslation = "KJV"
-    @State private var passageText: String = ""
     @State private var selectedBook = "John"
     @State private var startChapter: String = ""
     @State private var startVerse: String = ""
@@ -30,45 +30,52 @@ struct AddPassageView: View {
             return ""
         }
 
-        // Same chapter range like John 3:16-18
-        if endChapter.isEmpty || endChapter == startChapter {
-            if endVerse.isEmpty {
-                return "\(selectedBook) \(startChapter):\(startVerse)"
-            } else {
-                return "\(selectedBook) \(startChapter):\(startVerse)-\(endVerse)"
-            }
+        let startRef = "\(startChapter):\(startVerse)"
+
+        // If both end fields are empty, it's just the starting point
+        if endChapter.isEmpty && endVerse.isEmpty {
+            return "\(selectedBook) \(startRef)"
         }
 
-        // Cross-chapter range like John 3:16-4:2
-        if !endChapter.isEmpty {
-            if endVerse.isEmpty {
-                return "\(selectedBook) \(startChapter):\(startVerse)-\(endChapter)"
-            } else {
-                return "\(selectedBook) \(startChapter):\(startVerse)-\(endChapter):\(endVerse)"
-            }
-        }
+        // Use startChapter as default for endChapter if empty
+        let effectiveEndCh = endChapter.isEmpty ? startChapter : endChapter
 
-        return "\(selectedBook) \(startChapter):\(startVerse)"
+        if effectiveEndCh == startChapter {
+            // Same chapter range like John 3:16–18
+            if endVerse.isEmpty {
+                return "\(selectedBook) \(startRef)–?"
+            } else {
+                return "\(selectedBook) \(startRef)–\(endVerse)"
+            }
+        } else {
+            // Cross-chapter range like John 3:16–4:2
+            // Always include the colon for the second chapter to avoid ambiguity with verses
+            let vsPart = endVerse.isEmpty ? "?" : endVerse
+            return "\(selectedBook) \(startRef)–\(effectiveEndCh):\(vsPart)"
+        }
     }
 
     private var isRefValid: Bool {
-        guard let startChapterInt = Int(startChapter), let startVerseInt = Int(startVerse) else { return false }
+        guard let startCh = Int(startChapter), let startVs = Int(startVerse) else { return false }
 
         // Basic range check (already force-corrected in onChange, but good for safety)
-        guard bibleStore.isValidChapter(startChapterInt, for: selectedBook),
-              bibleStore.isValidVerse(startVerseInt, for: selectedBook, chapter: startChapterInt) else { return false }
+        guard bibleStore.isValidChapter(startCh, for: selectedBook),
+              bibleStore.isValidVerse(startVs, for: selectedBook, chapter: startCh) else { return false }
 
-        // If end is provided, it must be logically after start
+        // If something is in the end part
         if !endChapter.isEmpty || !endVerse.isEmpty {
-            let endCh = Int(endChapter) ?? startChapterInt
-            let endVs = Int(endVerse) ?? 0 // If no verse, we assume the whole chapter or it's invalid
+            // Both must be non-empty to be valid
+            guard !endChapter.isEmpty, !endVerse.isEmpty else { return false }
 
-            if endCh < startChapterInt { return false }
-            if endCh == startChapterInt, !endVerse.isEmpty, endVs < startVerseInt { return false }
+            guard let endCh = Int(endChapter), let endVs = Int(endVerse) else { return false }
 
-            // Validate end range
+            // Range checks (end must be logically after start)
+            if endCh < startCh { return false }
+            if endCh == startCh, endVs < startVs { return false }
+
+            // Validate end range against Bible data
             if !bibleStore.isValidChapter(endCh, for: selectedBook) { return false }
-            if !endVerse.isEmpty, !bibleStore.isValidVerse(endVs, for: selectedBook, chapter: endCh) { return false }
+            if !bibleStore.isValidVerse(endVs, for: selectedBook, chapter: endCh) { return false }
         }
 
         return true
@@ -118,19 +125,40 @@ struct AddPassageView: View {
                 }
 
                 Section {
-                    Text("Fill out the passage reference above to populate this field.")
-                        .foregroundStyle(.opacity(reference.isEmpty ? 0.5 : 1))
+                    if passageStore.state == .loading {
+                        HStack {
+                            Spacer()
+                            ProgressView()
+                                .padding()
+                            Spacer()
+                        }
+                    } else if let passage = passageStore.fetchedPassage {
+                        Text(passage.fullText)
+                            .font(.app(.body))
+                            .transition(.opacity)
+                    } else if case let .error(apiError) = passageStore.state {
+                        Text(apiError.localizedDescription)
+                            .foregroundStyle(.red)
+                            .font(.app(.subheadline))
+                    } else {
+                        Text("Fill out the passage reference above to populate this field.")
+                            .foregroundStyle(.secondary)
+                    }
                 } header: {
                     HStack {
                         Text(reference.isEmpty ? "Reference" : reference)
                             .textCase(.uppercase)
                         Spacer()
                         Button {
-                            print("refresh")
+                            Task {
+                                await loadPassage()
+                            }
                         } label: {
                             Image(systemName: "arrow.clockwise")
+                                .symbolEffect(.bounce, value: passageStore.state == .loading)
                         }
                         .buttonStyle(.plain)
+                        .disabled(!isRefValid || passageStore.state == .loading)
                     }
                     .font(.app(.footnote, weight: .semibold))
 
@@ -197,6 +225,10 @@ struct AddPassageView: View {
                 startVerse = ""
                 endChapter = ""
                 endVerse = ""
+                passageStore.clearPassage()
+            }
+            .onChange(of: selectedTranslation) {
+                passageStore.clearPassage()
             }
             .onReceive(NotificationCenter.default.publisher(for: UITextField.textDidBeginEditingNotification)) { obj in
                 if let textField = obj.object as? UITextField {
@@ -204,6 +236,30 @@ struct AddPassageView: View {
                 }
             }
         }
+    }
+
+    private func loadPassage() async {
+        guard isRefValid,
+              let startCh = Int(startChapter),
+              let startVs = Int(startVerse)
+        else { return }
+
+        // Formatting for the API (e.g., "John 3:16")
+        let startRef = "\(selectedBook) \(startCh):\(startVs)"
+        var endRef: String?
+
+        if !endChapter.isEmpty, !endVerse.isEmpty,
+           let endCh = Int(endChapter),
+           let endVs = Int(endVerse)
+        {
+            endRef = "\(selectedBook) \(endCh):\(endVs)"
+        }
+
+        await passageStore.fetchPassage(
+            translation: selectedTranslation,
+            start: startRef,
+            end: endRef
+        )
     }
 }
 
@@ -278,7 +334,7 @@ extension AddPassageView {
                 }
                 startVerse = value
             }
-            Text("-")
+            Text("–")
             NumericRefTextField(
                 placeholder: "Ch",
                 text: $endChapter,
@@ -404,6 +460,9 @@ extension AddPassageView {
             Button {
                 withAnimation {
                     focusedField = nil
+                    Task {
+                        await loadPassage()
+                    }
                 }
             } label: {
                 Image("lucide.check")

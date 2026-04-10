@@ -35,3 +35,35 @@ struct BibleTranslation: Codable, Equatable {
 }
 
 typealias BibleTranslationsResponse = [BibleTranslation]
+
+struct BibleVerse: Codable, Identifiable, Equatable {
+    var id: String { "\(book) \(chapter):\(verse)" }
+    let book: String
+    let chapter: Int
+    let verse: Int
+    let text: String
+}
+
+struct BiblePassageResponse: Codable {
+    let translation: String
+    let verses: [BibleVerse]
+    let fumsTokens: [String]?
+    let book: String
+    let startChapter: Int
+    let endChapter: Int
+    let startVerse: Int
+    let endVerse: Int
+
+    enum CodingKeys: String, CodingKey {
+        case translation, verses, book
+        case fumsTokens = "fums_tokens"
+        case startChapter = "start_chapter"
+        case endChapter = "end_chapter"
+        case startVerse = "start_verse"
+        case endVerse = "end_verse"
+    }
+
+    var fullText: String {
+        verses.map { $0.text }.joined(separator: " ")
+    }
+}
