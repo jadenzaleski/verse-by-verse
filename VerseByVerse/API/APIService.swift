@@ -406,7 +406,7 @@ final class APIService {
     }
 
     func getBibleTranslations(lookInCache: Bool = true, saveToCache: Bool = true)
-    async throws -> BibleTranslationsResponse {
+        async throws -> BibleTranslationsResponse {
         log.debug("getBibleTranslations called")
 
         do {
@@ -436,7 +436,7 @@ final class APIService {
         end: String? = nil,
         strip: Bool = true,
         lookInCache: Bool = true,
-        saveToCache: Bool = true
+        saveToCache: Bool = true,
     ) async throws -> BiblePassageResponse {
         log.debug("getBiblePassage called for \(start) in \(translation)")
 
@@ -448,10 +448,10 @@ final class APIService {
                     translation: translation,
                     startReference: start,
                     endReference: end,
-                    strip: strip
+                    strip: strip,
                 ).request,
                 lookInCache: lookInCache,
-                saveToCache: saveToCache
+                saveToCache: saveToCache,
             )
 
             log.debug("getBiblePassage succeeded")

@@ -8,8 +8,9 @@
 import SwiftUI
 
 struct PassageCard: View {
+    @State private var progress: Double = 4
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("John 3:16")
                     .font(.app(weight: .semibold))
@@ -17,15 +18,19 @@ struct PassageCard: View {
                 Text("ESV")
                     .environment(\.font, .app(.caption))
             }
-            Text("For God so loved the world that he gave is only son, that "
-                + "whoever believe in him shall not perish but have eternal life.")
+
+            Text("For God so loved the world that he gave his only son, that "
+                + "whoever believes in him shall not perish but have eternal life.")
                 .lineLimit(2)
                 .font(.app(.subheadline))
 
-            ProgressView(value: 0.50)
-                .progressViewStyle(.linear)
+            SegmentedProgressBar(
+                totalSegments: 10,
+                completedSegments: Int(progress),
+            )
+
             HStack {
-                Text("Every 3 days")
+                Text("Due in 3 days")
                 Spacer()
                 Text("3 days ago")
             }

@@ -44,9 +44,8 @@ struct SplashView: View {
                     await startupTasks()
                     log.debug("startupTasks finished, playing drawOff")
                     playOff = true
-
                     // Wait long enough for drawOff animation to finish
-                    try? await Task.sleep(nanoseconds: 400_000_000) // adjust as needed
+                    try? await Task.sleep(nanoseconds: 400_000_000)
 
                     isDone = true
                 }

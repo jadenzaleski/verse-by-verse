@@ -15,7 +15,6 @@ enum MemoryTopTab: String, CaseIterable {
 
 struct TabFrameKey: PreferenceKey {
     static var defaultValue: [MemoryTopTab: CGRect] = [:]
-
     static func reduce(value: inout [MemoryTopTab: CGRect], nextValue: () -> [MemoryTopTab: CGRect]) {
         value.merge(nextValue(), uniquingKeysWith: { $1 })
     }
@@ -23,9 +22,22 @@ struct TabFrameKey: PreferenceKey {
 
 struct ScrollOffsetKey: PreferenceKey {
     static var defaultValue: CGFloat = 0
-
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
         value = min(value, nextValue())
+    }
+}
+
+enum ActiveSheet: Identifiable {
+    case add
+    case passage(Int)
+
+    var id: String {
+        switch self {
+        case .add:
+            "add"
+        case let .passage(id):
+            "passage_\(id)"
+        }
     }
 }
 
@@ -34,7 +46,7 @@ struct MemoryView: View {
     @Namespace private var tabIndicator
     @State private var tabFrames: [MemoryTopTab: CGRect] = [:]
     @State private var scrollOffset: CGFloat = 0
-    @State private var isAddingPassage: Bool = false
+    @State private var activeSheet: ActiveSheet?
     private let horizontalSetSize: CGFloat = 135
     private let gridSetSize: CGFloat = 170
 
@@ -66,7 +78,7 @@ struct MemoryView: View {
         .toolbar {
             ToolbarItem {
                 Button {
-                    isAddingPassage = true
+                    activeSheet = .add
                 } label: {
                     Image("lucide.plus")
                 }
@@ -84,8 +96,27 @@ struct MemoryView: View {
             //            }
         }
         .toolbarTitleDisplayMode(.inlineLarge)
-        .sheet(isPresented: $isAddingPassage) {
-            AddPassageView()
+        .sheet(item: $activeSheet) { sheet in
+            switch sheet {
+            case .add:
+                AddPassageView()
+            case let .passage(id):
+                NavigationStack {
+                    PassageDetailView(passageID: id)
+                        .navigationTitle("Passage")
+                        .navigationBarTitleDisplayMode(.inline)
+                        .toolbar {
+                            ToolbarItem(placement: .destructiveAction) {
+                                Button {
+                                    activeSheet = nil
+                                } label: {
+                                    Image("lucide.x")
+                                        .scaleEffect(0.80)
+                                }
+                            }
+                        }
+                }
+            }
         }
     }
 
@@ -145,26 +176,12 @@ struct MemoryView: View {
         switch selectedTab {
         case .all:
             VStack(spacing: 10) {
-                PassageCard()
-                PassageCard()
-                PassageCard()
-                PassageCard()
-                PassageCard()
-                PassageCard()
-                PassageCard()
-                PassageCard()
-                PassageCard()
-                PassageCard()
-                PassageCard()
-                PassageCard()
-                PassageCard()
-                PassageCard()
-                PassageCard()
-                PassageCard()
-                PassageCard()
-                PassageCard()
-                PassageCard()
-                PassageCard()
+                ForEach(0 ..< 20, id: \.self) { index in
+                    PassageCard()
+                        .onTapGesture {
+                            activeSheet = .passage(index)
+                        }
+                }
             }
 
         case .sets:

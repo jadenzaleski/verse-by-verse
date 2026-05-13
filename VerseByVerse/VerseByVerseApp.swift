@@ -13,8 +13,8 @@ struct VerseByVerseApp: App {
     @State private var isReady = false
     @State private var statusText = "Loading…"
     @State private var showLogin = false
-    @State private var userStore = UserStore.shared
-    @State private var bibleStore = BibleStore.shared
+    private let userStore = UserStore.shared
+    private let bibleStore = BibleStore.shared
     private let log = AppLog.category("Init")
     private let cache = Cache.shared
 
@@ -45,7 +45,8 @@ struct VerseByVerseApp: App {
             .onChange(of: userStore.currentUser != nil) { wasLoggedIn, isLoggedIn in
                 // If the user was logged in (wasLoggedIn == true) and is now logged out (isLoggedIn == false)
                 // and the app is past the initial splash phase (isReady == true)
-                log.debug("userStore.currentUser change detected: wasLoggedIn: \(wasLoggedIn) isLoggedIn: \(isLoggedIn) isReady: \(isReady)")
+                log.debug("userStore.currentUser change detected: wasLoggedIn: \(wasLoggedIn)"
+                    + "isLoggedIn: \(isLoggedIn) isReady: \(isReady)")
                 if wasLoggedIn, !isLoggedIn, isReady {
                     withAnimation {
                         showLogin = true
@@ -94,21 +95,13 @@ struct VerseByVerseApp: App {
             }
         }
 
-        while await MainActor.run(body: { showLogin }) {
+        while await MainActor.run(body: { showLogin && userStore.currentUser == nil }) {
             try? await Task.sleep(nanoseconds: 250_000_000)
         }
 
-        await MainActor.run { statusText = "Configuring…" }
-        Task {
-            await bibleStore.loadBibleData()
-            await bibleStore.loadTranslations()
-        }
-
-        // Fade into main content
-        await MainActor.run {
-            withAnimation(.easeInOut) {
-                isReady = true
-            }
-        }
+        await MainActor.run { statusText = "Fetching Bible data…" }
+        await bibleStore.loadBibleData()
+        await bibleStore.loadTranslations()
+        await MainActor.run { statusText = "Launching…" }
     }
 }

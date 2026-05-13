@@ -103,8 +103,7 @@ struct AddPassageView: View {
             if let startChVal = Int(startChapter),
                let startVsVal = Int(startVerse),
                let endChVal = Int(endChapter.isEmpty ? startChapter : endChapter),
-               startChVal == endChVal
-            {
+               startChVal == endChVal {
                 return (startVsVal, bookVsMax)
             }
             return (1, bookVsMax)
@@ -250,20 +249,20 @@ struct AddPassageView: View {
 
         if !endChapter.isEmpty, !endVerse.isEmpty,
            let endCh = Int(endChapter),
-           let endVs = Int(endVerse)
-        {
+           let endVs = Int(endVerse) {
             endRef = "\(selectedBook) \(endCh):\(endVs)"
         }
 
         await passageStore.fetchPassage(
             translation: selectedTranslation,
             start: startRef,
-            end: endRef
+            end: endRef,
         )
     }
 }
 
 // MARK: Helper Views
+
 extension AddPassageView {
     @ViewBuilder
     private var pickers: some View {
@@ -290,7 +289,6 @@ extension AddPassageView {
         .pickerStyle(.menu)
     }
 
-    @ViewBuilder
     private var referenceInputGroup: some View {
         HStack {
             Text("Ref")
@@ -302,7 +300,7 @@ extension AddPassageView {
                 focus: $focusedField,
                 thisField: .startChapter,
                 submitLabel: .next,
-                width: 50
+                width: 50,
             ) {
                 focusNext()
             } onChange: { newValue in
@@ -322,7 +320,7 @@ extension AddPassageView {
                 focus: $focusedField,
                 thisField: .startVerse,
                 submitLabel: .next,
-                width: 50
+                width: 50,
             ) {
                 focusNext()
             } onChange: { newValue in
@@ -342,7 +340,7 @@ extension AddPassageView {
                 focus: $focusedField,
                 thisField: .endChapter,
                 submitLabel: .next,
-                width: 50
+                width: 50,
             ) {
                 focusNext()
             } onChange: { newValue in
@@ -362,14 +360,15 @@ extension AddPassageView {
                 focus: $focusedField,
                 thisField: .endVerse,
                 submitLabel: .done,
-                width: 50
+                width: 50,
             ) {
                 focusNext()
             } onChange: { newValue in
                 var value = newValue.filter(\.isNumber)
                 if value.count > 3 { value = String(value.prefix(3)) }
-                if let ch = Int(endChapter.isEmpty ? startChapter : endChapter), let verse = Int(value) {
-                    let max = bibleStore.verseCount(for: selectedBook, chapter: ch)
+                if let chapter = Int(endChapter.isEmpty ? startChapter : endChapter),
+                   let verse = Int(value) {
+                    let max = bibleStore.verseCount(for: selectedBook, chapter: chapter)
                     if verse > max { value = String(max) }
                 }
                 endVerse = value
@@ -377,7 +376,6 @@ extension AddPassageView {
         }
     }
 
-    @ViewBuilder
     private var referenceFooter: some View {
         HStack {
             if bibleStore.state == .loading {
@@ -550,14 +548,14 @@ private struct NumericRefTextField: View {
          onSubmit: @escaping () -> Void,
          onChange: @escaping (String) -> Void) {
         self.placeholder = placeholder
-        self._text = text
+        _text = text
         self.isFocused = isFocused
-        self._focus = focus
+        _focus = focus
         self.thisField = thisField
         self.submitLabel = submitLabel
         self.width = width
-        self.onSubmitAction = onSubmit
-        self.onChangeAction = onChange
+        onSubmitAction = onSubmit
+        onChangeAction = onChange
     }
 
     var body: some View {
@@ -568,11 +566,11 @@ private struct NumericRefTextField: View {
             .padding(.vertical, 5)
             .background(
                 RoundedRectangle(cornerRadius: 5, style: .continuous)
-                    .fill(Color(.secondarySystemBackground))
+                    .fill(Color(.secondarySystemBackground)),
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 5, style: .continuous)
-                    .stroke(isFocused ? Color.accentColor.opacity(0.8) : Color.secondary.opacity(0.2), lineWidth: 1.5)
+                    .stroke(isFocused ? Color.accentColor.opacity(0.8) : Color.secondary.opacity(0.2), lineWidth: 1.5),
             )
             .multilineTextAlignment(.center)
             .focused($focus, equals: thisField)

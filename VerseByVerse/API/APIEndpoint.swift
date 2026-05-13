@@ -8,15 +8,37 @@
 import Foundation
 
 enum APIEndpoint {
+    // Login
     case postLogin(email: String, password: String)
     case postRegister(firstName: String, lastName: String, email: String, password: String)
     case postRefresh(accessToken: String, refreshToken: String)
+    // User
     case getUser
     case patchUser(firstName: String?, lastName: String?, email: String?, password: String?)
-    case getHealth
+    // Bible
     case getBibleBooks
     case getBibleTranslations
     case getBiblePassage(translation: String, startReference: String, endReference: String?, strip: Bool)
+    // Passages
+    case getPassage(id: Int)
+    case patchPassage(id: Int, book: String?,
+                      startChapter: Int?,
+                      endChapter: Int?,
+                      startVerse: Int?,
+                      endVerse: Int?,
+                      translation: String?,
+                      lastPracticed: Date?)
+    case deletePassage(id: Int)
+    case postPassage(book: String,
+                     startChapter: Int,
+                     endChapter: Int,
+                     startVerse: Int,
+                     endVerse: Int,
+                     translation: String,
+                     lastPracticed: Date?)
+    case getUserPassageList
+    /// Other
+    case getHealth
 
     var path: String {
         switch self {
@@ -29,6 +51,11 @@ enum APIEndpoint {
         case .getBibleBooks: "/static/bible_books_array.min.json"
         case .getBibleTranslations: "/bible/translations"
         case .getBiblePassage: "/bible"
+        case .getPassage: "/passage"
+        case .patchPassage: "/passage"
+        case .deletePassage: "/passage"
+        case .postPassage: "/passage"
+        case .getUserPassageList: "/passage/list/me"
         }
     }
 
@@ -38,6 +65,9 @@ enum APIEndpoint {
         case .postRegister: "POST"
         case .postRefresh: "POST"
         case .patchUser: "PATCH"
+        case .patchPassage: "PATCH"
+        case .deletePassage: "DELETE"
+        case .postPassage: "POST"
         default: "GET"
         }
     }
@@ -70,7 +100,19 @@ enum APIEndpoint {
                 URLQueryItem(name: "translation", value: translation),
                 URLQueryItem(name: "start", value: startReference),
                 URLQueryItem(name: "end", value: endReference),
-                URLQueryItem(name: "strip_formatting", value: String(strip))
+                URLQueryItem(name: "strip_formatting", value: String(strip)),
+            ]
+        case let .getPassage(id):
+            [
+                URLQueryItem(name: "id", value: String(id)),
+            ]
+        case let .patchPassage(id, book, startChapter, endChapter, startVerse, endVerse, translation, lastPracticed):
+            [
+                URLQueryItem(name: "id", value: String(id)),
+            ]
+        case let .deletePassage(id):
+            [
+                URLQueryItem(name: "id", value: String(id)),
             ]
         default:
             nil
@@ -105,7 +147,49 @@ enum APIEndpoint {
             if password != nil {
                 json["password"] = password
             }
-            print(json)
+            return try? JSONSerialization.data(withJSONObject: json, options: [])
+        case let .postPassage(book, startChapter, endChapter, startVerse, endVerse, translation, lastPracticed):
+            var json: [String: Any] = [:]
+            json["book"] = book
+            json["start_chapter"] = startChapter
+            json["end_chapter"] = endChapter
+            json["start_verse"] = startVerse
+            json["end_verse"] = endVerse
+            json["translation"] = translation
+            if lastPracticed != nil {
+                json["last_practiced"] = lastPracticed
+            }
+            return try? JSONSerialization.data(withJSONObject: json, options: [])
+        case let .patchPassage(id,
+                               book,
+                               startChapter,
+                               endChapter,
+                               startVerse,
+                               endVerse,
+                               translation,
+                               lastPracticed):
+            var json: [String: Any] = [:]
+            if book != nil {
+                json["book"] = book
+            }
+            if startChapter != nil {
+                json["start_chapter"] = startChapter
+            }
+            if endChapter != nil {
+                json["end_chapter"] = endChapter
+            }
+            if startVerse != nil {
+                json["start_verse"] = startVerse
+            }
+            if endVerse != nil {
+                json["end_verse"] = endVerse
+            }
+            if translation != nil {
+                json["translation"] = translation
+            }
+            if lastPracticed != nil {
+                json["last_practiced"] = lastPracticed
+            }
             return try? JSONSerialization.data(withJSONObject: json, options: [])
         default:
             return nil

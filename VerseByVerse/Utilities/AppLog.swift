@@ -37,8 +37,7 @@ enum AppLog {
     /// otherwise provide a sensible default based on build configuration.
     private static var persistedMinimumLevel: LogLevel {
         if let raw = UserDefaults.standard.object(forKey: StorageKeys.logLevel.rawValue) as? Int,
-           let level = LogLevel(rawValue: raw)
-        {
+           let level = LogLevel(rawValue: raw) {
             return level
         }
         #if DEBUG

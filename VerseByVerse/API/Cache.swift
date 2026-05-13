@@ -87,42 +87,32 @@ extension Cache {
 
     /// Preferred method for storing full APIResponse envelope.
     func set(key: String, response: APIResponse<some Encodable>, expiresIn: TimeInterval?) {
-        queue.async {
-            do {
-                // Encode on the main thread to respect APIResponse's main-actor-isolated Encodable conformance
-                let encodedResponse: Data = try {
-                    var result: Result<Data, Error>!
-                    DispatchQueue.main.sync {
-                        let encoder = JSONEncoder()
-                        encoder.dateEncodingStrategy = .iso8601WithFractionalSeconds
-                        do {
-                            let data = try encoder.encode(response)
-                            result = .success(data)
-                        } catch {
-                            result = .failure(error)
-                        }
-                    }
-                    switch result! {
-                    case let .success(data): return data
-                    case let .failure(error): throw error
-                    }
-                }()
+        do {
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .iso8601WithFractionalSeconds
+            let encodedResponse = try encoder.encode(response)
+            let statusCode = response.statusCode
 
+            queue.async {
                 let expiry = expiresIn.map { Date().addingTimeInterval($0) }
                 let entry = DiskCacheEntry(
                     data: encodedResponse,
-                    statusCode: response.statusCode,
+                    statusCode: statusCode,
                     expiresAt: expiry,
                 )
 
                 self.memory[key] = entry
 
                 let url = self.fileURL(for: key)
-                let encodedEntry = try JSONEncoder().encode(entry)
-                try encodedEntry.write(to: url, options: .atomic)
-            } catch {
-                self.log.error("Failed to write full APIResponse cache entry to disk")
+                do {
+                    let encodedEntry = try JSONEncoder().encode(entry)
+                    try encodedEntry.write(to: url, options: .atomic)
+                } catch {
+                    self.log.error("Failed to write full APIResponse cache entry to disk")
+                }
             }
+        } catch {
+            log.error("Failed to encode response for cache: \(error.localizedDescription)")
         }
     }
 

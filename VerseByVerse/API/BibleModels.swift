@@ -37,7 +37,10 @@ struct BibleTranslation: Codable, Equatable {
 typealias BibleTranslationsResponse = [BibleTranslation]
 
 struct BibleVerse: Codable, Identifiable, Equatable {
-    var id: String { "\(book) \(chapter):\(verse)" }
+    var id: String {
+        "\(book) \(chapter):\(verse)"
+    }
+
     let book: String
     let chapter: Int
     let verse: Int
@@ -64,6 +67,6 @@ struct BiblePassageResponse: Codable {
     }
 
     var fullText: String {
-        verses.map { $0.text }.joined(separator: " ")
+        verses.map(\.text).joined(separator: " ")
     }
 }

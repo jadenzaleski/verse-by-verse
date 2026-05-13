@@ -25,7 +25,7 @@ final class PassageStore {
         translation: String,
         start: String,
         end: String? = nil,
-        strip: Bool = true
+        strip: Bool = true,
     ) async {
         state = .loading
         lastError = nil
@@ -35,7 +35,7 @@ final class PassageStore {
                 translation: translation,
                 start: start,
                 end: end,
-                strip: strip
+                strip: strip,
             )
             fetchedPassage = passage
             state = .success
