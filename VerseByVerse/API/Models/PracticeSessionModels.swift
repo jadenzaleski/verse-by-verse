@@ -1,3 +1,12 @@
+//
+//  PracticeSessionModels.swift
+//  VerseByVerse
+//
+//  Created by Jaden Zaleski on 5/16/26.
+//
+
+// https://app.quicktype.io
+
 import Foundation
 
 struct PracticeSession: Identifiable, Equatable {

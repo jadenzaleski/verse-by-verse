@@ -5,6 +5,8 @@
 //  Created by Jaden Zaleski on 3/6/26.
 //
 
+// https://app.quicktype.io
+
 import Foundation
 
 struct BibleBooksResponse: Codable {
