@@ -1,10 +1,3 @@
-//
-//  AddPassageView.swift
-//  VerseByVerse
-//
-//  Created by Jaden Zaleski on 3/1/26.
-//
-
 import SwiftUI
 
 struct AddPassageView: View {
@@ -103,7 +96,8 @@ struct AddPassageView: View {
             if let startChVal = Int(startChapter),
                let startVsVal = Int(startVerse),
                let endChVal = Int(endChapter.isEmpty ? startChapter : endChapter),
-               startChVal == endChVal {
+               startChVal == endChVal
+            {
                 return (startVsVal, bookVsMax)
             }
             return (1, bookVsMax)
@@ -249,7 +243,8 @@ struct AddPassageView: View {
 
         if !endChapter.isEmpty, !endVerse.isEmpty,
            let endCh = Int(endChapter),
-           let endVs = Int(endVerse) {
+           let endVs = Int(endVerse)
+        {
             endRef = "\(selectedBook) \(endCh):\(endVs)"
         }
 
@@ -367,7 +362,8 @@ extension AddPassageView {
                 var value = newValue.filter(\.isNumber)
                 if value.count > 3 { value = String(value.prefix(3)) }
                 if let chapter = Int(endChapter.isEmpty ? startChapter : endChapter),
-                   let verse = Int(value) {
+                   let verse = Int(value)
+                {
                     let max = bibleStore.verseCount(for: selectedBook, chapter: chapter)
                     if verse > max { value = String(max) }
                 }
@@ -546,7 +542,8 @@ private struct NumericRefTextField: View {
          submitLabel: SubmitLabel,
          width: CGFloat,
          onSubmit: @escaping () -> Void,
-         onChange: @escaping (String) -> Void) {
+         onChange: @escaping (String) -> Void)
+    {
         self.placeholder = placeholder
         _text = text
         self.isFocused = isFocused

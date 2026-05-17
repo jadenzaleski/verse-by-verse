@@ -264,7 +264,8 @@ final class APIService {
     }
 
     func postRegister(firstName: String, lastName: String, email: String, password: String)
-        async throws -> UserResponse {
+        async throws -> UserResponse
+    {
         log.debug("postRegister called for email: \(email)")
 
         do {
@@ -351,7 +352,8 @@ final class APIService {
     func patchUser(firstName: String? = nil,
                    lastName: String? = nil,
                    email: String? = nil,
-                   password: String? = nil) async throws -> UserResponse {
+                   password: String? = nil) async throws -> UserResponse
+    {
         log.debug("patchUser called")
 
         do {
@@ -406,7 +408,8 @@ final class APIService {
     }
 
     func getBibleTranslations(lookInCache: Bool = true, saveToCache: Bool = true)
-        async throws -> BibleTranslationsResponse {
+        async throws -> BibleTranslationsResponse
+    {
         log.debug("getBibleTranslations called")
 
         do {

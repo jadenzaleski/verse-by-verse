@@ -29,6 +29,14 @@ struct HomeView: View {
             VStack(spacing: 15) {
                 StreakWidget()
                     .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
+
+                PracticeHistoryCalendar(sessions: [
+                    PracticeSession(id: 1, date: Date().addingTimeInterval(-86400 * 2), score: 0.9, stability: 5),
+                    PracticeSession(id: 2, date: Date().addingTimeInterval(-86400 * 1), score: 0.8, stability: 4),
+                    PracticeSession(id: 3, date: Date(), score: 0.95, stability: 6),
+                ])
+                .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
+
                 Spacer()
             }
             .padding(.horizontal, 10)

@@ -1,3 +1,15 @@
+disabled_rules:
+  - colon
+  - comma
+  - opening_brace
+  - closing_brace
+  - statement_position
+  - trailing_newline
+  - trailing_whitespace
+  - vertical_whitespace
+  - void_return
+  - trailing_comma
+
 identifier_name:
   excluded: # excluded via string array
     - id
@@ -8,9 +20,6 @@ identifier_name:
     - x
     - y
     - z
-
-trailing_comma:
-  mandatory_comma: true
 
 type_body_length:
   warning: 400

@@ -80,7 +80,8 @@ final class UserStore {
     func patchUser(firstName: String? = nil,
                    lastName: String? = nil,
                    email: String? = nil,
-                   password: String? = nil) async throws {
+                   password: String? = nil) async throws
+    {
         state = .loading
         lastError = nil
 

@@ -1,1 +1,6 @@
 --swift-version 6.2.3
+--indent 4
+--commas always
+--trimwhitespace always
+--stripunusedargs always
+--importgrouping alpha
