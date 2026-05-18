@@ -91,7 +91,7 @@ struct VerseByVerseApp: App {
             log.debug("setting showLogin to: " + (!userLoaded ? "true" : "false"))
             showLogin = !userLoaded
             if showLogin {
-                userStore.resetState()
+                userStore.resetStateAndError()
             }
         }
 

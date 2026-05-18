@@ -27,7 +27,7 @@ extension APIService {
         } catch let apiError as APIError {
             let code = apiError.statusCode.map(String.init) ?? "n/a"
             log.error("postLogin failed for email \(email) — statusCode: \(code), " +
-                      "error: \(apiError.localizedDescription)")
+                "error: \(apiError.localizedDescription)")
             throw apiError
         } catch {
             log.error("postLogin failed for email \(email) — unknown error: \(error.localizedDescription)")
@@ -36,7 +36,7 @@ extension APIService {
     }
 
     func postRegister(firstName: String, lastName: String, email: String, password: String)
-    async throws -> UserResponse
+        async throws -> UserResponse
     {
         log.debug("postRegister called for email: \(email)")
 
@@ -59,7 +59,7 @@ extension APIService {
         } catch let apiError as APIError {
             let code = apiError.statusCode.map(String.init) ?? "n/a"
             log.error("postRegister failed for email \(email) — statusCode: \(code), " +
-                      "error: \(apiError.localizedDescription)")
+                "error: \(apiError.localizedDescription)")
             throw apiError
         } catch {
             log.error("postRegister failed for email \(email) — unknown error: \(error.localizedDescription)")
@@ -84,7 +84,7 @@ extension APIService {
         } catch let apiError as APIError {
             let code = apiError.statusCode.map(String.init) ?? "n/a"
             log.error("postRefresh failed, statusCode: \(code), " +
-                      "error: \(apiError.localizedDescription)")
+                "error: \(apiError.localizedDescription)")
             throw apiError
         } catch {
             log.error("postRefresh failed, unknown error: \(error.localizedDescription)")

@@ -51,14 +51,15 @@ struct PassageMemoryScoreChart: View {
 
     private func retention(at date: Date) -> Double {
         // Use pre-sorted memoized data if available, otherwise fallback
-        let dateSortedSessions = sessions.sorted(by: { $0.date < $1.date })
+        let dateSortedSessions = sessions.sorted(by: { $0.startDate < $1.startDate })
         let data = memoizedFilteredSessions.isEmpty ? dateSortedSessions : memoizedFilteredSessions
 
-        guard let lastSession = data.last(where: { $0.date <= date }) else {
+        guard let lastSession = data.last(where: { $0.startDate <= date }) else {
             return data.first?.score ?? 1.0
         }
-        let daysSince = date.timeIntervalSince(lastSession.date) / 86400
-        return pow(0.9, daysSince / lastSession.stability)
+        let daysSince = date.timeIntervalSince(lastSession.startDate) / 86400
+        let stability = Double(lastSession.scheduledDays ?? 1)
+        return pow(0.9, daysSince / max(1.0, stability))
     }
 
     private func refreshMemoizedData() {
@@ -67,19 +68,21 @@ struct PassageMemoryScoreChart: View {
 
         // 1. Filter and Sort Sessions
         let filtered = sessions.filter { session in
+            guard session.isCompleted else { return false }
+
             switch selectedDuration {
             case .week:
-                session.date > calendar.date(byAdding: .day, value: -7, to: now)!
+                return session.startDate > calendar.date(byAdding: .day, value: -7, to: now)!
             case .month:
-                session.date > calendar.date(byAdding: .month, value: -1, to: now)!
+                return session.startDate > calendar.date(byAdding: .month, value: -1, to: now)!
             case .sixMonths:
-                session.date > calendar.date(byAdding: .month, value: -6, to: now)!
+                return session.startDate > calendar.date(byAdding: .month, value: -6, to: now)!
             case .year:
-                session.date > calendar.date(byAdding: .year, value: -1, to: now)!
+                return session.startDate > calendar.date(byAdding: .year, value: -1, to: now)!
             case .all:
-                true
+                return true
             }
-        }.sorted(by: { $0.date < $1.date })
+        }.sorted(by: { $0.startDate < $1.startDate })
 
         memoizedFilteredSessions = filtered
 
@@ -90,24 +93,25 @@ struct PassageMemoryScoreChart: View {
         }
 
         var points: [MemoryPoint] = []
-        let totalInterval = now.timeIntervalSince(firstSession.date)
+        let totalInterval = now.timeIntervalSince(firstSession.startDate)
 
         // Aim for ~250 points across the visible range for smooth performance
         let stepInterval = max(3600, totalInterval / 250)
 
         for i in 0 ..< filtered.count {
             let session = filtered[i]
-            let endDate = (i + 1 < filtered.count) ? filtered[i + 1].date : now
+            let endDate = (i + 1 < filtered.count) ? filtered[i + 1].startDate : now
 
-            let segmentInterval = endDate.timeIntervalSince(session.date)
+            let segmentInterval = endDate.timeIntervalSince(session.startDate)
             let stepCount = Int(segmentInterval / stepInterval)
 
             for step in 0 ... max(1, stepCount) {
-                let pointDate = session.date.addingTimeInterval(TimeInterval(step) * stepInterval)
+                let pointDate = session.startDate.addingTimeInterval(TimeInterval(step) * stepInterval)
                 if pointDate > endDate { break }
 
-                let daysSince = pointDate.timeIntervalSince(session.date) / 86400
-                let retention = pow(0.9, daysSince / session.stability)
+                let daysSince = pointDate.timeIntervalSince(session.startDate) / 86400
+                let stability = Double(session.scheduledDays ?? 1)
+                let retention = pow(0.9, daysSince / max(1.0, stability))
                 points.append(MemoryPoint(date: pointDate, retention: retention))
             }
         }
@@ -147,8 +151,8 @@ struct PassageMemoryScoreChart: View {
 
     private func nearestSession(to date: Date) -> PracticeSession? {
         memoizedFilteredSessions.min(by: {
-            abs($0.date.timeIntervalSince(date)) <
-                abs($1.date.timeIntervalSince(date))
+            abs($0.startDate.timeIntervalSince(date)) <
+                abs($1.startDate.timeIntervalSince(date))
         })
     }
 
@@ -174,7 +178,7 @@ struct PassageMemoryScoreChart: View {
                 Spacer()
                 if let session = selectedSession {
                     VStack(alignment: .trailing) {
-                        Text("\(Int(session.score * 100))%")
+                        Text("\(Int((session.score ?? 0.0) * 100))%")
                             .font(.app(.largeTitle, weight: .semibold))
                             .foregroundStyle(.secondary)
                         Text("PRACTICE SCORE")
@@ -200,8 +204,8 @@ struct PassageMemoryScoreChart: View {
                 // Practice Sessions (Points)
                 ForEach(memoizedFilteredSessions) { session in
                     PointMark(
-                        x: .value("Date", session.date),
-                        y: .value("Score", session.score),
+                        x: .value("Date", session.startDate),
+                        y: .value("Score", session.score ?? 0.0),
                     )
                     .symbolSize(selectedSession?.id == session.id ? 120 : 60)
                     .foregroundStyle(.accent)
@@ -239,7 +243,7 @@ struct PassageMemoryScoreChart: View {
                                     let location = value.location
                                     if let date: Date = proxy.value(atX: location.x) {
                                         let now = Date()
-                                        guard let firstDate = memoizedFilteredSessions.first?.date else { return }
+                                        guard let firstDate = memoizedFilteredSessions.first?.startDate else { return }
                                         // Clamp date between first session and now
                                         let clampedDate = min(max(date, firstDate), now)
 
@@ -248,8 +252,8 @@ struct PassageMemoryScoreChart: View {
                                         let timeRange = now.timeIntervalSince(firstDate)
                                         let threshold = timeRange / 80
 
-                                        if let nearest, abs(nearest.date.timeIntervalSince(clampedDate)) < threshold {
-                                            selectedDate = nearest.date
+                                        if let nearest, abs(nearest.startDate.timeIntervalSince(clampedDate)) < threshold {
+                                            selectedDate = nearest.startDate
                                             selectedSession = nearest
                                         } else {
                                             selectedDate = clampedDate
@@ -281,10 +285,22 @@ struct PassageMemoryScoreChart: View {
     let calendar = Calendar.current
 
     let sessions: [PracticeSession] = [
-        PracticeSession(id: 1, date: calendar.date(byAdding: .day, value: -12, to: now)!, score: 0.85, stability: 2.5),
-        PracticeSession(id: 2, date: calendar.date(byAdding: .day, value: -9, to: now)!, score: 0.92, stability: 5.8),
-        PracticeSession(id: 3, date: calendar.date(byAdding: .day, value: -4, to: now)!, score: 0.70, stability: 4.2),
-        PracticeSession(id: 4, date: calendar.date(byAdding: .day, value: -1, to: now)!, score: 0.95, stability: 10.5),
+        PracticeSession(id: 1, userId: "u1", passageId: 1,
+                        startDate: calendar.date(byAdding: .day, value: -12, to: now)!,
+                        endDate: calendar.date(byAdding: .day, value: -12, to: now)!.addingTimeInterval(300),
+                        score: 0.85, rating: 3, scheduledDays: 2, elapsedDays: 1, state: 1),
+        PracticeSession(id: 2, userId: "u1", passageId: 1,
+                        startDate: calendar.date(byAdding: .day, value: -9, to: now)!,
+                        endDate: calendar.date(byAdding: .day, value: -9, to: now)!.addingTimeInterval(300),
+                        score: 0.92, rating: 4, scheduledDays: 5, elapsedDays: 3, state: 1),
+        PracticeSession(id: 3, userId: "u1", passageId: 1,
+                        startDate: calendar.date(byAdding: .day, value: -4, to: now)!,
+                        endDate: calendar.date(byAdding: .day, value: -4, to: now)!.addingTimeInterval(300),
+                        score: 0.70, rating: 2, scheduledDays: 4, elapsedDays: 5, state: 1),
+        PracticeSession(id: 4, userId: "u1", passageId: 1,
+                        startDate: calendar.date(byAdding: .day, value: -1, to: now)!,
+                        endDate: calendar.date(byAdding: .day, value: -1, to: now)!.addingTimeInterval(300),
+                        score: 0.95, rating: 5, scheduledDays: 10, elapsedDays: 3, state: 1),
     ]
 
     PassageMemoryScoreChart(sessions: sessions)

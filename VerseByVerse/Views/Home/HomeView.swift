@@ -31,9 +31,18 @@ struct HomeView: View {
                     .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
 
                 PracticeHistoryCalendar(sessions: [
-                    PracticeSession(id: 1, date: Date().addingTimeInterval(-86400 * 2), score: 0.9, stability: 5),
-                    PracticeSession(id: 2, date: Date().addingTimeInterval(-86400 * 1), score: 0.8, stability: 4),
-                    PracticeSession(id: 3, date: Date(), score: 0.95, stability: 6),
+                    PracticeSession(id: 1, userId: "u1", passageId: 1,
+                                    startDate: Date().addingTimeInterval(-86400 * 2),
+                                    endDate: Date().addingTimeInterval(-86400 * 2 + 300),
+                                    score: 0.9, rating: 4, scheduledDays: 5, elapsedDays: 2, state: 1),
+                    PracticeSession(id: 2, userId: "u1", passageId: 1,
+                                    startDate: Date().addingTimeInterval(-86400 * 1),
+                                    endDate: Date().addingTimeInterval(-86400 * 1 + 300),
+                                    score: 0.8, rating: 3, scheduledDays: 4, elapsedDays: 1, state: 1),
+                    PracticeSession(id: 3, userId: "u1", passageId: 1,
+                                    startDate: Date(),
+                                    endDate: Date().addingTimeInterval(300),
+                                    score: 0.95, rating: 5, scheduledDays: 6, elapsedDays: 3, state: 1),
                 ])
                 .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
 

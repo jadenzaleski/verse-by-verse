@@ -172,13 +172,13 @@ struct LoginOrRegisterView: View {
 
                             // Reset state after success and delay
                             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                                userStore.resetState()
+                                userStore.resetStateAndError()
                             }
                         } catch {
                             // Error is handled by UserStore and displayed via errorText
                             DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
                                 withAnimation {
-                                    userStore.resetState()
+                                    userStore.resetStateAndError()
                                 }
                             }
                         }
@@ -224,7 +224,7 @@ struct LoginOrRegisterView: View {
                 withAnimation(.spring(.snappy)) {
                     isRegistering.toggle()
                     showValidationResults = false
-                    userStore.resetState()
+                    userStore.resetStateAndError()
                 }
             } label: {
                 Text(isRegistering ? "Already have an account? Log in." : "Don't have an account? Sign up.")

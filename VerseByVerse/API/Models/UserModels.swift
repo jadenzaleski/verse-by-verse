@@ -14,6 +14,11 @@ struct UserResponse: Codable {
     let isActive, isSuperuser, isVerified: Bool
     let firstName, lastName: String?
     let lastLogin, createdAt, modifiedAt: Date?
+    let fsrsParams: [String: Double]?
+    let desiredRetention: Double
+    let passages: [UserPassageReadResponse]?
+    let studySets: [StudySetReadResponse]?
+    let practiceSessions: [PracticeSessionReadResponse]?
 
     enum CodingKeys: String, CodingKey {
         case id, email
@@ -25,5 +30,10 @@ struct UserResponse: Codable {
         case lastLogin = "last_login"
         case createdAt = "created_at"
         case modifiedAt = "modified_at"
+        case fsrsParams = "fsrs_params"
+        case desiredRetention = "desired_retention"
+        case passages
+        case studySets = "study_sets"
+        case practiceSessions = "practice_sessions"
     }
 }

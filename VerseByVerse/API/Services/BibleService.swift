@@ -33,7 +33,7 @@ extension APIService {
     }
 
     func getBibleTranslations(lookInCache: Bool = true, saveToCache: Bool = true)
-    async throws -> BibleTranslationsResponse
+        async throws -> BibleTranslationsResponse
     {
         log.debug("getBibleTranslations called")
 
@@ -58,21 +58,21 @@ extension APIService {
         }
     }
 
-    func getBiblePassage(
+    func getBibleSelection(
         translation: String,
         start: String,
         end: String? = nil,
         strip: Bool = true,
         lookInCache: Bool = true,
         saveToCache: Bool = true,
-    ) async throws -> BiblePassageResponse {
-        log.debug("getBiblePassage called for \(start) in \(translation)")
+    ) async throws -> BibleSelectionResponse {
+        log.debug("getBibleSelection called for \(start) in \(translation)")
 
         do {
-            let response: APIResponse<BiblePassageResponse> = try await fetch(
+            let response: APIResponse<BibleSelectionResponse> = try await fetch(
                 key: "passage-\(translation)-\(start)-\(end ?? "none")-\(strip)",
                 expiresIn: 30 * 24 * 60 * 60, // 30 days
-                request: APIEndpoint.getBiblePassage(
+                request: APIEndpoint.getBibleSelection(
                     translation: translation,
                     startReference: start,
                     endReference: end,
@@ -82,14 +82,14 @@ extension APIService {
                 saveToCache: saveToCache,
             )
 
-            log.debug("getBiblePassage succeeded")
+            log.debug("getBibleSelection succeeded")
 
             return response.body
         } catch let apiError as APIError {
-            log.error("getBiblePassage failed, error: \(apiError.localizedDescription)")
+            log.error("getBibleSelection failed, error: \(apiError.localizedDescription)")
             throw apiError
         } catch {
-            log.error("getBiblePassage failed, unknown error: \(error.localizedDescription)")
+            log.error("getBibleSelection failed, unknown error: \(error.localizedDescription)")
             throw error
         }
     }

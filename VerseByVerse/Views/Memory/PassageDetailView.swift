@@ -42,18 +42,22 @@ struct PassageDetailView: View {
                 let now = Date()
                 let calendar = Calendar.current
                 let sessions: [PracticeSession] = [
-                    PracticeSession(id: 1,
-                                    date: calendar.date(byAdding: .day, value: -12, to: now)!,
-                                    score: 0.85, stability: 2.5),
-                    PracticeSession(id: 2,
-                                    date: calendar.date(byAdding: .day, value: -9, to: now)!, score: 0.92,
-                                    stability: 5.8),
-                    PracticeSession(id: 3,
-                                    date: calendar.date(byAdding: .day, value: -4, to: now)!, score: 0.70,
-                                    stability: 4.2),
-                    PracticeSession(id: 4,
-                                    date: calendar.date(byAdding: .day, value: -1, to: now)!, score: 0.95,
-                                    stability: 10.5),
+                    PracticeSession(id: 1, userId: "u1", passageId: passageID,
+                                    startDate: calendar.date(byAdding: .day, value: -12, to: now)!,
+                                    endDate: calendar.date(byAdding: .day, value: -12, to: now)!.addingTimeInterval(300),
+                                    score: 0.85, rating: 4, scheduledDays: 2, elapsedDays: 1, state: 1),
+                    PracticeSession(id: 2, userId: "u1", passageId: passageID,
+                                    startDate: calendar.date(byAdding: .day, value: -9, to: now)!,
+                                    endDate: calendar.date(byAdding: .day, value: -9, to: now)!.addingTimeInterval(300),
+                                    score: 0.92, rating: 5, scheduledDays: 5, elapsedDays: 3, state: 1),
+                    PracticeSession(id: 3, userId: "u1", passageId: passageID,
+                                    startDate: calendar.date(byAdding: .day, value: -4, to: now)!,
+                                    endDate: calendar.date(byAdding: .day, value: -4, to: now)!.addingTimeInterval(300),
+                                    score: 0.70, rating: 2, scheduledDays: 4, elapsedDays: 5, state: 1),
+                    PracticeSession(id: 4, userId: "u1", passageId: passageID,
+                                    startDate: calendar.date(byAdding: .day, value: -1, to: now)!,
+                                    endDate: calendar.date(byAdding: .day, value: -1, to: now)!.addingTimeInterval(300),
+                                    score: 0.95, rating: 5, scheduledDays: 10, elapsedDays: 3, state: 1),
                 ]
                 PassageMemoryScoreChart(sessions: sessions)
             }

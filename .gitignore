@@ -2,3 +2,7 @@
 xcuserdata/
 project.xcworkspace
 GEMINI.md
+openapi.json
+.gemini
+*.skill
+skills/

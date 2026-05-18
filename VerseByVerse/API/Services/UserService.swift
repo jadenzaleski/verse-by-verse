@@ -29,7 +29,7 @@ extension APIService {
         } catch let apiError as APIError {
             let code = apiError.statusCode.map(String.init) ?? "n/a"
             log.error("getUser failed, statusCode: \(code), " +
-                      "error: \(apiError.localizedDescription)")
+                "error: \(apiError.localizedDescription)")
             throw apiError
         } catch {
             log.error("getUser failed, unknown error: \(error.localizedDescription)")
@@ -63,7 +63,7 @@ extension APIService {
         } catch let apiError as APIError {
             let code = apiError.statusCode.map(String.init) ?? "n/a"
             log.error("patchUser failed, statusCode: \(code), " +
-                      "error: \(apiError.localizedDescription)")
+                "error: \(apiError.localizedDescription)")
             throw apiError
         } catch {
             log.error("patchUser failed, unknown error: \(error.localizedDescription)")

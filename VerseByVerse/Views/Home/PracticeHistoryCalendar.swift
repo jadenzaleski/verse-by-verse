@@ -43,8 +43,8 @@ struct PracticeHistoryCalendar: View {
 
     private var sessionsByDay: [Date: Int] {
         var counts: [Date: Int] = [:]
-        for session in sessions {
-            let startOfDay = calendar.startOfDay(for: session.date)
+        for session in sessions where session.isCompleted {
+            let startOfDay = calendar.startOfDay(for: session.startDate)
             counts[startOfDay, default: 0] += 1
         }
         return counts
@@ -210,9 +210,15 @@ struct PracticeHistoryCalendar: View {
     let sessions: [PracticeSession] = (0 ..< 300).map { i in
         PracticeSession(
             id: i,
-            date: calendar.date(byAdding: .day, value: -Int.random(in: 0 ..< 365), to: now)!,
+            userId: "u1",
+            passageId: 1,
+            startDate: calendar.date(byAdding: .day, value: -Int.random(in: 0 ..< 365), to: now)!,
+            endDate: nil,
             score: 0.8,
-            stability: 5.0,
+            rating: 3,
+            scheduledDays: 5,
+            elapsedDays: 4,
+            state: 1,
         )
     }
 

@@ -9,15 +9,15 @@ import Observation
 import SwiftUI
 
 @Observable
-final class BibleStore {
+final class BibleStore: Store {
     static let shared = BibleStore()
 
-    private(set) var bibleData: BibleBooksResponse?
-    private(set) var availableTranslations: BibleTranslationsResponse?
-    private(set) var state: DataState = .idle
-    private(set) var lastError: APIError?
+    private(set) var bibleData: BibleStructure?
+    private(set) var availableTranslations: [BibleTranslationInfo]?
+    private(set) var fetchedSelection: BibleSelection?
 
-    private let log = AppLog.category("BibleStore")
+    var state: DataState = .idle
+    var lastError: APIError?
 
     private init() {}
 
@@ -45,22 +45,15 @@ final class BibleStore {
         if bibleData != nil, state == .success { return }
 
         state = .loading
-        lastError = nil
+        clearError()
 
         do {
-            let data = try await APIService.shared.getBibleBooks()
-            bibleData = data
+            let dataResponse = try await APIService.shared.getBibleBooks()
+            bibleData = dataResponse.toDomain()
             state = .success
             log.info("Bible data loaded successfully")
-        } catch let apiError as APIError {
-            self.lastError = apiError
-            self.state = .error(apiError)
-            log.error("Failed to load Bible data: \(apiError.localizedDescription)")
         } catch {
-            let unknownError = APIError.unknown(underlying: error)
-            lastError = unknownError
-            state = .error(unknownError)
-            log.error("Unknown error loading Bible data: \(error.localizedDescription)")
+            handle(error: error)
         }
     }
 
@@ -70,22 +63,15 @@ final class BibleStore {
         if availableTranslations != nil, state == .success { return }
 
         state = .loading
-        lastError = nil
+        clearError()
 
         do {
-            let translations = try await APIService.shared.getBibleTranslations()
-            availableTranslations = translations
+            let translationsResponse = try await APIService.shared.getBibleTranslations()
+            availableTranslations = translationsResponse.map { $0.toDomain() }
             state = .success
             log.info("Bible translations loaded successfully")
-        } catch let apiError as APIError {
-            self.lastError = apiError
-            self.state = .error(apiError)
-            log.error("Failed to load Bible translations: \(apiError.localizedDescription)")
         } catch {
-            let unknownError = APIError.unknown(underlying: error)
-            lastError = unknownError
-            state = .error(unknownError)
-            log.error("Unknown error loading Bible translations: \(error.localizedDescription)")
+            handle(error: error)
         }
     }
 
@@ -109,5 +95,30 @@ final class BibleStore {
     func isValidVerse(_ verse: Int, for book: String, chapter: Int) -> Bool {
         let count = verseCount(for: book, chapter: chapter)
         return verse >= 1 && verse <= count
+    }
+
+    @MainActor
+    func fetchSelection(
+        translation: String,
+        start: String,
+        end: String? = nil,
+        strip: Bool = true,
+    ) async {
+        state = .loading
+        clearError()
+
+        do {
+            let passageResponse = try await APIService.shared.getBibleSelection(
+                translation: translation,
+                start: start,
+                end: end,
+                strip: strip,
+            )
+            fetchedSelection = passageResponse.toDomain()
+            state = .success
+            log.info("BibleSelection fetched successfully: \(start)")
+        } catch {
+            handle(error: error)
+        }
     }
 }

@@ -9,52 +9,34 @@ import Observation
 import SwiftUI
 
 @Observable
-final class PassageStore {
+final class PassageStore: Store {
     static let shared = PassageStore()
 
-    private(set) var fetchedPassage: BiblePassageResponse?
-    private(set) var state: DataState = .idle
-    private(set) var lastError: APIError?
+    private(set) var userPassages: [UserPassage] = []
 
-    private let log = AppLog.category("PassageStore")
+    // Store protocol requirements
+    var state: DataState = .idle
+    var lastError: APIError?
 
     init() {}
 
     @MainActor
-    func fetchPassage(
-        translation: String,
-        start: String,
-        end: String? = nil,
-        strip: Bool = true,
-    ) async {
+    func loadMyPassages() async {
         state = .loading
-        lastError = nil
+        clearError()
 
         do {
-            let passage = try await APIService.shared.getBiblePassage(
-                translation: translation,
-                start: start,
-                end: end,
-                strip: strip,
-            )
-            fetchedPassage = passage
+            let responses = try await APIService.shared.getMyPassages()
+            userPassages = responses.map { $0.toDomain() }
             state = .success
-            log.info("Passage fetched successfully: \(start)")
-        } catch let apiError as APIError {
-            self.lastError = apiError
-            self.state = .error(apiError)
-            log.error("Failed to fetch passage: \(apiError.localizedDescription)")
+            log.info("Loaded \(userPassages.count) user passages")
         } catch {
-            let unknownError = APIError.unknown(underlying: error)
-            lastError = unknownError
-            state = .error(unknownError)
-            log.error("Unknown error fetching passage: \(error.localizedDescription)")
+            handle(error: error)
         }
     }
 
     @MainActor
-    func clearPassage() {
-        fetchedPassage = nil
+    func resetState() {
         state = .idle
         lastError = nil
     }

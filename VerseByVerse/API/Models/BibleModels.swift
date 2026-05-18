@@ -5,31 +5,10 @@
 //  Created by Jaden Zaleski on 3/6/26.
 //
 
-// https://app.quicktype.io
-
 import Foundation
 
 struct BibleBooksResponse: Codable {
     let books: [String: [Int]]
-
-    /// Returns the sorted list of book names.
-    var sortedBookNames: [String] {
-        // Since it's a JSON object, the keys are not guaranteed to be in biblical order.
-        // We might want to provide a hardcoded order if order matters.
-        // For now, let's just return them sorted alphabetically or check if the JSON has a specific order.
-        books.keys.sorted()
-    }
-
-    func chapters(for book: String) -> Int {
-        books[book]?.count ?? 0
-    }
-
-    func verses(for book: String, chapter: Int) -> Int {
-        guard let chapters = books[book], chapter >= 1, chapter <= chapters.count else {
-            return 0
-        }
-        return chapters[chapter - 1]
-    }
 }
 
 struct BibleTranslation: Codable, Equatable {
@@ -39,17 +18,17 @@ struct BibleTranslation: Codable, Equatable {
 typealias BibleTranslationsResponse = [BibleTranslation]
 
 struct BibleVerse: Codable, Identifiable, Equatable {
-    var id: String {
-        "\(book) \(chapter):\(verse)"
-    }
-
     let book: String
     let chapter: Int
     let verse: Int
     let text: String
+
+    var id: String {
+        "\(book) \(chapter):\(verse)"
+    }
 }
 
-struct BiblePassageResponse: Codable {
+struct BibleSelectionResponse: Codable {
     let translation: String
     let verses: [BibleVerse]
     let fumsTokens: [String]?
@@ -66,9 +45,5 @@ struct BiblePassageResponse: Codable {
         case endChapter = "end_chapter"
         case startVerse = "start_verse"
         case endVerse = "end_verse"
-    }
-
-    var fullText: String {
-        verses.map(\.text).joined(separator: " ")
     }
 }

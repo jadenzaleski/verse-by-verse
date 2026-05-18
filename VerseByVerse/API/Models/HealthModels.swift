@@ -15,4 +15,3 @@ struct GetHealthResponse: Codable {
     let db: String
     let redis: String
 }
-

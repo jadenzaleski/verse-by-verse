@@ -1,3 +1,10 @@
+//
+//  AddPassageView.swift
+//  VerseByVerse
+//
+//  Created by Jaden Zaleski on 3/1/26.
+//
+
 import SwiftUI
 
 struct AddPassageView: View {
@@ -138,23 +145,7 @@ struct AddPassageView: View {
                             .foregroundStyle(.secondary)
                     }
                 } header: {
-                    HStack {
-                        Text(reference.isEmpty ? "Reference" : reference)
-                            .textCase(.uppercase)
-                        Spacer()
-                        Button {
-                            Task {
-                                await loadPassage()
-                            }
-                        } label: {
-                            Image(systemName: "arrow.clockwise")
-                                .symbolEffect(.bounce, value: passageStore.state == .loading)
-                        }
-                        .buttonStyle(.plain)
-                        .disabled(!isRefValid || passageStore.state == .loading)
-                    }
-                    .font(.app(.footnote, weight: .semibold))
-
+                    headerView
                 } footer: {
                     Text(" ")
                 }
@@ -196,16 +187,11 @@ struct AddPassageView: View {
                 guard let list = newValue, !list.isEmpty else { return }
 
                 // If our current selection isn't in the list, we need a fallback
-                let hasSelected = list.contains { item in
-                    item.abbreviation == selectedTranslation
-                }
-
-                guard !hasSelected else { return }
+                let hasSelected = list.contains { $0.abbreviation == selectedTranslation }
+                guard hasSelected == false else { return }
 
                 // Prefer KJV if present, otherwise first available
-                let hasKJV = list.contains { item in
-                    item.abbreviation == "KJV"
-                }
+                let hasKJV = list.contains { $0.abbreviation == "KJV" }
 
                 if hasKJV {
                     selectedTranslation = "KJV"
@@ -248,7 +234,7 @@ struct AddPassageView: View {
             endRef = "\(selectedBook) \(endCh):\(endVs)"
         }
 
-        await passageStore.fetchPassage(
+        await bibleStore.fetchSelection(
             translation: selectedTranslation,
             start: startRef,
             end: endRef,
@@ -259,6 +245,26 @@ struct AddPassageView: View {
 // MARK: Helper Views
 
 extension AddPassageView {
+    @ViewBuilder
+    private var headerView: some View {
+        let isLoading = passageStore.state == .loading
+        let disableRefresh = !isRefValid || isLoading
+        HStack {
+            Text(reference.isEmpty ? "Reference" : reference)
+                .textCase(.uppercase)
+            Spacer()
+            Button {
+                Task { await loadPassage() }
+            } label: {
+                Image(systemName: "arrow.clockwise")
+                    .symbolEffect(.bounce, value: isLoading)
+            }
+            .buttonStyle(.plain)
+            .disabled(disableRefresh)
+        }
+        .font(.app(.footnote, weight: .semibold))
+    }
+
     @ViewBuilder
     private var pickers: some View {
         Picker("Translation", selection: $selectedTranslation) {
@@ -520,62 +526,6 @@ extension AddPassageView {
 
         // Auto-advance to next field
         focusNext()
-    }
-}
-
-private struct NumericRefTextField: View {
-    let placeholder: String
-    @Binding var text: String
-    let isFocused: Bool
-    @FocusState.Binding var focus: AddPassageView.Field?
-    let thisField: AddPassageView.Field
-    let submitLabel: SubmitLabel
-    let width: CGFloat
-    let onSubmitAction: () -> Void
-    let onChangeAction: (String) -> Void
-
-    init(placeholder: String,
-         text: Binding<String>,
-         isFocused: Bool,
-         focus: FocusState<AddPassageView.Field?>.Binding,
-         thisField: AddPassageView.Field,
-         submitLabel: SubmitLabel,
-         width: CGFloat,
-         onSubmit: @escaping () -> Void,
-         onChange: @escaping (String) -> Void)
-    {
-        self.placeholder = placeholder
-        _text = text
-        self.isFocused = isFocused
-        _focus = focus
-        self.thisField = thisField
-        self.submitLabel = submitLabel
-        self.width = width
-        onSubmitAction = onSubmit
-        onChangeAction = onChange
-    }
-
-    var body: some View {
-        TextField(placeholder, text: $text)
-            .keyboardType(.numberPad)
-            .textFieldStyle(.plain)
-            .frame(width: width)
-            .padding(.vertical, 5)
-            .background(
-                RoundedRectangle(cornerRadius: 5, style: .continuous)
-                    .fill(Color(.secondarySystemBackground)),
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 5, style: .continuous)
-                    .stroke(isFocused ? Color.accentColor.opacity(0.8) : Color.secondary.opacity(0.2), lineWidth: 1.5),
-            )
-            .multilineTextAlignment(.center)
-            .focused($focus, equals: thisField)
-            .submitLabel(submitLabel)
-            .onSubmit { onSubmitAction() }
-            .onChange(of: text) { _, newValue in
-                onChangeAction(newValue)
-            }
     }
 }
 

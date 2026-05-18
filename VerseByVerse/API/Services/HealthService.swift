@@ -20,9 +20,9 @@ extension APIService {
             )
 
             return response.statusCode == 200 &&
-            response.body.status == "ok" &&
-            response.body.db == "ok" &&
-            response.body.redis == "ok"
+                response.body.status == "ok" &&
+                response.body.db == "ok" &&
+                response.body.redis == "ok"
         } catch let apiError as APIError {
             let code = apiError.statusCode.map(String.init) ?? "n/a"
             log.error("getHealth failed — statusCode: \(code), error: \(apiError.localizedDescription)")
