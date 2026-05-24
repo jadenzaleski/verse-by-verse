@@ -20,7 +20,14 @@ extension APIService {
         return response.body
     }
 
-    func createStudySet(name: String, description: String?, positionSeed: Int, colorSeed: Int, theme: MeshTheme, passageIds: [Int]?) async throws -> StudySetReadResponse {
+    func createStudySet(
+        name: String,
+        description: String?,
+        positionSeed: Int,
+        colorSeed: Int,
+        theme: MeshTheme,
+        passageIds: [Int]?,
+    ) async throws -> StudySetReadResponse {
         log.debug("createStudySet called: \(name)")
         let response: APIResponse<StudySetReadResponse> = try await fetch(
             key: "createStudySet",

@@ -27,6 +27,17 @@ struct UserPassage: Identifiable, Equatable {
     let scheduledDays: Int
     let elapsedDays: Int
 
+    var selectionKey: BibleSelectionKey {
+        BibleSelectionKey(
+            translation: translation,
+            book: book,
+            startChapter: startChapter,
+            startVerse: startVerse,
+            endChapter: endChapter,
+            endVerse: endVerse
+        )
+    }
+
     var reference: String {
         if startChapter == endChapter {
             if startVerse == endVerse {

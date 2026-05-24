@@ -14,7 +14,7 @@ final class BibleStore: Store {
 
     private(set) var bibleData: BibleStructure?
     private(set) var availableTranslations: [BibleTranslationInfo]?
-    private(set) var fetchedSelection: BibleSelection?
+    private(set) var selections: [BibleSelectionKey: BibleSelection] = [:]
 
     var state: DataState = .idle
     var lastError: APIError?
@@ -98,25 +98,27 @@ final class BibleStore: Store {
     }
 
     @MainActor
-    func fetchSelection(
-        translation: String,
-        start: String,
-        end: String? = nil,
-        strip: Bool = true,
-    ) async {
+    func fetchSelection(_ key: BibleSelectionKey, strip: Bool = true) async {
+        // Check cache first
+        if selections[key] != nil {
+            state = .success
+            return
+        }
+
         state = .loading
         clearError()
 
         do {
             let passageResponse = try await APIService.shared.getBibleSelection(
-                translation: translation,
-                start: start,
-                end: end,
+                translation: key.translation,
+                start: key.startRef,
+                end: key.endRef,
                 strip: strip,
             )
-            fetchedSelection = passageResponse.toDomain()
+            let selection = passageResponse.toDomain()
+            selections[key] = selection
             state = .success
-            log.info("BibleSelection fetched successfully: \(start)")
+            log.info("BibleSelection fetched and cached: \(key)")
         } catch {
             handle(error: error)
         }

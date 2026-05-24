@@ -39,8 +39,18 @@ enum APIEndpoint {
     // Study Sets
     case getMyStudySets
     case getStudySet(id: Int)
-    case createStudySet(name: String, description: String?, positionSeed: Int, colorSeed: Int, theme: String, passageIds: [Int]?)
-    case patchStudySet(id: Int, name: String?, description: String?, positionSeed: Int?, colorSeed: Int?, theme: String?)
+    case createStudySet(name: String,
+                        description: String?,
+                        positionSeed: Int,
+                        colorSeed: Int,
+                        theme: String,
+                        passageIds: [Int]?)
+    case patchStudySet(id: Int,
+                       name: String?,
+                       description: String?,
+                       positionSeed: Int?,
+                       colorSeed: Int?,
+                       theme: String?)
     case deleteStudySet(id: Int)
     case addPassageToStudySet(studySetId: Int, passageId: Int)
     case removePassageFromStudySet(studySetId: Int, passageId: Int)
@@ -82,7 +92,14 @@ enum APIEndpoint {
 
     var method: String {
         switch self {
-        case .postLogin, .postRegister, .postRefresh, .createPassage, .createStudySet, .addPassageToStudySet, .startPracticeSession, .completePracticeSession: "POST"
+        case .postLogin,
+                .postRegister,
+                .postRefresh,
+                .createPassage,
+                .createStudySet,
+                .addPassageToStudySet,
+                .startPracticeSession,
+                .completePracticeSession: "POST"
         case .patchUser, .patchPassage, .patchStudySet: "PATCH"
         case .deletePassage, .deleteStudySet, .removePassageFromStudySet: "DELETE"
         default: "GET"

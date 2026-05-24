@@ -15,6 +15,30 @@ struct Verse: Identifiable, Equatable {
     let text: String
 }
 
+struct BibleSelectionKey: Hashable, Codable {
+    let translation: String
+    let book: String
+    let startChapter: Int
+    let startVerse: Int
+    let endChapter: Int
+    let endVerse: Int
+
+    init(translation: String, book: String, startChapter: Int, startVerse: Int, endChapter: Int, endVerse: Int) {
+        self.translation = translation.uppercased()
+        self.book = book.uppercased()
+        self.startChapter = startChapter
+        self.startVerse = startVerse
+        self.endChapter = endChapter
+        self.endVerse = endVerse
+    }
+
+    var startRef: String { "\(book) \(startChapter):\(startVerse)" }
+    var endRef: String? {
+        if startChapter == endChapter && startVerse == endVerse { return nil }
+        return "\(book) \(endChapter):\(endVerse)"
+    }
+}
+
 struct BibleSelection: Equatable {
     let translation: String
     let book: String
@@ -23,6 +47,17 @@ struct BibleSelection: Equatable {
     let endChapter: Int
     let endVerse: Int
     let verses: [Verse]
+
+    var key: BibleSelectionKey {
+        BibleSelectionKey(
+            translation: translation,
+            book: book,
+            startChapter: startChapter,
+            startVerse: startVerse,
+            endChapter: endChapter,
+            endVerse: endVerse
+        )
+    }
 
     var fullText: String {
         verses.map(\.text).joined(separator: " ")

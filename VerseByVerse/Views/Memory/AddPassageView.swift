@@ -10,7 +10,6 @@ import SwiftUI
 struct AddPassageView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(BibleStore.self) private var bibleStore
-    @State private var passageStore = PassageStore()
 
     @AppStorage(.lastUsedTranslation) private var selectedTranslation = "KJV"
     @State private var selectedBook = "John"
@@ -24,6 +23,21 @@ struct AddPassageView: View {
     @FocusState private var focusedField: Field?
 
     enum Field: Hashable { case startChapter, startVerse, endChapter, endVerse }
+
+    private var currentSelectionKey: BibleSelectionKey? {
+        guard let startCh = Int(startChapter), let startVs = Int(startVerse) else { return nil }
+        let endCh = Int(endChapter) ?? startCh
+        let endVs = Int(endVerse) ?? startVs
+
+        return BibleSelectionKey(
+            translation: selectedTranslation,
+            book: selectedBook,
+            startChapter: startCh,
+            startVerse: startVs,
+            endChapter: endCh,
+            endVerse: endVs
+        )
+    }
 
     private var reference: String {
         guard !startChapter.isEmpty, !startVerse.isEmpty else {
@@ -116,129 +130,128 @@ struct AddPassageView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section {
-                    pickers
-                    referenceInputGroup
-                } footer: {
-                    referenceFooter
-                }
-
-                Section {
-                    if passageStore.state == .loading {
-                        HStack {
-                            Spacer()
-                            ProgressView()
-                                .padding()
-                            Spacer()
+            formView
+                .navigationTitle("Add Passage")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button {
+                            dismiss()
+                        } label: {
+                            Image("lucide.x")
+                                .scaleEffect(0.80)
                         }
-                    } else if let passage = passageStore.fetchedPassage {
-                        Text(passage.fullText)
-                            .font(.app(.body))
-                            .transition(.opacity)
-                    } else if case let .error(apiError) = passageStore.state {
-                        Text(apiError.localizedDescription)
-                            .foregroundStyle(.red)
-                            .font(.app(.subheadline))
-                    } else {
-                        Text("Fill out the passage reference above to populate this field.")
-                            .foregroundStyle(.secondary)
                     }
-                } header: {
-                    headerView
-                } footer: {
-                    Text(" ")
-                }
-            }
-            .navigationTitle("Add Passage")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image("lucide.x")
-                            .scaleEffect(0.80)
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button {
+                            dismiss()
+                        } label: {
+                            Image("lucide.plus")
+                        }
+                        .buttonStyle(.glassProminent)
+                        .tint(.accent)
+                        .disabled(!isRefValid)
                     }
                 }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image("lucide.plus")
+                .safeAreaInset(edge: .bottom) {
+                    if focusedField != nil {
+                        keyboardBar()
                     }
-                    .buttonStyle(.glassProminent)
-                    .tint(.accent)
-                    .disabled(!isRefValid)
                 }
-            }
-            .safeAreaInset(edge: .bottom) {
-                if focusedField != nil {
-                    keyboardBar()
+                .task {
+                    await loadInitialData()
                 }
-            }
-            .task {
-                await withTaskGroup(of: Void.self) { group in
-                    group.addTask { await bibleStore.loadBibleData() }
-                    group.addTask { await bibleStore.loadTranslations() }
+                .onChange(of: bibleStore.availableTranslations) { _, newValue in
+                    handleTranslationsChange(newValue)
                 }
-            }
-            .onChange(of: bibleStore.availableTranslations) { _, newValue in
-                guard let list = newValue, !list.isEmpty else { return }
+                .onChange(of: selectedBook) {
+                    handleBookChange()
+                }
+                .onReceive(NotificationCenter.default.publisher(
+                    for: UITextField.textDidBeginEditingNotification)) { obj in
+                    handleTextFieldBeginEditing(obj)
+                }
+        }
+    }
 
-                // If our current selection isn't in the list, we need a fallback
-                let hasSelected = list.contains { $0.abbreviation == selectedTranslation }
-                guard hasSelected == false else { return }
+    @ViewBuilder
+    private var formView: some View {
+        Form {
+            Section {
+                pickers
+                referenceInputGroup
+            } footer: {
+                referenceFooter
+            }
 
-                // Prefer KJV if present, otherwise first available
-                let hasKJV = list.contains { $0.abbreviation == "KJV" }
-
-                if hasKJV {
-                    selectedTranslation = "KJV"
-                } else if let first = list.first {
-                    selectedTranslation = first.abbreviation
+            Section {
+                if bibleStore.state == .loading {
+                    HStack {
+                        Spacer()
+                        ProgressView()
+                            .padding()
+                        Spacer()
+                    }
+                } else if let key = currentSelectionKey, let selection = bibleStore.selections[key] {
+                    Text(selection.fullText)
+                        .font(.app(.body))
+                        .transition(.opacity)
+                } else if case let .error(apiError) = bibleStore.state {
+                    Text(apiError.localizedDescription)
+                        .foregroundStyle(.red)
+                        .font(.app(.subheadline))
+                } else {
+                    Text("Fill out the passage reference above to populate this field.")
+                        .foregroundStyle(.secondary)
                 }
-            }
-            .onChange(of: selectedBook) {
-                startChapter = ""
-                startVerse = ""
-                endChapter = ""
-                endVerse = ""
-                passageStore.clearPassage()
-            }
-            .onChange(of: selectedTranslation) {
-                passageStore.clearPassage()
-            }
-            .onReceive(NotificationCenter.default.publisher(for: UITextField.textDidBeginEditingNotification)) { obj in
-                if let textField = obj.object as? UITextField {
-                    textField.selectAll(nil)
-                }
+            } header: {
+                headerView
+            } footer: {
+                Text(" ")
             }
         }
     }
 
-    private func loadPassage() async {
-        guard isRefValid,
-              let startCh = Int(startChapter),
-              let startVs = Int(startVerse)
-        else { return }
-
-        // Formatting for the API (e.g., "John 3:16")
-        let startRef = "\(selectedBook) \(startCh):\(startVs)"
-        var endRef: String?
-
-        if !endChapter.isEmpty, !endVerse.isEmpty,
-           let endCh = Int(endChapter),
-           let endVs = Int(endVerse)
-        {
-            endRef = "\(selectedBook) \(endCh):\(endVs)"
+    private func loadInitialData() async {
+        await withTaskGroup(of: Void.self) { group in
+            group.addTask { await bibleStore.loadBibleData() }
+            group.addTask { await bibleStore.loadTranslations() }
         }
+    }
 
-        await bibleStore.fetchSelection(
-            translation: selectedTranslation,
-            start: startRef,
-            end: endRef,
-        )
+    private func handleTranslationsChange(_ newValue: [BibleTranslationInfo]?) {
+        guard let list = newValue, !list.isEmpty else { return }
+
+        // If our current selection isn't in the list, we need a fallback
+        let hasSelected = list.contains { $0.abbreviation == selectedTranslation }
+        if hasSelected { return }
+
+        // Prefer KJV if present, otherwise first available
+        let hasKJV = list.contains { $0.abbreviation == "KJV" }
+
+        if hasKJV {
+            selectedTranslation = "KJV"
+        } else if let first = list.first {
+            selectedTranslation = first.abbreviation
+        }
+    }
+
+    private func handleBookChange() {
+        startChapter = ""
+        startVerse = ""
+        endChapter = ""
+        endVerse = ""
+    }
+
+    private func handleTextFieldBeginEditing(_ notification: Notification) {
+        if let textField = notification.object as? UITextField {
+            textField.selectAll(nil)
+        }
+    }
+
+    private func loadBibleSelection() async {
+        guard let key = currentSelectionKey, isRefValid else { return }
+        await bibleStore.fetchSelection(key)
     }
 }
 
@@ -247,14 +260,14 @@ struct AddPassageView: View {
 extension AddPassageView {
     @ViewBuilder
     private var headerView: some View {
-        let isLoading = passageStore.state == .loading
+        let isLoading = bibleStore.state == .loading
         let disableRefresh = !isRefValid || isLoading
         HStack {
             Text(reference.isEmpty ? "Reference" : reference)
                 .textCase(.uppercase)
             Spacer()
             Button {
-                Task { await loadPassage() }
+                Task { await loadBibleSelection() }
             } label: {
                 Image(systemName: "arrow.clockwise")
                     .symbolEffect(.bounce, value: isLoading)
@@ -461,7 +474,7 @@ extension AddPassageView {
                 withAnimation {
                     focusedField = nil
                     Task {
-                        await loadPassage()
+                        await loadBibleSelection()
                     }
                 }
             } label: {

@@ -252,7 +252,9 @@ struct PassageMemoryScoreChart: View {
                                         let timeRange = now.timeIntervalSince(firstDate)
                                         let threshold = timeRange / 80
 
-                                        if let nearest, abs(nearest.startDate.timeIntervalSince(clampedDate)) < threshold {
+                                        if let nearest,
+                                           abs(nearest.startDate.timeIntervalSince(clampedDate)) < threshold
+                                        {
                                             selectedDate = nearest.startDate
                                             selectedSession = nearest
                                         } else {
