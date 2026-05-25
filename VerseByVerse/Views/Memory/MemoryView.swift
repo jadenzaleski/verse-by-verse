@@ -29,7 +29,7 @@ struct ScrollOffsetKey: PreferenceKey {
 
 enum ActiveSheet: Identifiable {
     case add
-    case passage(Int)
+    case passage(UserPassage)
 
     var id: String {
         switch self {
@@ -42,6 +42,7 @@ enum ActiveSheet: Identifiable {
 }
 
 struct MemoryView: View {
+    @Environment(PassageStore.self) private var passageStore
     @State private var selectedTab: MemoryTopTab = .all
     @Namespace private var tabIndicator
     @State private var tabFrames: [MemoryTopTab: CGRect] = [:]
@@ -69,10 +70,16 @@ struct MemoryView: View {
                 content
                     .transaction { $0.animation = nil }
                     .padding()
+                    .task {
+                        await passageStore.loadMyPassages()
+                    }
             }
             .scrollIndicators(.hidden)
             .coordinateSpace(name: "scroll")
             .onPreferenceChange(ScrollOffsetKey.self) { scrollOffset = $0 }
+            .refreshable {
+                await passageStore.loadMyPassages()
+            }
         }
         .navigationTitle("Memory")
         .toolbar {
@@ -100,9 +107,9 @@ struct MemoryView: View {
             switch sheet {
             case .add:
                 AddPassageView()
-            case let .passage(id):
+            case let .passage(userPassage):
                 NavigationStack {
-                    PassageDetailView(passageID: id)
+                    PassageDetailView(passage: userPassage)
                         .navigationTitle("Passage")
                         .navigationBarTitleDisplayMode(.inline)
                         .toolbar {
@@ -176,8 +183,8 @@ struct MemoryView: View {
         switch selectedTab {
         case .all:
             VStack(spacing: 10) {
-                ForEach(0 ..< 20, id: \.self) { index in
-                    PassageCard()
+                ForEach(passageStore.userPassages, id: \.id) { index in
+                    PassageCard(passage: index)
                         .onTapGesture {
                             activeSheet = .passage(index)
                         }
@@ -280,4 +287,5 @@ struct MemoryView: View {
     MemoryView()
         .environment(\.font, .app())
         .environment(UserStore.shared)
+        .environment(PassageStore.shared)
 }

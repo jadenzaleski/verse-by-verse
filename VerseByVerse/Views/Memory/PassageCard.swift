@@ -8,19 +8,21 @@
 import SwiftUI
 
 struct PassageCard: View {
+    @Environment(BibleStore.self) private var bibleStore
     @State private var progress: Double = 4
+    let passage: UserPassage
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("John 3:16")
+                Text(passage.reference)
                     .font(.app(weight: .semibold))
                 Spacer()
-                Text("ESV")
+                Text(passage.translation)
                     .environment(\.font, .app(.caption))
             }
 
-            Text("For God so loved the world that he gave his only son, that "
-                + "whoever believes in him shall not perish but have eternal life.")
+            Text(bibleStore.selections[passage.selectionKey]?.fullText ?? "...")
                 .lineLimit(2)
                 .font(.app(.subheadline))
 
@@ -40,11 +42,30 @@ struct PassageCard: View {
         .padding()
         .frame(maxWidth: .infinity)
         .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
+        .task {
+            await bibleStore.fetchSelection(passage.selectionKey)
+        }
     }
 }
 
 #Preview {
-    PassageCard()
+    PassageCard(passage: UserPassage(id: 1,
+                                     userId: "test",
+                                     book: "John",
+                                     startChapter: 1,
+                                     endChapter: 2,
+                                     startVerse: 3,
+                                     endVerse: 4,
+                                     translation: "KJV",
+                                     lastPracticed: nil,
+                                     nextPractice: nil,
+                                     stability: 1.0,
+                                     difficulty: 1.0,
+                                     state: 1,
+                                     reps: 1,
+                                     lapses: 1,
+                                     scheduledDays: 1,
+                                     elapsedDays: 1))
         .padding()
         .environment(\.font, .app())
 }

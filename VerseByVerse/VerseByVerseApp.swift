@@ -15,6 +15,7 @@ struct VerseByVerseApp: App {
     @State private var showLogin = false
     private let userStore = UserStore.shared
     private let bibleStore = BibleStore.shared
+    private let passageStore = PassageStore.shared
     private let log = AppLog.category("Init")
     private let cache = Cache.shared
 
@@ -57,6 +58,7 @@ struct VerseByVerseApp: App {
             .environment(\.font, .app())
             .environment(userStore)
             .environment(bibleStore)
+            .environment(passageStore)
         }
     }
 
