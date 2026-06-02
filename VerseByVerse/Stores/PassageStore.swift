@@ -21,7 +21,7 @@ final class PassageStore: Store {
     init() {}
 
     @MainActor
-    func loadMyPassages() async {
+    func loadMyPassages(lookInCache: Bool = true) async {
         state = .loading
         clearError()
 
@@ -32,6 +32,38 @@ final class PassageStore: Store {
             log.info("Loaded \(userPassages.count) user passages")
         } catch {
             handle(error: error)
+        }
+    }
+
+    @MainActor
+    func createPassage(
+        book: String,
+        startChapter: Int,
+        endChapter: Int,
+        startVerse: Int,
+        endVerse: Int,
+        translation: String
+    ) async throws {
+        state = .loading
+        clearError()
+
+        do {
+            let response = try await APIService.shared.createPassage(
+                book: book,
+                startChapter: startChapter,
+                endChapter: endChapter,
+                startVerse: startVerse,
+                endVerse: endVerse,
+                translation: translation
+            )
+            
+            let newPassage = response.toDomain()
+            userPassages.append(newPassage)
+            state = .success
+            log.info("Created new passage: \(newPassage.id)")
+        } catch {
+            handle(error: error)
+            throw error
         }
     }
 

@@ -11,11 +11,9 @@ extension APIService {
     func getMyStudySets() async throws -> [StudySetReadResponse] {
         log.debug("getMyStudySets called")
         let response: APIResponse<[StudySetReadResponse]> = try await fetch(
-            key: "myStudySets",
-            request: APIEndpoint.getMyStudySets.request,
+            endpoint: APIEndpoint.getMyStudySets,
             lookInCache: false,
             saveToCache: true,
-            attemptRefresh: true,
         )
         return response.body
     }
@@ -30,18 +28,16 @@ extension APIService {
     ) async throws -> StudySetReadResponse {
         log.debug("createStudySet called: \(name)")
         let response: APIResponse<StudySetReadResponse> = try await fetch(
-            key: "createStudySet",
-            request: APIEndpoint.createStudySet(
+            endpoint: APIEndpoint.createStudySet(
                 name: name,
                 description: description,
                 positionSeed: positionSeed,
                 colorSeed: colorSeed,
                 theme: theme.rawValue,
                 passageIds: passageIds,
-            ).request,
+            ),
             lookInCache: false,
             saveToCache: false,
-            attemptRefresh: true,
         )
         return response.body
     }

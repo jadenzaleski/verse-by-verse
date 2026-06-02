@@ -6,8 +6,9 @@
 //
 
 import Foundation
+import CryptoKit
 
-enum APIEndpoint {
+enum APIEndpoint: Hashable {
     // Login
     case postLogin(email: String, password: String)
     case postRegister(firstName: String, lastName: String, email: String, password: String)
@@ -60,6 +61,48 @@ enum APIEndpoint {
     case completePracticeSession(id: Int, score: Double)
     /// Other
     case getHealth
+
+
+    var debugIdentifier: String {
+        var parts: [String] = [method, path]
+
+        if let items = queryItems, !items.isEmpty {
+            let query = items
+                .sorted { $0.name < $1.name }
+                .map { "\($0.name)=\($0.value ?? "")" }
+                .joined(separator: "&")
+            parts.append(query)
+        }
+
+        if let body {
+            parts.append("body:\(body.sha256Hex)")
+        }
+
+        return parts.joined(separator: " | ")
+    }
+
+    var cacheIdentifier: String {
+        // Build canonical bytes from method, path, sorted query, then append body bytes with a delimiter, and hash.
+        var parts: [String] = [method, path]
+
+        if let items = queryItems, !items.isEmpty {
+            let query = items
+                .sorted { $0.name < $1.name }
+                .map { "\($0.name)=\($0.value ?? "")" }
+                .joined(separator: "&")
+            parts.append(query)
+        }
+
+        let canonical = parts.joined(separator: " ")
+        var data = Data(canonical.utf8)
+
+        if let body {
+            data.append(Data([0x1F])) // Unit Separator delimiter
+            data.append(body)
+        }
+
+        return data.sha256Hex
+    }
 
     var path: String {
         switch self {
@@ -210,6 +253,50 @@ enum APIEndpoint {
         }
     }
 
+    var invalidates: [APIEndpoint] {
+        switch self {
+        case .patchUser:
+            return [.getUser]
+        case .createPassage:
+            return [.getMyPassages]
+        case let .patchPassage(id, _, _, _, _, _, _):
+            return [.getPassage(id: id), .getMyPassages]
+        case let .deletePassage(id):
+            return [.getPassage(id: id), .getMyPassages]
+        case .createStudySet:
+            return [.getMyStudySets]
+        case let .patchStudySet(id, _, _, _, _, _):
+            return [.getStudySet(id: id), .getMyStudySets]
+        case let .deleteStudySet(id):
+            return [.getStudySet(id: id), .getMyStudySets]
+        case let .addPassageToStudySet(sid, _), let .removePassageFromStudySet(sid, _):
+            return [.getStudySet(id: sid), .getMyStudySets]
+        case .completePracticeSession:
+            return [.getMyPracticeSessions, .getMyPassages]
+        default:
+            return []
+        }
+    }
+
+    /// The APIEndpoint Time To Live, or time in seconds before it expires and is purged.
+    var ttl: TimeInterval? {
+        switch self {
+        case .getUser,
+                .getBibleSelection,
+                .getPassage,
+                .getMyPassages,
+                .getMyStudySets,
+                .getStudySet,
+                .getMyPracticeSessions:
+            return 60
+        case .getBibleBooks,
+                .getBibleTranslations:
+            return 30 * 24 * 60 * 60 // 30 days
+        default:
+            return nil
+        }
+    }
+
     var request: URLRequest {
         let log = AppLog.category("APIEndpoint.request")
         let base = APIConfig.shared.baseURL.appendingPathComponent(path)
@@ -235,4 +322,12 @@ enum APIEndpoint {
 
         return req
     }
+}
+
+private extension Data {
+    var sha256Hex: String { SHA256.hash(data: self).map { String(format: "%02x", $0) }.joined() }
+}
+
+private extension String {
+    var sha256Hex: String { Data(self.utf8).sha256Hex }
 }

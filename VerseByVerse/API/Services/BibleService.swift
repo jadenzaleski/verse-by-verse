@@ -13,9 +13,7 @@ extension APIService {
 
         do {
             let response: APIResponse<BibleBooksResponse> = try await fetch(
-                key: "bibleBooks",
-                expiresIn: 15 * 24 * 60 * 60, // 15 days
-                request: APIEndpoint.getBibleBooks.request,
+                endpoint: APIEndpoint.getBibleBooks,
                 lookInCache: true,
                 saveToCache: true,
             )
@@ -39,9 +37,7 @@ extension APIService {
 
         do {
             let response: APIResponse<BibleTranslationsResponse> = try await fetch(
-                key: "bibleTranslations",
-                expiresIn: 15 * 24 * 60 * 60, // 15 days
-                request: APIEndpoint.getBibleTranslations.request,
+                endpoint: APIEndpoint.getBibleTranslations,
                 lookInCache: lookInCache,
                 saveToCache: saveToCache,
             )
@@ -70,14 +66,12 @@ extension APIService {
 
         do {
             let response: APIResponse<BibleSelectionResponse> = try await fetch(
-                key: "passage-\(translation)-\(start)-\(end ?? "none")-\(strip)",
-                expiresIn: 30 * 24 * 60 * 60, // 30 days
-                request: APIEndpoint.getBibleSelection(
+                endpoint: APIEndpoint.getBibleSelection(
                     translation: translation,
                     startReference: start,
                     endReference: end,
                     strip: strip,
-                ).request,
+                ),
                 lookInCache: lookInCache,
                 saveToCache: saveToCache,
             )

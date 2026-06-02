@@ -71,7 +71,7 @@ struct MemoryView: View {
                     .transaction { $0.animation = nil }
                     .padding()
                     .task {
-                        await passageStore.loadMyPassages()
+                        await passageStore.loadMyPassages(lookInCache: true)
                     }
             }
             .scrollIndicators(.hidden)

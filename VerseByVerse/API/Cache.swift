@@ -58,35 +58,8 @@ extension Cache {
         }
     }
 
-    /// Legacy method retained for compatibility.
-    func set(
-        key: String,
-        data: Data,
-        statusCode: Int,
-        expiresIn: TimeInterval?,
-    ) {
-        queue.async {
-            let expiry = expiresIn.map { Date().addingTimeInterval($0) }
-            let entry = DiskCacheEntry(
-                data: data,
-                statusCode: statusCode,
-                expiresAt: expiry,
-            )
-
-            self.memory[key] = entry
-
-            let url = self.fileURL(for: key)
-            do {
-                let encoded = try JSONEncoder().encode(entry)
-                try encoded.write(to: url, options: .atomic)
-            } catch {
-                self.log.error("Failed to write cache entry to disk")
-            }
-        }
-    }
-
     /// Preferred method for storing full APIResponse envelope.
-    func set(key: String, response: APIResponse<some Encodable>, expiresIn: TimeInterval?) {
+    func set(key: String, response: APIResponse<some Encodable>, ttl: TimeInterval?) {
         do {
             let encoder = JSONEncoder()
             encoder.dateEncodingStrategy = .iso8601WithFractionalSeconds
@@ -94,7 +67,7 @@ extension Cache {
             let statusCode = response.statusCode
 
             queue.async {
-                let expiry = expiresIn.map { Date().addingTimeInterval($0) }
+                let expiry = ttl.map { Date().addingTimeInterval($0) }
                 let entry = DiskCacheEntry(
                     data: encodedResponse,
                     statusCode: statusCode,

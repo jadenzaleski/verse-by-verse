@@ -10,6 +10,7 @@ import SwiftUI
 struct AddPassageView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(BibleStore.self) private var bibleStore
+    @Environment(PassageStore.self) private var passageStore
 
     @AppStorage(.lastUsedTranslation) private var selectedTranslation = "KJV"
     @State private var selectedBook = "John"
@@ -144,13 +145,19 @@ struct AddPassageView: View {
                     }
                     ToolbarItem(placement: .confirmationAction) {
                         Button {
-                            dismiss()
+                            Task {
+                                await handleAddPassage()
+                            }
                         } label: {
-                            Image("lucide.plus")
+                            if passageStore.state == .loading {
+                                ProgressView()
+                            } else {
+                                Image("lucide.plus")
+                            }
                         }
                         .buttonStyle(.glassProminent)
                         .tint(.accent)
-                        .disabled(!isRefValid)
+                        .disabled(!isRefValid || passageStore.state == .loading)
                     }
                 }
                 .safeAreaInset(edge: .bottom) {
@@ -252,6 +259,31 @@ struct AddPassageView: View {
     private func loadBibleSelection() async {
         guard let key = currentSelectionKey, isRefValid else { return }
         await bibleStore.fetchSelection(key)
+    }
+
+    private func handleAddPassage() async {
+        guard isRefValid else { return }
+
+        let startCh = Int(startChapter) ?? 1
+        let startVs = Int(startVerse) ?? 1
+        let endCh = Int(endChapter.isEmpty ? startChapter : endChapter) ?? startCh
+        let endVs = Int(endVerse.isEmpty ? startVerse : endVerse) ?? startVs
+
+        do {
+            try await passageStore.createPassage(
+                book: selectedBook,
+                startChapter: startCh,
+                endChapter: endCh,
+                startVerse: startVs,
+                endVerse: endVs,
+                translation: selectedTranslation
+            )
+            dismiss()
+        } catch {
+            // Error is already handled in the store, 
+            // but we keep the view open so the user can see it or retry.
+            AppLog.category("AddPassageView").error("Failed to add passage: \(error.localizedDescription)")
+        }
     }
 }
 

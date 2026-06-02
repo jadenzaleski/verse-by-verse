@@ -13,8 +13,7 @@ extension APIService {
 
         do {
             let response: APIResponse<PostLoginResponse> = try await fetch(
-                key: "postLogin",
-                request: APIEndpoint.postLogin(email: email, password: password).request,
+                endpoint: APIEndpoint.postLogin(email: email, password: password),
                 lookInCache: false,
                 saveToCache: false,
             )
@@ -42,11 +41,10 @@ extension APIService {
 
         do {
             let response: APIResponse<UserResponse> = try await fetch(
-                key: "postRegister",
-                request: APIEndpoint.postRegister(firstName: firstName,
+                endpoint: APIEndpoint.postRegister(firstName: firstName,
                                                   lastName: lastName,
                                                   email: email,
-                                                  password: password).request,
+                                                  password: password),
                 lookInCache: false,
                 saveToCache: false,
             )
@@ -72,8 +70,7 @@ extension APIService {
 
         do {
             let response: APIResponse<PostRefreshResponse> = try await fetch(
-                key: "postRefresh",
-                request: APIEndpoint.postRefresh(accessToken: accessToken, refreshToken: refreshToken).request,
+                endpoint: APIEndpoint.postRefresh(accessToken: accessToken, refreshToken: refreshToken),
                 lookInCache: false,
                 saveToCache: false,
             )

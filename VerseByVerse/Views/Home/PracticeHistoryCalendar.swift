@@ -3,7 +3,6 @@ import SwiftUI
 struct PracticeHistoryCalendar: View {
     let sessions: [PracticeSession]
     @State private var scrollID: Int? = 0
-    @State private var currentMonth: Date = .init()
     @State private var selectedDate: Date?
 
     private var selectedDayStart: Date? {
@@ -51,7 +50,15 @@ struct PracticeHistoryCalendar: View {
     }
 
     var body: some View {
+        let currentMonth = calendar.date(
+            byAdding: .month, value: scrollID ?? 0,
+            to: Date())?.formatted(.dateTime.month(.wide).year()
+            ) ?? ""
+
         VStack(alignment: .leading, spacing: 15) {
+            Text("Practice History")
+                .font(.app(.title))
+                .padding(.horizontal)
             HStack {
                 Button {
                     withAnimation {
@@ -64,9 +71,8 @@ struct PracticeHistoryCalendar: View {
                 .disabled(scrollID == -monthsToShow)
 
                 Spacer()
-                Text("\(currentMonth.formatted(.dateTime.month(.wide).year()))")
+                Text(currentMonth)
                     .font(.app(.body, weight: .semibold))
-                    .id(currentMonth) // Force refresh when month changes
                 Spacer()
 
                 Button {
@@ -92,7 +98,7 @@ struct PracticeHistoryCalendar: View {
                 Text("S")
             }
             .font(.app(.caption, weight: .semibold))
-            .padding(.vertical, 5)
+            .padding(.top, 5)
             .padding(.horizontal)
 
             ScrollView(.horizontal, showsIndicators: false) {
@@ -107,11 +113,6 @@ struct PracticeHistoryCalendar: View {
             }
             .scrollTargetBehavior(.viewAligned)
             .scrollPosition(id: $scrollID)
-            .onChange(of: scrollID) { _, newValue in
-                if let newValue {
-                    currentMonth = calendar.date(byAdding: .month, value: newValue, to: Date()) ?? Date()
-                }
-            }
 
             VStack(alignment: .leading) {
                 Text(selectedDayStart ?? .now, format: .dateTime.month().day().year())
@@ -136,43 +137,41 @@ struct PracticeHistoryCalendar: View {
 
         LazyVGrid(columns: columns) {
             ForEach(days.indices, id: \.self) { index in
-                if let date = days[index] {
-                    let count = sessionsByDay[calendar.startOfDay(for: date)] ?? 0
-                    let isSelected = selectedDayStart == calendar.startOfDay(for: date)
-                    Circle()
-                        .fill(heatmapColor(for: count))
-                        .aspectRatio(1, contentMode: .fit)
-                        .overlay {
-                            ZStack {
-                                Text(date, format: .dateTime.day())
-                                    .font(.app(.caption, weight: calendar.isDateInToday(date) ? .bold : .regular))
-                                if isSelected {
-                                    Circle()
-                                        .stroke(Color.accentColor, lineWidth: 3)
-                                }
+                let date = days[index]
+                let count = sessionsByDay[calendar.startOfDay(for: date)] ?? 0
+                let isSelected = selectedDayStart == calendar.startOfDay(for: date)
+                let inCurrentMonth = calendar.isDate(date, equalTo: monthDate, toGranularity: .month)
+                let fontWeight = (calendar.isDateInToday(date) && inCurrentMonth) ? Font.Weight.heavy : Font.Weight.medium
+
+                Circle()
+                    .fill(inCurrentMonth ? heatmapColor(for: count) : Color.secondary.opacity(0.05))
+                    .aspectRatio(1, contentMode: .fit)
+                    .overlay {
+                        ZStack {
+                            Text(date, format: .dateTime.day())
+                                .font(.app(.caption, weight: fontWeight))
+                                .foregroundStyle(inCurrentMonth ? .primary : .tertiary)
+                            if isSelected {
+                                Circle()
+                                    .stroke(Color.accentColor, lineWidth: 3)
                             }
                         }
-                        .contentShape(Circle())
-                        .onTapGesture {
-                            let start = calendar.startOfDay(for: date)
-                            if selectedDayStart == start {
-                                selectedDate = nil
-                            } else {
-                                selectedDate = date
-                            }
-                        }
-                } else {
-                    Circle()
-                        .fill(.secondary.opacity(0.1))
-                }
+                    }
+                    .contentShape(Circle())
+                    .onTapGesture {
+                        selectedDate = date
+                    }
             }
         }
         .padding(.horizontal)
+        .padding(.vertical, 5)
     }
 
-    private func daysInMonth(for date: Date) -> [Date?] {
-        guard let range = calendar.range(of: .day, in: .month, for: date),
-              let firstOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: date))
+    private func daysInMonth(for date: Date) -> [Date] {
+        guard let firstOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: date)),
+              let range = calendar.range(of: .day, in: .month, for: date),
+              let previousMonth = calendar.date(byAdding: .month, value: -1, to: firstOfMonth),
+              let nextMonth = calendar.date(byAdding: .month, value: 1, to: firstOfMonth)
         else {
             return []
         }
@@ -180,18 +179,36 @@ struct PracticeHistoryCalendar: View {
         let firstWeekday = calendar.component(.weekday, from: firstOfMonth)
         let offset = firstWeekday - 1 // 0 for Sunday
 
-        var days: [Date?] = Array(repeating: nil, count: offset)
+        var days: [Date] = []
 
+        // Leading days from previous month
+        let daysInPreviousMonth = calendar.range(of: .day, in: .month, for: previousMonth)!.count
+        if offset > 0 {
+            let startDay = daysInPreviousMonth - offset + 1
+            for day in startDay ... daysInPreviousMonth {
+                if let date = calendar.date(bySetting: .day, value: day, of: previousMonth) {
+                    days.append(date)
+                }
+            }
+        }
+
+        // Current month days
         for day in range {
             if let date = calendar.date(byAdding: .day, value: day - 1, to: firstOfMonth) {
                 days.append(date)
             }
         }
 
-        // Pad the array to always have 42 items (6 weeks)
-        if days.count < 42 {
-            days.append(contentsOf: Array(repeating: nil, count: 42 - days.count))
+        // Trailing days from next month to fill 42 cells
+        let needed = max(0, 42 - days.count)
+        if needed > 0 {
+            for day in 1 ... needed {
+                if let date = calendar.date(bySetting: .day, value: day, of: nextMonth) {
+                    days.append(date)
+                }
+            }
         }
+
         return days
     }
 

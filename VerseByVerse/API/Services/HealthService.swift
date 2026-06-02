@@ -12,9 +12,7 @@ extension APIService {
         log.debug("getHealth called")
         do {
             let response: APIResponse<GetHealthResponse> = try await fetch(
-                key: "health",
-                expiresIn: 60,
-                request: APIEndpoint.getHealth.request,
+                endpoint: APIEndpoint.getHealth,
                 lookInCache: false,
                 saveToCache: false,
             )

@@ -13,12 +13,9 @@ extension APIService {
 
         do {
             let response: APIResponse<UserResponse> = try await fetch(
-                key: "getUser",
-                expiresIn: 15 * 60,
-                request: APIEndpoint.getUser.request,
+                endpoint: APIEndpoint.getUser,
                 lookInCache: lookInCache,
                 saveToCache: saveToCache,
-                attemptRefresh: true,
             )
 
             log.debug(
@@ -46,13 +43,11 @@ extension APIService {
 
         do {
             let response: APIResponse<UserResponse> = try await fetch(
-                key: "patchUser",
-                request: APIEndpoint.patchUser(
+                endpoint: APIEndpoint.patchUser(
                     firstName: firstName, lastName: lastName, email: email, password: password,
-                ).request,
+                ),
                 lookInCache: false,
                 saveToCache: false,
-                attemptRefresh: true,
             )
 
             log.debug(

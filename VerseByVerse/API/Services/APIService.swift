@@ -18,29 +18,41 @@ final class APIService {
     /// - Returns: A decoded `APIResponse<T>` on success.
     /// - Throws: `APIError` for HTTP, network, decoding, cancellation, or unknown errors.
     func fetch<T: Codable>(
-        key: String,
-        expiresIn: TimeInterval? = nil,
-        request: URLRequest,
-        lookInCache: Bool = false,
-        saveToCache: Bool = true,
-        attemptRefresh: Bool = false,
+        endpoint: APIEndpoint,
+        lookInCache: Bool? = nil,
+        saveToCache: Bool? = nil,
+        attemptRefresh: Bool = true,
     ) async throws -> APIResponse<T> {
-        log.debug("Fetch:\n- url: \(request)\n- key: \(key)\n"
-            + "- expiresIn: \(String(describing: expiresIn))\n"
-            + "- lookInCache: \(lookInCache)\n- saveToCache: \(saveToCache)\n"
-            + "- attemptRefresh: \(attemptRefresh)")
+        let cacheKey = endpoint.cacheIdentifier
+        let request = endpoint.request
+        let isGet = endpoint.method == "GET"
+        
+        let defaultLook = isGet
+        let defaultSave = isGet
+        let effectiveLookInCache = lookInCache ?? defaultLook
+        let effectiveSaveToCache = saveToCache ?? defaultSave
+
+        log.debug("""
+Fetch:
+- url: \(request)
+- key: \(cacheKey)
+- debugKey: \(endpoint.debugIdentifier)
+- ttl: \(String(describing: endpoint.ttl))
+- lookInCache: \(effectiveLookInCache) \(lookInCache != nil ? "(override)" : "(default)")
+- saveToCache: \(effectiveSaveToCache) \(saveToCache != nil ? "(override)" : "(default)")
+- attemptRefresh: \(attemptRefresh)
+""")
 
         // Cache
-        if lookInCache, let cached = cache.get(key, decode: T.self) {
-            log.debug("Found key \"\(key)\" in cache")
+        if effectiveLookInCache, let cached = cache.get(cacheKey, decode: T.self) {
+            log.debug("Found key \"\(cacheKey)\" in cache")
             return cached
         } else {
-            log.debug("\"\(key)\" not found in cache, or cache ignored.")
+            log.debug("\"\(cacheKey)\" not found in cache, or cache ignored.")
         }
 
         do {
             // Network
-            log.debug("Making network request")
             let (data, response) = try await performRequestWithOptionalRefresh(for: request,
                                                                                attemptRefresh: attemptRefresh)
 
@@ -59,15 +71,15 @@ final class APIService {
                 as: T.self,
             )
 
-            if saveToCache {
-                log.debug("Adding key \"\(key)\" to cache")
+            if effectiveSaveToCache {
+                log.debug("Adding key \"\(cacheKey)\" to cache")
                 cache.set(
-                    key: key,
+                    key: cacheKey,
                     response: apiResponse,
-                    expiresIn: expiresIn,
+                    ttl: endpoint.ttl,
                 )
             } else {
-                log.debug("\"\(key)\" not being saved to cache")
+                log.debug("\"\(cacheKey)\" not being saved to cache")
             }
 
             return apiResponse
@@ -177,3 +189,4 @@ final class APIService {
         return nil
     }
 }
+

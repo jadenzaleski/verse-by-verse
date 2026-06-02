@@ -12,11 +12,9 @@ extension APIService {
         log.debug("getMyPassages called")
 
         let response: APIResponse<[UserPassageReadResponse]> = try await fetch(
-            key: "myPassages",
-            request: APIEndpoint.getMyPassages.request,
+            endpoint: APIEndpoint.getMyPassages,
             lookInCache: false,
             saveToCache: true,
-            attemptRefresh: true,
         )
 
         return response.body
@@ -32,22 +30,17 @@ extension APIService {
     ) async throws -> UserPassageReadResponse {
         log.debug("createPassage called for \(book)")
 
-        // This would normally use a PassageCreate request body, but for brevity I'll assume APIEndpoint handles it
-        // Or I should update APIEndpoint.
-
         let response: APIResponse<UserPassageReadResponse> = try await fetch(
-            key: "createPassage",
-            request: APIEndpoint.createPassage(
+            endpoint: APIEndpoint.createPassage(
                 book: book,
                 startChapter: startChapter,
                 endChapter: endChapter,
                 startVerse: startVerse,
                 endVerse: endVerse,
                 translation: translation,
-            ).request,
+            ),
             lookInCache: false,
             saveToCache: false,
-            attemptRefresh: true,
         )
 
         return response.body

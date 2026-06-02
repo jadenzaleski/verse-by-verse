@@ -9,11 +9,12 @@ import Foundation
 import os
 
 enum LogLevel: Int, Comparable, CaseIterable {
-    case debug = 0
-    case info = 1
-    case warning = 2
-    case error = 3
-    case fault = 4
+    case trace = 0
+    case debug = 1
+    case info = 2
+    case warning = 3
+    case error = 4
+    case fault = 5
 
     static func < (lhs: LogLevel, rhs: LogLevel) -> Bool {
         lhs.rawValue < rhs.rawValue
@@ -21,6 +22,7 @@ enum LogLevel: Int, Comparable, CaseIterable {
 
     var displayName: String {
         switch self {
+        case .trace: "Trace"
         case .debug: "Debug"
         case .info: "Info"
         case .warning: "Warning"
@@ -73,6 +75,13 @@ extension Logger {
         let string = "\(message)"
         AppLog.logToFile("\(string)")
         log("\(message, privacy: .public)")
+    }
+
+    func trace(_ message: String) {
+        guard AppLog.minimumLevel <= .trace else { return }
+        let string = "\(message)"
+        AppLog.logToFile("[TRACE] \(string)")
+        trace("\(message, privacy: .public)")
     }
 
     func info(_ message: String) {

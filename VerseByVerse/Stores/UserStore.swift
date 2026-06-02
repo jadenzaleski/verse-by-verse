@@ -61,8 +61,6 @@ final class UserStore: Store {
             currentUser = updatedUserResponse.toDomain()
             state = .success
 
-            // Invalidate the cache for getUser to ensure consistency
-            Cache.shared.remove("getUser")
             log.info("User updated successfully")
         } catch {
             handle(error: error)

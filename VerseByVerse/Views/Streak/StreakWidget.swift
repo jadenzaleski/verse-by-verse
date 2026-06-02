@@ -42,8 +42,6 @@ struct StreakWidget: View {
                         Text(dayLetters[i])
                             .font(.app(.footnote, weight: .semibold))
                             .foregroundStyle(.secondary)
-                        // Now we make sure the show the particle effect
-                        // behind the check
                         ZStack {
                             Image(completed[i] ? "lucide.circle.check.fill" : "lucide.circle")
                                 .foregroundColor(completed[i] ? .orange : .secondary)
@@ -89,7 +87,7 @@ struct StreakWidget: View {
             streakBadge()
                 .padding(.trailing, 5)
         }
-        .padding(20)
+        .padding()
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + startAnimationDelaySeconds) {
                 // Initialize revealed array to false for each day
