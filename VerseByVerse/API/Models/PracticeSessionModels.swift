@@ -34,6 +34,22 @@ struct PracticeSessionReadResponse: Codable {
     }
 }
 
+struct StartPracticeSessionResponse: Codable {
+    let id: Int
+    let userId: String
+    let passageId: Int?
+    let startDate: Date
+    let plan: [String]
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case userId = "user_id"
+        case passageId = "passage_id"
+        case startDate = "start_date"
+        case plan
+    }
+}
+
 struct CompletePracticeSessionResponse: Codable {
     let sessionId: Int
     let rating: Int

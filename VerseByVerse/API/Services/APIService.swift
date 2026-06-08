@@ -82,6 +82,11 @@ Fetch:
                 log.debug("\"\(cacheKey)\" not being saved to cache")
             }
 
+            for invalidated in endpoint.invalidates {
+                cache.remove(invalidated.cacheIdentifier)
+                log.debug("Invalidated cache key for \(invalidated.debugIdentifier)")
+            }
+
             return apiResponse
         } catch {
             // Preserve APIError thrown above

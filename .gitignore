@@ -3,6 +3,10 @@ xcuserdata/
 project.xcworkspace
 GEMINI.md
 openapi.json
-.gemini
+.gemini/
 *.skill
 skills/
+.codegraph
+CLAUDE.md
+.claude/
+.understand-anything/

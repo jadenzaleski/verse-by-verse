@@ -18,9 +18,9 @@ extension APIService {
         return response.body
     }
 
-    func startPracticeSession(passageId: Int) async throws -> PracticeSessionReadResponse {
+    func startPracticeSession(passageId: Int) async throws -> StartPracticeSessionResponse {
         log.debug("startPracticeSession called for passage: \(passageId)")
-        let response: APIResponse<PracticeSessionReadResponse> = try await fetch(
+        let response: APIResponse<StartPracticeSessionResponse> = try await fetch(
             endpoint: APIEndpoint.startPracticeSession(passageId: passageId),
             lookInCache: false,
             saveToCache: false,
@@ -28,9 +28,9 @@ extension APIService {
         return response.body
     }
 
-    func completePracticeSession(id: Int, score: Double) async throws -> PracticeSessionReadResponse {
+    func completePracticeSession(id: Int, score: Double) async throws -> CompletePracticeSessionResponse {
         log.debug("completePracticeSession called for session: \(id)")
-        let response: APIResponse<PracticeSessionReadResponse> = try await fetch(
+        let response: APIResponse<CompletePracticeSessionResponse> = try await fetch(
             endpoint: APIEndpoint.completePracticeSession(id: id, score: score),
             lookInCache: false,
             saveToCache: false,
