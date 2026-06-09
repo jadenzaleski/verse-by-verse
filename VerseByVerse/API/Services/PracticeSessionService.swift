@@ -28,10 +28,15 @@ extension APIService {
         return response.body
     }
 
-    func completePracticeSession(id: Int, score: Double) async throws -> CompletePracticeSessionResponse {
+    func deleteSession(id: Int) async throws {
+        log.debug("deleteSession called for session: \(id)")
+        try await fetchVoid(endpoint: APIEndpoint.deletePracticeSession(id: id))
+    }
+
+    func completePracticeSession(id: Int, activities: [ActivityResult]) async throws -> CompletePracticeSessionResponse {
         log.debug("completePracticeSession called for session: \(id)")
         let response: APIResponse<CompletePracticeSessionResponse> = try await fetch(
-            endpoint: APIEndpoint.completePracticeSession(id: id, score: score),
+            endpoint: APIEndpoint.completePracticeSession(id: id, activities: activities),
             lookInCache: false,
             saveToCache: false,
         )

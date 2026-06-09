@@ -34,12 +34,23 @@ struct PracticeSessionReadResponse: Codable {
     }
 }
 
+struct PlanStep: Codable, Hashable {
+    let type: String
+    let phase: Int?
+    let allowsRetry: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case type, phase
+        case allowsRetry = "allows_retry"
+    }
+}
+
 struct StartPracticeSessionResponse: Codable {
     let id: Int
     let userId: String
     let passageId: Int?
     let startDate: Date
-    let plan: [String]
+    let plan: [PlanStep]
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -47,6 +58,25 @@ struct StartPracticeSessionResponse: Codable {
         case passageId = "passage_id"
         case startDate = "start_date"
         case plan
+    }
+}
+
+struct ActivityResult: Codable, Hashable {
+    let type: String
+    let phase: Int?
+    let isRetry: Bool
+    let correctCount: Int
+    let totalCount: Int
+    let startDate: Date
+    let endDate: Date
+
+    enum CodingKeys: String, CodingKey {
+        case type, phase
+        case isRetry = "is_retry"
+        case correctCount = "correct_count"
+        case totalCount = "total_count"
+        case startDate = "start_date"
+        case endDate = "end_date"
     }
 }
 

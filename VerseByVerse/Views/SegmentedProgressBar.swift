@@ -7,96 +7,80 @@
 
 import SwiftUI
 
+enum ProgressBarFill {
+    case dynamic
+    case solid(Color)
+}
+
 struct SegmentedProgressBar: View {
     let totalSegments: Int
+    /// Number of fully completed segments. The segment at this index is the active one.
     let completedSegments: Int
 
+    var fill: ProgressBarFill = .dynamic
+    /// When true, completed segments are dimmed and the segment at `completedSegments` is highlighted as active.
+    var highlightCurrent: Bool = false
     var emptyColor: Color = .gray.opacity(0.2)
     var spacing: CGFloat = 5
     var height: CGFloat = 5
 
-    var body: some View {
-        let fillColor: Color = if Double(completedSegments) / Double(totalSegments) <= 0.33 {
-            .red
-        } else if Double(completedSegments) / Double(totalSegments) <= 0.66 {
-            .orange
-        } else {
-            .green
+    private var fillColor: Color {
+        switch fill {
+        case .solid(let color):
+            return color
+        case .dynamic:
+            let ratio = totalSegments > 0 ? Double(completedSegments) / Double(totalSegments) : 0
+            if ratio <= 0.33 { return .red }
+            if ratio <= 0.66 { return .orange }
+            return .green
         }
+    }
 
+    private func segmentColor(at index: Int) -> Color {
+        if index < completedSegments {
+            return highlightCurrent ? fillColor.opacity(0.4) : fillColor
+        } else if index == completedSegments && highlightCurrent {
+            return fillColor
+        } else {
+            return emptyColor
+        }
+    }
+
+    var body: some View {
         HStack(spacing: spacing) {
             ForEach(0 ..< totalSegments, id: \.self) { index in
-                SegmentBlock(
-                    filled: index < completedSegments,
-                    fillColor: fillColor,
-                    emptyColor: emptyColor,
-                    height: height,
-                )
-                .frame(maxWidth: .infinity)
-                .animation(
-                    .easeInOut(duration: 0.35)
-                        .delay(animationDelay(for: index)),
-                    value: completedSegments,
-                )
-            }
-        }
-        .animation(nil, value: fillColor)
-    }
-
-    private func animationDelay(for index: Int) -> Double {
-        if index < completedSegments {
-            Double(index) * 0.1
-        } else {
-            Double(totalSegments - 1 - index) * 0.1
-        }
-    }
-}
-
-struct SegmentBlock: View {
-    let filled: Bool
-    let fillColor: Color
-    let emptyColor: Color
-    let height: CGFloat
-
-    var body: some View {
-        GeometryReader { geo in
-            ZStack {
-                RoundedRectangle(cornerRadius: 5.0)
-                    .fill(emptyColor)
-
-                RoundedRectangle(cornerRadius: 5.0)
-                    .fill(fillColor)
-                    .mask(
-                        HStack(spacing: 0) {
-                            if filled {
-                                Rectangle()
-                            }
-                        },
+                RoundedRectangle(cornerRadius: 5)
+                    .fill(segmentColor(at: index))
+                    .frame(maxWidth: .infinity, maxHeight: height)
+                    .animation(
+                        .easeInOut(duration: 0.35).delay(animationDelay(for: index)),
+                        value: completedSegments
                     )
-                    .frame(width: geo.size.width, alignment: .leading)
-                    .clipped()
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 5.0)
-                            .fill(fillColor)
-                            .frame(width: filled ? geo.size.width : 0),
-                        alignment: .leading,
-                    )
+                    .animation(.easeInOut(duration: 0.35), value: totalSegments)
+                    .transition(.opacity.combined(with: .scale(scale: 0.7)))
             }
         }
         .frame(height: height)
     }
+
+    private func animationDelay(for index: Int) -> Double {
+        if index < completedSegments {
+            Double(index) * 0.05
+        } else {
+            Double(totalSegments - 1 - index) * 0.05
+        }
+    }
 }
 
 #Preview {
-    @Previewable @State var progress: Double = 4
+    @Previewable @State var completed: Double = 2
 
-    VStack {
-        SegmentedProgressBar(totalSegments: 10, completedSegments: Int(progress))
-        Slider(
-            value: $progress,
-            in: 0 ... 10,
-            step: 1,
-        )
+    VStack(spacing: 24) {
+        SegmentedProgressBar(totalSegments: 6, completedSegments: Int(completed))
+        SegmentedProgressBar(totalSegments: 6, completedSegments: Int(completed), fill: .solid(.accentColor))
+        SegmentedProgressBar(totalSegments: 6, completedSegments: Int(completed), fill: .solid(.accentColor), highlightCurrent: true)
+        Slider(value: $completed, in: 0 ... 6, step: 1)
     }
+    .padding()
     .environment(\.font, .app())
 }

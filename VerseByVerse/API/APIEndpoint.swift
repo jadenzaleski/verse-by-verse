@@ -58,7 +58,8 @@ enum APIEndpoint: Hashable {
     // Practice Sessions
     case getMyPracticeSessions
     case startPracticeSession(passageId: Int)
-    case completePracticeSession(id: Int, score: Double)
+    case completePracticeSession(id: Int, activities: [ActivityResult])
+    case deletePracticeSession(id: Int)
     /// Other
     case getHealth
 
@@ -130,6 +131,7 @@ enum APIEndpoint: Hashable {
         case .getMyPracticeSessions: "/practice-session/list/me"
         case .startPracticeSession: "/practice-session/start"
         case let .completePracticeSession(id, _): "/practice-session/\(id)/complete"
+        case let .deletePracticeSession(id): "/practice-session/\(id)"
         }
     }
 
@@ -144,7 +146,7 @@ enum APIEndpoint: Hashable {
                 .startPracticeSession,
                 .completePracticeSession: "POST"
         case .patchUser, .patchPassage, .patchStudySet: "PATCH"
-        case .deletePassage, .deleteStudySet, .removePassageFromStudySet: "DELETE"
+        case .deletePassage, .deleteStudySet, .removePassageFromStudySet, .deletePracticeSession: "DELETE"
         default: "GET"
         }
     }
@@ -245,9 +247,10 @@ enum APIEndpoint: Hashable {
         case let .startPracticeSession(passageId):
             let json: [String: Any] = ["passage_id": passageId]
             return try? JSONSerialization.data(withJSONObject: json, options: [])
-        case let .completePracticeSession(_, score):
-            let json: [String: Any] = ["score": score]
-            return try? JSONSerialization.data(withJSONObject: json, options: [])
+        case let .completePracticeSession(_, activities):
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .iso8601
+            return try? encoder.encode(CompletePracticeSessionBody(activities: activities))
         default:
             return nil
         }
@@ -273,6 +276,8 @@ enum APIEndpoint: Hashable {
             return [.getStudySet(id: sid), .getMyStudySets]
         case .completePracticeSession:
             return [.getMyPracticeSessions, .getMyPassages]
+        case .deletePracticeSession:
+            return [.getMyPracticeSessions]
         default:
             return []
         }
@@ -322,6 +327,10 @@ enum APIEndpoint: Hashable {
 
         return req
     }
+}
+
+private struct CompletePracticeSessionBody: Encodable {
+    let activities: [ActivityResult]
 }
 
 private extension Data {

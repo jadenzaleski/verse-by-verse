@@ -117,6 +117,21 @@ Fetch:
         }
     }
 
+    /// Performs a request that returns no body (e.g. 204 No Content).
+    func fetchVoid(endpoint: APIEndpoint, attemptRefresh: Bool = true) async throws {
+        let request = endpoint.request
+        log.debug("FetchVoid: \(endpoint.debugIdentifier)")
+        let (data, response) = try await performRequestWithOptionalRefresh(for: request, attemptRefresh: attemptRefresh)
+        if !(200 ... 299).contains(response.statusCode) {
+            let message = parseServerErrorMessage(from: data)
+            throw APIError.http(statusCode: response.statusCode, message: message, data: data)
+        }
+        for invalidated in endpoint.invalidates {
+            cache.remove(invalidated.cacheIdentifier)
+            log.debug("Invalidated cache key for \(invalidated.debugIdentifier)")
+        }
+    }
+
     private func performRequestWithOptionalRefresh(
         for request: URLRequest,
         attemptRefresh: Bool,
