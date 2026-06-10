@@ -13,6 +13,8 @@ struct ProfileView: View {
     private let log = AppLog.category("ProfileView")
     private let jitter: Float = 0.5
     @Environment(UserStore.self) private var userStore
+    @Environment(PassageStore.self) private var passageStore
+    @Environment(PracticeStore.self) private var practiceStore
 
     var body: some View {
         let user = userStore.currentUser
@@ -49,91 +51,79 @@ struct ProfileView: View {
         let p3TrailingControlPoint: SIMD2<Float> = [1.0, 1.0]
         let p3BottomControlPoint: SIMD2<Float> = [1.0, 1.0]
 
-        ScrollView {
-            MeshGradient(
-                width: 2,
-                height: 2,
-                bezierPoints: [
-                    // Row 1 (top)
-                    // p0
-                    MeshGradient.BezierPoint(
-                        position: p0Position,
-                        leadingControlPoint: p0LeadingControlPoint,
-                        topControlPoint: p0TopControlPoint,
-                        trailingControlPoint: p0TrailingControlPoint,
-                        bottomControlPoint: p0BottomControlPoint,
-                    ),
-                    // p1
-                    MeshGradient.BezierPoint(
-                        position: p1Position,
-                        leadingControlPoint: p1LeadingControlPoint,
-                        topControlPoint: p1TopControlPoint,
-                        trailingControlPoint: p1TrailingControlPoint,
-                        bottomControlPoint: p1BottomControlPoint,
-                    ),
-                    // Row 2 (bottom)
-                    // p2
-                    MeshGradient.BezierPoint(
-                        position: p2Position,
-                        leadingControlPoint: p2LeadingControlPoint,
-                        topControlPoint: p2TopControlPoint,
-                        trailingControlPoint: p2TrailingControlPoint,
-                        bottomControlPoint: p2BottomControlPoint,
-                    ),
+        ScrollView() {
+            VStack(spacing: 15) {
+                MeshGradient(
+                    width: 2,
+                    height: 2,
+                    bezierPoints: [
+                        // Row 1 (top)
+                        // p0
+                        MeshGradient.BezierPoint(
+                            position: p0Position,
+                            leadingControlPoint: p0LeadingControlPoint,
+                            topControlPoint: p0TopControlPoint,
+                            trailingControlPoint: p0TrailingControlPoint,
+                            bottomControlPoint: p0BottomControlPoint,
+                        ),
+                        // p1
+                        MeshGradient.BezierPoint(
+                            position: p1Position,
+                            leadingControlPoint: p1LeadingControlPoint,
+                            topControlPoint: p1TopControlPoint,
+                            trailingControlPoint: p1TrailingControlPoint,
+                            bottomControlPoint: p1BottomControlPoint,
+                        ),
+                        // Row 2 (bottom)
+                        // p2
+                        MeshGradient.BezierPoint(
+                            position: p2Position,
+                            leadingControlPoint: p2LeadingControlPoint,
+                            topControlPoint: p2TopControlPoint,
+                            trailingControlPoint: p2TrailingControlPoint,
+                            bottomControlPoint: p2BottomControlPoint,
+                        ),
 
-                    // p3
-                    MeshGradient.BezierPoint(
-                        position: p3Position,
-                        leadingControlPoint: p3LeadingControlPoint,
-                        topControlPoint: p3TopControlPoint,
-                        trailingControlPoint: p3TrailingControlPoint,
-                        bottomControlPoint: p3BottomControlPoint,
-                    ),
-                ],
-                colors: shuffledColors(from: MeshPalette.all.randomElement(using: &themeGenerator)
-                    ?? .ocean, seed: userIdInt),
-            )
-//                .resizable()
-            .scaledToFill()
-            .frame(width: 150, height: 150)
-            .clipShape(Circle())
-            .glassEffect()
-            .shadow(color: .black.opacity(0.35), radius: 6, x: 2, y: 2)
-            .padding(20)
-            .overlay {
-                Text(firstName.first!.uppercased() + lastName.first!.uppercased())
-                    .font(.app(size: 50, weight: .black))
-                    .foregroundStyle(.ultraThinMaterial)
-            }
-
-            Text(sinceDate)
-                .font(.app(.footnote))
-                .foregroundStyle(.secondary)
-
-            HStack(spacing: 60) {
-                VStack {
-                    Text("123")
-                        .font(.app(.body, weight: .bold))
-                        .foregroundStyle(
-                            LinearGradient(
-                                gradient: Gradient(colors: [Color("CustomPurple"), Color("CustomGreen")]),
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing,
-                            ),
-                        )
-                    Text("Best Streak")
-                        .font(.app(.footnote))
+                        // p3
+                        MeshGradient.BezierPoint(
+                            position: p3Position,
+                            leadingControlPoint: p3LeadingControlPoint,
+                            topControlPoint: p3TopControlPoint,
+                            trailingControlPoint: p3TrailingControlPoint,
+                            bottomControlPoint: p3BottomControlPoint,
+                        ),
+                    ],
+                    colors: shuffledColors(from: MeshPalette.all.randomElement(using: &themeGenerator)
+                                           ?? .ocean, seed: userIdInt),
+                )
+                .scaledToFill()
+                .frame(width: 150, height: 150)
+                .clipShape(Circle())
+                .glassEffect()
+                .shadow(color: .black.opacity(0.35), radius: 6, x: 2, y: 2)
+                .overlay {
+                    Text(firstName.first!.uppercased() + lastName.first!.uppercased())
+                        .font(.app(size: 50, weight: .black))
+                        .foregroundStyle(.ultraThinMaterial)
                 }
 
-                VStack {
-                    Text("456")
-                        .font(.app(.body, weight: .bold))
-                    Text("Passages")
+                VStack(spacing: 4) {
+                    if let email = user?.email {
+                        Text(email)
+                            .font(.app(.subheadline))
+                            .foregroundStyle(.secondary)
+                    }
+                    Text(sinceDate)
                         .font(.app(.footnote))
+                        .foregroundStyle(.secondary)
                 }
+
+                lifetimeStats
+
+                WeeklySessionsChart(sessions: practiceStore.sessions)
+                    .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
             }
-            .padding(10)
-            Spacer()
+            .padding(.horizontal)
         }
         .navigationTitle("\(firstName) \(lastName)")
         .toolbar {
@@ -148,6 +138,72 @@ struct ProfileView: View {
         .toolbarTitleDisplayMode(.inlineLarge)
         .task {
             await userStore.loadUser()
+            if passageStore.userPassages.isEmpty {
+                await passageStore.loadMyPassages(lookInCache: true)
+            }
+            if practiceStore.sessions.isEmpty {
+                await practiceStore.loadMyPracticeSessions()
+            }
+        }
+    }
+
+    // MARK: - Lifetime stats
+
+    @ViewBuilder
+    private var lifetimeStats: some View {
+        let passages = passageStore.userPassages
+        let sessions = practiceStore.sessions
+        let avgScore = PracticeStats.averageScore(sessions)
+
+        LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible())], spacing: 10) {
+            statCard(value: "\(passages.count)", label: "Passages", systemImage: "book.closed")
+            statCard(value: "\(PracticeStats.completedCount(sessions))",
+                     label: "Sessions", systemImage: "checkmark.circle")
+            statCard(value: "\(PracticeStats.bestStreak(from: sessions))",
+                     label: "Best Streak", systemImage: "flame.fill",
+                     valueStyle: AnyShapeStyle(streakGradient))
+            statCard(value: avgScore.map { "\(Int($0 * 100))%" } ?? "—",
+                     label: "Avg Score", systemImage: "chart.line.uptrend.xyaxis",
+                     valueStyle: avgScore.map { AnyShapeStyle(scoreColor($0)) } ?? AnyShapeStyle(.primary))
+        }
+    }
+
+    private func statCard(
+        value: String,
+        label: String,
+        systemImage: String,
+        valueStyle: AnyShapeStyle = AnyShapeStyle(.primary),
+    ) -> some View {
+        VStack(spacing: 5) {
+            Image(systemName: systemImage)
+                .font(.app(.caption))
+                .foregroundStyle(.secondary)
+            Text(value)
+                .font(.app(.title2, weight: .bold))
+                .foregroundStyle(valueStyle)
+                .contentTransition(.numericText())
+            Text(label)
+                .font(.app(.caption))
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
+    }
+
+    private var streakGradient: LinearGradient {
+        LinearGradient(
+            gradient: Gradient(colors: [Color("CustomPurple"), Color("CustomGreen")]),
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing,
+        )
+    }
+
+    private func scoreColor(_ score: Double) -> Color {
+        switch score {
+        case ..<0.6: .red
+        case ..<0.8: .orange
+        default: .green
         }
     }
 
@@ -185,5 +241,8 @@ extension String {
     NavigationStack {
         ProfileView()
             .environment(\.font, .app())
+            .environment(UserStore.shared)
+            .environment(PassageStore.shared)
+            .environment(PracticeStore.shared)
     }
 }

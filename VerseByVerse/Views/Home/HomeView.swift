@@ -50,16 +50,7 @@ struct HomeView: View {
     }
 
     private var currentStreak: Int {
-        let calendar = Calendar.current
-        var day = calendar.startOfDay(for: Date())
-        var streak = 0
-        while practiceStore.sessions.contains(where: {
-            $0.isCompleted && calendar.isDate($0.startDate, inSameDayAs: day)
-        }) {
-            streak += 1
-            day = calendar.date(byAdding: .day, value: -1, to: day)!
-        }
-        return streak
+        PracticeStats.currentStreak(from: practiceStore.sessions)
     }
 
     var body: some View {
@@ -103,7 +94,6 @@ struct HomeView: View {
 
     // MARK: - Up Next
 
-    @ViewBuilder
     private var upNextSection: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text("Up Next")
@@ -111,7 +101,7 @@ struct HomeView: View {
                 .padding(.horizontal)
                 .padding(.top)
 
-            if passageStore.state == .loading && passageStore.userPassages.isEmpty {
+            if passageStore.state == .loading, passageStore.userPassages.isEmpty {
                 HStack {
                     ProgressView()
                         .padding(.trailing, 4)
