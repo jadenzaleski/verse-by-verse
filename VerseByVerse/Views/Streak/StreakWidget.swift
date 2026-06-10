@@ -31,92 +31,100 @@ struct StreakWidget: View {
     }
 
     var body: some View {
-        HStack {
-            HStack(spacing: 0) {
-                // Display each day
-                ForEach(0 ..< completed.count, id: \.self) { i in
-                    // The instensity will build so we calculate that
-                    let intensity = (0.4 + Double(i) * 0.1)
-                    VStack(alignment: .center, spacing: 1) {
-                        // Show the day letters
-                        Text(dayLetters[i])
-                            .font(.app(.footnote, weight: .semibold))
-                            .foregroundStyle(.secondary)
-                        ZStack {
-                            Image(completed[i] ? "lucide.circle.check.fill" : "lucide.circle")
-                                .foregroundColor(completed[i] ? .orange : .secondary)
-                                .font(.app(.title2, weight: .semibold))
-                                .scaleEffect(revealed[safe: i] == true ? 1.0 : 0.4)
-                                .opacity(revealed[safe: i] == true ? 1.0 : 0.0)
-                                .animation(
-                                    completed[i] ? .spring(response: 0.3, dampingFraction: 0.40)
-                                        : .smooth(duration: dayDelaySeconds), value: revealed,
-                                )
-                                .sensoryFeedback(
-                                    .impact(
-                                        flexibility: .rigid,
-                                        intensity: intensity,
-                                    ),
-                                    trigger: revealed[safe: i] == true && completed[i],
-                                )
-                                .zIndex(1)
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                Text("Streak")
+                    .font(.app(.title3))
+            }
+            .padding([.horizontal, .top])
 
-                            // I have hidden this for now
-                            /*
-                             // Particle burst when a completed day is revealed
-                             if completed[i] && (revealed[safe: i] == true) {
+            HStack {
+                HStack(spacing: 0) {
+                    // Display each day
+                    ForEach(0 ..< completed.count, id: \.self) { i in
+                        // The instensity will build so we calculate that
+                        let intensity = (0.4 + Double(i) * 0.1)
+                        VStack(alignment: .center, spacing: 1) {
+                            // Show the day letters
+                            Text(dayLetters[i])
+                                .font(.app(.footnote, weight: .semibold))
+                                .foregroundStyle(.secondary)
+                            ZStack {
+                                Image(completed[i] ? "lucide.circle.check.fill" : "lucide.circle")
+                                    .foregroundColor(completed[i] ? .orange : .secondary)
+                                    .font(.app(.title2, weight: .semibold))
+                                    .scaleEffect(revealed[safe: i] == true ? 1.0 : 0.4)
+                                    .opacity(revealed[safe: i] == true ? 1.0 : 0.0)
+                                    .animation(
+                                        completed[i] ? .spring(response: 0.3, dampingFraction: 0.40)
+                                        : .smooth(duration: dayDelaySeconds), value: revealed,
+                                    )
+                                    .sensoryFeedback(
+                                        .impact(
+                                            flexibility: .rigid,
+                                            intensity: intensity,
+                                        ),
+                                        trigger: revealed[safe: i] == true && completed[i],
+                                    )
+                                    .zIndex(1)
+                                
+                                // I have hidden this for now
+                                /*
+                                 // Particle burst when a completed day is revealed
+                                 if completed[i] && (revealed[safe: i] == true) {
                                  ParticleBurst(count: 10, baseColor: .orange, duration: 0.45)
-                                     .transition(.opacity)
-                                     .zIndex(2)
-                             }
-                              */
+                                 .transition(.opacity)
+                                 .zIndex(2)
+                                 }
+                                 */
+                            }
+                        }
+                        .frame(minWidth: 22)
+                        .padding([.leading, .trailing], 5)
+                        .padding([.top, .bottom], 5)
+                        .overlay(
+                            todaysDateInt == i + 1 ?
+                            TodayOutline(draw: drawTodayStroke) : nil,
+                        )
+                    }
+                }
+
+                Spacer()
+                // Now show the number with the icon
+                streakBadge()
+                    .padding(.trailing, 5)
+            }
+            .padding()
+            .onAppear {
+                DispatchQueue.main.asyncAfter(deadline: .now() + startAnimationDelaySeconds) {
+                    // Initialize revealed array to false for each day
+                    if revealed.count != completed.count {
+                        revealed = Array(repeating: false, count: completed.count)
+                    }
+                    // Stagger the pop-in
+                    for i in completed.indices {
+                        let delay = Double(i) * dayDelaySeconds
+                        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                            if i < revealed.count { revealed[i] = true }
                         }
                     }
-                    .frame(minWidth: 22)
-                    .padding([.leading, .trailing], 5)
-                    .padding([.top, .bottom], 5)
-                    .overlay(
-                        todaysDateInt == i + 1 ?
-                            TodayOutline(draw: drawTodayStroke) : nil,
-                    )
-                }
-            }
-
-            Spacer()
-            // Now show the number with the icon
-            streakBadge()
-                .padding(.trailing, 5)
-        }
-        .padding()
-        .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + startAnimationDelaySeconds) {
-                // Initialize revealed array to false for each day
-                if revealed.count != completed.count {
-                    revealed = Array(repeating: false, count: completed.count)
-                }
-                // Stagger the pop-in
-                for i in completed.indices {
-                    let delay = Double(i) * dayDelaySeconds
-                    DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                        if i < revealed.count { revealed[i] = true }
+                    // Begin drawing today's outline shortly after reveals start
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                        drawTodayStroke = 1.0
                     }
-                }
-                // Begin drawing today's outline shortly after reveals start
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-                    drawTodayStroke = 1.0
-                }
-                // After all day reveals, show badge then flip digits
-                let lastDelay = Double(max(0, completed.count - 1)) * 0.15
-                DispatchQueue.main.asyncAfter(deadline: .now() + lastDelay) {
-                    showBadge = true
-                    // Sequentially reveal each numeric digit with a small cadence
-                    let chars = Array(streakCount.formatted(.number.grouping(.automatic)))
-                    let totalDigits = chars.count(where: { Int(String($0)) != nil })
-                    revealedDigits = 0
-                    for step in 0 ..< totalDigits {
-                        let delay = Double(step) * 0.08
-                        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                            revealedDigits = step + 1
+                    // After all day reveals, show badge then flip digits
+                    let lastDelay = Double(max(0, completed.count - 1)) * 0.15
+                    DispatchQueue.main.asyncAfter(deadline: .now() + lastDelay) {
+                        showBadge = true
+                        // Sequentially reveal each numeric digit with a small cadence
+                        let chars = Array(streakCount.formatted(.number.grouping(.automatic)))
+                        let totalDigits = chars.count(where: { Int(String($0)) != nil })
+                        revealedDigits = 0
+                        for step in 0 ..< totalDigits {
+                            let delay = Double(step) * 0.08
+                            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                                revealedDigits = step + 1
+                            }
                         }
                     }
                 }

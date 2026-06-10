@@ -8,9 +8,8 @@
 import SwiftUI
 
 enum MemoryTopTab: String, CaseIterable {
-    case all = "All"
+    case passages = "Passages"
     case sets = "Sets"
-    case recommended = "Recommended"
 }
 
 struct TabFrameKey: PreferenceKey {
@@ -43,7 +42,7 @@ enum ActiveSheet: Identifiable {
 
 struct MemoryView: View {
     @Environment(PassageStore.self) private var passageStore
-    @State private var selectedTab: MemoryTopTab = .all
+    @State private var selectedTab: MemoryTopTab = .passages
     @Namespace private var tabIndicator
     @State private var tabFrames: [MemoryTopTab: CGRect] = [:]
     @State private var scrollOffset: CGFloat = 0
@@ -181,7 +180,7 @@ struct MemoryView: View {
     @ViewBuilder
     private var content: some View {
         switch selectedTab {
-        case .all:
+        case .passages:
             VStack(spacing: 10) {
                 ForEach(passageStore.userPassages, id: \.id) { index in
                     PassageCard(passage: index)
@@ -272,12 +271,6 @@ struct MemoryView: View {
                                 colorShuffleSeed: 111)
                     }
                 }
-            }
-
-        case .recommended:
-            VStack(spacing: 12) {
-                Text("Recommended 1")
-                Text("Recommended 2")
             }
         }
     }

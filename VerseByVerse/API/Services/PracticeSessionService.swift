@@ -12,7 +12,7 @@ extension APIService {
         log.debug("getMyPracticeSessions called")
         let response: APIResponse<[PracticeSessionReadResponse]> = try await fetch(
             endpoint: APIEndpoint.getMyPracticeSessions,
-            lookInCache: false,
+            lookInCache: true,
             saveToCache: true,
         )
         return response.body

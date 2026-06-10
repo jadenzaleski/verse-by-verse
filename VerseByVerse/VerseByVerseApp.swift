@@ -106,6 +106,9 @@ struct VerseByVerseApp: App {
         await MainActor.run { statusText = "Fetching Bible data…" }
         await bibleStore.loadBibleData()
         await bibleStore.loadTranslations()
+        await MainActor.run { statusText = "Loading your data…" }
+        await passageStore.loadMyPassages()
+        await practiceStore.loadMyPracticeSessions()
         await MainActor.run { statusText = "Launching…" }
     }
 }

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct PracticeHistoryCalendar: View {
     let sessions: [PracticeSession]
+
     @State private var scrollID: Int? = 0
     @State private var selectedDate: Date?
 
@@ -15,60 +16,55 @@ struct PracticeHistoryCalendar: View {
         return sessionsByDay[day] ?? 0
     }
 
-    private var selectedDayFormatted: String {
-        guard let date = selectedDayStart else { return "" }
-        let formatter = DateFormatter()
-        formatter.dateFormat = "EEEE, MMM d"
-        var result = formatter.string(from: date)
-        let day = calendar.component(.day, from: date)
-        let suffix = switch day {
-        case 11, 12, 13: "th"
-        default:
-            switch day % 10 {
-            case 1: "st"
-            case 2: "nd"
-            case 3: "rd"
-            default: "th"
-            }
-        }
-        result = result.replacingOccurrences(of: "\\b\\d+\\b", with: "\(day)\(suffix)", options: .regularExpression)
-        return result
-    }
-
-    private let calendar = Calendar.current
-    private static let daySpacing: CGFloat = 10
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: daySpacing), count: 7)
-    private let monthsToShow = 12 // Show last year
-
     private var sessionsByDay: [Date: Int] {
         var counts: [Date: Int] = [:]
         for session in sessions where session.isCompleted {
-            let startOfDay = calendar.startOfDay(for: session.startDate)
-            counts[startOfDay, default: 0] += 1
+            let day = calendar.startOfDay(for: session.startDate)
+            counts[day, default: 0] += 1
         }
         return counts
     }
 
+    private let calendar = Calendar.current
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: 10), count: 7)
+    private let monthsToShow = 12
+
     var body: some View {
-        let currentMonth = calendar.date(
-            byAdding: .month, value: scrollID ?? 0,
-            to: Date())?.formatted(.dateTime.month(.wide).year()
-            ) ?? ""
+        let currentOffset = scrollID ?? 0
+        let currentMonth = calendar.date(byAdding: .month, value: currentOffset, to: Date())?
+            .formatted(.dateTime.month(.wide).year()) ?? ""
 
         VStack(alignment: .leading, spacing: 15) {
-            Text("Practice History")
-                .font(.app(.title))
-                .padding(.horizontal)
+            HStack {
+                Text("Practice History")
+                    .font(.app(.title3))
+                    .padding(.horizontal)
+                Spacer()
+                if currentOffset != 0 {
+                    Button {
+                        withAnimation {
+                            scrollID = 0
+                        }
+                    } label: {
+                        Text("Today")
+                            .font(.app(.footnote, weight: .semibold))
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 5)
+                            .background(Color.accentColor, in: Capsule())
+                            .foregroundStyle(.white)
+                            .padding(.trailing)
+                    }
+                }
+            }
+
             HStack {
                 Button {
-                    withAnimation {
-                        scrollID = (scrollID ?? 0) - 1
-                    }
+                    withAnimation { scrollID = currentOffset - 1 }
                 } label: {
                     Image("lucide.chevron.left")
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.accentColor)
                 }
-                .disabled(scrollID == -monthsToShow)
+                .disabled(currentOffset <= -monthsToShow)
 
                 Spacer()
                 Text(currentMonth)
@@ -76,56 +72,55 @@ struct PracticeHistoryCalendar: View {
                 Spacer()
 
                 Button {
-                    withAnimation {
-                        scrollID = (scrollID ?? 0) + 1
-                    }
+                    withAnimation { scrollID = currentOffset + 1 }
                 } label: {
                     Image("lucide.chevron.left")
-                        .rotationEffect(Angle(degrees: 180))
-                        .foregroundStyle(.secondary)
+                        .rotationEffect(.degrees(180))
+                        .foregroundStyle(Color.accentColor)
                 }
-                .disabled(scrollID == 0)
+                .disabled(currentOffset >= 0)
             }
             .padding(.horizontal)
 
+            let dayLabels = ["S", "M", "T", "W", "T", "F", "S"]
             LazyVGrid(columns: columns) {
-                Text("S")
-                Text("M")
-                Text("T")
-                Text("W")
-                Text("T")
-                Text("F")
-                Text("S")
+                ForEach(0 ..< 7, id: \.self) { i in Text(dayLabels[i]) }
             }
             .font(.app(.caption, weight: .semibold))
             .padding(.top, 5)
             .padding(.horizontal)
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                LazyHStack(spacing: 0) {
-                    ForEach(-monthsToShow ... 0, id: \.self) { offset in
-                        monthGrid(for: offset)
-                            .containerRelativeFrame(.horizontal)
-                            .id(offset)
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    LazyHStack(spacing: 0) {
+                        ForEach(-monthsToShow ... 0, id: \.self) { offset in
+                            monthGrid(for: offset)
+                                .containerRelativeFrame(.horizontal)
+                                .id(offset)
+                        }
                     }
+                    .scrollTargetLayout()
                 }
-                .scrollTargetLayout()
+                .scrollTargetBehavior(.viewAligned)
+                .scrollPosition(id: $scrollID)
+                .onAppear {
+                    proxy.scrollTo(0)
+                }
             }
-            .scrollTargetBehavior(.viewAligned)
-            .scrollPosition(id: $scrollID)
 
-            VStack(alignment: .leading) {
-                Text(selectedDayStart ?? .now, format: .dateTime.month().day().year())
-                Text("\(selectedDayCount) Practice \(selectedDayCount == 1 ? "Session" : "Sessions")")
+            VStack(alignment: .leading, spacing: 2) {
+                if let day = selectedDayStart {
+                    Text(day, format: .dateTime.weekday(.wide).month().day())
+                        .font(.app(.subheadline, weight: .semibold))
+                    Text("\(selectedDayCount) Practice \(selectedDayCount == 1 ? "Session" : "Sessions")")
+                        .font(.app(.caption))
+                }
             }
-            .font(.app(.subheadline))
             .foregroundStyle(.secondary)
             .padding(.horizontal)
         }
-        .fixedSize(horizontal: false, vertical: true)
         .padding(.vertical)
         .onAppear {
-            scrollID = 0
             selectedDate = Date()
         }
     }
@@ -141,7 +136,7 @@ struct PracticeHistoryCalendar: View {
                 let count = sessionsByDay[calendar.startOfDay(for: date)] ?? 0
                 let isSelected = selectedDayStart == calendar.startOfDay(for: date)
                 let inCurrentMonth = calendar.isDate(date, equalTo: monthDate, toGranularity: .month)
-                let fontWeight = (calendar.isDateInToday(date) && inCurrentMonth) ? Font.Weight.heavy : Font.Weight.medium
+                let isToday = calendar.isDateInToday(date) && inCurrentMonth
 
                 Circle()
                     .fill(inCurrentMonth ? heatmapColor(for: count) : Color.secondary.opacity(0.05))
@@ -149,18 +144,15 @@ struct PracticeHistoryCalendar: View {
                     .overlay {
                         ZStack {
                             Text(date, format: .dateTime.day())
-                                .font(.app(.caption, weight: fontWeight))
+                                .font(.app(.caption, weight: isToday ? .heavy : .medium))
                                 .foregroundStyle(inCurrentMonth ? .primary : .tertiary)
                             if isSelected {
-                                Circle()
-                                    .stroke(Color.accentColor, lineWidth: 3)
+                                Circle().stroke(Color.accentColor, lineWidth: 3)
                             }
                         }
                     }
                     .contentShape(Circle())
-                    .onTapGesture {
-                        selectedDate = date
-                    }
+                    .onTapGesture { selectedDate = date }
             }
         }
         .padding(.horizontal)
@@ -172,70 +164,50 @@ struct PracticeHistoryCalendar: View {
               let range = calendar.range(of: .day, in: .month, for: date),
               let previousMonth = calendar.date(byAdding: .month, value: -1, to: firstOfMonth),
               let nextMonth = calendar.date(byAdding: .month, value: 1, to: firstOfMonth)
-        else {
-            return []
-        }
+        else { return [] }
 
-        let firstWeekday = calendar.component(.weekday, from: firstOfMonth)
-        let offset = firstWeekday - 1 // 0 for Sunday
-
+        let offset = calendar.component(.weekday, from: firstOfMonth) - 1
         var days: [Date] = []
 
-        // Leading days from previous month
-        let daysInPreviousMonth = calendar.range(of: .day, in: .month, for: previousMonth)!.count
+        let prevCount = calendar.range(of: .day, in: .month, for: previousMonth)!.count
         if offset > 0 {
-            let startDay = daysInPreviousMonth - offset + 1
-            for day in startDay ... daysInPreviousMonth {
-                if let date = calendar.date(bySetting: .day, value: day, of: previousMonth) {
-                    days.append(date)
-                }
+            for day in (prevCount - offset + 1) ... prevCount {
+                if let currentDay = calendar.date(bySetting: .day, value: day, of: previousMonth) { days.append(currentDay) }
             }
         }
-
-        // Current month days
         for day in range {
-            if let date = calendar.date(byAdding: .day, value: day - 1, to: firstOfMonth) {
-                days.append(date)
-            }
+            if let currentDay = calendar.date(byAdding: .day, value: day - 1, to: firstOfMonth) { days.append(currentDay) }
         }
-
-        // Trailing days from next month to fill 42 cells
         let needed = max(0, 42 - days.count)
-        if needed > 0 {
-            for day in 1 ... needed {
-                if let date = calendar.date(bySetting: .day, value: day, of: nextMonth) {
-                    days.append(date)
-                }
-            }
+        for day in 1 ... max(1, needed) {
+            if day > needed { break }
+            if let currentDay = calendar.date(bySetting: .day, value: day, of: nextMonth) { days.append(currentDay) }
         }
 
         return days
     }
 
     private func heatmapColor(for count: Int) -> Color {
-        if count == 0 {
-            return Color.primary.opacity(0.05)
-        }
-        let opacity = min(Double(count * 2) * 0.1, 1.0)
-        return Color.accentColor.opacity(opacity)
+        guard count > 0 else { return Color.primary.opacity(0.05) }
+        return Color.accentColor.opacity(min(Double(count) * 0.2 + 0.1, 1.0))
     }
 }
 
 #Preview {
     let now = Date()
-    let calendar = Calendar.current
-    let sessions: [PracticeSession] = (0 ..< 300).map { i in
+    let cal = Calendar.current
+    let sessions: [PracticeSession] = (0 ..< 80).map { i in
         PracticeSession(
             id: i,
             userId: "u1",
             passageId: 1,
-            startDate: calendar.date(byAdding: .day, value: -Int.random(in: 0 ..< 365), to: now)!,
-            endDate: nil,
+            startDate: cal.date(byAdding: .day, value: -Int.random(in: 0 ..< 180), to: now)!,
+            endDate: cal.date(byAdding: .day, value: -Int.random(in: 0 ..< 180), to: now),
             score: 0.8,
             rating: 3,
             scheduledDays: 5,
             elapsedDays: 4,
-            state: 1,
+            state: 1
         )
     }
 
