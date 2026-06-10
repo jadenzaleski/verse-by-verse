@@ -141,7 +141,7 @@ struct ProfileView: View {
                 NavigationLink {
                     SettingsView()
                 } label: {
-                    Image("lucide.settings")
+                    Image(systemName: "gearshape.fill")
                 }
             }
         }

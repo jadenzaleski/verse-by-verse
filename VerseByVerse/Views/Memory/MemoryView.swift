@@ -86,7 +86,7 @@ struct MemoryView: View {
                 Button {
                     activeSheet = .add
                 } label: {
-                    Image("lucide.plus")
+                    Image(systemName: "plus")
                 }
                 .padding(0)
             }
@@ -96,7 +96,7 @@ struct MemoryView: View {
             //                    Text("hey")
             //
             //                } label: {
-            //                    Image("lucide.ellipsis")
+            //                    Image(systemName: "ellipsis")
             //                        .imageScale(.medium)
             //                }
             //            }
@@ -116,7 +116,7 @@ struct MemoryView: View {
                                 Button {
                                     activeSheet = nil
                                 } label: {
-                                    Image("lucide.x")
+                                    Image(systemName: "xmark")
                                         .scaleEffect(0.80)
                                 }
                             }

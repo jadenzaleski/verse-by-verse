@@ -16,7 +16,7 @@ struct ContentView: View {
                 HomeView()
             }
             .tabItem {
-                Label("Home", image: "lucide.house")
+                Label("Home", systemImage: "house")
             }
             .tag(0)
 
@@ -24,7 +24,7 @@ struct ContentView: View {
                 MemoryView()
             }
             .tabItem {
-                Label("Memory", image: "lucide.brain")
+                Label("Memory", systemImage: "brain")
             }
             .tag(1)
 
@@ -32,7 +32,7 @@ struct ContentView: View {
                 ProfileView()
             }
             .tabItem {
-                Label("Profile", image: "lucide.user")
+                Label("Profile", systemImage: "person")
             }
             .tag(2)
         }

@@ -48,10 +48,6 @@ struct PracticeHistoryCalendar: View {
                     } label: {
                         Text("Today")
                             .font(.app(.footnote, weight: .semibold))
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 5)
-                            .background(Color.accentColor, in: Capsule())
-                            .foregroundStyle(.white)
                             .padding(.trailing)
                     }
                 }
@@ -61,7 +57,7 @@ struct PracticeHistoryCalendar: View {
                 Button {
                     withAnimation { scrollID = currentOffset - 1 }
                 } label: {
-                    Image("lucide.chevron.left")
+                    Image(systemName: "chevron.left")
                         .foregroundStyle(Color.accentColor)
                 }
                 .disabled(currentOffset <= -monthsToShow)
@@ -74,8 +70,7 @@ struct PracticeHistoryCalendar: View {
                 Button {
                     withAnimation { scrollID = currentOffset + 1 }
                 } label: {
-                    Image("lucide.chevron.left")
-                        .rotationEffect(.degrees(180))
+                    Image(systemName: "chevron.right")
                         .foregroundStyle(Color.accentColor)
                 }
                 .disabled(currentOffset >= 0)
@@ -90,23 +85,19 @@ struct PracticeHistoryCalendar: View {
             .padding(.top, 5)
             .padding(.horizontal)
 
-            ScrollViewReader { proxy in
-                ScrollView(.horizontal, showsIndicators: false) {
-                    LazyHStack(spacing: 0) {
-                        ForEach(-monthsToShow ... 0, id: \.self) { offset in
-                            monthGrid(for: offset)
-                                .containerRelativeFrame(.horizontal)
-                                .id(offset)
-                        }
+            ScrollView(.horizontal, showsIndicators: false) {
+                LazyHStack(spacing: 0) {
+                    ForEach(-monthsToShow ... 0, id: \.self) { offset in
+                        monthGrid(for: offset)
+                            .containerRelativeFrame(.horizontal)
+                            .id(offset)
                     }
-                    .scrollTargetLayout()
                 }
-                .scrollTargetBehavior(.viewAligned)
-                .scrollPosition(id: $scrollID)
-                .onAppear {
-                    proxy.scrollTo(0)
-                }
+                .fixedSize(horizontal: false, vertical: true)
+                .scrollTargetLayout()
             }
+            .scrollTargetBehavior(.viewAligned)
+            .scrollPosition(id: $scrollID)
 
             VStack(alignment: .leading, spacing: 2) {
                 if let day = selectedDayStart {

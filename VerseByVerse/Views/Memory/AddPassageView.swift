@@ -139,7 +139,7 @@ struct AddPassageView: View {
                         Button {
                             dismiss()
                         } label: {
-                            Image("lucide.x")
+                            Image(systemName: "xmark")
                                 .scaleEffect(0.80)
                         }
                     }
@@ -152,7 +152,7 @@ struct AddPassageView: View {
                             if passageStore.state == .loading {
                                 ProgressView()
                             } else {
-                                Image("lucide.plus")
+                                Image(systemName: "plus")
                             }
                         }
                         .buttonStyle(.glassProminent)
@@ -450,7 +450,7 @@ extension AddPassageView {
                     Button {
                         focusPrevious()
                     } label: {
-                        Image("lucide.chevron.left")
+                        Image(systemName: "chevron.left")
                             .frame(width: 20, height: 20)
                             .padding()
                             .glassEffect(.regular.interactive())
@@ -460,7 +460,7 @@ extension AddPassageView {
                     Button {
                         focusNext()
                     } label: {
-                        Image("lucide.chevron.left")
+                        Image(systemName: "chevron.left")
                             .rotationEffect(.degrees(180))
                             .frame(width: 20, height: 20)
                             .padding()
@@ -510,7 +510,7 @@ extension AddPassageView {
                     }
                 }
             } label: {
-                Image("lucide.check")
+                Image(systemName: "checkmark")
                     .frame(width: 20, height: 20)
                     .padding()
                     .glassEffect(.regular.interactive())

@@ -197,13 +197,13 @@ struct LoginOrRegisterView: View {
                     }
 
                     if case .success = userStore.state {
-                        Image("lucide.circle.check.fill")
+                        Image(systemName: "checkmark.circle.fill")
                             .scaleEffect(1.3)
                             .transition(.scale.combined(with: .opacity))
                     }
 
                     if case .error = userStore.state {
-                        Image("lucide.circle.x.fill")
+                        Image(systemName: "xmark.circle.fill")
                             .scaleEffect(1.3)
                             .transition(.scale.combined(with: .opacity))
                     }
@@ -248,7 +248,7 @@ struct LoginOrRegisterView: View {
     @ViewBuilder
     private func validationIcon(_ isValid: Bool) -> some View {
         if showValidationResults {
-            Image(isValid ? "lucide.circle.check" : "lucide.circle.x")
+            Image(systemName: isValid ? "checkmark.circle" : "xmark.circle")
                 .scaleEffect(1.3)
                 .foregroundStyle(isValid ? .green : .red)
                 .transition(.scale.combined(with: .opacity))

@@ -23,7 +23,7 @@ struct VerseByVerseApp: App {
     init() {
         log.info("--- Verse By Verse \(AppFunctions.versionString() ?? "") ---")
         log.log("Log level: \(AppLog.minimumLevel)")
-        let backImage = UIImage(named: "lucide.chevron.left")
+        let backImage = UIImage(systemName: "chevron.left")
         UINavigationBar.appearance().backIndicatorImage = backImage
         UINavigationBar.appearance().backIndicatorTransitionMaskImage = backImage
     }

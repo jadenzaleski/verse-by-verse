@@ -36,7 +36,7 @@ struct SettingsView: View {
                     activeSheet = .name
                 } label: {
                     HStack {
-                        Label("Name", image: "lucide.id.card.lanyard")
+                        Label("Name", systemImage: "person.text.rectangle")
                         Spacer()
                         Text(displayFirstName + " " + displayLastName)
                             .foregroundStyle(.secondary)
@@ -51,7 +51,7 @@ struct SettingsView: View {
                     activeSheet = .email
                 } label: {
                     HStack {
-                        Label("Email", image: "lucide.mail")
+                        Label("Email", systemImage: "envelope.fill")
                         Spacer()
                         Text(verbatim: displayEmail)
                             .foregroundStyle(.secondary)
@@ -66,7 +66,7 @@ struct SettingsView: View {
                     activeSheet = .password
                 } label: {
                     HStack {
-                        Label("Password", image: "lucide.lock")
+                        Label("Password", systemImage: "lock.fill")
                         Spacer()
                         Text("••••••••")
                             .foregroundStyle(.secondary)
@@ -90,14 +90,14 @@ struct SettingsView: View {
                 Label {
                     Text(AppFunctions.versionString() ?? "")
                 } icon: {
-                    Image("lucide.rocket")
+                    Image(systemName: "app.badge")
                 }
                 Label {
                     Text(user?.id ?? "Unknown id")
                         .lineLimit(1)
                         .textSelection(.enabled)
                 } icon: {
-                    Image("lucide.hash")
+                    Image(systemName: "number")
                 }
 
             } header: {
@@ -109,7 +109,7 @@ struct SettingsView: View {
                 NavigationLink {
                     DeveloperView()
                 } label: {
-                    Label("Developer", image: "lucide.hammer")
+                    Label("Developer", systemImage: "hammer.fill")
                 }
             }
 
@@ -229,7 +229,7 @@ private struct NameEditorView: View {
                     Button {
                         dismiss()
                     } label: {
-                        Image("lucide.x")
+                        Image(systemName: "xmark")
                             .scaleEffect(0.80)
                     }
                 }
@@ -247,7 +247,7 @@ private struct NameEditorView: View {
                         if case .loading = userStore.state {
                             ProgressView()
                         } else {
-                            Image("lucide.check")
+                            Image(systemName: "checkmark")
                                 .scaleEffect(0.80)
                         }
                     }
@@ -306,7 +306,7 @@ private struct EmailEditorView: View {
                     Button {
                         dismiss()
                     } label: {
-                        Image("lucide.x")
+                        Image(systemName: "xmark")
                             .scaleEffect(0.80)
                     }
                 }
@@ -324,7 +324,7 @@ private struct EmailEditorView: View {
                         if case .loading = userStore.state {
                             ProgressView()
                         } else {
-                            Image("lucide.check")
+                            Image(systemName: "checkmark")
                                 .scaleEffect(0.80)
                         }
                     }
@@ -393,7 +393,7 @@ private struct PasswordEditorView: View {
                     Button {
                         dismiss()
                     } label: {
-                        Image("lucide.x")
+                        Image(systemName: "xmark")
                             .scaleEffect(0.80)
                     }
                 }
@@ -411,7 +411,7 @@ private struct PasswordEditorView: View {
                         if case .loading = userStore.state {
                             ProgressView()
                         } else {
-                            Image("lucide.check")
+                            Image(systemName: "checkmark")
                                 .scaleEffect(0.80)
                         }
                     }
