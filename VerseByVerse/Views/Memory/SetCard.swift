@@ -10,8 +10,9 @@ import SwiftUI
 struct SetCard: View {
     // Public configuration
     var title: String
-    var passageCount: Int
-    var verseCount: Int
+    var passageCount: Int?
+    var verseCount: Int?
+    var subtitle: String?
     var positionSeed: Int
     var colorShuffleSeed: Int
     var colorPallette: MeshPalette
@@ -21,16 +22,17 @@ struct SetCard: View {
 
     init(
         title: String = "The Gospels",
-        passageCount: Int = 18,
-        verseCount: Int = 26,
+        passageCount: Int? = nil,
+        verseCount: Int? = nil,
+        subtitle: String? = nil,
         positionSeed: Int = 123,
         colorShuffleSeed: Int = 1234,
         colorPallette: MeshPalette = MeshPalette.all[0],
-
     ) {
         self.title = title
         self.passageCount = passageCount
         self.verseCount = verseCount
+        self.subtitle = subtitle
         self.positionSeed = positionSeed
         self.colorShuffleSeed = colorShuffleSeed
         self.colorPallette = colorPallette
@@ -195,13 +197,19 @@ struct SetCard: View {
                 .font(.app(.headline))
                 .padding(.top, 5)
 
-            HStack {
-                Text("\(passageCount) Passages")
-                Spacer(minLength: 5)
-                Text("\(verseCount) V")
+            if let passages = passageCount, let verses = verseCount {
+                HStack {
+                    Text("\(passages) Passages")
+                    Spacer(minLength: 5)
+                    Text("\(verses) V")
+                }
+                .font(.app(.caption))
+                .foregroundStyle(.secondary)
+            } else if let sub = subtitle {
+                Text(sub)
+                    .font(.app(.caption))
+                    .foregroundStyle(.secondary)
             }
-            .font(.app(.caption))
-            .foregroundStyle(.secondary)
         }
         .lineLimit(1)
     }
@@ -230,12 +238,12 @@ struct SetCard: View {
         LazyVGrid(columns: [GridItem(.flexible(minimum: 100, maximum: 300), spacing: 10)], spacing: 10) {
             SetCard(title: "The Gospels", passageCount: 24, verseCount: 120, positionSeed: 1)
             SetCard(title: "Paul's Epistles", passageCount: 13, verseCount: 87, positionSeed: 12)
-            SetCard(title: "Psalms of Ascent", passageCount: 15, verseCount: 45, positionSeed: 3)
-            SetCard(title: "Wisdom Literature", passageCount: 5, verseCount: 250, positionSeed: 42)
+            SetCard(title: "Psalms of Ascent", subtitle: "Songs of pilgrimage", positionSeed: 3)
+            SetCard(title: "Wisdom Literature", positionSeed: 42)
             SetCard(title: "Pentateuch", passageCount: 5, verseCount: 585, positionSeed: 12345)
             SetCard(title: "Major Prophets", passageCount: 5, verseCount: 300, positionSeed: 987)
             SetCard(title: "Minor Prophets", passageCount: 12, verseCount: 150, positionSeed: 654)
-            SetCard(title: "Johannine Writings very", passageCount: 3, verseCount: 60, positionSeed: 316)
+            SetCard(title: "Johannine Writings very", positionSeed: 316)
         }
         .padding()
     }

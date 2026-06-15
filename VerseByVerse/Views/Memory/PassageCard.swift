@@ -9,7 +9,6 @@ import SwiftUI
 
 struct PassageCard: View {
     @Environment(BibleStore.self) private var bibleStore
-    @State private var progress: Double = 4
     let passage: UserPassage
 
     var body: some View {
@@ -28,13 +27,13 @@ struct PassageCard: View {
 
             SegmentedProgressBar(
                 totalSegments: 10,
-                completedSegments: Int(progress),
+                completedSegments: min(passage.reps, 10),
             )
 
             HStack {
-                Text("Due in 3 days")
+                Text(dueText)
                 Spacer()
-                Text("3 days ago")
+                Text(lastPracticedText)
             }
             .environment(\.font, .app(.caption))
             .foregroundStyle(.secondary)
@@ -45,6 +44,21 @@ struct PassageCard: View {
         .task {
             await bibleStore.fetchSelection(passage.selectionKey)
         }
+    }
+
+    private var dueText: String {
+        guard let next = passage.nextPractice else { return "Not scheduled" }
+        let days = Calendar.current.dateComponents([.day], from: .now, to: next).day ?? 0
+        if days > 0 { return "Due in \(days) day\(days == 1 ? "" : "s")" }
+        if days == 0 { return "Due today" }
+        return "Overdue \(-days) day\(-days == 1 ? "" : "s")"
+    }
+
+    private var lastPracticedText: String {
+        guard let last = passage.lastPracticed else { return "Never practiced" }
+        let days = Calendar.current.dateComponents([.day], from: last, to: .now).day ?? 0
+        if days == 0 { return "Practiced today" }
+        return "\(days) day\(days == 1 ? "" : "s") ago"
     }
 }
 

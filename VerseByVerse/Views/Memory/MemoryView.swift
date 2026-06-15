@@ -28,12 +28,15 @@ struct ScrollOffsetKey: PreferenceKey {
 
 enum ActiveSheet: Identifiable {
     case add
+    case addSet
     case passage(UserPassage)
 
     var id: String {
         switch self {
         case .add:
             "add"
+        case .addSet:
+            "addSet"
         case let .passage(id):
             "passage_\(id)"
         }
@@ -42,6 +45,7 @@ enum ActiveSheet: Identifiable {
 
 struct MemoryView: View {
     @Environment(PassageStore.self) private var passageStore
+    @Environment(StudySetStore.self) private var studySetStore
     @State private var selectedTab: MemoryTopTab = .passages
     @Namespace private var tabIndicator
     @State private var tabFrames: [MemoryTopTab: CGRect] = [:]
@@ -78,10 +82,18 @@ struct MemoryView: View {
             .onPreferenceChange(ScrollOffsetKey.self) { scrollOffset = $0 }
             .refreshable {
                 await passageStore.loadMyPassages()
+                await studySetStore.loadMySets()
             }
         }
         .navigationTitle("Memory")
         .toolbar {
+            ToolbarItem {
+                Button {
+                    activeSheet = .addSet
+                } label: {
+                    Image(systemName: "rectangle.stack.badge.plus")
+                }
+            }
             ToolbarItem {
                 Button {
                     activeSheet = .add
@@ -90,22 +102,14 @@ struct MemoryView: View {
                 }
                 .padding(0)
             }
-            //            ToolbarSpacer(.fixed)
-            //            ToolbarItem() {
-            //                Menu {
-            //                    Text("hey")
-            //
-            //                } label: {
-            //                    Image(systemName: "ellipsis")
-            //                        .imageScale(.medium)
-            //                }
-            //            }
         }
         .toolbarTitleDisplayMode(.inlineLarge)
         .sheet(item: $activeSheet) { sheet in
             switch sheet {
             case .add:
                 AddPassageView()
+            case .addSet:
+                AddStudySetView()
             case let .passage(userPassage):
                 NavigationStack {
                     PassageDetailView(passage: userPassage)
@@ -188,89 +192,62 @@ struct MemoryView: View {
                             activeSheet = .passage(index)
                         }
                 }
+
             }
 
         case .sets:
             VStack(alignment: .leading, spacing: 10) {
-                Text("Recent")
-                    .font(.app(.title3))
-                ScrollView(.horizontal) {
-                    LazyHStack(spacing: 20) {
-                        SetCard(title: "The Gospels",
-                                passageCount: 24,
-                                verseCount: 120,
-                                positionSeed: 1,
-                                colorShuffleSeed: 123,
-                                colorPallette: .ocean)
-                            .frame(width: horizontalSetSize)
-                    }
-                }
-                Text("Popular")
-                    .font(.app(.title3))
-                ScrollView(.horizontal) {
-                    LazyHGrid(
-                        rows: [GridItem(.adaptive(minimum: horizontalSetSize, maximum: 300), spacing: 20)],
-                        spacing: 20,
-                    ) {
-                        SetCard(title: "The Gospels",
-                                passageCount: 24,
-                                verseCount: 120,
-                                positionSeed: 1,
-                                colorShuffleSeed: 67,
-                                colorPallette: .ocean)
-                            .frame(width: horizontalSetSize)
-                        SetCard(title: "Paul's Epistles",
-                                passageCount: 13,
-                                verseCount: 87,
-                                positionSeed: 12,
-                                colorShuffleSeed: 1)
-                            .frame(width: horizontalSetSize)
-                        SetCard(title: "Psalms of Ascent",
-                                passageCount: 15,
-                                verseCount: 45,
-                                positionSeed: 3,
-                                colorShuffleSeed: 12)
-                            .frame(width: horizontalSetSize)
-                        SetCard(title: "Wisdom Literature",
-                                passageCount: 5,
-                                verseCount: 250,
-                                positionSeed: 42,
-                                colorShuffleSeed: 12311)
-                            .frame(width: horizontalSetSize)
+                let recentSets = studySetStore.sets
+                    .sorted { $0.modifiedAt > $1.modifiedAt }
+                    .prefix(5)
+
+                if !recentSets.isEmpty {
+                    Text("Recent")
+                        .font(.app(.title3))
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        LazyHStack(spacing: 20) {
+                            ForEach(Array(recentSets)) { set in
+                                SetCard(
+                                    title: set.name,
+                                    subtitle: set.description,
+                                    positionSeed: set.meshPositionSeed,
+                                    colorShuffleSeed: set.meshColorSeed,
+                                    colorPallette: set.meshTheme.palette,
+                                )
+                                .frame(width: horizontalSetSize)
+                            }
+                        }
                     }
                 }
 
                 Text("All")
                     .font(.app(.title3))
-                ScrollView {
+
+                if studySetStore.sets.isEmpty {
+                    Text("No sets yet — tap \(Image(systemName: "rectangle.stack.badge.plus")) to create one.")
+                        .font(.app(.subheadline))
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.top, 40)
+                } else {
                     LazyVGrid(
-                        columns: [
-                            GridItem(.adaptive(minimum: gridSetSize, maximum: 250), spacing: 20),
-                        ],
-                        spacing: 20,
+                        columns: [GridItem(.flexible()), GridItem(.flexible())],
+                        spacing: 16,
                     ) {
-                        SetCard(title: "The Gospels",
-                                passageCount: 24,
-                                verseCount: 120,
-                                positionSeed: 1,
-                                colorShuffleSeed: 123)
-                        SetCard(title: "Major Prophets",
-                                passageCount: 5,
-                                verseCount: 300,
-                                positionSeed: 987,
-                                colorShuffleSeed: 91)
-                        SetCard(title: "Minor Prophets",
-                                passageCount: 12,
-                                verseCount: 150,
-                                positionSeed: 654,
-                                colorShuffleSeed: 98)
-                        SetCard(title: "Johannine Writings That Are Long",
-                                passageCount: 3,
-                                verseCount: 60,
-                                positionSeed: 316,
-                                colorShuffleSeed: 111)
+                        ForEach(studySetStore.sets) { set in
+                            SetCard(
+                                title: set.name,
+                                subtitle: set.description,
+                                positionSeed: set.meshPositionSeed,
+                                colorShuffleSeed: set.meshColorSeed,
+                                colorPallette: set.meshTheme.palette,
+                            )
+                        }
                     }
                 }
+            }
+            .task {
+                await studySetStore.loadMySets(lookInCache: true)
             }
         }
     }
@@ -281,4 +258,5 @@ struct MemoryView: View {
         .environment(\.font, .app())
         .environment(UserStore.shared)
         .environment(PassageStore.shared)
+        .environment(StudySetStore.shared)
 }
