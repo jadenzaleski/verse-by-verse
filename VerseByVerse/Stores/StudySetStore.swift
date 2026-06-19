@@ -34,6 +34,13 @@ final class StudySetStore: Store {
         }
     }
 
+    #if DEBUG
+    @MainActor
+    func setSetsForPreview(_ sets: [StudySet]) {
+        self.sets = sets
+    }
+    #endif
+
     @MainActor
     func createSet(name: String, description: String?, theme: MeshTheme) async throws {
         state = .loading

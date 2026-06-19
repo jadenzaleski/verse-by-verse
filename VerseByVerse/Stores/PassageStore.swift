@@ -73,3 +73,12 @@ final class PassageStore: Store {
         lastError = nil
     }
 }
+
+#if DEBUG
+extension PassageStore {
+    @MainActor
+    func setUserPassagesForPreview(_ passages: [UserPassage]) {
+        self.userPassages = passages
+    }
+}
+#endif

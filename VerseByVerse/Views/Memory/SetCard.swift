@@ -8,23 +8,22 @@
 import SwiftUI
 
 struct SetCard: View {
-    // Public configuration
     var title: String
     var passageCount: Int?
     var verseCount: Int?
-    var subtitle: String?
+    var description: String?
     var positionSeed: Int
     var colorShuffleSeed: Int
     var colorPallette: MeshPalette
-
+    
     private let cornerRadius: CGFloat = 20
     private let jitter: Float = 0.25
-
+    
     init(
         title: String = "The Gospels",
         passageCount: Int? = nil,
         verseCount: Int? = nil,
-        subtitle: String? = nil,
+        description: String? = nil,
         positionSeed: Int = 123,
         colorShuffleSeed: Int = 1234,
         colorPallette: MeshPalette = MeshPalette.all[0],
@@ -32,12 +31,12 @@ struct SetCard: View {
         self.title = title
         self.passageCount = passageCount
         self.verseCount = verseCount
-        self.subtitle = subtitle
+        self.description = description
         self.positionSeed = positionSeed
         self.colorShuffleSeed = colorShuffleSeed
         self.colorPallette = colorPallette
     }
-
+    
     var body: some View {
         /*
          Mesh Grid Bezier Points (p):
@@ -104,7 +103,7 @@ struct SetCard: View {
         let p8TopControlPoint: SIMD2<Float> = [1.0, jitteredNumber(0.75)]
         let p8TrailingControlPoint: SIMD2<Float> = [1.0, 1.0]
         let p8BottomControlPoint: SIMD2<Float> = [1.0, 1.0]
-
+        
         VStack(alignment: .leading, spacing: 0) {
             MeshGradient(
                 width: 3,
@@ -135,7 +134,7 @@ struct SetCard: View {
                         trailingControlPoint: p2TrailingControlPoint,
                         bottomControlPoint: p2BottomControlPoint,
                     ),
-
+                    
                     // Row 2 (middle)
                     // p3
                     MeshGradient.BezierPoint(
@@ -161,7 +160,7 @@ struct SetCard: View {
                         trailingControlPoint: p5TrailingControlPoint,
                         bottomControlPoint: p5BottomControlPoint,
                     ),
-
+                    
                     // Row 3 (bottom)
                     // p6
                     MeshGradient.BezierPoint(
@@ -192,28 +191,24 @@ struct SetCard: View {
             )
             .aspectRatio(1, contentMode: .fit)
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-
-            Text(title)
-                .font(.app(.headline))
-                .padding(.top, 5)
-
-            if let passages = passageCount, let verses = verseCount {
+            
+            Group {
+                Text(title)
+                    .font(.app(.callout, weight: .semibold))
+                    .padding(.top, 5)
+                
                 HStack {
-                    Text("\(passages) Passages")
+                    Text("\(passageCount ?? 0) Passages")
                     Spacer(minLength: 5)
-                    Text("\(verses) V")
+                    Text("\(verseCount ?? 0) V")
                 }
                 .font(.app(.caption))
                 .foregroundStyle(.secondary)
-            } else if let sub = subtitle {
-                Text(sub)
-                    .font(.app(.caption))
-                    .foregroundStyle(.secondary)
             }
+            .lineLimit(1)
         }
-        .lineLimit(1)
     }
-
+    
     private func jitteredNumber(_ number: Float) -> Float {
         var generator = SeededGenerator(seed: positionSeed)
         // set min and max to ensure our result cannot be out of bounds [0.0, 1.0]
@@ -221,11 +216,11 @@ struct SetCard: View {
         let maxBound = min(1.0, number + jitter)
         return Float.random(in: minBound ... maxBound, using: &generator)
     }
-
+    
     private func shuffledColors(from palette: MeshPalette) -> [Color] {
         var generator = SeededGenerator(seed: colorShuffleSeed)
         var colors = palette.colors
-
+        
         colors.shuffle(using: &generator)
         return colors
     }
@@ -235,10 +230,18 @@ struct SetCard: View {
 
 #Preview {
     ScrollView {
-        LazyVGrid(columns: [GridItem(.flexible(minimum: 100, maximum: 300), spacing: 10)], spacing: 10) {
+        let space: CGFloat = 20.0
+        let columns = [
+            GridItem(.flexible(), spacing: space),
+            GridItem(.flexible(), spacing: space)
+        ]
+        LazyVGrid(
+            columns: columns,
+            spacing: space,
+        ) {
             SetCard(title: "The Gospels", passageCount: 24, verseCount: 120, positionSeed: 1)
             SetCard(title: "Paul's Epistles", passageCount: 13, verseCount: 87, positionSeed: 12)
-            SetCard(title: "Psalms of Ascent", subtitle: "Songs of pilgrimage", positionSeed: 3)
+            SetCard(title: "Psalms of Ascent", description: "Songs of pilgrimage", positionSeed: 3)
             SetCard(title: "Wisdom Literature", positionSeed: 42)
             SetCard(title: "Pentateuch", passageCount: 5, verseCount: 585, positionSeed: 12345)
             SetCard(title: "Major Prophets", passageCount: 5, verseCount: 300, positionSeed: 987)
