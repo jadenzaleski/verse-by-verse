@@ -12,7 +12,12 @@ import SwiftUI
 final class PassageStore: Store {
     static let shared = PassageStore()
 
-    private(set) var userPassages: [UserPassage] = []
+    private(set) var userPassages: [UserPassage] = [] {
+        didSet { passagesById = Dictionary(userPassages.map { ($0.id, $0) }, uniquingKeysWith: { _, new in new }) }
+    }
+
+    /// Index of passages by ID for O(1) lookups (e.g. resolving a set's passage IDs).
+    private(set) var passagesById: [Int: UserPassage] = [:]
 
     // Store protocol requirements
     var state: DataState = .idle

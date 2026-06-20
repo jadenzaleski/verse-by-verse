@@ -9,21 +9,26 @@ import SwiftUI
 
 struct SetDetailView: View {
     let set: StudySet
-    var passages: [UserPassage] = []
 
     @Environment(StudySetStore.self) private var studySetStore
+    @Environment(PassageStore.self) private var passageStore
     @Environment(\.dismiss) private var dismiss
 
     @State private var currentSet: StudySet
     @State private var showingEditSheet = false
     @State private var showingDeleteConfirmation = false
+    @State private var showingAddPassages = false
 
     private let jitter: Float = 0.25
 
-    init(set: StudySet, passages: [UserPassage] = []) {
+    init(set: StudySet) {
         self.set = set
-        self.passages = passages
         _currentSet = State(initialValue: set)
+    }
+
+    /// The set's passages, resolved live from `PassageStore` via the membership in `StudySetStore`.
+    private var passages: [UserPassage] {
+        (studySetStore.setPassageIds[currentSet.id] ?? []).compactMap { passageStore.passagesById[$0] }
     }
 
     var body: some View {
@@ -46,16 +51,35 @@ struct SetDetailView: View {
                         .foregroundStyle(.secondary)
                     Spacer()
                 }
+
+                if !passages.isEmpty {
+                    HStack {
+                        Text("Passages")
+                            .font(.app(.headline, weight: .semibold))
+                        Spacer()
+                        Text("\(passages.count)")
+                            .font(.app(.subheadline))
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.top, 8)
+
+                    ForEach(passages) { passage in
+                        NavigationLink(destination: PassageDetailView(passage: passage)) {
+                            PassageCard(passage: passage, style: .compact)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
             }
         }
         .padding(.horizontal)
         .scrollIndicators(.hidden)
+        .task { await refresh(lookInCache: true) }
+        .refreshable { await refresh(lookInCache: false) }
         .background(SetMesh(colorPallette: currentSet.meshTheme.palette,
                             colorShuffleSeed: currentSet.meshColorSeed,
                             positionSeed: currentSet.meshPositionSeed
                            ).opacity(0.5).ignoresSafeArea())
-        .navigationTitle(currentSet.name)
-        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Menu {
@@ -73,6 +97,16 @@ struct SetDetailView: View {
                     Image(systemName: "ellipsis")
                 }
             }
+            ToolbarItem() {
+                Button {
+                    showingAddPassages = true
+                } label: {
+                    Image(systemName: "plus")
+                }
+            }
+        }
+        .sheet(isPresented: $showingAddPassages) {
+            AddPassagesToSetView(setId: currentSet.id)
         }
         .sheet(isPresented: $showingEditSheet) {
             StudySetFormView(
@@ -105,6 +139,12 @@ struct SetDetailView: View {
         } message: {
             Text("This set will be permanently deleted.")
         }
+    }
+
+    /// Ensures the passage objects are loaded in `PassageStore`, then refreshes this set's membership.
+    private func refresh(lookInCache: Bool) async {
+        await passageStore.loadMyPassages(lookInCache: lookInCache)
+        try? await studySetStore.loadPassageIds(forSet: currentSet.id)
     }
 
     private func deleteSet() async {
@@ -179,9 +219,19 @@ struct SetDetailView: View {
         ),
     ]
 
-    NavigationStack {
-        SetDetailView(set: set, passages: passages)
+    let passageStore = PassageStore.shared
+    let studySetStore = StudySetStore.shared
+    #if DEBUG
+    passageStore.setUserPassagesForPreview(passages)
+    studySetStore.setSetsForPreview([set])
+    studySetStore.setPassageIdsForPreview([set.id: passages.map(\.id)])
+    #endif
+
+    return NavigationStack {
+        SetDetailView(set: set)
     }
     .environment(\.font, .app())
-    .environment(StudySetStore.shared)
+    .environment(studySetStore)
+    .environment(passageStore)
+    .environment(BibleStore.shared)
 }

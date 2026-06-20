@@ -15,7 +15,6 @@ enum MemoryTopTab: String, CaseIterable {
 enum ActiveSheet: Identifiable {
     case add
     case addSet
-    case passage(UserPassage)
 
     var id: String {
         switch self {
@@ -23,8 +22,6 @@ enum ActiveSheet: Identifiable {
             "add"
         case .addSet:
             "addSet"
-        case let .passage(id):
-            "passage_\(id)"
         }
     }
 }
@@ -32,6 +29,7 @@ enum ActiveSheet: Identifiable {
 struct MemoryView: View {
     @Environment(PassageStore.self) private var passageStore
     @Environment(StudySetStore.self) private var studySetStore
+    @Environment(BibleStore.self) private var bibleStore
     @State private var searchText: String = ""
     @State private var selectedTab: MemoryTopTab = .passages
     @State private var activeSheet: ActiveSheet?
@@ -101,22 +99,6 @@ struct MemoryView: View {
                 ) { name, description, theme in
                     try await studySetStore.createSet(name: name, description: description, theme: theme)
                 }
-            case let .passage(userPassage):
-                NavigationStack {
-                    PassageDetailView(passage: userPassage)
-                        .navigationTitle("Passage")
-                        .navigationBarTitleDisplayMode(.inline)
-                        .toolbar {
-                            ToolbarItem(placement: .destructiveAction) {
-                                Button {
-                                    activeSheet = nil
-                                } label: {
-                                    Image(systemName: "xmark")
-                                        .scaleEffect(0.80)
-                                }
-                            }
-                        }
-                }
             }
         }
     }
@@ -154,10 +136,10 @@ struct MemoryView: View {
                     )
                 }
                 ForEach(filteredPassages, id: \.id) { passage in
-                    PassageCard(passage: passage)
-                        .onTapGesture {
-                            activeSheet = .passage(passage)
-                        }
+                    NavigationLink(destination: PassageDetailView(passage: passage)) {
+                        PassageCard(passage: passage)
+                    }
+                    .buttonStyle(.plain)
                 }
             }
 
@@ -177,6 +159,8 @@ struct MemoryView: View {
                                     NavigationLink(destination: SetDetailView(set: set)) {
                                         SetCard(
                                             title: set.name,
+                                            passageCount: setPassageCount(set),
+                                            verseCount: setVerseCount(set),
                                             description: set.description,
                                             positionSeed: set.meshPositionSeed,
                                             colorShuffleSeed: set.meshColorSeed,
@@ -214,6 +198,8 @@ struct MemoryView: View {
                             NavigationLink(destination: SetDetailView(set: set)) {
                                 SetCard(
                                     title: set.name,
+                                    passageCount: setPassageCount(set),
+                                    verseCount: setVerseCount(set),
                                     description: set.description,
                                     positionSeed: set.meshPositionSeed,
                                     colorShuffleSeed: set.meshColorSeed,
@@ -228,6 +214,19 @@ struct MemoryView: View {
             .task {
                 await studySetStore.loadMySets(lookInCache: true)
             }
+        }
+    }
+
+    /// Number of passages in a set, or nil if membership hasn't loaded yet.
+    private func setPassageCount(_ set: StudySet) -> Int? {
+        studySetStore.setPassageIds[set.id]?.count
+    }
+
+    /// Total verse count across a set's passages, resolved live from `PassageStore`.
+    private func setVerseCount(_ set: StudySet) -> Int? {
+        studySetStore.setPassageIds[set.id].map { ids in
+            ids.compactMap { passageStore.passagesById[$0] }
+                .reduce(0) { $0 + $1.verseCount(using: bibleStore) }
         }
     }
 
@@ -348,6 +347,11 @@ struct MemoryView: View {
     .task {
         passageStore.setUserPassagesForPreview(samplePassages)
         studySetStore.setSetsForPreview(sampleSets)
+        studySetStore.setPassageIdsForPreview([
+            1: samplePassages.prefix(4).map(\.id),
+            2: samplePassages.prefix(2).map(\.id),
+            3: samplePassages.map(\.id),
+        ])
     }
 #endif
 

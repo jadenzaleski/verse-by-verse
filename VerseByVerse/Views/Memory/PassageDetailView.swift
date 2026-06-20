@@ -73,6 +73,8 @@ struct PassageDetailView: View {
             }
             await bibleStore.fetchSelection(passage.selectionKey)
         }
+        .navigationTitle(passage.reference)
+        .navigationBarTitleDisplayMode(.inline)
     }
 
     // MARK: - Cards

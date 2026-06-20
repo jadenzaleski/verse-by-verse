@@ -38,6 +38,18 @@ struct UserPassage: Identifiable, Equatable {
         )
     }
 
+    func verseCount(using bibleStore: BibleStore) -> Int {
+        if startChapter == endChapter {
+            return endVerse - startVerse + 1
+        }
+        var total = bibleStore.verseCount(for: book, chapter: startChapter) - startVerse + 1
+        for chapter in (startChapter + 1) ..< endChapter {
+            total += bibleStore.verseCount(for: book, chapter: chapter)
+        }
+        total += endVerse
+        return total
+    }
+
     var reference: String {
         if startChapter == endChapter {
             if startVerse == endVerse {

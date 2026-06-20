@@ -7,9 +7,15 @@
 
 import SwiftUI
 
+enum PassageCardStyle {
+    case full
+    case compact
+}
+
 struct PassageCard: View {
     @Environment(BibleStore.self) private var bibleStore
     let passage: UserPassage
+    var style: PassageCardStyle = .full
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -21,9 +27,11 @@ struct PassageCard: View {
                     .environment(\.font, .app(.caption))
             }
 
-            Text(bibleStore.selections[passage.selectionKey]?.fullText ?? "...")
-                .lineLimit(2)
-                .font(.app(.subheadline))
+            if style == .full {
+                Text(bibleStore.selections[passage.selectionKey]?.fullText ?? "...")
+                    .lineLimit(2)
+                    .font(.app(.subheadline))
+            }
 
             SegmentedProgressBar(
                 totalSegments: 10,
@@ -42,7 +50,9 @@ struct PassageCard: View {
         .frame(maxWidth: .infinity)
         .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
         .task {
-            await bibleStore.fetchSelection(passage.selectionKey)
+            if style == .full {
+                await bibleStore.fetchSelection(passage.selectionKey)
+            }
         }
     }
 

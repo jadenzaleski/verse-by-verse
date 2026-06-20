@@ -23,6 +23,7 @@ struct StudySetReadResponse: Codable {
     let meshTheme: MeshThemeResponse
     let createdAt: Date
     let modifiedAt: Date
+    let passageIds: [Int]?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -33,6 +34,39 @@ struct StudySetReadResponse: Codable {
         case meshTheme = "mesh_theme"
         case createdAt = "created_at"
         case modifiedAt = "modified_at"
+        case passageIds = "passage_ids"
+    }
+}
+
+// Returned by GET /study-set/{id} and passage add/remove endpoints (includes passages array).
+struct StudySetDetailResponse: Codable {
+    let id: Int
+    let userId: String
+    let name: String
+    let description: String?
+    let meshPositionSeed: Int
+    let meshColorSeed: Int
+    let meshTheme: MeshThemeResponse
+    let createdAt: Date
+    let modifiedAt: Date
+    let passages: [UserPassageReadResponse]
+
+    enum CodingKeys: String, CodingKey {
+        case id, name, description, passages
+        case userId = "user_id"
+        case meshPositionSeed = "mesh_position_seed"
+        case meshColorSeed = "mesh_color_seed"
+        case meshTheme = "mesh_theme"
+        case createdAt = "created_at"
+        case modifiedAt = "modified_at"
+    }
+
+    func toPassages() -> [UserPassage] {
+        passages.map { $0.toDomain() }
+    }
+
+    var passageIds: [Int] {
+        passages.map(\.id)
     }
 }
 

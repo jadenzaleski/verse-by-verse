@@ -48,7 +48,7 @@ struct SetCard: View {
                 HStack {
                     Text("\(passageCount ?? 0) Passages")
                     Spacer(minLength: 5)
-                    Text("\(verseCount ?? 0) V")
+                    Text("\(verseCount ?? 0) Verses")
                 }
                 .font(.app(.caption))
                 .foregroundStyle(.secondary)

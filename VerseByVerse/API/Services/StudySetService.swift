@@ -64,8 +64,38 @@ extension APIService {
         return response.body
     }
 
+    func getStudySet(id: Int) async throws -> StudySetDetailResponse {
+        log.debug("getStudySet called: \(id)")
+        let response: APIResponse<StudySetDetailResponse> = try await fetch(
+            endpoint: APIEndpoint.getStudySet(id: id),
+            lookInCache: false,
+            saveToCache: false,
+        )
+        return response.body
+    }
+
     func deleteStudySet(id: Int) async throws {
         log.debug("deleteStudySet called: \(id)")
         try await fetchVoid(endpoint: APIEndpoint.deleteStudySet(id: id))
+    }
+
+    func addPassageToStudySet(studySetId: Int, passageId: Int) async throws -> StudySetDetailResponse {
+        log.debug("addPassageToStudySet called: set \(studySetId), passage \(passageId)")
+        let response: APIResponse<StudySetDetailResponse> = try await fetch(
+            endpoint: APIEndpoint.addPassageToStudySet(studySetId: studySetId, passageId: passageId),
+            lookInCache: false,
+            saveToCache: false,
+        )
+        return response.body
+    }
+
+    func removePassageFromStudySet(studySetId: Int, passageId: Int) async throws -> StudySetDetailResponse {
+        log.debug("removePassageFromStudySet called: set \(studySetId), passage \(passageId)")
+        let response: APIResponse<StudySetDetailResponse> = try await fetch(
+            endpoint: APIEndpoint.removePassageFromStudySet(studySetId: studySetId, passageId: passageId),
+            lookInCache: false,
+            saveToCache: false,
+        )
+        return response.body
     }
 }

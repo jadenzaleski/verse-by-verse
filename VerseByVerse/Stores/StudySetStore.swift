@@ -17,6 +17,10 @@ final class StudySetStore: Store {
 
     private(set) var sets: [StudySet] = []
 
+    /// Maps each set ID to the IDs of its passages. The canonical passage objects
+    /// live in `PassageStore`; this store only tracks membership.
+    private(set) var setPassageIds: [Int: [Int]] = [:]
+
     private init() {}
 
     @MainActor
@@ -27,6 +31,9 @@ final class StudySetStore: Store {
         do {
             let responses = try await APIService.shared.getMyStudySets()
             sets = responses.map { $0.toDomain() }
+            for response in responses {
+                setPassageIds[response.id] = response.passageIds ?? []
+            }
             state = .success
             log.info("Loaded \(sets.count) study sets")
         } catch {
@@ -38,6 +45,11 @@ final class StudySetStore: Store {
     @MainActor
     func setSetsForPreview(_ sets: [StudySet]) {
         self.sets = sets
+    }
+
+    @MainActor
+    func setPassageIdsForPreview(_ ids: [Int: [Int]]) {
+        self.setPassageIds = ids
     }
     #endif
 
@@ -86,6 +98,51 @@ final class StudySetStore: Store {
             state = .success
             log.info("Updated study set: \(id)")
             return updated
+        } catch {
+            handle(error: error)
+            throw error
+        }
+    }
+
+    @MainActor
+    @discardableResult
+    func loadPassageIds(forSet setId: Int) async throws -> [Int] {
+        do {
+            let response = try await APIService.shared.getStudySet(id: setId)
+            let ids = response.passageIds
+            setPassageIds[setId] = ids
+            log.info("Loaded \(ids.count) passage IDs for set \(setId)")
+            return ids
+        } catch {
+            handle(error: error)
+            throw error
+        }
+    }
+
+    @MainActor
+    @discardableResult
+    func addPassage(toSet setId: Int, passageId: Int) async throws -> [Int] {
+        do {
+            let response = try await APIService.shared.addPassageToStudySet(studySetId: setId, passageId: passageId)
+            let ids = response.passageIds
+            setPassageIds[setId] = ids
+            log.info("Added passage \(passageId) to set \(setId)")
+            return ids
+        } catch {
+            handle(error: error)
+            throw error
+        }
+    }
+
+    @MainActor
+    @discardableResult
+    func removePassage(fromSet setId: Int, passageId: Int) async throws -> [Int] {
+        do {
+            let response = try await APIService.shared.removePassageFromStudySet(studySetId: setId, passageId: passageId)
+            let ids = response.passageIds
+            setPassageIds[setId] = ids
+            log.info("Removed passage \(passageId) from set \(setId)")
+            return ids
         } catch {
             handle(error: error)
             throw error
