@@ -344,8 +344,11 @@ struct MemoryView: View {
             .environment(studySetStore)
             .environment(BibleStore.shared)
     }
+#if DEBUG
     .task {
         passageStore.setUserPassagesForPreview(samplePassages)
         studySetStore.setSetsForPreview(sampleSets)
     }
+#endif
+
 }
