@@ -36,6 +36,7 @@ struct PassageMemoryScoreChart: View {
     // Memoized Data
     @State private var memoizedFilteredSessions: [PracticeSession] = []
     @State private var memoizedCurve: [MemoryPoint] = []
+    @State private var memoizedRangeStart: Date?
     @State private var memoizedGradient: LinearGradient = .init(colors: [.green], startPoint: .bottom, endPoint: .top)
 
     private var activeRetention: Double {
@@ -49,11 +50,19 @@ struct PassageMemoryScoreChart: View {
         retention(at: Date())
     }
 
-    private func retention(at date: Date) -> Double {
-        // Use pre-sorted memoized data if available, otherwise fallback
-        let dateSortedSessions = sessions.sorted(by: { $0.startDate < $1.startDate })
-        let data = memoizedFilteredSessions.isEmpty ? dateSortedSessions : memoizedFilteredSessions
+    private var allCompletedSorted: [PracticeSession] {
+        sessions.filter(\.isCompleted).sorted(by: { $0.startDate < $1.startDate })
+    }
 
+    private func retention(at date: Date) -> Double {
+        // Always evaluate against every completed session so the score is correct
+        // even when the most recent practice is outside the selected window.
+        retention(at: date, in: allCompletedSorted)
+    }
+
+    /// Retention at `date` against a pre-sorted session list — avoids re-sorting
+    /// when sampling the curve at many points.
+    private func retention(at date: Date, in data: [PracticeSession]) -> Double {
         guard let lastSession = data.last(where: { $0.startDate <= date }) else {
             return data.first?.score ?? 1.0
         }
@@ -65,56 +74,51 @@ struct PassageMemoryScoreChart: View {
     private func refreshMemoizedData() {
         let now = Date()
         let calendar = Calendar.current
+        let allSorted = allCompletedSorted
 
-        // 1. Filter and Sort Sessions
-        let filtered = sessions.filter { session in
-            guard session.isCompleted else { return false }
+        // 1. Determine the visible window's start.
+        let windowStart: Date?
+        switch selectedDuration {
+        case .week:
+            windowStart = calendar.date(byAdding: .day, value: -7, to: now)
+        case .month:
+            windowStart = calendar.date(byAdding: .month, value: -1, to: now)
+        case .sixMonths:
+            windowStart = calendar.date(byAdding: .month, value: -6, to: now)
+        case .year:
+            windowStart = calendar.date(byAdding: .year, value: -1, to: now)
+        case .all:
+            windowStart = allSorted.first?.startDate
+        }
 
-            switch selectedDuration {
-            case .week:
-                return session.startDate > calendar.date(byAdding: .day, value: -7, to: now)!
-            case .month:
-                return session.startDate > calendar.date(byAdding: .month, value: -1, to: now)!
-            case .sixMonths:
-                return session.startDate > calendar.date(byAdding: .month, value: -6, to: now)!
-            case .year:
-                return session.startDate > calendar.date(byAdding: .year, value: -1, to: now)!
-            case .all:
-                return true
-            }
-        }.sorted(by: { $0.startDate < $1.startDate })
+        // Sessions whose marker dots fall inside the window.
+        memoizedFilteredSessions = allSorted.filter { session in
+            guard let windowStart else { return true }
+            return session.startDate >= windowStart
+        }
 
-        memoizedFilteredSessions = filtered
-
-        // 2. Generate Curve with Adaptive Resolution
-        guard let firstSession = filtered.first else {
+        // 2. Generate the retention curve across the whole visible window.
+        // It is anchored by the most recent practice — even one before the
+        // window — so a line always shows whenever any practice exists.
+        guard let firstEver = allSorted.first?.startDate else {
             memoizedCurve = []
+            memoizedRangeStart = nil
             return
         }
+        let rangeStart = max(windowStart ?? firstEver, firstEver)
+        memoizedRangeStart = rangeStart
 
         var points: [MemoryPoint] = []
-        let totalInterval = now.timeIntervalSince(firstSession.startDate)
-
-        // Aim for ~250 points across the visible range for smooth performance
+        let totalInterval = max(0, now.timeIntervalSince(rangeStart))
+        // Aim for ~250 points across the visible range for smooth performance.
         let stepInterval = max(3600, totalInterval / 250)
 
-        for i in 0 ..< filtered.count {
-            let session = filtered[i]
-            let endDate = (i + 1 < filtered.count) ? filtered[i + 1].startDate : now
-
-            let segmentInterval = endDate.timeIntervalSince(session.startDate)
-            let stepCount = Int(segmentInterval / stepInterval)
-
-            for step in 0 ... max(1, stepCount) {
-                let pointDate = session.startDate.addingTimeInterval(TimeInterval(step) * stepInterval)
-                if pointDate > endDate { break }
-
-                let daysSince = pointDate.timeIntervalSince(session.startDate) / 86400
-                let stability = Double(session.scheduledDays ?? 1)
-                let retention = pow(0.9, daysSince / max(1.0, stability))
-                points.append(MemoryPoint(date: pointDate, retention: retention))
-            }
+        var pointDate = rangeStart
+        while pointDate < now {
+            points.append(MemoryPoint(date: pointDate, retention: retention(at: pointDate, in: allSorted)))
+            pointDate = pointDate.addingTimeInterval(stepInterval)
         }
+        points.append(MemoryPoint(date: now, retention: retention(at: now, in: allSorted)))
         memoizedCurve = points
 
         // 3. Calculate Gradient
@@ -243,8 +247,8 @@ struct PassageMemoryScoreChart: View {
                                     let location = value.location
                                     if let date: Date = proxy.value(atX: location.x) {
                                         let now = Date()
-                                        guard let firstDate = memoizedFilteredSessions.first?.startDate else { return }
-                                        // Clamp date between first session and now
+                                        guard let firstDate = memoizedRangeStart else { return }
+                                        // Clamp date between the curve's start and now
                                         let clampedDate = min(max(date, firstDate), now)
 
                                         // Slight snap logic
