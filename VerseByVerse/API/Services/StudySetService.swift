@@ -41,4 +41,31 @@ extension APIService {
         )
         return response.body
     }
+
+    func updateStudySet(
+        id: Int,
+        name: String?,
+        description: String?,
+        theme: MeshTheme?
+    ) async throws -> StudySetReadResponse {
+        log.debug("updateStudySet called: \(id)")
+        let response: APIResponse<StudySetReadResponse> = try await fetch(
+            endpoint: APIEndpoint.patchStudySet(
+                id: id,
+                name: name,
+                description: description,
+                positionSeed: nil,
+                colorSeed: nil,
+                theme: theme?.rawValue,
+            ),
+            lookInCache: false,
+            saveToCache: false,
+        )
+        return response.body
+    }
+
+    func deleteStudySet(id: Int) async throws {
+        log.debug("deleteStudySet called: \(id)")
+        try await fetchVoid(endpoint: APIEndpoint.deleteStudySet(id: id))
+    }
 }

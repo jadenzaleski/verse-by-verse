@@ -94,7 +94,13 @@ struct MemoryView: View {
             case .add:
                 AddPassageView()
             case .addSet:
-                AddStudySetView()
+                StudySetFormView(
+                    title: "New Set",
+                    confirmSystemImage: "plus",
+                    confirmTint: .green
+                ) { name, description, theme in
+                    try await studySetStore.createSet(name: name, description: description, theme: theme)
+                }
             case let .passage(userPassage):
                 NavigationStack {
                     PassageDetailView(passage: userPassage)
@@ -168,14 +174,17 @@ struct MemoryView: View {
                         ScrollView(.horizontal, showsIndicators: false) {
                             LazyHStack(spacing: 20) {
                                 ForEach(Array(recentSets)) { set in
-                                    SetCard(
-                                        title: set.name,
-                                        description: set.description,
-                                        positionSeed: set.meshPositionSeed,
-                                        colorShuffleSeed: set.meshColorSeed,
-                                        colorPallette: set.meshTheme.palette,
-                                    )
+                                    NavigationLink(destination: SetDetailView(set: set)) {
+                                        SetCard(
+                                            title: set.name,
+                                            description: set.description,
+                                            positionSeed: set.meshPositionSeed,
+                                            colorShuffleSeed: set.meshColorSeed,
+                                            colorPallette: set.meshTheme.palette,
+                                        )
+                                    }
                                     .frame(width: horizontalSetSize)
+                                    .buttonStyle(.plain)
                                 }
                             }
                         }
@@ -202,13 +211,16 @@ struct MemoryView: View {
                         spacing: space,
                     ) {
                         ForEach(filteredSets) { set in
-                            SetCard(
-                                title: set.name,
-                                description: set.description,
-                                positionSeed: set.meshPositionSeed,
-                                colorShuffleSeed: set.meshColorSeed,
-                                colorPallette: set.meshTheme.palette,
-                            )
+                            NavigationLink(destination: SetDetailView(set: set)) {
+                                SetCard(
+                                    title: set.name,
+                                    description: set.description,
+                                    positionSeed: set.meshPositionSeed,
+                                    colorShuffleSeed: set.meshColorSeed,
+                                    colorPallette: set.meshTheme.palette,
+                                )
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
                 }

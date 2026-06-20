@@ -1,5 +1,5 @@
 //
-//  AddStudySetView.swift
+//  StudySetFormView.swift
 //  VerseByVerse
 //
 //  Created by Jaden Zaleski on 6/11/26.
@@ -7,14 +7,49 @@
 
 import SwiftUI
 
-struct AddStudySetView: View {
+struct StudySetFormView: View {
+    var title: String
+    var initialName: String
+    var initialDescription: String
+    var initialTheme: MeshTheme
+    var positionSeed: Int
+    var colorSeed: Int
+    var confirmSystemImage: String
+    var confirmTint: Color
+    var onConfirm: (_ name: String, _ description: String?, _ theme: MeshTheme) async throws -> Void
+
     @Environment(StudySetStore.self) private var studySetStore
     @Environment(\.dismiss) private var dismiss
 
-    @State private var name: String = ""
-    @State private var description: String = ""
-    @State private var selectedTheme: MeshTheme = .ocean
-    @State private var isCreating = false
+    @State private var name: String
+    @State private var description: String
+    @State private var selectedTheme: MeshTheme
+    @State private var isWorking = false
+
+    init(
+        title: String,
+        initialName: String = "",
+        initialDescription: String = "",
+        initialTheme: MeshTheme = .ocean,
+        positionSeed: Int = 42,
+        colorSeed: Int = 7,
+        confirmSystemImage: String,
+        confirmTint: Color,
+        onConfirm: @escaping (_ name: String, _ description: String?, _ theme: MeshTheme) async throws -> Void
+    ) {
+        self.title = title
+        self.initialName = initialName
+        self.initialDescription = initialDescription
+        self.initialTheme = initialTheme
+        self.positionSeed = positionSeed
+        self.colorSeed = colorSeed
+        self.confirmSystemImage = confirmSystemImage
+        self.confirmTint = confirmTint
+        self.onConfirm = onConfirm
+        _name = State(initialValue: initialName)
+        _description = State(initialValue: initialDescription)
+        _selectedTheme = State(initialValue: initialTheme)
+    }
 
     private var nameIsValid: Bool {
         !name.trimmingCharacters(in: .whitespaces).isEmpty && name.count <= 100
@@ -24,7 +59,6 @@ struct AddStudySetView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
-                    // Theme picker with live preview
                     Text("Appearance")
                         .font(.app(.headline))
 
@@ -34,16 +68,16 @@ struct AddStudySetView: View {
                                 VStack(spacing: 8) {
                                     SetCard(
                                         title: name.isEmpty ? theme.displayName : name,
-                                        positionSeed: 42,
-                                        colorShuffleSeed: 7,
-                                        colorPallette: theme.palette,
+                                        positionSeed: positionSeed,
+                                        colorShuffleSeed: colorSeed,
+                                        colorPallette: theme.palette
                                     )
                                     .frame(width: 120)
                                     .overlay(alignment: .top) {
                                         RoundedRectangle(cornerRadius: 20)
                                             .stroke(
                                                 selectedTheme == theme ? Color.accentColor : Color.clear,
-                                                lineWidth: 3,
+                                                lineWidth: 3
                                             )
                                             .frame(width: 120, height: 120)
                                     }
@@ -61,7 +95,6 @@ struct AddStudySetView: View {
 
                     Divider()
 
-                    // Name field
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Name")
                             .font(.app(.headline))
@@ -79,7 +112,6 @@ struct AddStudySetView: View {
                         }
                     }
 
-                    // Description field
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Description")
                             .font(.app(.headline))
@@ -91,7 +123,6 @@ struct AddStudySetView: View {
                             .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
                     }
 
-                    // Error
                     if let error = studySetStore.lastError {
                         Text(error.localizedDescription)
                             .font(.app(.caption))
@@ -101,46 +132,54 @@ struct AddStudySetView: View {
                 }
                 .padding()
             }
-            .navigationTitle("New Set")
+            .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                        .font(.app())
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                    }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Create") {
-                        Task { await create() }
+                    Button {
+                        Task { await confirm() }
+                    } label: {
+                        Image(systemName: confirmSystemImage)
                     }
-                    .font(.app(weight: .semibold))
-                    .disabled(!nameIsValid || isCreating)
+                    .tint(confirmTint)
+                    .buttonStyle(.glassProminent)
+                    .disabled(!nameIsValid || isWorking)
                 }
             }
         }
     }
 
-    private func create() async {
-        isCreating = true
-        defer { isCreating = false }
+    private func confirm() async {
+        isWorking = true
+        defer { isWorking = false }
 
         let trimmedName = name.trimmingCharacters(in: .whitespaces)
         let trimmedDesc = description.trimmingCharacters(in: .whitespaces)
 
         do {
-            try await studySetStore.createSet(
-                name: trimmedName,
-                description: trimmedDesc.isEmpty ? nil : trimmedDesc,
-                theme: selectedTheme,
-            )
+            try await onConfirm(trimmedName, trimmedDesc.isEmpty ? nil : trimmedDesc, selectedTheme)
             dismiss()
         } catch {
-            // error is already stored in studySetStore.lastError
+            // error stored in studySetStore.lastError
         }
     }
 }
 
-#Preview {
-    AddStudySetView()
+// MARK: - Preview
+
+#Preview("Create") {
+    StudySetFormView(
+        title: "New Set",
+        confirmSystemImage: "plus",
+        confirmTint: .green
+    ) { _, _, _ in }
         .environment(\.font, .app())
         .environment(StudySetStore.shared)
 }

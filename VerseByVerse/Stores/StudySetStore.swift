@@ -66,4 +66,45 @@ final class StudySetStore: Store {
             throw error
         }
     }
+
+    @MainActor
+    func updateSet(id: Int, name: String, description: String?, theme: MeshTheme) async throws -> StudySet {
+        state = .loading
+        clearError()
+
+        do {
+            let response = try await APIService.shared.updateStudySet(
+                id: id,
+                name: name,
+                description: description,
+                theme: theme,
+            )
+            let updated = response.toDomain()
+            if let idx = sets.firstIndex(where: { $0.id == id }) {
+                sets[idx] = updated
+            }
+            state = .success
+            log.info("Updated study set: \(id)")
+            return updated
+        } catch {
+            handle(error: error)
+            throw error
+        }
+    }
+
+    @MainActor
+    func deleteSet(id: Int) async throws {
+        state = .loading
+        clearError()
+
+        do {
+            try await APIService.shared.deleteStudySet(id: id)
+            sets.removeAll { $0.id == id }
+            state = .success
+            log.info("Deleted study set: \(id)")
+        } catch {
+            handle(error: error)
+            throw error
+        }
+    }
 }
