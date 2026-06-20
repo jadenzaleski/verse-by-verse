@@ -335,16 +335,17 @@ struct MemoryView: View {
         )
     ]
 
-    Task { @MainActor in
-        passageStore.setUserPassagesForPreview(samplePassages)
-        studySetStore.setSetsForPreview(sampleSets)
-    }
-    return NavigationStack {
+
+    NavigationStack {
         MemoryView()
             .environment(\.font, .app())
             .environment(UserStore.shared)
             .environment(passageStore)
             .environment(studySetStore)
             .environment(BibleStore.shared)
+    }
+    .task {
+        passageStore.setUserPassagesForPreview(samplePassages)
+        studySetStore.setSetsForPreview(sampleSets)
     }
 }
