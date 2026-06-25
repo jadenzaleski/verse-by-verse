@@ -26,7 +26,7 @@ final class PassageStore: Store {
     init() {}
 
     @MainActor
-    func loadMyPassages(lookInCache: Bool = true) async {
+    func loadMyPassages(lookInCache _: Bool = true) async {
         state = .loading
         clearError()
 
@@ -47,7 +47,7 @@ final class PassageStore: Store {
         endChapter: Int,
         startVerse: Int,
         endVerse: Int,
-        translation: String
+        translation: String,
     ) async throws {
         state = .loading
         clearError()
@@ -59,9 +59,9 @@ final class PassageStore: Store {
                 endChapter: endChapter,
                 startVerse: startVerse,
                 endVerse: endVerse,
-                translation: translation
+                translation: translation,
             )
-            
+
             let newPassage = response.toDomain()
             userPassages.append(newPassage)
             state = .success
@@ -80,10 +80,10 @@ final class PassageStore: Store {
 }
 
 #if DEBUG
-extension PassageStore {
-    @MainActor
-    func setUserPassagesForPreview(_ passages: [UserPassage]) {
-        self.userPassages = passages
+    extension PassageStore {
+        @MainActor
+        func setUserPassagesForPreview(_ passages: [UserPassage]) {
+            userPassages = passages
+        }
     }
-}
 #endif

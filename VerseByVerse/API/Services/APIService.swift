@@ -26,22 +26,22 @@ final class APIService {
         let cacheKey = endpoint.cacheIdentifier
         let request = endpoint.request
         let isGet = endpoint.method == "GET"
-        
+
         let defaultLook = isGet
         let defaultSave = isGet
         let effectiveLookInCache = lookInCache ?? defaultLook
         let effectiveSaveToCache = saveToCache ?? defaultSave
 
         log.debug("""
-Fetch:
-- url: \(request)
-- key: \(cacheKey)
-- debugKey: \(endpoint.debugIdentifier)
-- ttl: \(String(describing: endpoint.ttl))
-- lookInCache: \(effectiveLookInCache) \(lookInCache != nil ? "(override)" : "(default)")
-- saveToCache: \(effectiveSaveToCache) \(saveToCache != nil ? "(override)" : "(default)")
-- attemptRefresh: \(attemptRefresh)
-""")
+        Fetch:
+        - url: \(request)
+        - key: \(cacheKey)
+        - debugKey: \(endpoint.debugIdentifier)
+        - ttl: \(String(describing: endpoint.ttl))
+        - lookInCache: \(effectiveLookInCache) \(lookInCache != nil ? "(override)" : "(default)")
+        - saveToCache: \(effectiveSaveToCache) \(saveToCache != nil ? "(override)" : "(default)")
+        - attemptRefresh: \(attemptRefresh)
+        """)
 
         // Cache
         if effectiveLookInCache, let cached = cache.get(cacheKey, decode: T.self) {
@@ -209,4 +209,3 @@ Fetch:
         return nil
     }
 }
-

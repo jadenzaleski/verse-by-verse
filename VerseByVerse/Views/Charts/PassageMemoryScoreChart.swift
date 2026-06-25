@@ -77,18 +77,17 @@ struct PassageMemoryScoreChart: View {
         let allSorted = allCompletedSorted
 
         // 1. Determine the visible window's start.
-        let windowStart: Date?
-        switch selectedDuration {
+        let windowStart: Date? = switch selectedDuration {
         case .week:
-            windowStart = calendar.date(byAdding: .day, value: -7, to: now)
+            calendar.date(byAdding: .day, value: -7, to: now)
         case .month:
-            windowStart = calendar.date(byAdding: .month, value: -1, to: now)
+            calendar.date(byAdding: .month, value: -1, to: now)
         case .sixMonths:
-            windowStart = calendar.date(byAdding: .month, value: -6, to: now)
+            calendar.date(byAdding: .month, value: -6, to: now)
         case .year:
-            windowStart = calendar.date(byAdding: .year, value: -1, to: now)
+            calendar.date(byAdding: .year, value: -1, to: now)
         case .all:
-            windowStart = allSorted.first?.startDate
+            allSorted.first?.startDate
         }
 
         // Sessions whose marker dots fall inside the window.

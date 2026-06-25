@@ -54,7 +54,7 @@ struct SessionView: View {
                     totalSegments: steps.count,
                     completedSegments: stepIndex,
                     fill: .solid(.accentColor),
-                    highlightCurrent: true
+                    highlightCurrent: true,
                 )
                 .padding(.horizontal)
             }
@@ -111,7 +111,7 @@ struct SessionView: View {
     private var activityContent: some View {
         if stepIndex < steps.count {
             switch steps[stepIndex] {
-            case .everyOtherWord(let phase):
+            case let .everyOtherWord(phase):
                 ActivityView(
                     activityName: "Every Other Word",
                     passage: passage,
@@ -119,7 +119,7 @@ struct SessionView: View {
                     maskedIndices: words.indices.filter { $0 % 2 == phase },
                     instruction: "Type the first letter of each missing word.",
                     showWordHints: true,
-                    onContinue: advance
+                    onContinue: advance,
                 )
                 .id(stepIndex)
                 .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
@@ -131,7 +131,7 @@ struct SessionView: View {
                     maskedIndices: Array(words.indices),
                     instruction: "Type the first letter of every word from memory.",
                     showWordHints: false,
-                    onContinue: advance
+                    onContinue: advance,
                 )
                 .id(stepIndex)
                 .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
@@ -139,7 +139,7 @@ struct SessionView: View {
                 VerbalActivityView(
                     passage: passage,
                     verseText: verseText,
-                    onContinue: advance
+                    onContinue: advance,
                 )
                 .id(stepIndex)
                 .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
@@ -273,13 +273,13 @@ struct SessionView: View {
             correctCount: correct,
             totalCount: total,
             startDate: stepStartDate,
-            endDate: now
+            endDate: now,
         ))
 
         totalCorrect += correct
         totalPossible += total
 
-        if case .everyWord(let allowsRetry) = step, allowsRetry, correct < total {
+        if case let .everyWord(allowsRetry) = step, allowsRetry, correct < total {
             withAnimation(.easeInOut(duration: 0.35)) {
                 steps.insert(.everyWordRetry, at: stepIndex + 1)
             }
@@ -334,7 +334,7 @@ struct SessionView: View {
         do {
             let result = try await APIService.shared.completePracticeSession(
                 id: session.id,
-                activities: activities
+                activities: activities,
             )
             Task {
                 await passageStore.loadMyPassages(lookInCache: false)
@@ -357,7 +357,7 @@ struct SessionView: View {
         translation: "KJV",
         lastPracticed: nil, nextPractice: nil,
         stability: 1.0, difficulty: 5.0, state: 0,
-        reps: 0, lapses: 0, scheduledDays: 0, elapsedDays: 0
+        reps: 0, lapses: 0, scheduledDays: 0, elapsedDays: 0,
     )
     SessionView(passage: passage)
         .environment(BibleStore.shared)

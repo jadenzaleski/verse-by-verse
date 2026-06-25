@@ -15,23 +15,23 @@ enum ActivityStep: Equatable {
 extension ActivityStep {
     static func from(_ step: PlanStep) -> ActivityStep? {
         switch step.type {
-        case "Every Other Word": return .everyOtherWord(phase: step.phase ?? 0)
-        case "Every Word":       return .everyWord(allowsRetry: step.allowsRetry)
-        case "Verbal Recite":    return .verbalRecite
-        default:                 return nil
+        case "Every Other Word": .everyOtherWord(phase: step.phase ?? 0)
+        case "Every Word": .everyWord(allowsRetry: step.allowsRetry)
+        case "Verbal Recite": .verbalRecite
+        default: nil
         }
     }
 
     var activityType: String {
         switch self {
-        case .everyOtherWord:        return "Every Other Word"
-        case .everyWord, .everyWordRetry: return "Every Word"
-        case .verbalRecite:          return "Verbal Recite"
+        case .everyOtherWord: "Every Other Word"
+        case .everyWord, .everyWordRetry: "Every Word"
+        case .verbalRecite: "Verbal Recite"
         }
     }
 
     var phase: Int? {
-        if case .everyOtherWord(let phase) = self { return phase }
+        if case let .everyOtherWord(phase) = self { return phase }
         return nil
     }
 

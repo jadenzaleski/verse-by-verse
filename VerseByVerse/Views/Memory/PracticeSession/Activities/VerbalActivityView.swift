@@ -99,11 +99,11 @@ struct VerbalActivityView: View {
                 }
 
                 #if DEBUG
-                Button("Skip (debug — random score)") {
-                    onContinue(Int.random(in: 0...1), 1)
-                }
-                .font(.app(.caption))
-                .foregroundStyle(.tertiary)
+                    Button("Skip (debug — random score)") {
+                        onContinue(Int.random(in: 0 ... 1), 1)
+                    }
+                    .font(.app(.caption))
+                    .foregroundStyle(.tertiary)
                 #endif
             }
             .padding(.horizontal, 20)
@@ -120,12 +120,12 @@ struct VerbalActivityView: View {
         translation: "KJV",
         lastPracticed: nil, nextPractice: nil,
         stability: 1.0, difficulty: 5.0, state: 0,
-        reps: 0, lapses: 0, scheduledDays: 0, elapsedDays: 0
+        reps: 0, lapses: 0, scheduledDays: 0, elapsedDays: 0,
     )
     VerbalActivityView(
         passage: passage,
         verseText: "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.",
-        onContinue: { _, _ in }
+        onContinue: { _, _ in },
     )
     .environment(\.font, .app())
 }

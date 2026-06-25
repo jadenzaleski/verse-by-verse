@@ -80,90 +80,90 @@ struct SetMesh: View {
         let p8TrailingControlPoint: SIMD2<Float> = [1.0, 1.0]
         let p8BottomControlPoint: SIMD2<Float> = [1.0, 1.0]
 
-            MeshGradient(
-                width: 3,
-                height: 3,
-                bezierPoints: [
-                    // Row 1 (top)
-                    // p0
-                    MeshGradient.BezierPoint(
-                        position: p0Position,
-                        leadingControlPoint: p0LeadingControlPoint,
-                        topControlPoint: p0TopControlPoint,
-                        trailingControlPoint: p0TrailingControlPoint,
-                        bottomControlPoint: p0BottomControlPoint,
-                    ),
-                    // p1
-                    MeshGradient.BezierPoint(
-                        position: p1Position,
-                        leadingControlPoint: p1LeadingControlPoint,
-                        topControlPoint: p1TopControlPoint,
-                        trailingControlPoint: p1TrailingControlPoint,
-                        bottomControlPoint: p1BottomControlPoint,
-                    ),
-                    // p2
-                    MeshGradient.BezierPoint(
-                        position: p2Position,
-                        leadingControlPoint: p2LeadingControlPoint,
-                        topControlPoint: p2TopControlPoint,
-                        trailingControlPoint: p2TrailingControlPoint,
-                        bottomControlPoint: p2BottomControlPoint,
-                    ),
+        MeshGradient(
+            width: 3,
+            height: 3,
+            bezierPoints: [
+                // Row 1 (top)
+                // p0
+                MeshGradient.BezierPoint(
+                    position: p0Position,
+                    leadingControlPoint: p0LeadingControlPoint,
+                    topControlPoint: p0TopControlPoint,
+                    trailingControlPoint: p0TrailingControlPoint,
+                    bottomControlPoint: p0BottomControlPoint,
+                ),
+                // p1
+                MeshGradient.BezierPoint(
+                    position: p1Position,
+                    leadingControlPoint: p1LeadingControlPoint,
+                    topControlPoint: p1TopControlPoint,
+                    trailingControlPoint: p1TrailingControlPoint,
+                    bottomControlPoint: p1BottomControlPoint,
+                ),
+                // p2
+                MeshGradient.BezierPoint(
+                    position: p2Position,
+                    leadingControlPoint: p2LeadingControlPoint,
+                    topControlPoint: p2TopControlPoint,
+                    trailingControlPoint: p2TrailingControlPoint,
+                    bottomControlPoint: p2BottomControlPoint,
+                ),
 
-                    // Row 2 (middle)
-                    // p3
-                    MeshGradient.BezierPoint(
-                        position: p3Position,
-                        leadingControlPoint: p3LeadingControlPoint,
-                        topControlPoint: p3TopControlPoint,
-                        trailingControlPoint: p3TrailingControlPoint,
-                        bottomControlPoint: p3BottomControlPoint,
-                    ),
-                    // p4
-                    MeshGradient.BezierPoint(
-                        position: p4Position,
-                        leadingControlPoint: p4LeadingControlPoint,
-                        topControlPoint: p4TopControlPoint,
-                        trailingControlPoint: p4TrailingControlPoint,
-                        bottomControlPoint: p4BottomControlPoint,
-                    ),
-                    // p5
-                    MeshGradient.BezierPoint(
-                        position: p5Position,
-                        leadingControlPoint: p5LeadingControlPoint,
-                        topControlPoint: p5TopControlPoint,
-                        trailingControlPoint: p5TrailingControlPoint,
-                        bottomControlPoint: p5BottomControlPoint,
-                    ),
+                // Row 2 (middle)
+                // p3
+                MeshGradient.BezierPoint(
+                    position: p3Position,
+                    leadingControlPoint: p3LeadingControlPoint,
+                    topControlPoint: p3TopControlPoint,
+                    trailingControlPoint: p3TrailingControlPoint,
+                    bottomControlPoint: p3BottomControlPoint,
+                ),
+                // p4
+                MeshGradient.BezierPoint(
+                    position: p4Position,
+                    leadingControlPoint: p4LeadingControlPoint,
+                    topControlPoint: p4TopControlPoint,
+                    trailingControlPoint: p4TrailingControlPoint,
+                    bottomControlPoint: p4BottomControlPoint,
+                ),
+                // p5
+                MeshGradient.BezierPoint(
+                    position: p5Position,
+                    leadingControlPoint: p5LeadingControlPoint,
+                    topControlPoint: p5TopControlPoint,
+                    trailingControlPoint: p5TrailingControlPoint,
+                    bottomControlPoint: p5BottomControlPoint,
+                ),
 
-                    // Row 3 (bottom)
-                    // p6
-                    MeshGradient.BezierPoint(
-                        position: p6Position,
-                        leadingControlPoint: p6LeadingControlPoint,
-                        topControlPoint: p6TopControlPoint,
-                        trailingControlPoint: p6TrailingControlPoint,
-                        bottomControlPoint: p6BottomControlPoint,
-                    ),
-                    // p7
-                    MeshGradient.BezierPoint(
-                        position: p7Position,
-                        leadingControlPoint: p7LeadingControlPoint,
-                        topControlPoint: p7TopControlPoint,
-                        trailingControlPoint: p7TrailingControlPoint,
-                        bottomControlPoint: p7BottomControlPoint,
-                    ),
-                    // p8
-                    MeshGradient.BezierPoint(
-                        position: p8Position,
-                        leadingControlPoint: p8LeadingControlPoint,
-                        topControlPoint: p8TopControlPoint,
-                        trailingControlPoint: p8TrailingControlPoint,
-                        bottomControlPoint: p8BottomControlPoint,
-                    ),
-                ],
-                colors: shuffledColors(from: colorPallette),
-            )
+                // Row 3 (bottom)
+                // p6
+                MeshGradient.BezierPoint(
+                    position: p6Position,
+                    leadingControlPoint: p6LeadingControlPoint,
+                    topControlPoint: p6TopControlPoint,
+                    trailingControlPoint: p6TrailingControlPoint,
+                    bottomControlPoint: p6BottomControlPoint,
+                ),
+                // p7
+                MeshGradient.BezierPoint(
+                    position: p7Position,
+                    leadingControlPoint: p7LeadingControlPoint,
+                    topControlPoint: p7TopControlPoint,
+                    trailingControlPoint: p7TrailingControlPoint,
+                    bottomControlPoint: p7BottomControlPoint,
+                ),
+                // p8
+                MeshGradient.BezierPoint(
+                    position: p8Position,
+                    leadingControlPoint: p8LeadingControlPoint,
+                    topControlPoint: p8TopControlPoint,
+                    trailingControlPoint: p8TrailingControlPoint,
+                    bottomControlPoint: p8BottomControlPoint,
+                ),
+            ],
+            colors: shuffledColors(from: colorPallette),
+        )
     }
 
     private func jitteredNumber(_ number: Float) -> Float {

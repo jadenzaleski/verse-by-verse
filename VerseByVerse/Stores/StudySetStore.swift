@@ -24,7 +24,7 @@ final class StudySetStore: Store {
     private init() {}
 
     @MainActor
-    func loadMySets(lookInCache: Bool = true) async {
+    func loadMySets(lookInCache _: Bool = true) async {
         state = .loading
         clearError()
 
@@ -42,15 +42,15 @@ final class StudySetStore: Store {
     }
 
     #if DEBUG
-    @MainActor
-    func setSetsForPreview(_ sets: [StudySet]) {
-        self.sets = sets
-    }
+        @MainActor
+        func setSetsForPreview(_ sets: [StudySet]) {
+            self.sets = sets
+        }
 
-    @MainActor
-    func setPassageIdsForPreview(_ ids: [Int: [Int]]) {
-        self.setPassageIds = ids
-    }
+        @MainActor
+        func setPassageIdsForPreview(_ ids: [Int: [Int]]) {
+            setPassageIds = ids
+        }
     #endif
 
     @MainActor

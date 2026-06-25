@@ -34,7 +34,7 @@ struct UserPassage: Identifiable, Equatable {
             startChapter: startChapter,
             startVerse: startVerse,
             endChapter: endChapter,
-            endVerse: endVerse
+            endVerse: endVerse,
         )
     }
 

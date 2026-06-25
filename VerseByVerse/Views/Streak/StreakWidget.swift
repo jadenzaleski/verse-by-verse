@@ -57,7 +57,7 @@ struct StreakWidget: View {
                                     .opacity(revealed[safe: i] == true ? 1.0 : 0.0)
                                     .animation(
                                         completed[i] ? .spring(response: 0.3, dampingFraction: 0.40)
-                                        : .smooth(duration: dayDelaySeconds), value: revealed,
+                                            : .smooth(duration: dayDelaySeconds), value: revealed,
                                     )
                                     .sensoryFeedback(
                                         .impact(
@@ -67,7 +67,7 @@ struct StreakWidget: View {
                                         trigger: revealed[safe: i] == true && completed[i],
                                     )
                                     .zIndex(1)
-                                
+
                                 // I have hidden this for now
                                 /*
                                  // Particle burst when a completed day is revealed
@@ -84,7 +84,7 @@ struct StreakWidget: View {
                         .padding([.top, .bottom], 5)
                         .overlay(
                             todaysDateInt == i + 1 ?
-                            TodayOutline(draw: drawTodayStroke) : nil,
+                                TodayOutline(draw: drawTodayStroke) : nil,
                         )
                     }
                 }

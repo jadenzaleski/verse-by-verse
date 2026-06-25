@@ -211,7 +211,6 @@ struct WeeklySessionsChart: View {
             }
         }
         .frame(height: 200)
-
     }
 }
 

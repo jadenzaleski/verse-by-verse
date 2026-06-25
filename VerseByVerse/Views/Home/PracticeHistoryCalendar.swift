@@ -198,7 +198,7 @@ struct PracticeHistoryCalendar: View {
             rating: 3,
             scheduledDays: 5,
             elapsedDays: 4,
-            state: 1
+            state: 1,
         )
     }
 

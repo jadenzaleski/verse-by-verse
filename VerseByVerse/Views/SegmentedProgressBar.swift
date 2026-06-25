@@ -26,7 +26,7 @@ struct SegmentedProgressBar: View {
 
     private var fillColor: Color {
         switch fill {
-        case .solid(let color):
+        case let .solid(color):
             return color
         case .dynamic:
             let ratio = totalSegments > 0 ? Double(completedSegments) / Double(totalSegments) : 0
@@ -38,11 +38,11 @@ struct SegmentedProgressBar: View {
 
     private func segmentColor(at index: Int) -> Color {
         if index < completedSegments {
-            return highlightCurrent ? fillColor.opacity(0.4) : fillColor
-        } else if index == completedSegments && highlightCurrent {
-            return fillColor
+            highlightCurrent ? fillColor.opacity(0.4) : fillColor
+        } else if index == completedSegments, highlightCurrent {
+            fillColor
         } else {
-            return emptyColor
+            emptyColor
         }
     }
 
@@ -54,7 +54,7 @@ struct SegmentedProgressBar: View {
                     .frame(maxWidth: .infinity, maxHeight: height)
                     .animation(
                         .easeInOut(duration: 0.35).delay(animationDelay(for: index)),
-                        value: completedSegments
+                        value: completedSegments,
                     )
                     .animation(.easeInOut(duration: 0.35), value: totalSegments)
                     .transition(.opacity.combined(with: .scale(scale: 0.7)))

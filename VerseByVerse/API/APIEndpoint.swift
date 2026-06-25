@@ -5,8 +5,8 @@
 //  Created by Jaden Zaleski on 12/11/25.
 //
 
-import Foundation
 import CryptoKit
+import Foundation
 
 enum APIEndpoint: Hashable {
     // Login
@@ -62,7 +62,6 @@ enum APIEndpoint: Hashable {
     case deletePracticeSession(id: Int)
     /// Other
     case getHealth
-
 
     var debugIdentifier: String {
         var parts: [String] = [method, path]
@@ -138,13 +137,13 @@ enum APIEndpoint: Hashable {
     var method: String {
         switch self {
         case .postLogin,
-                .postRegister,
-                .postRefresh,
-                .createPassage,
-                .createStudySet,
-                .addPassageToStudySet,
-                .startPracticeSession,
-                .completePracticeSession: "POST"
+             .postRegister,
+             .postRefresh,
+             .createPassage,
+             .createStudySet,
+             .addPassageToStudySet,
+             .startPracticeSession,
+             .completePracticeSession: "POST"
         case .patchUser, .patchPassage, .patchStudySet: "PATCH"
         case .deletePassage, .deleteStudySet, .removePassageFromStudySet, .deletePracticeSession: "DELETE"
         default: "GET"
@@ -259,27 +258,27 @@ enum APIEndpoint: Hashable {
     var invalidates: [APIEndpoint] {
         switch self {
         case .patchUser:
-            return [.getUser]
+            [.getUser]
         case .createPassage:
-            return [.getMyPassages]
+            [.getMyPassages]
         case let .patchPassage(id, _, _, _, _, _, _):
-            return [.getPassage(id: id), .getMyPassages]
+            [.getPassage(id: id), .getMyPassages]
         case let .deletePassage(id):
-            return [.getPassage(id: id), .getMyPassages]
+            [.getPassage(id: id), .getMyPassages]
         case .createStudySet:
-            return [.getMyStudySets]
+            [.getMyStudySets]
         case let .patchStudySet(id, _, _, _, _, _):
-            return [.getStudySet(id: id), .getMyStudySets]
+            [.getStudySet(id: id), .getMyStudySets]
         case let .deleteStudySet(id):
-            return [.getStudySet(id: id), .getMyStudySets]
+            [.getStudySet(id: id), .getMyStudySets]
         case let .addPassageToStudySet(sid, _), let .removePassageFromStudySet(sid, _):
-            return [.getStudySet(id: sid), .getMyStudySets]
+            [.getStudySet(id: sid), .getMyStudySets]
         case .completePracticeSession:
-            return [.getMyPracticeSessions, .getMyPassages]
+            [.getMyPracticeSessions, .getMyPassages]
         case .deletePracticeSession:
-            return [.getMyPracticeSessions]
+            [.getMyPracticeSessions]
         default:
-            return []
+            []
         }
     }
 
@@ -287,18 +286,18 @@ enum APIEndpoint: Hashable {
     var ttl: TimeInterval? {
         switch self {
         case .getUser,
-                .getBibleSelection,
-                .getPassage,
-                .getMyPassages,
-                .getMyStudySets,
-                .getStudySet,
-                .getMyPracticeSessions:
-            return 60
+             .getBibleSelection,
+             .getPassage,
+             .getMyPassages,
+             .getMyStudySets,
+             .getStudySet,
+             .getMyPracticeSessions:
+            60
         case .getBibleBooks,
-                .getBibleTranslations:
-            return 30 * 24 * 60 * 60 // 30 days
+             .getBibleTranslations:
+            30 * 24 * 60 * 60 // 30 days
         default:
-            return nil
+            nil
         }
     }
 
@@ -334,9 +333,13 @@ private struct CompletePracticeSessionBody: Encodable {
 }
 
 private extension Data {
-    var sha256Hex: String { SHA256.hash(data: self).map { String(format: "%02x", $0) }.joined() }
+    var sha256Hex: String {
+        SHA256.hash(data: self).map { String(format: "%02x", $0) }.joined()
+    }
 }
 
 private extension String {
-    var sha256Hex: String { Data(self.utf8).sha256Hex }
+    var sha256Hex: String {
+        Data(utf8).sha256Hex
+    }
 }

@@ -46,7 +46,7 @@ extension APIService {
         id: Int,
         name: String?,
         description: String?,
-        theme: MeshTheme?
+        theme: MeshTheme?,
     ) async throws -> StudySetReadResponse {
         log.debug("updateStudySet called: \(id)")
         let response: APIResponse<StudySetReadResponse> = try await fetch(

@@ -15,7 +15,7 @@ struct SetCard: View {
     var positionSeed: Int
     var colorShuffleSeed: Int
     var colorPallette: MeshPalette
-    
+
     init(
         title: String = "The Gospels",
         passageCount: Int? = nil,
@@ -33,7 +33,7 @@ struct SetCard: View {
         self.colorShuffleSeed = colorShuffleSeed
         self.colorPallette = colorPallette
     }
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             SetMesh(colorPallette: colorPallette, colorShuffleSeed: colorShuffleSeed, positionSeed: positionSeed)
@@ -65,7 +65,7 @@ struct SetCard: View {
         let space: CGFloat = 20.0
         let columns = [
             GridItem(.flexible(), spacing: space),
-            GridItem(.flexible(), spacing: space)
+            GridItem(.flexible(), spacing: space),
         ]
         LazyVGrid(
             columns: columns,

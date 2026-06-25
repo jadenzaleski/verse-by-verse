@@ -30,9 +30,17 @@ struct ActivityView: View {
         Dictionary(uniqueKeysWithValues: maskedIndices.enumerated().map { ($0.element, $0.offset) })
     }
 
-    private var totalToType: Int { maskedIndices.count }
-    private var currentTypingIndex: Int { min(inputText.count, totalToType) }
-    private var isComplete: Bool { inputText.count >= totalToType }
+    private var totalToType: Int {
+        maskedIndices.count
+    }
+
+    private var currentTypingIndex: Int {
+        min(inputText.count, totalToType)
+    }
+
+    private var isComplete: Bool {
+        inputText.count >= totalToType
+    }
 
     private func typedChar(at idx: Int) -> Character? {
         guard idx < inputText.count else { return nil }
@@ -52,7 +60,7 @@ struct ActivityView: View {
     }
 
     private var correctCount: Int {
-        (0..<totalToType).filter { isCorrect(at: $0) == true }.count
+        (0 ..< totalToType).count(where: { isCorrect(at: $0) == true })
     }
 
     private var scoreColor: Color {
@@ -148,12 +156,12 @@ struct ActivityView: View {
                 }
 
                 #if DEBUG
-                Button("Skip (debug — random score)") {
-                    let correct = Int.random(in: 0...totalToType)
-                    onContinue(correct, totalToType)
-                }
-                .font(.app(.caption))
-                .foregroundStyle(.tertiary)
+                    Button("Skip (debug — random score)") {
+                        let correct = Int.random(in: 0 ... totalToType)
+                        onContinue(correct, totalToType)
+                    }
+                    .font(.app(.caption))
+                    .foregroundStyle(.tertiary)
                 #endif
             }
             .padding(.horizontal, 20)
@@ -170,7 +178,7 @@ struct ActivityView: View {
                 typedChar: typedChar(at: typingIdx),
                 correctness: isCorrect(at: typingIdx),
                 isCurrent: typingIdx == currentTypingIndex && !isComplete,
-                showHint: showWordHints
+                showHint: showWordHints,
             )
         } else {
             Text(word)
@@ -238,16 +246,16 @@ private struct FlowLayout: Layout {
     var spacing: CGFloat = 6
     var lineSpacing: CGFloat = 8
 
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache _: inout ()) -> CGSize {
         layout(subviews: subviews, width: proposal.width ?? 300).size
     }
 
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+    func placeSubviews(in bounds: CGRect, proposal _: ProposedViewSize, subviews: Subviews, cache _: inout ()) {
         let result = layout(subviews: subviews, width: bounds.width)
         for (i, pos) in result.positions.enumerated() {
             subviews[i].place(
                 at: CGPoint(x: bounds.minX + pos.x, y: bounds.minY + pos.y),
-                proposal: .unspecified
+                proposal: .unspecified,
             )
         }
     }
@@ -285,7 +293,7 @@ private struct FlowLayout: Layout {
         translation: "KJV",
         lastPracticed: nil, nextPractice: nil,
         stability: 1.0, difficulty: 5.0, state: 0,
-        reps: 0, lapses: 0, scheduledDays: 0, elapsedDays: 0
+        reps: 0, lapses: 0, scheduledDays: 0, elapsedDays: 0,
     )
     let verse = "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life."
     let words = verse.split(separator: " ", omittingEmptySubsequences: true)
@@ -296,7 +304,7 @@ private struct FlowLayout: Layout {
         maskedIndices: Array(words.indices),
         instruction: "Type the first letter of each word.",
         showWordHints: false,
-        onContinue: { _, _ in }
+        onContinue: { _, _ in },
     )
     .environment(\.font, .app())
 }

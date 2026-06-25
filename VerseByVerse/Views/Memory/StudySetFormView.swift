@@ -35,7 +35,7 @@ struct StudySetFormView: View {
         colorSeed: Int = 7,
         confirmSystemImage: String,
         confirmTint: Color,
-        onConfirm: @escaping (_ name: String, _ description: String?, _ theme: MeshTheme) async throws -> Void
+        onConfirm: @escaping (_ name: String, _ description: String?, _ theme: MeshTheme) async throws -> Void,
     ) {
         self.title = title
         self.initialName = initialName
@@ -70,14 +70,14 @@ struct StudySetFormView: View {
                                         title: name.isEmpty ? theme.displayName : name,
                                         positionSeed: positionSeed,
                                         colorShuffleSeed: colorSeed,
-                                        colorPallette: theme.palette
+                                        colorPallette: theme.palette,
                                     )
                                     .frame(width: 120)
                                     .overlay(alignment: .top) {
                                         RoundedRectangle(cornerRadius: 20)
                                             .stroke(
                                                 selectedTheme == theme ? Color.accentColor : Color.clear,
-                                                lineWidth: 3
+                                                lineWidth: 3,
                                             )
                                             .frame(width: 120, height: 120)
                                     }
@@ -178,7 +178,7 @@ struct StudySetFormView: View {
     StudySetFormView(
         title: "New Set",
         confirmSystemImage: "plus",
-        confirmTint: .green
+        confirmTint: .green,
     ) { _, _, _ in }
         .environment(\.font, .app())
         .environment(StudySetStore.shared)

@@ -42,9 +42,9 @@ extension APIService {
         do {
             let response: APIResponse<UserResponse> = try await fetch(
                 endpoint: APIEndpoint.postRegister(firstName: firstName,
-                                                  lastName: lastName,
-                                                  email: email,
-                                                  password: password),
+                                                   lastName: lastName,
+                                                   email: email,
+                                                   password: password),
                 lookInCache: false,
                 saveToCache: false,
             )

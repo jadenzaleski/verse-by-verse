@@ -65,7 +65,7 @@ struct MemoryView: View {
         .searchable(
             text: $searchText,
             placement: .navigationBarDrawer(displayMode: .automatic),
-            prompt: "Search passages and sets"
+            prompt: "Search passages and sets",
         )
         .navigationTitle("Memory")
         .toolbar {
@@ -95,7 +95,7 @@ struct MemoryView: View {
                 StudySetFormView(
                     title: "New Set",
                     confirmSystemImage: "plus",
-                    confirmTint: .green
+                    confirmTint: .green,
                 ) { name, description, theme in
                     try await studySetStore.createSet(name: name, description: description, theme: theme)
                 }
@@ -111,7 +111,7 @@ struct MemoryView: View {
         guard hasQuery else { return passageStore.userPassages }
         return passageStore.userPassages.filter {
             $0.reference.localizedCaseInsensitiveContains(searchText)
-            || $0.translation.localizedCaseInsensitiveContains(searchText)
+                || $0.translation.localizedCaseInsensitiveContains(searchText)
         }
     }
 
@@ -119,7 +119,7 @@ struct MemoryView: View {
         guard hasQuery else { return studySetStore.sets }
         return studySetStore.sets.filter {
             $0.name.localizedCaseInsensitiveContains(searchText)
-            || ($0.description?.localizedCaseInsensitiveContains(searchText) ?? false)
+                || ($0.description?.localizedCaseInsensitiveContains(searchText) ?? false)
         }
     }
 
@@ -131,8 +131,8 @@ struct MemoryView: View {
                 if filteredPassages.isEmpty {
                     emptyMessage(
                         hasQuery
-                        ? "No passages match your search."
-                        : "No passages yet — tap \(Image(systemName: "plus")) to create one."
+                            ? "No passages match your search."
+                            : "No passages yet — tap \(Image(systemName: "plus")) to create one.",
                     )
                 }
                 ForEach(filteredPassages, id: \.id) { passage in
@@ -178,8 +178,8 @@ struct MemoryView: View {
                 if filteredSets.isEmpty {
                     emptyMessage(
                         hasQuery
-                        ? "No sets match your search."
-                        : "No sets yet — tap \(Image(systemName: "plus")) to create one."
+                            ? "No sets match your search."
+                            : "No sets yet — tap \(Image(systemName: "plus")) to create one.",
                     )
                 } else {
                     Text("All")
@@ -188,7 +188,7 @@ struct MemoryView: View {
                     let space: CGFloat = 20.0
                     let columns = [
                         GridItem(.flexible(), spacing: space),
-                        GridItem(.flexible(), spacing: space)
+                        GridItem(.flexible(), spacing: space),
                     ]
                     LazyVGrid(
                         columns: columns,
@@ -243,7 +243,7 @@ struct MemoryView: View {
     let passageStore = PassageStore.shared
     let studySetStore = StudySetStore.shared
 
-    let samplePassages: [UserPassage] = (1...12).map { idx in
+    let samplePassages: [UserPassage] = (1 ... 12).map { idx in
         UserPassage(
             id: idx,
             userId: "preview",
@@ -261,7 +261,7 @@ struct MemoryView: View {
             reps: idx,
             lapses: 0,
             scheduledDays: 1,
-            elapsedDays: 0
+            elapsedDays: 0,
         )
     }
 
@@ -275,7 +275,7 @@ struct MemoryView: View {
             meshColorSeed: 4096,
             meshTheme: .ocean,
             createdAt: .now.addingTimeInterval(-86400 * 14),
-            modifiedAt: .now.addingTimeInterval(-3600)
+            modifiedAt: .now.addingTimeInterval(-3600),
         ),
         StudySet(
             id: 2,
@@ -286,7 +286,7 @@ struct MemoryView: View {
             meshColorSeed: 8192,
             meshTheme: .sunset,
             createdAt: .now.addingTimeInterval(-86400 * 30),
-            modifiedAt: .now.addingTimeInterval(-86400 * 2)
+            modifiedAt: .now.addingTimeInterval(-86400 * 2),
         ),
         StudySet(
             id: 3,
@@ -297,7 +297,7 @@ struct MemoryView: View {
             meshColorSeed: 1234,
             meshTheme: .forest,
             createdAt: .now.addingTimeInterval(-86400 * 7),
-            modifiedAt: .now.addingTimeInterval(-86400)
+            modifiedAt: .now.addingTimeInterval(-86400),
         ),
         StudySet(
             id: 4,
@@ -308,7 +308,7 @@ struct MemoryView: View {
             meshColorSeed: 5678,
             meshTheme: .ocean,
             createdAt: .now.addingTimeInterval(-86400 * 3),
-            modifiedAt: .now.addingTimeInterval(-86400 * 3)
+            modifiedAt: .now.addingTimeInterval(-86400 * 3),
         ),
         StudySet(
             id: 5,
@@ -319,7 +319,7 @@ struct MemoryView: View {
             meshColorSeed: 9012,
             meshTheme: .sunset,
             createdAt: .now.addingTimeInterval(-86400 * 60),
-            modifiedAt: .now.addingTimeInterval(-86400 * 5)
+            modifiedAt: .now.addingTimeInterval(-86400 * 5),
         ),
         StudySet(
             id: 6,
@@ -330,10 +330,9 @@ struct MemoryView: View {
             meshColorSeed: 3456,
             meshTheme: .forest,
             createdAt: .now.addingTimeInterval(-86400 * 21),
-            modifiedAt: .now.addingTimeInterval(-86400 * 10)
-        )
+            modifiedAt: .now.addingTimeInterval(-86400 * 10),
+        ),
     ]
-
 
     NavigationStack {
         MemoryView()
@@ -343,16 +342,15 @@ struct MemoryView: View {
             .environment(studySetStore)
             .environment(BibleStore.shared)
     }
-#if DEBUG
+    #if DEBUG
     .task {
-        passageStore.setUserPassagesForPreview(samplePassages)
-        studySetStore.setSetsForPreview(sampleSets)
-        studySetStore.setPassageIdsForPreview([
-            1: samplePassages.prefix(4).map(\.id),
-            2: samplePassages.prefix(2).map(\.id),
-            3: samplePassages.map(\.id),
-        ])
-    }
-#endif
-
+            passageStore.setUserPassagesForPreview(samplePassages)
+            studySetStore.setSetsForPreview(sampleSets)
+            studySetStore.setPassageIdsForPreview([
+                1: samplePassages.prefix(4).map(\.id),
+                2: samplePassages.prefix(2).map(\.id),
+                3: samplePassages.map(\.id),
+            ])
+        }
+    #endif
 }

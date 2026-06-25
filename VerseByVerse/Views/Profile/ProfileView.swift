@@ -51,7 +51,7 @@ struct ProfileView: View {
         let p3TrailingControlPoint: SIMD2<Float> = [1.0, 1.0]
         let p3BottomControlPoint: SIMD2<Float> = [1.0, 1.0]
 
-        ScrollView() {
+        ScrollView {
             VStack(spacing: 15) {
                 MeshGradient(
                     width: 2,
@@ -94,7 +94,7 @@ struct ProfileView: View {
                         ),
                     ],
                     colors: shuffledColors(from: MeshPalette.all.randomElement(using: &themeGenerator)
-                                           ?? .ocean, seed: userIdInt),
+                        ?? .ocean, seed: userIdInt),
                 )
                 .scaledToFill()
                 .frame(width: 150, height: 150)

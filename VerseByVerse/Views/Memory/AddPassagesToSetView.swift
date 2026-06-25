@@ -33,7 +33,7 @@ struct AddPassagesToSetView: View {
                     ContentUnavailableView(
                         "No Passages to Add",
                         systemImage: "text.book.closed",
-                        description: Text("All your passages are already in this set.")
+                        description: Text("All your passages are already in this set."),
                     )
                 } else {
                     List(availablePassages) { passage in
@@ -117,7 +117,7 @@ struct AddPassagesToSetView: View {
             translation: "ESV",
             lastPracticed: nil, nextPractice: nil,
             stability: 1.0, difficulty: 5.0, state: 0, reps: 0,
-            lapses: 0, scheduledDays: 0, elapsedDays: 0
+            lapses: 0, scheduledDays: 0, elapsedDays: 0,
         ),
         UserPassage(
             id: 7, userId: "preview", book: "Psalm",
@@ -126,7 +126,7 @@ struct AddPassagesToSetView: View {
             lastPracticed: .now.addingTimeInterval(-86400),
             nextPractice: .now,
             stability: 2.0, difficulty: 5.5, state: 2, reps: 2,
-            lapses: 0, scheduledDays: 1, elapsedDays: 1
+            lapses: 0, scheduledDays: 1, elapsedDays: 1,
         ),
         UserPassage(
             id: 8, userId: "preview", book: "Romans",
@@ -135,12 +135,12 @@ struct AddPassagesToSetView: View {
             lastPracticed: .now.addingTimeInterval(-86400 * 3),
             nextPractice: .now.addingTimeInterval(86400 * 2),
             stability: 3.0, difficulty: 4.8, state: 2, reps: 4,
-            lapses: 0, scheduledDays: 5, elapsedDays: 3
+            lapses: 0, scheduledDays: 5, elapsedDays: 3,
         ),
     ]
 
     #if DEBUG
-    store.setUserPassagesForPreview(allPassages)
+        store.setUserPassagesForPreview(allPassages)
     #endif
 
     return AddPassagesToSetView(setId: 1)

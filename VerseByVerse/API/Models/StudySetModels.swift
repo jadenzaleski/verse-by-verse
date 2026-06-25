@@ -38,7 +38,7 @@ struct StudySetReadResponse: Codable {
     }
 }
 
-// Returned by GET /study-set/{id} and passage add/remove endpoints (includes passages array).
+/// Returned by GET /study-set/{id} and passage add/remove endpoints (includes passages array).
 struct StudySetDetailResponse: Codable {
     let id: Int
     let userId: String

@@ -36,7 +36,7 @@ struct AddPassageView: View {
             startChapter: startCh,
             startVerse: startVs,
             endChapter: endCh,
-            endVerse: endVs
+            endVerse: endVs,
         )
     }
 
@@ -175,13 +175,13 @@ struct AddPassageView: View {
                     handleBookChange()
                 }
                 .onReceive(NotificationCenter.default.publisher(
-                    for: UITextField.textDidBeginEditingNotification)) { obj in
+                    for: UITextField.textDidBeginEditingNotification,
+                )) { obj in
                     handleTextFieldBeginEditing(obj)
                 }
         }
     }
 
-    @ViewBuilder
     private var formView: some View {
         Form {
             Section {
@@ -276,11 +276,11 @@ struct AddPassageView: View {
                 endChapter: endCh,
                 startVerse: startVs,
                 endVerse: endVs,
-                translation: selectedTranslation
+                translation: selectedTranslation,
             )
             dismiss()
         } catch {
-            // Error is already handled in the store, 
+            // Error is already handled in the store,
             // but we keep the view open so the user can see it or retry.
             AppLog.category("AddPassageView").error("Failed to add passage: \(error.localizedDescription)")
         }

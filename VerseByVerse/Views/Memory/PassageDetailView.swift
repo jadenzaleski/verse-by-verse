@@ -32,7 +32,7 @@ struct PassageDetailView: View {
         let days = Calendar.current.dateComponents(
             [.day],
             from: Calendar.current.startOfDay(for: .now),
-            to: Calendar.current.startOfDay(for: next)
+            to: Calendar.current.startOfDay(for: next),
         ).day ?? 0
         if days < 0 { return "Overdue by \(-days) day\(-days == 1 ? "" : "s")" }
         if days == 0 { return "Due today" }
@@ -46,7 +46,7 @@ struct PassageDetailView: View {
         let days = Calendar.current.dateComponents(
             [.day],
             from: Calendar.current.startOfDay(for: .now),
-            to: Calendar.current.startOfDay(for: next)
+            to: Calendar.current.startOfDay(for: next),
         ).day ?? 0
         if days < 0 { return .red }
         if days == 0 { return .orange }
@@ -91,7 +91,7 @@ struct PassageDetailView: View {
                 SegmentedProgressBar(
                     totalSegments: 10,
                     completedSegments: Int(retentionScore * 10),
-                    height: 20
+                    height: 20,
                 )
             } else {
                 Text("Complete your first practice session to start tracking your memory score.")
@@ -218,7 +218,7 @@ struct PassageDetailView: View {
         lastPracticed: Calendar.current.date(byAdding: .day, value: -2, to: .now),
         nextPractice: Calendar.current.date(byAdding: .day, value: 1, to: .now),
         stability: 4.0, difficulty: 5.2, state: 2,
-        reps: 3, lapses: 0, scheduledDays: 3, elapsedDays: 2
+        reps: 3, lapses: 0, scheduledDays: 3, elapsedDays: 2,
     )
     NavigationStack {
         PassageDetailView(passage: passage)
