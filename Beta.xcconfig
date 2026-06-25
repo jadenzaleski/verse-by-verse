@@ -1,0 +1,14 @@
+//
+//  Beta.xcconfig
+//  VerseByVerse
+//
+//  Created by Jaden Zaleski on 6/7/26.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://developer.apple.com/documentation/xcode/adding-a-build-configuration-file-to-your-project
+
+// Marks this as the beta/TestFlight channel. Surfaced at runtime via
+// AppFunctions.channel for the "BETA" badge. Checked before DEBUG in code
+// because this configuration also defines DEBUG.
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) BETA

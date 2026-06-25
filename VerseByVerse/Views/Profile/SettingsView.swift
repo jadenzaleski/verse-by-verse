@@ -88,7 +88,17 @@ struct SettingsView: View {
 
             Section {
                 Label {
-                    Text(AppFunctions.versionString() ?? "")
+                    HStack(spacing: 8) {
+                        Text(AppFunctions.versionString() ?? "")
+                        if let badge = AppFunctions.channel.badge {
+                            Text(badge)
+                                .font(.app(.caption2, weight: .semibold))
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Capsule().fill(AppFunctions.channel.badgeColor.opacity(0.15)))
+                                .foregroundStyle(AppFunctions.channel.badgeColor)
+                        }
+                    }
                 } icon: {
                     Image(systemName: "app.badge")
                 }
@@ -426,5 +436,6 @@ private struct PasswordEditorView: View {
 
 #Preview {
     SettingsView()
+        .environment(UserStore.shared)
         .environment(\.font, .app())
 }

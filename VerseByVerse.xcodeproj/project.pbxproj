@@ -6,16 +6,25 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		D74FF5DF2FD2738600166624 /* Debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = D74FF5DE2FD2738600166624 /* Debug.xcconfig */; };
-		D74FF5E12FD6418D00166624 /* Release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = D74FF5E02FD6418D00166624 /* Release.xcconfig */; };
-		D74FF5E32FD647DF00166624 /* Staging.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = D74FF5E22FD647DF00166624 /* Staging.xcconfig */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXFileReference section */
 		D74FF5DE2FD2738600166624 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		D74FF5E02FD6418D00166624 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
-		D74FF5E22FD647DF00166624 /* Staging.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Staging.xcconfig; sourceTree = "<group>"; };
+		D74FF5E22FD647DF00166624 /* Beta.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Beta.xcconfig; sourceTree = "<group>"; };
+		D75907CB2FEC8C4200C07D82 /* ci_pre_xcodebuild.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = ci_pre_xcodebuild.sh; sourceTree = "<group>"; };
+		D75907CD2FEC8C4200C07D82 /* CLAUDE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CLAUDE.md; sourceTree = "<group>"; };
+		D75907CE2FEC8C4200C07D82 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		D75907CF2FEC8C4200C07D82 /* release-please-config.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "release-please-config.json"; sourceTree = "<group>"; };
+		D75907D02FEC8C4200C07D82 /* release-please-config.beta.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "release-please-config.beta.json"; sourceTree = "<group>"; };
+		D75908392FEC8C4200C07D82 /* version.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = version.txt; sourceTree = "<group>"; };
+		D75908952FEC8CE400C07D82 /* release-please.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = "release-please.yml"; sourceTree = "<group>"; };
+		D75908A72FEC8DA700C07D82 /* backend-sync.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "backend-sync.md"; sourceTree = "<group>"; };
+		D75908A92FEC8DA700C07D82 /* settings.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = settings.json; sourceTree = "<group>"; };
+		D75908AA2FEC8DA700C07D82 /* settings.local.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = settings.local.json; sourceTree = "<group>"; };
+		D75908AC2FEC8DA700C07D82 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		D75908AD2FEC8DA700C07D82 /* .swiftformat */ = {isa = PBXFileReference; lastKnownFileType = text; path = .swiftformat; sourceTree = "<group>"; };
+		D75908AE2FEC8DA700C07D82 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
+		D75908B52FEC8DCE00C07D82 /* .release-please-manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = ".release-please-manifest.json"; path = "/Users/jaden/Desktop/Developer/Apps/VerseByVerse/.release-please-manifest.json"; sourceTree = "<absolute>"; };
+		D75908B62FEC8DCE00C07D82 /* .release-please-manifest.beta.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = ".release-please-manifest.beta.json"; sourceTree = "<group>"; };
 		D75E3E8D2ED2653A00B0DDC8 /* VerseByVerse.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VerseByVerse.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -51,14 +60,69 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D75907CC2FEC8C4200C07D82 /* ci_scripts */ = {
+			isa = PBXGroup;
+			children = (
+				D75907CB2FEC8C4200C07D82 /* ci_pre_xcodebuild.sh */,
+			);
+			path = ci_scripts;
+			sourceTree = "<group>";
+		};
+		D75908962FEC8CE400C07D82 /* workflows */ = {
+			isa = PBXGroup;
+			children = (
+				D75908952FEC8CE400C07D82 /* release-please.yml */,
+			);
+			path = workflows;
+			sourceTree = "<group>";
+		};
+		D75908972FEC8CE400C07D82 /* .github */ = {
+			isa = PBXGroup;
+			children = (
+				D75908962FEC8CE400C07D82 /* workflows */,
+			);
+			path = .github;
+			sourceTree = "<group>";
+		};
+		D75908A82FEC8DA700C07D82 /* commands */ = {
+			isa = PBXGroup;
+			children = (
+				D75908A72FEC8DA700C07D82 /* backend-sync.md */,
+			);
+			path = commands;
+			sourceTree = "<group>";
+		};
+		D75908AB2FEC8DA700C07D82 /* .claude */ = {
+			isa = PBXGroup;
+			children = (
+				D75908A82FEC8DA700C07D82 /* commands */,
+				D75908A92FEC8DA700C07D82 /* settings.json */,
+				D75908AA2FEC8DA700C07D82 /* settings.local.json */,
+			);
+			path = .claude;
+			sourceTree = "<group>";
+		};
 		D75E3E842ED2653A00B0DDC8 = {
 			isa = PBXGroup;
 			children = (
-				D74FF5E22FD647DF00166624 /* Staging.xcconfig */,
+				D75908AB2FEC8DA700C07D82 /* .claude */,
+				D75908AC2FEC8DA700C07D82 /* .gitignore */,
+				D75908AD2FEC8DA700C07D82 /* .swiftformat */,
+				D75908AE2FEC8DA700C07D82 /* .swiftlint.yml */,
+				D75908B52FEC8DCE00C07D82 /* .release-please-manifest.json */,
+				D75908B62FEC8DCE00C07D82 /* .release-please-manifest.beta.json */,
+				D75908972FEC8CE400C07D82 /* .github */,
+				D74FF5E22FD647DF00166624 /* Beta.xcconfig */,
 				D74FF5E02FD6418D00166624 /* Release.xcconfig */,
 				D74FF5DE2FD2738600166624 /* Debug.xcconfig */,
 				D75E3E8F2ED2653A00B0DDC8 /* VerseByVerse */,
 				D75E3E8E2ED2653A00B0DDC8 /* Products */,
+				D75907CC2FEC8C4200C07D82 /* ci_scripts */,
+				D75907CD2FEC8C4200C07D82 /* CLAUDE.md */,
+				D75907CE2FEC8C4200C07D82 /* README.md */,
+				D75907CF2FEC8C4200C07D82 /* release-please-config.json */,
+				D75907D02FEC8C4200C07D82 /* release-please-config.beta.json */,
+				D75908392FEC8C4200C07D82 /* version.txt */,
 			);
 			sourceTree = "<group>";
 		};
@@ -136,9 +200,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D74FF5DF2FD2738600166624 /* Debug.xcconfig in Resources */,
-				D74FF5E12FD6418D00166624 /* Release.xcconfig in Resources */,
-				D74FF5E32FD647DF00166624 /* Staging.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -196,9 +257,9 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		D74FF5E42FD647EE00166624 /* Staging */ = {
+		D7590B9D2FECB8B800C07D82 /* Beta */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D74FF5E22FD647DF00166624 /* Staging.xcconfig */;
+			baseConfigurationReference = D74FF5E22FD647DF00166624 /* Beta.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -231,19 +292,13 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = A6M3VA78J8;
+				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -252,19 +307,18 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
-				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
 			};
-			name = Staging;
+			name = Beta;
 		};
-		D74FF5E52FD647EE00166624 /* Staging */ = {
+		D7590B9E2FECB8B800C07D82 /* Beta */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D74FF5E22FD647DF00166624 /* Staging.xcconfig */;
+			baseConfigurationReference = D74FF5E22FD647DF00166624 /* Beta.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = logo;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -298,8 +352,9 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
 			};
-			name = Staging;
+			name = Beta;
 		};
 		D75E3EAC2ED2653B00B0DDC8 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -462,6 +517,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
 		};
@@ -501,6 +557,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
 		};
@@ -511,8 +568,8 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D75E3EAC2ED2653B00B0DDC8 /* Debug */,
-				D74FF5E42FD647EE00166624 /* Staging */,
 				D75E3EAD2ED2653B00B0DDC8 /* Release */,
+				D7590B9D2FECB8B800C07D82 /* Beta */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -521,8 +578,8 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D75E3EAF2ED2653B00B0DDC8 /* Debug */,
-				D74FF5E52FD647EE00166624 /* Staging */,
 				D75E3EB02ED2653B00B0DDC8 /* Release */,
+				D7590B9E2FECB8B800C07D82 /* Beta */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
