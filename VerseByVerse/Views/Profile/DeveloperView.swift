@@ -14,8 +14,21 @@ struct DeveloperView: View {
     @State private var selectedLogLevel: LogLevel = AppLog.minimumLevel
     private let log = AppLog.category("DeveloperView")
 
+    private var channelName: String {
+        switch AppFunctions.channel {
+        case .development: "Development"
+        case .beta: "Beta"
+        case .production: "Production"
+        }
+    }
+
     var body: some View {
         List {
+            Section("Build") {
+                LabeledContent("Channel", value: channelName)
+                LabeledContent("Version", value: AppFunctions.versionString() ?? "—")
+            }
+
             Button("Clear Logs", action: {})
 
             Button("Clear Cache") {
