@@ -14,7 +14,6 @@
 		D75907CD2FEC8C4200C07D82 /* CLAUDE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CLAUDE.md; sourceTree = "<group>"; };
 		D75907CE2FEC8C4200C07D82 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		D75907CF2FEC8C4200C07D82 /* release-please-config.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "release-please-config.json"; sourceTree = "<group>"; };
-		D75907D02FEC8C4200C07D82 /* release-please-config.beta.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "release-please-config.beta.json"; sourceTree = "<group>"; };
 		D75908392FEC8C4200C07D82 /* version.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = version.txt; sourceTree = "<group>"; };
 		D75908952FEC8CE400C07D82 /* release-please.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = "release-please.yml"; sourceTree = "<group>"; };
 		D75908A72FEC8DA700C07D82 /* backend-sync.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "backend-sync.md"; sourceTree = "<group>"; };
@@ -24,7 +23,6 @@
 		D75908AD2FEC8DA700C07D82 /* .swiftformat */ = {isa = PBXFileReference; lastKnownFileType = text; path = .swiftformat; sourceTree = "<group>"; };
 		D75908AE2FEC8DA700C07D82 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 		D75908B52FEC8DCE00C07D82 /* .release-please-manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = ".release-please-manifest.json"; path = "/Users/jaden/Desktop/Developer/Apps/VerseByVerse/.release-please-manifest.json"; sourceTree = "<absolute>"; };
-		D75908B62FEC8DCE00C07D82 /* .release-please-manifest.beta.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = ".release-please-manifest.beta.json"; sourceTree = "<group>"; };
 		D75E3E8D2ED2653A00B0DDC8 /* VerseByVerse.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VerseByVerse.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -110,7 +108,6 @@
 				D75908AD2FEC8DA700C07D82 /* .swiftformat */,
 				D75908AE2FEC8DA700C07D82 /* .swiftlint.yml */,
 				D75908B52FEC8DCE00C07D82 /* .release-please-manifest.json */,
-				D75908B62FEC8DCE00C07D82 /* .release-please-manifest.beta.json */,
 				D75908972FEC8CE400C07D82 /* .github */,
 				D74FF5E22FD647DF00166624 /* Beta.xcconfig */,
 				D74FF5E02FD6418D00166624 /* Release.xcconfig */,
@@ -121,7 +118,6 @@
 				D75907CD2FEC8C4200C07D82 /* CLAUDE.md */,
 				D75907CE2FEC8C4200C07D82 /* README.md */,
 				D75907CF2FEC8C4200C07D82 /* release-please-config.json */,
-				D75907D02FEC8C4200C07D82 /* release-please-config.beta.json */,
 				D75908392FEC8C4200C07D82 /* version.txt */,
 			);
 			sourceTree = "<group>";
@@ -342,7 +338,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 0.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.jadenzaleski.VerseByVerse;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -507,7 +503,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 0.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.jadenzaleski.VerseByVerse;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -547,7 +543,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 0.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.jadenzaleski.VerseByVerse;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
