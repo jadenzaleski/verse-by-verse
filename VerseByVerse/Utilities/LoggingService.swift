@@ -10,27 +10,25 @@ import SwiftUI
 
 final class LoggingService {
     static let shared = LoggingService()
-
+    private static let timestampFormatter = ISO8601DateFormatter()
     private let queue = DispatchQueue(label: "LoggingQueue", qos: .background)
     private let maxFileSize: Int = 512_000 // 500 KB
     private let maxLogFiles: Int = 5
-
     private let logsDirectory: URL
     private var currentLogURL: URL {
         logsDirectory.appendingPathComponent("vbv.log")
     }
 
     private init() {
-        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        logsDirectory = docs.appendingPathComponent("Logs", isDirectory: true)
+        let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
+        logsDirectory = caches.appendingPathComponent("Logs", isDirectory: true)
         try? FileManager.default.createDirectory(at: logsDirectory, withIntermediateDirectories: true)
     }
 
     func log(_ message: String) {
-        let timestamp = ISO8601DateFormatter().string(from: Date())
-        let entry = "[\(timestamp)] \(message)\n"
-
         queue.async {
+            let timestamp = Self.timestampFormatter.string(from: Date())
+            let entry = "[\(timestamp)] \(message)\n"
             self.rotateIfNeeded()
             self.appendToFile(entry)
         }
@@ -55,7 +53,7 @@ final class LoggingService {
               let size = attributes[.size] as? NSNumber,
               size.intValue > maxFileSize else { return }
 
-        let dateStr = ISO8601DateFormatter().string(from: Date())
+        let dateStr = Self.timestampFormatter.string(from: Date())
         let rotatedURL = logsDirectory.appendingPathComponent("vbv_\(dateStr).log")
 
         try? FileManager.default.moveItem(at: currentLogURL, to: rotatedURL)
