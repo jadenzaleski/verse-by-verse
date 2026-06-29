@@ -87,6 +87,15 @@ struct SettingsView: View {
             }
 
             Section {
+                Button("Clear Cache") {
+                    Cache.shared.removeAll()
+                }
+            } header: {
+                Text("GENERAL")
+                    .font(Font.app(.footnote, weight: .semibold))
+            }
+
+            Section {
                 Label {
                     HStack(spacing: 8) {
                         Text(AppFunctions.versionString() ?? "")
