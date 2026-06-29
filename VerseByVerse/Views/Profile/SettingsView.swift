@@ -115,11 +115,13 @@ struct SettingsView: View {
                     .font(Font.app(.footnote, weight: .semibold))
             }
 
-            Section {
-                NavigationLink {
-                    DeveloperView()
-                } label: {
-                    Label("Developer", systemImage: "hammer.fill")
+            if AppFunctions.channel != .production {
+                Section {
+                    NavigationLink {
+                        DeveloperView()
+                    } label: {
+                        Label("Developer", systemImage: "hammer.fill")
+                    }
                 }
             }
 
