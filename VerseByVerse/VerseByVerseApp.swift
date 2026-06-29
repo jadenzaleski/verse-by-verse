@@ -80,6 +80,17 @@ struct VerseByVerseApp: App {
                 }
             }
         }
+        // Verify we can reach the backend before making any other API calls.
+        await MainActor.run { statusText = "Connecting…" }
+        var healthAttempts = 0
+        while (try? await APIService.shared.getHealth()) != true {
+            healthAttempts += 1
+            await MainActor.run {
+                statusText = healthAttempts < 3 ? "Connecting…" : "Can't reach the server. Retrying…"
+            }
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
+        }
+
         // Present login over the splash if needed
         await MainActor.run {
             statusText = "Logging in…"
