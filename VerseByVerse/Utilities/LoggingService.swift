@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import SwiftUI
 
 final class LoggingService {
     static let shared = LoggingService()
@@ -20,8 +19,9 @@ final class LoggingService {
     }()
 
     private let queue = DispatchQueue(label: "LoggingQueue", qos: .background)
-    private let maxFileSize: Int = 512_000 // 500 KB
-    private let maxLogFiles: Int = 5
+    private let maxFileSize: Int = 200_000 // 200 KB per file
+    private let maxLogFiles: Int = 2 // 2 rotated + 1 active ≈ 600 KB max
+    private let maxLogAge: TimeInterval = 7 * 24 * 3600 // 7 days
     private let logsDirectory: URL
     private var currentLogURL: URL {
         logsDirectory.appendingPathComponent("vbv.log")
@@ -69,30 +69,38 @@ final class LoggingService {
     }
 
     private func cleanupOldLogs() {
-        let files = (
-            try? FileManager.default
-                .contentsOfDirectory(at: logsDirectory, includingPropertiesForKeys: [.creationDateKey]),
-        ) ?? []
+        let keys: [URLResourceKey] = [.creationDateKey]
+        let files = (try? FileManager.default.contentsOfDirectory(at: logsDirectory, includingPropertiesForKeys: keys)) ?? []
 
-        let sorted = files.sorted {
-            let aFile = (try? $0.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? .distantPast
-            let bFile = (try? $1.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? .distantPast
-            return aFile > bFile
-        }
+        let cutoff = Date().addingTimeInterval(-maxLogAge)
 
-        let excess = sorted.dropFirst(maxLogFiles)
-        for file in excess {
-            try? FileManager.default.removeItem(at: file)
+        // Sort rotated files newest-first; skip the active vbv.log (handled separately).
+        let rotated = files
+            .filter { $0.lastPathComponent != "vbv.log" }
+            .sorted {
+                let lhsDate = (try? $0.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? .distantPast
+                let rhsDate = (try? $1.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? .distantPast
+                return lhsDate > rhsDate
+            }
+
+        for (index, file) in rotated.enumerated() {
+            let created = (try? file.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? .distantPast
+            if index >= maxLogFiles || created < cutoff {
+                try? FileManager.default.removeItem(at: file)
+            }
         }
     }
 
     func readAllLogs() -> String {
-        let files = (
-            try? FileManager.default.contentsOfDirectory(at: logsDirectory, includingPropertiesForKeys: nil),
-        ) ?? []
-        let sorted = files.sorted { $0.lastPathComponent < $1.lastPathComponent }
+        let files = (try? FileManager.default.contentsOfDirectory(at: logsDirectory, includingPropertiesForKeys: nil)) ?? []
 
-        return sorted.compactMap { try? String(contentsOf: $0, encoding: .utf8) }.joined(separator: "\n-----\n")
+        // Rotated files use yyyyMMdd-HHmmss names, so ascending lexical sort = chronological.
+        // Active file always goes last so the full log reads oldest → newest.
+        let rotated = files.filter { $0.lastPathComponent != "vbv.log" }.sorted { $0.lastPathComponent < $1.lastPathComponent }
+        let active = files.filter { $0.lastPathComponent == "vbv.log" }
+        let ordered = rotated + active
+
+        return ordered.compactMap { try? String(contentsOf: $0, encoding: .utf8) }.joined(separator: "\n-----\n")
     }
 
     /// Deletes all persisted log files (current and rotated).
