@@ -124,7 +124,7 @@ struct SettingsView: View {
                     .font(Font.app(.footnote, weight: .semibold))
             }
 
-            if AppFunctions.channel != .production {
+            #if DEBUG || BETA
                 Section {
                     NavigationLink {
                         DeveloperView()
@@ -132,7 +132,7 @@ struct SettingsView: View {
                         Label("Developer", systemImage: "hammer.fill")
                     }
                 }
-            }
+            #endif // DEBUG || BETA
 
             Section {
                 Button(role: .destructive) {

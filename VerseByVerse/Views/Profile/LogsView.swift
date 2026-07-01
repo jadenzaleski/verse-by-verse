@@ -9,6 +9,7 @@ import SwiftUI
 
 struct LogsView: View {
     @State private var logs: String = ""
+    @State private var logFileURL: URL?
     private let log = AppLog.category("LogsView")
 
     var body: some View {
@@ -17,13 +18,23 @@ struct LogsView: View {
                 .font(.system(.caption2, design: .monospaced))
         }
         .navigationTitle("Logs")
+        .toolbar {
+            if let logFileURL {
+                ShareLink(item: logFileURL) {
+                    Image(systemName: "square.and.arrow.up")
+                }
+            }
+        }
         .refreshable {
             log.debug("refreshed")
-            logs = LoggingService.shared.readAllLogs()
+            reload()
         }
-        .onAppear {
-            logs = LoggingService.shared.readAllLogs()
-        }
+        .onAppear(perform: reload)
+    }
+
+    private func reload() {
+        logs = LoggingService.shared.readAllLogs()
+        logFileURL = LoggingService.shared.exportLogs()
     }
 }
 

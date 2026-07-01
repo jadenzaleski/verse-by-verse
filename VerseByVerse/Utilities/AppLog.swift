@@ -30,6 +30,19 @@ enum LogLevel: Int, Comparable, CaseIterable {
         case .fault: "Fault"
         }
     }
+
+    /// Fixed-width tag written to the persisted log file so lines align and
+    /// stay greppable (e.g. `[INFO ]`, `[ERROR]`).
+    var fileTag: String {
+        switch self {
+        case .trace: "TRACE"
+        case .debug: "DEBUG"
+        case .info: "INFO "
+        case .warning: "WARN "
+        case .error: "ERROR"
+        case .fault: "FAULT"
+        }
+    }
 }
 
 enum AppLog {
@@ -60,62 +73,70 @@ enum AppLog {
         minimumLevel = level
     }
 
-    static func category(_ category: String) -> Logger {
-        Logger(subsystem: subsystem, category: category)
-    }
-
-    static func logToFile(_ message: String) {
-        LoggingService.shared.log(message)
+    /// Returns a category-scoped logger. The category is preserved in both the
+    /// unified log (os.Logger) and the persisted, exportable log file.
+    static func category(_ category: String) -> AppLogger {
+        AppLogger(category: category)
     }
 }
 
-extension Logger {
-    func log(_ message: String) {
-        guard AppLog.minimumLevel <= .info else { return }
-        let string = "\(message)"
-        AppLog.logToFile("\(string)")
-        log("\(message, privacy: .public)")
+/// A category-scoped logger that mirrors each message to Apple's unified log
+/// (`os.Logger`) and to the persisted, exportable log file via `LoggingService`.
+///
+/// - Important: Messages are recorded with `.public` privacy so they appear in
+///   full in exported logs that testers send back. Never pass secrets (tokens,
+///   passwords, raw request bodies) into these methods.
+struct AppLogger {
+    let category: String
+    private let logger: Logger
+
+    init(category: String) {
+        self.category = category
+        logger = Logger(subsystem: AppLog.subsystem, category: category)
     }
 
-    func trace(_ message: String) {
-        guard AppLog.minimumLevel <= .trace else { return }
-        let string = "\(message)"
-        AppLog.logToFile("[TRACE] \(string)")
-        trace("\(message, privacy: .public)")
+    func trace(_ message: String, file: String = #fileID, line: Int = #line) {
+        emit(.trace, message, file: file, line: line)
     }
 
-    func info(_ message: String) {
-        guard AppLog.minimumLevel <= .info else { return }
-        let string = "\(message)"
-        AppLog.logToFile("[INFO] \(string)")
-        info("\(message, privacy: .public)")
+    func debug(_ message: String, file: String = #fileID, line: Int = #line) {
+        emit(.debug, message, file: file, line: line)
     }
 
-    func debug(_ message: String) {
-        guard AppLog.minimumLevel <= .debug else { return }
-        let string = "\(message)"
-        AppLog.logToFile("[DEBUG] \(string)")
-        debug("\(message, privacy: .public)")
+    func info(_ message: String, file: String = #fileID, line: Int = #line) {
+        emit(.info, message, file: file, line: line)
     }
 
-    func warning(_ message: String) {
-        guard AppLog.minimumLevel <= .warning else { return }
-        let string = "\(message)"
-        AppLog.logToFile("[WARNING] \(string)")
-        warning("\(message, privacy: .public)")
+    func warning(_ message: String, file: String = #fileID, line: Int = #line) {
+        emit(.warning, message, file: file, line: line)
     }
 
-    func error(_ message: String) {
-        guard AppLog.minimumLevel <= .error else { return }
-        let string = "\(message)"
-        AppLog.logToFile("[ERROR] \(string)")
-        error("\(message, privacy: .public)")
+    func error(_ message: String, file: String = #fileID, line: Int = #line) {
+        emit(.error, message, file: file, line: line)
     }
 
-    func fault(_ message: String) {
-        guard AppLog.minimumLevel <= .fault else { return }
-        let string = "\(message)"
-        AppLog.logToFile("[FAULT] \(string)")
-        fault("\(message, privacy: .public)")
+    func fault(_ message: String, file: String = #fileID, line: Int = #line) {
+        emit(.fault, message, file: file, line: line)
+    }
+
+    /// Convenience alias for `info`, retained for existing call sites.
+    func log(_ message: String, file: String = #fileID, line: Int = #line) {
+        emit(.info, message, file: file, line: line)
+    }
+
+    private func emit(_ level: LogLevel, _ message: String, file: String, line: Int) {
+        guard AppLog.minimumLevel <= level else { return }
+
+        let source = "\(file):\(line)"
+        LoggingService.shared.log(level: level, category: category, source: source, message: message)
+
+        switch level {
+        case .trace: logger.trace("\(message, privacy: .public)")
+        case .debug: logger.debug("\(message, privacy: .public)")
+        case .info: logger.info("\(message, privacy: .public)")
+        case .warning: logger.warning("\(message, privacy: .public)")
+        case .error: logger.error("\(message, privacy: .public)")
+        case .fault: logger.fault("\(message, privacy: .public)")
+        }
     }
 }

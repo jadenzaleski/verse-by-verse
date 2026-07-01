@@ -12,6 +12,7 @@ struct DeveloperView: View {
     @State private var showAlert = false
     @State private var alertMessage: String? = ""
     @State private var selectedLogLevel: LogLevel = AppLog.minimumLevel
+    @State private var logFileURL: URL?
     private let log = AppLog.category("DeveloperView")
 
     private var channelName: String {
@@ -29,7 +30,10 @@ struct DeveloperView: View {
                 LabeledContent("Version", value: AppFunctions.versionString() ?? "—")
             }
 
-            Button("Clear Logs", action: {})
+            Button("Clear Logs") {
+                LoggingService.shared.clearLogs()
+                logFileURL = LoggingService.shared.exportLogs()
+            }
 
             Button("Clear Cache") {
                 Cache.shared.removeAll()
@@ -79,8 +83,17 @@ struct DeveloperView: View {
             } label: {
                 Text("Logs")
             }
+
+            if let logFileURL {
+                ShareLink(item: logFileURL) {
+                    Label("Share Logs", systemImage: "square.and.arrow.up")
+                }
+            }
         }
         .navigationTitle("Developer")
+        .onAppear {
+            logFileURL = LoggingService.shared.exportLogs()
+        }
         .alert(isPresented: $showAlert, content: {
             Alert(title: Text("Health Check"),
                   message: Text(alertMessage ?? "No message"),

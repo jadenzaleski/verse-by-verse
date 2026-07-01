@@ -11,6 +11,14 @@ import SwiftUI
 final class LoggingService {
     static let shared = LoggingService()
     private static let timestampFormatter = ISO8601DateFormatter()
+    /// Filename-safe timestamp (no colons) for rotated and exported files.
+    private static let fileTimestampFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyyMMdd-HHmmss"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        return formatter
+    }()
+
     private let queue = DispatchQueue(label: "LoggingQueue", qos: .background)
     private let maxFileSize: Int = 512_000 // 500 KB
     private let maxLogFiles: Int = 5
@@ -25,10 +33,10 @@ final class LoggingService {
         try? FileManager.default.createDirectory(at: logsDirectory, withIntermediateDirectories: true)
     }
 
-    func log(_ message: String) {
+    func log(level: LogLevel, category: String, source: String, message: String) {
         queue.async {
             let timestamp = Self.timestampFormatter.string(from: Date())
-            let entry = "[\(timestamp)] \(message)\n"
+            let entry = "[\(timestamp)] [\(level.fileTag)] [\(category)] (\(source)) \(message)\n"
             self.rotateIfNeeded()
             self.appendToFile(entry)
         }
@@ -53,7 +61,7 @@ final class LoggingService {
               let size = attributes[.size] as? NSNumber,
               size.intValue > maxFileSize else { return }
 
-        let dateStr = Self.timestampFormatter.string(from: Date())
+        let dateStr = Self.fileTimestampFormatter.string(from: Date())
         let rotatedURL = logsDirectory.appendingPathComponent("vbv_\(dateStr).log")
 
         try? FileManager.default.moveItem(at: currentLogURL, to: rotatedURL)
@@ -85,5 +93,40 @@ final class LoggingService {
         let sorted = files.sorted { $0.lastPathComponent < $1.lastPathComponent }
 
         return sorted.compactMap { try? String(contentsOf: $0, encoding: .utf8) }.joined(separator: "\n-----\n")
+    }
+
+    /// Deletes all persisted log files (current and rotated).
+    func clearLogs() {
+        queue.async {
+            let files = (
+                try? FileManager.default.contentsOfDirectory(at: self.logsDirectory, includingPropertiesForKeys: nil),
+            ) ?? []
+            for file in files {
+                try? FileManager.default.removeItem(at: file)
+            }
+        }
+    }
+
+    /// Writes all logs (with a build/version header) to a single temporary file
+    /// suitable for the share sheet, returning its URL. The file is named so it's
+    /// recognizable when received via Mail/Messages/AirDrop/Files.
+    func exportLogs() -> URL? {
+        let header = """
+        VerseByVerse Logs
+        Version: \(AppFunctions.versionString() ?? "unknown")
+        Channel: \(AppFunctions.channel)
+        Exported: \(Self.timestampFormatter.string(from: Date()))
+
+        """
+
+        let fileName = "VerseByVerse-logs-\(Self.fileTimestampFormatter.string(from: Date())).log"
+        let exportURL = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
+
+        do {
+            try (header + readAllLogs()).write(to: exportURL, atomically: true, encoding: .utf8)
+            return exportURL
+        } catch {
+            return nil
+        }
     }
 }

@@ -5,7 +5,6 @@
 //  Created by Jaden Zaleski on 5/17/26.
 
 import Foundation
-import os
 
 protocol Store: AnyObject {
     var state: DataState { get set }
@@ -18,7 +17,7 @@ protocol Store: AnyObject {
 
 extension Store {
     /// Default logger for any store implementation
-    var log: Logger {
+    var log: AppLogger {
         AppLog.category(String(describing: self))
     }
 
