@@ -8,7 +8,10 @@
 // Configuration settings file format documentation can be found at:
 // https://developer.apple.com/documentation/xcode/adding-a-build-configuration-file-to-your-project
 
-// Marks this as the beta/TestFlight channel. Surfaced at runtime via
-// AppFunctions.channel for the "BETA" badge. Checked before DEBUG in code
-// because this configuration also defines DEBUG.
+API_BASE_URL = https:/$()/vbv-api-dev.jadenzaleski.com
+
+// LogLevel raw values: 0=trace, 1=debug, 2=info, 3=warning, 4=error, 5=fault.
+DEFAULT_LOG_LEVEL = 2
+
+// Marks this as the beta/TestFlight channel.
 SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) BETA

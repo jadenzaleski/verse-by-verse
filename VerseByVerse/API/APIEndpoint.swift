@@ -303,7 +303,7 @@ enum APIEndpoint: Hashable {
 
     var request: URLRequest {
         let log = AppLog.category("APIEndpoint.request")
-        let base = APIConfig.shared.baseURL.appendingPathComponent(path)
+        let base = AppFunctions.apiBaseURL.appendingPathComponent(path)
 
         var components = URLComponents(url: base, resolvingAgainstBaseURL: false)
         components?.queryItems = queryItems

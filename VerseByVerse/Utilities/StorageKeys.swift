@@ -8,7 +8,6 @@
 import SwiftUI
 
 enum StorageKeys: String, CaseIterable {
-    case logLevel
     case firstLaunch
     case lastUsedTranslation
 }

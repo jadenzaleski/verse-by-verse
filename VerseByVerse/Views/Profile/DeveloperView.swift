@@ -8,10 +8,8 @@
 import SwiftUI
 
 struct DeveloperView: View {
-    @State private var selectedURL: String = APIConfig.shared.baseURL.absoluteString
     @State private var showAlert = false
     @State private var alertMessage: String? = ""
-    @State private var selectedLogLevel: LogLevel = AppLog.minimumLevel
     @State private var logFileURL: URL?
     private let log = AppLog.category("DeveloperView")
 
@@ -28,6 +26,9 @@ struct DeveloperView: View {
             Section("Build") {
                 LabeledContent("Channel", value: channelName)
                 LabeledContent("Version", value: AppFunctions.versionString() ?? "—")
+                LabeledContent("API URL", value: AppFunctions.apiBaseURL.absoluteString)
+                    .lineLimit(1)
+                LabeledContent("Log Level", value: AppLog.minimumLevel.displayName)
             }
 
             Button("Clear Logs") {
@@ -53,29 +54,6 @@ struct DeveloperView: View {
                 }
             } label: {
                 Text("API Healthcheck")
-            }
-
-            Picker("API URL", selection: $selectedURL) {
-                ForEach(APIConfig.shared.urls, id: \.self) { url in
-                    Text(url).tag(url)
-                        .lineLimit(1)
-                }
-            }
-            .onChange(of: selectedURL) { _, newValue in
-                if let url = URL(string: newValue) {
-                    APIConfig.shared.baseURL = url
-                }
-
-                UserStore.shared.logout()
-            }
-
-            Picker("Log Level", selection: $selectedLogLevel) {
-                ForEach(LogLevel.allCases, id: \.self) { level in
-                    Text(level.displayName).tag(level)
-                }
-            }
-            .onChange(of: selectedLogLevel) { _, newValue in
-                AppLog.setMinimumLevel(newValue)
             }
 
             NavigationLink {

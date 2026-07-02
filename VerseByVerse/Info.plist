@@ -2,8 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
+	<key>API_BASE_URL</key>
+	<string>$(API_BASE_URL)</string>
+	<key>DEFAULT_LOG_LEVEL</key>
+	<string>$(DEFAULT_LOG_LEVEL)</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Montserrat-VariableFont_wght.ttf</string>

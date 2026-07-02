@@ -48,30 +48,18 @@ enum LogLevel: Int, Comparable, CaseIterable {
 enum AppLog {
     static let subsystem = "com.jadenzaleski.vbv"
 
-    /// Read the persisted minimum level from UserDefaults if present,
-    /// otherwise provide a sensible default based on build configuration.
-    private static var persistedMinimumLevel: LogLevel {
-        if let raw = UserDefaults.standard.object(forKey: StorageKeys.logLevel.rawValue) as? Int,
-           let level = LogLevel(rawValue: raw)
-        {
-            return level
-        }
-        #if DEBUG
-            return .debug
-        #else
+    /// The minimum level for this build, resolved at compile time from the
+    /// active build configuration's `DEFAULT_LOG_LEVEL` xcconfig setting
+    /// (injected via Info.plist), falling back to `.info` if unset or invalid.
+    static let minimumLevel: LogLevel = {
+        guard let raw = Bundle.main.object(forInfoDictionaryKey: "DEFAULT_LOG_LEVEL") as? String,
+              let value = Int(raw),
+              let level = LogLevel(rawValue: value)
+        else {
             return .info
-        #endif
-    }
-
-    static var minimumLevel: LogLevel = persistedMinimumLevel {
-        didSet {
-            UserDefaults.standard.set(minimumLevel.rawValue, forKey: StorageKeys.logLevel.rawValue)
         }
-    }
-
-    static func setMinimumLevel(_ level: LogLevel) {
-        minimumLevel = level
-    }
+        return level
+    }()
 
     /// Returns a category-scoped logger. The category is preserved in both the
     /// unified log (os.Logger) and the persisted, exportable log file.
