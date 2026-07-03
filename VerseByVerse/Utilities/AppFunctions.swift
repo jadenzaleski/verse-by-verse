@@ -7,7 +7,9 @@
 
 import SwiftUI
 
-enum AppFunctions {
+/// Pure build/bundle info reads, no UI — safe to call from any thread, so it
+/// opts out of the project's default MainActor isolation.
+nonisolated enum AppFunctions {
     /// The API base URL for this build, resolved at compile time from the active
     /// build configuration's `API_BASE_URL` xcconfig setting (injected via Info.plist).
     static let apiBaseURL: URL = {

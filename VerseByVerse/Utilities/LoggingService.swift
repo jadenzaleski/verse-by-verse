@@ -7,7 +7,10 @@
 
 import Foundation
 
-final class LoggingService {
+/// File I/O only, self-synchronized via its own background queue — safe to call
+/// from any thread, so it opts out of the project's default MainActor isolation.
+/// All stored properties are immutable and of `Sendable` types.
+final nonisolated class LoggingService: Sendable {
     static let shared = LoggingService()
     private static let timestampFormatter = ISO8601DateFormatter()
     /// Filename-safe timestamp (no colons) for rotated and exported files.
@@ -119,6 +122,12 @@ final class LoggingService {
     /// suitable for the share sheet, returning its URL. The file is named so it's
     /// recognizable when received via Mail/Messages/AirDrop/Files.
     func exportLogs() -> URL? {
+        exportLogs(contents: readAllLogs())
+    }
+
+    /// Same as ``exportLogs()``, but reuses log contents the caller already read
+    /// instead of hitting disk a second time.
+    func exportLogs(contents: String) -> URL? {
         let header = """
         VerseByVerse Logs
         Version: \(AppFunctions.versionString() ?? "unknown")
@@ -131,7 +140,7 @@ final class LoggingService {
         let exportURL = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
 
         do {
-            try (header + readAllLogs()).write(to: exportURL, atomically: true, encoding: .utf8)
+            try (header + contents).write(to: exportURL, atomically: true, encoding: .utf8)
             return exportURL
         } catch {
             return nil

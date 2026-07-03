@@ -131,7 +131,7 @@ struct ProfileView: View {
                 NavigationLink {
                     SettingsView()
                 } label: {
-                    Image(systemName: "gearshape.fill")
+                    Image(systemName: "gear")
                 }
             }
         }

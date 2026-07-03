@@ -33,7 +33,11 @@ struct DeveloperView: View {
 
             Button("Clear Logs") {
                 LoggingService.shared.clearLogs()
-                logFileURL = LoggingService.shared.exportLogs()
+                Task {
+                    logFileURL = await Task.detached(priority: .utility) {
+                        LoggingService.shared.exportLogs()
+                    }.value
+                }
             }
 
             Button("Clear Cache") {
@@ -69,8 +73,10 @@ struct DeveloperView: View {
             }
         }
         .navigationTitle("Developer")
-        .onAppear {
-            logFileURL = LoggingService.shared.exportLogs()
+        .task {
+            logFileURL = await Task.detached(priority: .utility) {
+                LoggingService.shared.exportLogs()
+            }.value
         }
         .alert(isPresented: $showAlert, content: {
             Alert(title: Text("Health Check"),
