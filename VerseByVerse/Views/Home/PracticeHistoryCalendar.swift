@@ -163,11 +163,19 @@ struct PracticeHistoryCalendar: View {
         let prevCount = calendar.range(of: .day, in: .month, for: previousMonth)!.count
         if offset > 0 {
             for day in (prevCount - offset + 1) ... prevCount {
-                if let currentDay = calendar.date(bySetting: .day, value: day, of: previousMonth) { days.append(currentDay) }
+                if let currentDay = calendar.date(
+                    bySetting: .day, value: day, of: previousMonth,
+                ) {
+                    days.append(currentDay)
+                }
             }
         }
         for day in range {
-            if let currentDay = calendar.date(byAdding: .day, value: day - 1, to: firstOfMonth) { days.append(currentDay) }
+            if let currentDay = calendar.date(
+                byAdding: .day, value: day - 1, to: firstOfMonth,
+            ) {
+                days.append(currentDay)
+            }
         }
         let needed = max(0, 42 - days.count)
         for day in 1 ... max(1, needed) {

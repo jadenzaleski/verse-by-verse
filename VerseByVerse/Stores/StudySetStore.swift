@@ -138,7 +138,10 @@ final class StudySetStore: Store {
     @discardableResult
     func removePassage(fromSet setId: Int, passageId: Int) async throws -> [Int] {
         do {
-            let response = try await APIService.shared.removePassageFromStudySet(studySetId: setId, passageId: passageId)
+            let response = try await APIService.shared.removePassageFromStudySet(
+                studySetId: setId,
+                passageId: passageId,
+            )
             let ids = response.passageIds
             setPassageIds[setId] = ids
             log.info("Removed passage \(passageId) from set \(setId)")

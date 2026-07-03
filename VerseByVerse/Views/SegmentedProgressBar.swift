@@ -78,7 +78,10 @@ struct SegmentedProgressBar: View {
     VStack(spacing: 24) {
         SegmentedProgressBar(totalSegments: 6, completedSegments: Int(completed))
         SegmentedProgressBar(totalSegments: 6, completedSegments: Int(completed), fill: .solid(.accentColor))
-        SegmentedProgressBar(totalSegments: 6, completedSegments: Int(completed), fill: .solid(.accentColor), highlightCurrent: true)
+        SegmentedProgressBar(totalSegments: 6,
+                             completedSegments: Int(completed),
+                             fill: .solid(.accentColor),
+                             highlightCurrent: true)
         Slider(value: $completed, in: 0 ... 6, step: 1)
     }
     .padding()

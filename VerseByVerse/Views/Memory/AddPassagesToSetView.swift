@@ -51,7 +51,9 @@ struct AddPassagesToSetView: View {
                                 }
                                 Spacer()
                                 Image(systemName: selected.contains(passage.id) ? "checkmark.circle.fill" : "circle")
-                                    .foregroundStyle(selected.contains(passage.id) ? Color.accentColor : Color.secondary)
+                                    .foregroundStyle(
+                                        selected.contains(passage.id) ? Color.accentColor
+                                        : Color.secondary)
                                     .font(.title2)
                             }
                             .contentShape(Rectangle())

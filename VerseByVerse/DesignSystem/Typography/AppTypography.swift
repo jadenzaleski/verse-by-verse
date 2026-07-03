@@ -1,5 +1,5 @@
 //
-//  Font.swift
+//  AppTypography.swift
 //  VerseByVerse
 //
 //  Created by Jaden Zaleski on 11/26/25.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-enum AppFontStyle {
+enum AppTypography {
     case largeTitle, title, title2, title3, headline, subheadline, body, callout, footnote, caption, caption2
 
     var relative: Font.TextStyle {
@@ -45,7 +45,7 @@ enum AppFontStyle {
 
 extension Font {
     static func app(
-        _ style: AppFontStyle = .body,
+        _ style: AppTypography = .body,
         size: CGFloat? = nil,
         weight: Font.Weight? = nil,
         italic: Bool = false,

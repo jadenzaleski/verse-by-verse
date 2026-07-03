@@ -342,7 +342,12 @@ struct SessionView: View {
             }
             phase = .done(nextReview: result.nextReview, correct: correct, total: total)
             let score = total > 0 ? Double(correct) / Double(total) : 0
-            log.info("Completed session \(session.id), \(correct)/\(total) correct, score=\(String(format: "%.2f", score)), rating=\(result.rating)")
+            log.info("""
+            Completed session \(session.id), 
+            \(correct)/\(total) correct, 
+            score=\(String(format: "%.2f", score)), 
+            rating=\(result.rating)
+            """)
         } catch {
             log.error("Failed to complete session: \(error)")
             phase = .failed(error.localizedDescription)

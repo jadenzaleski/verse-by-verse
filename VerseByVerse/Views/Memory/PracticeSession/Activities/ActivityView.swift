@@ -295,7 +295,10 @@ private struct FlowLayout: Layout {
         stability: 1.0, difficulty: 5.0, state: 0,
         reps: 0, lapses: 0, scheduledDays: 0, elapsedDays: 0,
     )
-    let verse = "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life."
+    let verse = """
+    For God so loved the world that he gave his one and only Son,
+    that whoever believes in him shall not perish but have eternal life.
+    """
     let words = verse.split(separator: " ", omittingEmptySubsequences: true)
     ActivityView(
         activityName: "Preview",

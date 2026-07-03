@@ -89,32 +89,37 @@ final class APIService {
 
             return apiResponse
         } catch {
-            // Preserve APIError thrown above
-            if let apiError = error as? APIError { throw apiError }
-
-            // Map explicit Task cancellation
-            if error is CancellationError {
-                throw APIError.cancelled
-            }
-
-            // Map common error types
-            if let urlError = error as? URLError {
-                if urlError.code == .cancelled {
-                    throw APIError.cancelled
-                } else {
-                    log.error("Network error: \(urlError)")
-                    throw APIError.network(underlying: urlError)
-                }
-            }
-
-            if let decodingError = error as? DecodingError {
-                log.error("Decoding error: \(decodingError)")
-                throw APIError.decoding(underlying: decodingError)
-            }
-
-            log.error("Unknown error: \(error)")
-            throw APIError.unknown(underlying: error)
+            throw mapError(error)
         }
+    }
+
+    /// Maps an arbitrary thrown error to an `APIError`, logging along the way.
+    private func mapError(_ error: Error) -> APIError {
+        // Preserve APIError thrown above
+        if let apiError = error as? APIError { return apiError }
+
+        // Map explicit Task cancellation
+        if error is CancellationError {
+            return .cancelled
+        }
+
+        // Map common error types
+        if let urlError = error as? URLError {
+            if urlError.code == .cancelled {
+                return .cancelled
+            } else {
+                log.error("Network error: \(urlError)")
+                return .network(underlying: urlError)
+            }
+        }
+
+        if let decodingError = error as? DecodingError {
+            log.error("Decoding error: \(decodingError)")
+            return .decoding(underlying: decodingError)
+        }
+
+        log.error("Unknown error: \(error)")
+        return .unknown(underlying: error)
     }
 
     /// Performs a request that returns no body (e.g. 204 No Content).

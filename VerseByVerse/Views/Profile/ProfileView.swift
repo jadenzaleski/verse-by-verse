@@ -135,7 +135,7 @@ struct ProfileView: View {
                 }
             }
         }
-        .toolbarTitleDisplayMode(.inlineLarge)
+        .toolbarTitleDisplayMode(.large)
         .task {
             await userStore.loadUser()
             if passageStore.userPassages.isEmpty {

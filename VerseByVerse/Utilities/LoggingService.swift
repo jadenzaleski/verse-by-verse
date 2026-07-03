@@ -73,7 +73,10 @@ final nonisolated class LoggingService: Sendable {
 
     private func cleanupOldLogs() {
         let keys: [URLResourceKey] = [.creationDateKey]
-        let files = (try? FileManager.default.contentsOfDirectory(at: logsDirectory, includingPropertiesForKeys: keys)) ?? []
+        let files = (try? FileManager.default.contentsOfDirectory(
+            at: logsDirectory,
+            includingPropertiesForKeys: keys,
+        )) ?? []
 
         let cutoff = Date().addingTimeInterval(-maxLogAge)
 
@@ -95,11 +98,17 @@ final nonisolated class LoggingService: Sendable {
     }
 
     func readAllLogs() -> String {
-        let files = (try? FileManager.default.contentsOfDirectory(at: logsDirectory, includingPropertiesForKeys: nil)) ?? []
-
+        let files = (try? FileManager.default.contentsOfDirectory(
+            at: logsDirectory,
+            includingPropertiesForKeys: nil,
+        )) ?? []
         // Rotated files use yyyyMMdd-HHmmss names, so ascending lexical sort = chronological.
         // Active file always goes last so the full log reads oldest → newest.
-        let rotated = files.filter { $0.lastPathComponent != "vbv.log" }.sorted { $0.lastPathComponent < $1.lastPathComponent }
+        let rotated = files.filter {
+            $0.lastPathComponent != "vbv.log"
+        }.sorted {
+            $0.lastPathComponent < $1.lastPathComponent
+        }
         let active = files.filter { $0.lastPathComponent == "vbv.log" }
         let ordered = rotated + active
 

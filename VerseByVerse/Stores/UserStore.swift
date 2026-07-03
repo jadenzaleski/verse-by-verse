@@ -22,7 +22,9 @@ final class UserStore: Store {
             object: nil,
             queue: .main,
         ) { [weak self] _ in
-            self?.logout()
+            MainActor.assumeIsolated {
+                self?.logout()
+            }
         }
     }
 

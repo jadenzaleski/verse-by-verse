@@ -20,6 +20,12 @@ identifier_name:
     - x
     - y
     - z
+    - xs
+    - sm
+    - md
+    - lg
+    - xl
+    - xxl
 
 type_body_length:
   warning: 400
@@ -28,6 +34,10 @@ type_body_length:
 function_body_length:
   warning: 100
   error: 200
+
+function_parameter_count:
+  warning: 6
+  error: 8
 
 file_length:
   warning: 750

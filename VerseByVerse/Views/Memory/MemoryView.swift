@@ -57,7 +57,6 @@ struct MemoryView: View {
             }
         }
         .scrollPosition($scrollPosition)
-        .scrollIndicators(.hidden)
         .refreshable {
             await passageStore.loadMyPassages()
             await studySetStore.loadMySets()
@@ -86,7 +85,7 @@ struct MemoryView: View {
                 }
             }
         }
-        .toolbarTitleDisplayMode(.inlineLarge)
+        .toolbarTitleDisplayMode(.large)
         .sheet(item: $activeSheet) { sheet in
             switch sheet {
             case .add:

@@ -33,7 +33,10 @@ extension APIService {
         try await fetchVoid(endpoint: APIEndpoint.deletePracticeSession(id: id))
     }
 
-    func completePracticeSession(id: Int, activities: [ActivityResult]) async throws -> CompletePracticeSessionResponse {
+    func completePracticeSession(
+        id: Int,
+        activities: [ActivityResult],
+    ) async throws -> CompletePracticeSessionResponse {
         log.debug("completePracticeSession called for session: \(id)")
         let response: APIResponse<CompletePracticeSessionResponse> = try await fetch(
             endpoint: APIEndpoint.completePracticeSession(id: id, activities: activities),

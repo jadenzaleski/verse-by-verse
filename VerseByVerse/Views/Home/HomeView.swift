@@ -63,21 +63,13 @@ struct HomeView: View {
                 PracticeHistoryCalendar(sessions: practiceStore.sessions)
                     .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
             }
-            .padding(.horizontal, 10)
+            .padding(.horizontal)
         }
         .refreshable {
             log.debug("refreshed")
             await userStore.loadUser(lookInCache: false)
             await passageStore.loadMyPassages()
             await practiceStore.loadMyPracticeSessions()
-        }
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Text("\(greeting) \(userStore.currentUser?.firstName ?? "")")
-                    .font(.app(.title2, weight: .semibold))
-                    .fixedSize()
-            }
-            .sharedBackgroundVisibility(.hidden)
         }
         .task {
             if passageStore.userPassages.isEmpty {
@@ -90,6 +82,9 @@ struct HomeView: View {
         .sheet(item: $practicePassage) { passage in
             SessionView(passage: passage)
         }
+        .navigationTitle("Home")
+        .toolbarTitleDisplayMode(.large)
+        .navigationSubtitle("\(greeting) \(userStore.currentUser?.firstName ?? "")!")
     }
 
     // MARK: - Up Next

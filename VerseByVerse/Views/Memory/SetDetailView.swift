@@ -142,7 +142,7 @@ struct SetDetailView: View {
     /// Ensures the passage objects are loaded in `PassageStore`, then refreshes this set's membership.
     private func refresh(lookInCache: Bool) async {
         await passageStore.loadMyPassages(lookInCache: lookInCache)
-        try? await studySetStore.loadPassageIds(forSet: currentSet.id)
+        _ = try? await studySetStore.loadPassageIds(forSet: currentSet.id)
     }
 
     private func deleteSet() async {
