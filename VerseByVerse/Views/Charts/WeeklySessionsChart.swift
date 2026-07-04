@@ -93,7 +93,7 @@ struct WeeklySessionsChart: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: AppSpacing.md) {
             Text("Practice Sessions")
                 .font(.app(.title3))
                 .padding(.horizontal)
@@ -130,11 +130,11 @@ struct WeeklySessionsChart: View {
     }
 
     private func statHeader(caption: String, value: String, unit: String, subtitle: String) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: AppSpacing.xxs) {
             Text(caption)
                 .font(.app(.caption, weight: .semibold))
                 .foregroundStyle(.secondary)
-            HStack(alignment: .firstTextBaseline, spacing: 4) {
+            HStack(alignment: .firstTextBaseline, spacing: AppSpacing.xs) {
                 Text(value)
                     .font(.app(.largeTitle, weight: .bold))
                     .contentTransition(.numericText())
@@ -164,18 +164,18 @@ struct WeeklySessionsChart: View {
                 y: .value("Sessions", day.count),
             )
             .interpolationMethod(.linear)
-            .foregroundStyle(Color.accentColor)
+            .foregroundStyle(Color.appAccent)
 
             PointMark(
                 x: .value("Day", day.date, unit: .day),
                 y: .value("Sessions", day.count),
             )
-            .foregroundStyle(Color.accentColor)
+            .foregroundStyle(Color.appAccent)
             .symbol {
                 // Opaque center masks the line passing behind the hollow dot.
                 Circle()
                     .fill(Color(.systemBackground))
-                    .overlay { Circle().stroke(Color.accentColor, lineWidth: 2) }
+                    .overlay { Circle().stroke(Color.appAccent, lineWidth: 2) }
                     .frame(width: 9, height: 9)
             }
 
@@ -188,7 +188,7 @@ struct WeeklySessionsChart: View {
                     x: .value("Day", selectedDay.date, unit: .day),
                     y: .value("Sessions", selectedDay.count),
                 )
-                .foregroundStyle(Color.accentColor)
+                .foregroundStyle(Color.appAccent)
                 .symbolSize(90)
             }
         }
@@ -235,6 +235,6 @@ struct WeeklySessionsChart: View {
 
     WeeklySessionsChart(sessions: sessions)
         .environment(\.font, .app())
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
         .padding()
 }

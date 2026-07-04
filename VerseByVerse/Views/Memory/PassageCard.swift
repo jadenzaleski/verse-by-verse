@@ -18,7 +18,7 @@ struct PassageCard: View {
     var style: PassageCardStyle = .full
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: AppSpacing.md) {
             HStack {
                 Text(passage.reference)
                     .font(.app(weight: .semibold))
@@ -48,7 +48,7 @@ struct PassageCard: View {
         }
         .padding()
         .frame(maxWidth: .infinity)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
         .task {
             if style == .full {
                 await bibleStore.fetchSelection(passage.selectionKey)

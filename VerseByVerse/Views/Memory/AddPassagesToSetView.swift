@@ -41,7 +41,7 @@ struct AddPassagesToSetView: View {
                             toggle(passage.id)
                         } label: {
                             HStack {
-                                VStack(alignment: .leading, spacing: 2) {
+                                VStack(alignment: .leading, spacing: AppSpacing.xxs) {
                                     Text(passage.reference)
                                         .font(.app(weight: .semibold))
                                         .foregroundStyle(.primary)
@@ -52,8 +52,9 @@ struct AddPassagesToSetView: View {
                                 Spacer()
                                 Image(systemName: selected.contains(passage.id) ? "checkmark.circle.fill" : "circle")
                                     .foregroundStyle(
-                                        selected.contains(passage.id) ? Color.accentColor
-                                        : Color.secondary)
+                                        selected.contains(passage.id) ? Color.appAccent
+                                            : Color.secondary,
+                                    )
                                     .font(.title2)
                             }
                             .contentShape(Rectangle())

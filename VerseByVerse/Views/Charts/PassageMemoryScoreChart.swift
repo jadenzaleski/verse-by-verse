@@ -274,7 +274,7 @@ struct PassageMemoryScoreChart: View {
                 }
             }
             .frame(height: 220)
-            .padding(.top, 10)
+            .padding(.top, AppSpacing.md)
         }
         .task(id: selectedDuration) {
             refreshMemoizedData()

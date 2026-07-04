@@ -75,12 +75,12 @@ struct SegmentedProgressBar: View {
 #Preview {
     @Previewable @State var completed: Double = 2
 
-    VStack(spacing: 24) {
+    VStack(spacing: AppSpacing.xxl) {
         SegmentedProgressBar(totalSegments: 6, completedSegments: Int(completed))
-        SegmentedProgressBar(totalSegments: 6, completedSegments: Int(completed), fill: .solid(.accentColor))
+        SegmentedProgressBar(totalSegments: 6, completedSegments: Int(completed), fill: .solid(.appAccent))
         SegmentedProgressBar(totalSegments: 6,
                              completedSegments: Int(completed),
-                             fill: .solid(.accentColor),
+                             fill: .solid(.appAccent),
                              highlightCurrent: true)
         Slider(value: $completed, in: 0 ... 6, step: 1)
     }

@@ -38,12 +38,12 @@ struct SetCard: View {
         VStack(alignment: .leading, spacing: 0) {
             SetMesh(colorPallette: colorPallette, colorShuffleSeed: colorShuffleSeed, positionSeed: positionSeed)
                 .aspectRatio(1, contentMode: .fit)
-                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: AppRadius.lg, style: .continuous))
 
             Group {
                 Text(title)
                     .font(.app(.callout, weight: .semibold))
-                    .padding(.top, 5)
+                    .padding(.top, AppSpacing.xs)
 
                 HStack {
                     Text("\(passageCount ?? 0) Passages")

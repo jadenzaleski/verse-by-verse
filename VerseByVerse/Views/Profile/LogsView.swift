@@ -14,7 +14,7 @@ struct LogsView: View {
 
     var body: some View {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: 2) {
+            LazyVStack(alignment: .leading, spacing: AppSpacing.xxs) {
                 ForEach(Array(logLines.enumerated()), id: \.offset) { _, line in
                     Text(line)
                         .font(.system(.caption2, design: .monospaced))

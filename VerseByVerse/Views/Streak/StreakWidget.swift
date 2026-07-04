@@ -80,8 +80,8 @@ struct StreakWidget: View {
                             }
                         }
                         .frame(minWidth: 22)
-                        .padding([.leading, .trailing], 5)
-                        .padding([.top, .bottom], 5)
+                        .padding([.leading, .trailing], AppSpacing.xs)
+                        .padding([.top, .bottom], AppSpacing.xs)
                         .overlay(
                             todaysDateInt == i + 1 ?
                                 TodayOutline(draw: drawTodayStroke) : nil,
@@ -92,7 +92,7 @@ struct StreakWidget: View {
                 Spacer()
                 // Now show the number with the icon
                 streakBadge()
-                    .padding(.trailing, 5)
+                    .padding(.trailing, AppSpacing.xs)
             }
             .padding()
             .onAppear {
@@ -152,7 +152,7 @@ struct StreakWidget: View {
         HStack(spacing: 0) {
             Image(systemName: "flame.fill")
                 .font(.app(.title))
-                .padding(.trailing, 3)
+                .padding(.trailing, AppSpacing.xs)
 //                .rotationEffect(.degrees(showBadge ? 0 : -10))
                 .opacity(showBadge ? 1 : 0)
                 .scaleEffect(showBadge ? 1.0 : 0.6)
@@ -195,7 +195,7 @@ private struct TodayOutline: View {
     var draw: CGFloat
 
     var body: some View {
-        RoundedRectangle(cornerRadius: 8)
+        RoundedRectangle(cornerRadius: AppRadius.sm)
             .trim(from: 0, to: max(0, min(1, draw)))
             .stroke(.tertiary, style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
             .animation(.easeInOut(duration: 1.5), value: draw)

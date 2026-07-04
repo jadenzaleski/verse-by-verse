@@ -186,5 +186,5 @@ struct SetMesh: View {
 #Preview {
     SetMesh(colorPallette: .forest, colorShuffleSeed: 1, positionSeed: 1)
         .aspectRatio(1, contentMode: .fit)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: AppRadius.lg, style: .continuous))
 }

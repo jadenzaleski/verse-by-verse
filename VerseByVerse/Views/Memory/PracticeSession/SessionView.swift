@@ -53,7 +53,7 @@ struct SessionView: View {
                 SegmentedProgressBar(
                     totalSegments: steps.count,
                     completedSegments: stepIndex,
-                    fill: .solid(.accentColor),
+                    fill: .solid(.appAccent),
                     highlightCurrent: true,
                 )
                 .padding(.horizontal)
@@ -84,7 +84,6 @@ struct SessionView: View {
                             }
                         } label: {
                             Image(systemName: "xmark")
-                                .font(.body.weight(.semibold))
                         }
                     }
                 }
@@ -150,7 +149,7 @@ struct SessionView: View {
     // MARK: - Non-activity phase views
 
     private var loadingView: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: AppSpacing.lg) {
             ProgressView()
                 .scaleEffect(1.5)
             Text("Starting session...")
@@ -161,7 +160,7 @@ struct SessionView: View {
     }
 
     private var completingView: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: AppSpacing.lg) {
             ProgressView()
                 .scaleEffect(1.5)
             Text("Saving your progress...")
@@ -172,14 +171,14 @@ struct SessionView: View {
     }
 
     private func doneView(nextReview: Date?, correct: Int, total: Int) -> some View {
-        VStack(spacing: 24) {
+        VStack(spacing: AppSpacing.xxl) {
             Spacer()
 
             Image(systemName: correct == total ? "star.circle.fill" : "checkmark.circle.fill")
                 .font(.system(size: 64))
                 .foregroundStyle(correct == total ? .yellow : .green)
 
-            VStack(spacing: 8) {
+            VStack(spacing: AppSpacing.sm) {
                 Text("Session Complete!")
                     .font(.app(.title2, weight: .semibold))
 
@@ -194,7 +193,7 @@ struct SessionView: View {
                     .foregroundStyle(.secondary)
 
                 if let nextReview {
-                    HStack(spacing: 6) {
+                    HStack(spacing: AppSpacing.sm) {
                         Image(systemName: "calendar")
                         Text("Next review: \(nextReview.formatted(.dateTime.month(.abbreviated).day().year()))")
                     }
@@ -209,19 +208,19 @@ struct SessionView: View {
                 Text("Done")
                     .font(.app(.body, weight: .semibold))
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(Color.accentColor, in: RoundedRectangle(cornerRadius: 14))
+                    .padding(.vertical, AppRadius.md)
+                    .background(Color.appAccent, in: RoundedRectangle(cornerRadius: AppRadius.md))
                     .foregroundStyle(.white)
             }
             .buttonStyle(.plain)
-            .padding(.horizontal, 20)
+            .padding(.horizontal, AppSpacing.xl)
 
             Spacer()
         }
     }
 
     private func failedView(message: String) -> some View {
-        VStack(spacing: 20) {
+        VStack(spacing: AppSpacing.xl) {
             Spacer()
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 48))

@@ -107,7 +107,7 @@ struct ProfileView: View {
                         .foregroundStyle(.ultraThinMaterial)
                 }
 
-                VStack(spacing: 4) {
+                VStack(spacing: AppSpacing.xs) {
                     if let email = user?.email {
                         Text(email)
                             .font(.app(.subheadline))
@@ -121,7 +121,7 @@ struct ProfileView: View {
                 lifetimeStats
 
                 WeeklySessionsChart(sessions: practiceStore.sessions)
-                    .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
+                    .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
             }
             .padding(.horizontal)
         }
@@ -155,7 +155,10 @@ struct ProfileView: View {
         let sessions = practiceStore.sessions
         let avgScore = PracticeStats.averageScore(sessions)
 
-        LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible())], spacing: 10) {
+        LazyVGrid(
+            columns: [GridItem(.flexible(), spacing: AppSpacing.md), GridItem(.flexible())],
+            spacing: AppSpacing.md,
+        ) {
             statCard(value: "\(passages.count)", label: "Passages", systemImage: "book.closed")
             statCard(value: "\(PracticeStats.completedCount(sessions))",
                      label: "Sessions", systemImage: "checkmark.circle")
@@ -174,7 +177,7 @@ struct ProfileView: View {
         systemImage: String,
         valueStyle: AnyShapeStyle = AnyShapeStyle(.primary),
     ) -> some View {
-        VStack(spacing: 5) {
+        VStack(spacing: AppSpacing.xs) {
             Image(systemName: systemImage)
                 .font(.app(.caption))
                 .foregroundStyle(.secondary)
@@ -188,7 +191,7 @@ struct ProfileView: View {
         }
         .frame(maxWidth: .infinity)
         .padding()
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
     }
 
     private var streakGradient: LinearGradient {

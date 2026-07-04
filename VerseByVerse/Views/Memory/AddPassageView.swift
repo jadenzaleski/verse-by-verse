@@ -140,7 +140,6 @@ struct AddPassageView: View {
                             dismiss()
                         } label: {
                             Image(systemName: "xmark")
-                                .scaleEffect(0.80)
                         }
                     }
                     ToolbarItem(placement: .confirmationAction) {
@@ -479,7 +478,7 @@ extension AddPassageView {
                     } label: {
                         Text("\(limits.min)")
                             .padding()
-                            .padding(.leading, 10)
+                            .padding(.leading, AppSpacing.md)
                             .glassEffect(.regular.interactive())
                             .glassEffectUnion(id: 2, namespace: namespace)
                     }
@@ -495,7 +494,7 @@ extension AddPassageView {
                     } label: {
                         Text("\(limits.max)")
                             .padding()
-                            .padding(.trailing, 10)
+                            .padding(.trailing, AppSpacing.md)
                             .glassEffect(.regular.interactive())
                             .glassEffectUnion(id: 2, namespace: namespace)
                     }
@@ -520,7 +519,7 @@ extension AddPassageView {
             .disabled(!isRefValid)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 10)
+        .padding(.vertical, AppSpacing.md)
         .padding(.horizontal)
         .transition(.move(edge: .bottom).combined(with: .opacity))
     }

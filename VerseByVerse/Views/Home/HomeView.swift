@@ -57,11 +57,11 @@ struct HomeView: View {
         ScrollView {
             VStack(spacing: 15) {
                 StreakWidget(completed: weeklyCompletion, streakCount: currentStreak)
-                    .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
+                    .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
                 upNextSection
-                    .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
+                    .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
                 PracticeHistoryCalendar(sessions: practiceStore.sessions)
-                    .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
+                    .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
             }
             .padding(.horizontal)
         }
@@ -99,7 +99,7 @@ struct HomeView: View {
             if passageStore.state == .loading, passageStore.userPassages.isEmpty {
                 HStack {
                     ProgressView()
-                        .padding(.trailing, 4)
+                        .padding(.trailing, AppSpacing.xs)
                     Text("Loading passages…")
                         .font(.app(.subheadline))
                         .foregroundStyle(.secondary)
@@ -107,11 +107,11 @@ struct HomeView: View {
                 }
                 .padding()
             } else if passageStore.userPassages.isEmpty {
-                HStack(spacing: 10) {
+                HStack(spacing: AppSpacing.md) {
                     Image(systemName: "book.closed")
                         .font(.title3)
                         .foregroundStyle(.secondary)
-                    VStack(alignment: .leading, spacing: 2) {
+                    VStack(alignment: .leading, spacing: AppSpacing.xxs) {
                         Text("No passages yet")
                             .font(.app(.body, weight: .semibold))
                         Text("Add one in the Memory tab to get started.")
@@ -122,11 +122,11 @@ struct HomeView: View {
                 }
                 .padding()
             } else if duePassages.isEmpty {
-                HStack(spacing: 10) {
+                HStack(spacing: AppSpacing.md) {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.title3)
                         .foregroundStyle(.green)
-                    VStack(alignment: .leading, spacing: 2) {
+                    VStack(alignment: .leading, spacing: AppSpacing.xxs) {
                         Text("All caught up!")
                             .font(.app(.body, weight: .semibold))
                         Text("No passages due for review.")
@@ -142,8 +142,8 @@ struct HomeView: View {
                         if index > 0 {
                             Divider().padding(.horizontal)
                         }
-                        HStack(spacing: 12) {
-                            VStack(alignment: .leading, spacing: 3) {
+                        HStack(spacing: AppSpacing.md) {
+                            VStack(alignment: .leading, spacing: AppSpacing.xs) {
                                 Text(passage.reference)
                                     .font(.app(.body, weight: .semibold))
                                 Text(badgeText(for: passage))
@@ -156,20 +156,20 @@ struct HomeView: View {
                             } label: {
                                 Text("Practice")
                                     .font(.app(.subheadline, weight: .semibold))
-                                    .padding(.horizontal, 14)
-                                    .padding(.vertical, 7)
-                                    .background(Color.accentColor, in: Capsule())
+                                    .padding(.horizontal, AppSpacing.lg)
+                                    .padding(.vertical, AppSpacing.sm)
+                                    .background(Color.appAccent, in: Capsule())
                                     .foregroundStyle(.white)
                             }
                             .buttonStyle(.plain)
                         }
                         .padding(.horizontal)
-                        .padding(.vertical, 12)
+                        .padding(.vertical, AppSpacing.md)
                         .contentShape(Rectangle())
                         .onTapGesture { practicePassage = passage }
                     }
                 }
-                .padding(.bottom, 4)
+                .padding(.bottom, AppSpacing.xs)
             }
         }
     }
@@ -183,7 +183,7 @@ struct HomeView: View {
     }
 
     private func badgeColor(for passage: UserPassage) -> Color {
-        if passage.reps == 0 { return .accentColor }
+        if passage.reps == 0 { return .appAccent }
         let days = Int(Date().timeIntervalSince(passage.nextPractice ?? Date()) / 86400)
         return days < 1 ? .orange : .red
     }

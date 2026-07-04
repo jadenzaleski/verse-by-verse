@@ -33,7 +33,7 @@ struct SetDetailView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 10) {
+            VStack(spacing: AppSpacing.md) {
                 SetMesh(colorPallette: currentSet.meshTheme.palette,
                         colorShuffleSeed: currentSet.meshColorSeed,
                         positionSeed: currentSet.meshPositionSeed)
@@ -60,7 +60,7 @@ struct SetDetailView: View {
                             .font(.app(.subheadline))
                             .foregroundStyle(.secondary)
                     }
-                    .padding(.top, 8)
+                    .padding(.top, AppSpacing.sm)
 
                     ForEach(passages) { passage in
                         NavigationLink(destination: PassageDetailView(passage: passage)) {

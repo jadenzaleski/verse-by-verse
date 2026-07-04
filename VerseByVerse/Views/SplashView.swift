@@ -57,7 +57,7 @@ struct SplashView: View {
                 Text(statusText)
                 Text(AppFunctions.versionString() ?? "")
             }
-            .font(.footnote)
+            .font(.app(.footnote))
             .foregroundStyle(.secondary)
         }
     }

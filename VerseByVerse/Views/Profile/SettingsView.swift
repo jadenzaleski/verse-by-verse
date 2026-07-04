@@ -97,13 +97,13 @@ struct SettingsView: View {
 
             Section {
                 Label {
-                    HStack(spacing: 8) {
+                    HStack(spacing: AppSpacing.sm) {
                         Text(AppFunctions.versionString() ?? "")
                         if let badge = AppFunctions.channel.badge {
                             Text(badge)
                                 .font(.app(.caption2, weight: .semibold))
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
+                                .padding(.horizontal, AppSpacing.sm)
+                                .padding(.vertical, AppSpacing.xxs)
                                 .background(Capsule().fill(AppFunctions.channel.badgeColor.opacity(0.15)))
                                 .foregroundStyle(AppFunctions.channel.badgeColor)
                         }
@@ -251,7 +251,6 @@ private struct NameEditorView: View {
                         dismiss()
                     } label: {
                         Image(systemName: "xmark")
-                            .scaleEffect(0.80)
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
@@ -328,7 +327,6 @@ private struct EmailEditorView: View {
                         dismiss()
                     } label: {
                         Image(systemName: "xmark")
-                            .scaleEffect(0.80)
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
@@ -415,7 +413,6 @@ private struct PasswordEditorView: View {
                         dismiss()
                     } label: {
                         Image(systemName: "xmark")
-                            .scaleEffect(0.80)
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {

@@ -44,14 +44,14 @@ struct NumericRefTextField: View {
             .keyboardType(.numberPad)
             .textFieldStyle(.plain)
             .frame(width: width)
-            .padding(.vertical, 5)
+            .padding(.vertical, AppSpacing.xs)
             .background(
                 RoundedRectangle(cornerRadius: 5, style: .continuous)
                     .fill(Color(.secondarySystemBackground)),
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 5, style: .continuous)
-                    .stroke(isFocused ? Color.accentColor.opacity(0.8) : Color.secondary.opacity(0.2), lineWidth: 1.5),
+                    .stroke(isFocused ? Color.appAccent.opacity(0.8) : Color.secondary.opacity(0.2), lineWidth: 1.5),
             )
             .multilineTextAlignment(.center)
             .focused($focus, equals: thisField)

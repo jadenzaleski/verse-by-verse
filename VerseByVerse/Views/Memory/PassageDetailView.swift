@@ -41,7 +41,7 @@ struct PassageDetailView: View {
 
     private var dueDateColor: Color {
         guard let next = passage.nextPractice else {
-            return passage.state == 0 ? .accentColor : .green
+            return passage.state == 0 ? .appAccent : .green
         }
         let days = Calendar.current.dateComponents(
             [.day],
@@ -55,14 +55,14 @@ struct PassageDetailView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 12) {
+            VStack(spacing: AppSpacing.md) {
                 memoryScoreCard
                 practiceCard
                 historyCard
                 passageTextCard
             }
-            .padding(.horizontal, 10)
-            .padding(.bottom, 24)
+            .padding(.horizontal, AppSpacing.md)
+            .padding(.bottom, AppSpacing.xxl)
         }
         .fullScreenCover(isPresented: $showPractice) {
             SessionView(passage: passage)
@@ -80,7 +80,7 @@ struct PassageDetailView: View {
     // MARK: - Cards
 
     private var memoryScoreCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: AppSpacing.md) {
             Text("Memory Score")
                 .font(.app(.title2))
 
@@ -99,7 +99,7 @@ struct PassageDetailView: View {
                     .foregroundStyle(.secondary)
             }
 
-            HStack(spacing: 20) {
+            HStack(spacing: AppSpacing.xl) {
                 statItem(label: "Reviews", value: "\(passage.reps)")
                 statItem(label: "Missed", value: "\(passage.lapses)")
                 if let last = passage.lastPracticed {
@@ -109,15 +109,15 @@ struct PassageDetailView: View {
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
     }
 
     private var practiceCard: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: AppSpacing.lg) {
             Text("Practice")
                 .font(.app(.title2))
 
-            HStack(spacing: 6) {
+            HStack(spacing: AppSpacing.sm) {
                 Circle()
                     .fill(dueDateColor)
                     .frame(width: 8, height: 8)
@@ -132,14 +132,14 @@ struct PassageDetailView: View {
                 Text("Start Practice")
                     .font(.app(.body, weight: .semibold))
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(Color.accentColor, in: RoundedRectangle(cornerRadius: 14))
+                    .padding(.vertical, AppRadius.md)
+                    .background(Color.appAccent, in: RoundedRectangle(cornerRadius: AppRadius.md))
                     .foregroundStyle(.white)
             }
             .buttonStyle(.plain)
 
             if let next = passage.nextPractice {
-                HStack(spacing: 6) {
+                HStack(spacing: AppSpacing.sm) {
                     Image(systemName: "calendar")
                     Text("Next review: \(next.formatted(.dateTime.month(.abbreviated).day().year()))")
                 }
@@ -149,13 +149,13 @@ struct PassageDetailView: View {
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
     }
 
     @ViewBuilder
     private var historyCard: some View {
         if passageSessions.isEmpty {
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: AppSpacing.sm) {
                 Text("History")
                     .font(.app(.title2))
                 Text("No practice history yet.")
@@ -164,7 +164,7 @@ struct PassageDetailView: View {
             }
             .padding()
             .frame(maxWidth: .infinity, alignment: .leading)
-            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
+            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
         } else {
             VStack(alignment: .leading, spacing: 0) {
                 Text("History")
@@ -174,20 +174,20 @@ struct PassageDetailView: View {
                     .padding()
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
+            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
         }
     }
 
     private var passageTextCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: AppSpacing.md) {
             HStack {
                 Text("Passage")
                     .font(.app(.title2))
                 Spacer()
                 Text(passage.translation)
                     .font(.app(.caption, weight: .semibold))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
+                    .padding(.horizontal, AppSpacing.sm)
+                    .padding(.vertical, AppSpacing.xs)
                     .background(Color.secondary.opacity(0.15), in: Capsule())
                     .foregroundStyle(.secondary)
             }
@@ -196,11 +196,11 @@ struct PassageDetailView: View {
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
     }
 
     private func statItem(label: String, value: String) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: AppSpacing.xxs) {
             Text(value)
                 .font(.app(.body, weight: .semibold))
             Text(label)

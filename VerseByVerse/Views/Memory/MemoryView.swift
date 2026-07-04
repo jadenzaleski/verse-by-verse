@@ -39,14 +39,14 @@ struct MemoryView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 8) {
+            VStack(spacing: AppSpacing.sm) {
                 Picker("View", selection: $selectedTab) {
                     ForEach(MemoryTopTab.allCases, id: \.self) { tab in
                         Text(tab.rawValue).tag(tab)
                     }
                 }
                 .pickerStyle(.segmented)
-                .padding(.bottom, 10)
+                .padding(.bottom, AppSpacing.md)
 
                 content
                     .transaction { $0.animation = nil }
@@ -126,7 +126,7 @@ struct MemoryView: View {
     private var content: some View {
         switch selectedTab {
         case .passages:
-            VStack(spacing: 10) {
+            VStack(spacing: AppSpacing.md) {
                 if filteredPassages.isEmpty {
                     emptyMessage(
                         hasQuery
@@ -143,7 +143,7 @@ struct MemoryView: View {
             }
 
         case .sets:
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: AppSpacing.md) {
                 if !hasQuery {
                     let recentSets = filteredSets
                         .sorted { $0.modifiedAt > $1.modifiedAt }
@@ -153,7 +153,7 @@ struct MemoryView: View {
                         Text("Recent")
                             .font(.app(.title3))
                         ScrollView(.horizontal, showsIndicators: false) {
-                            LazyHStack(spacing: 20) {
+                            LazyHStack(spacing: AppSpacing.xl) {
                                 ForEach(Array(recentSets)) { set in
                                     NavigationLink(destination: SetDetailView(set: set)) {
                                         SetCard(

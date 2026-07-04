@@ -73,14 +73,14 @@ struct ActivityView: View {
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    HStack(spacing: 8) {
+                VStack(alignment: .leading, spacing: AppSpacing.xl) {
+                    HStack(spacing: AppSpacing.sm) {
                         Text(activityName)
                             .font(.app(.caption, weight: .semibold))
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 5)
-                            .background(Color.accentColor.opacity(0.15), in: Capsule())
-                            .foregroundStyle(Color.accentColor)
+                            .padding(.horizontal, AppSpacing.md)
+                            .padding(.vertical, AppSpacing.xs)
+                            .background(Color.appAccent.opacity(0.15), in: Capsule())
+                            .foregroundStyle(Color.appAccent)
                         Spacer()
                         Text(passage.reference)
                             .font(.app(.caption))
@@ -97,8 +97,8 @@ struct ActivityView: View {
                         }
                     }
                 }
-                .padding(20)
-                .padding(.top, 8)
+                .padding(AppSpacing.xl)
+                .padding(.top, AppSpacing.sm)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
             .onTapGesture { fieldFocused = true }
@@ -117,9 +117,9 @@ struct ActivityView: View {
                     }
                 }
 
-            VStack(spacing: 10) {
+            VStack(spacing: AppSpacing.md) {
                 if isComplete {
-                    HStack(spacing: 4) {
+                    HStack(spacing: AppSpacing.xs) {
                         Text("\(correctCount) of \(totalToType)")
                             .font(.app(.body, weight: .semibold))
                             .foregroundStyle(scoreColor)
@@ -134,8 +134,8 @@ struct ActivityView: View {
                         Text("Continue")
                             .font(.app(.body, weight: .semibold))
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .background(Color.accentColor, in: RoundedRectangle(cornerRadius: 14))
+                            .padding(.vertical, AppRadius.md)
+                            .background(Color.appAccent, in: RoundedRectangle(cornerRadius: AppRadius.md))
                             .foregroundStyle(.white)
                     }
                     .buttonStyle(.plain)
@@ -150,7 +150,7 @@ struct ActivityView: View {
                         } label: {
                             Label("Show keyboard", systemImage: "keyboard")
                                 .font(.app(.caption))
-                                .foregroundStyle(Color.accentColor)
+                                .foregroundStyle(Color.appAccent)
                         }
                     }
                 }
@@ -164,8 +164,8 @@ struct ActivityView: View {
                     .foregroundStyle(.tertiary)
                 #endif
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
+            .padding(.horizontal, AppSpacing.xl)
+            .padding(.vertical, AppSpacing.lg)
         }
         .onAppear { fieldFocused = true }
     }
@@ -217,7 +217,7 @@ private struct TypedWordCell: View {
                 if typedChar != nil {
                     Text(String(word.dropFirst()))
                         .font(.app(.body))
-                        .foregroundStyle(correctness == true ? Color.green : Color.red)
+                        .foregroundStyle(correctness == true ? Color.appSuccess : Color.appDestructive)
                 } else if showHint {
                     Text(String(word.dropFirst()))
                         .font(.app(.body))
@@ -234,9 +234,9 @@ private struct TypedWordCell: View {
 
     private var boxColor: Color {
         if let correct = correctness {
-            return correct ? .green : .red
+            return correct ? .appSuccess : .appDestructive
         }
-        return isCurrent ? Color.accentColor.opacity(0.6) : Color.secondary.opacity(0.2)
+        return isCurrent ? Color.appAccent.opacity(0.6) : Color.secondary.opacity(0.2)
     }
 }
 

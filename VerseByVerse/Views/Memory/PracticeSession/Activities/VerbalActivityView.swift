@@ -18,14 +18,14 @@ struct VerbalActivityView: View {
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    HStack(spacing: 8) {
+                VStack(alignment: .leading, spacing: AppSpacing.xl) {
+                    HStack(spacing: AppSpacing.sm) {
                         Text("Verbal Recite")
                             .font(.app(.caption, weight: .semibold))
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 5)
-                            .background(Color.accentColor.opacity(0.15), in: Capsule())
-                            .foregroundStyle(Color.accentColor)
+                            .padding(.horizontal, AppSpacing.md)
+                            .padding(.vertical, AppSpacing.xs)
+                            .background(Color.appAccent.opacity(0.15), in: Capsule())
+                            .foregroundStyle(Color.appAccent)
                         Spacer()
                         Text(passage.reference)
                             .font(.app(.caption))
@@ -37,10 +37,10 @@ struct VerbalActivityView: View {
                             .font(.app(.body))
                             .transition(.opacity)
                     } else {
-                        VStack(spacing: 16) {
+                        VStack(spacing: AppSpacing.lg) {
                             Image(systemName: "mic.fill")
                                 .font(.system(size: 48))
-                                .foregroundStyle(Color.accentColor)
+                                .foregroundStyle(Color.appAccent)
 
                             Text("Say the verse aloud from memory.")
                                 .font(.app(.title3, weight: .semibold))
@@ -52,16 +52,16 @@ struct VerbalActivityView: View {
                                 .multilineTextAlignment(.center)
                         }
                         .frame(maxWidth: .infinity)
-                        .padding(.top, 24)
+                        .padding(.top, AppSpacing.xxl)
                     }
                 }
-                .padding(20)
-                .padding(.top, 8)
+                .padding(AppSpacing.xl)
+                .padding(.top, AppSpacing.sm)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .animation(.easeIn(duration: 0.2), value: revealed)
             }
 
-            VStack(spacing: 12) {
+            VStack(spacing: AppSpacing.md) {
                 if !revealed {
                     Button {
                         withAnimation { revealed = true }
@@ -69,20 +69,23 @@ struct VerbalActivityView: View {
                         Text("Reveal")
                             .font(.app(.body, weight: .semibold))
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .background(Color.accentColor, in: RoundedRectangle(cornerRadius: 14))
+                            .padding(.vertical, AppRadius.md)
+                            .background(Color.appAccent, in: RoundedRectangle(cornerRadius: AppRadius.md))
                             .foregroundStyle(.white)
                     }
                     .buttonStyle(.plain)
                 } else {
-                    HStack(spacing: 12) {
+                    HStack(spacing: AppSpacing.md) {
                         Button { onContinue(0, 1) } label: {
                             Label("Missed it", systemImage: "xmark")
                                 .font(.app(.body, weight: .semibold))
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, 14)
-                                .background(Color.red.opacity(0.12), in: RoundedRectangle(cornerRadius: 14))
-                                .foregroundStyle(.red)
+                                .padding(.vertical, AppRadius.md)
+                                .background(
+                                    Color.appDestructive.opacity(0.12),
+                                    in: RoundedRectangle(cornerRadius: AppRadius.md),
+                                )
+                                .foregroundStyle(Color.appDestructive)
                         }
                         .buttonStyle(.plain)
 
@@ -90,8 +93,8 @@ struct VerbalActivityView: View {
                             Label("Got it", systemImage: "checkmark")
                                 .font(.app(.body, weight: .semibold))
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, 14)
-                                .background(Color.green, in: RoundedRectangle(cornerRadius: 14))
+                                .padding(.vertical, AppRadius.md)
+                                .background(Color.appSuccess, in: RoundedRectangle(cornerRadius: AppRadius.md))
                                 .foregroundStyle(.white)
                         }
                         .buttonStyle(.plain)
@@ -106,8 +109,8 @@ struct VerbalActivityView: View {
                     .foregroundStyle(.tertiary)
                 #endif
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 12)
+            .padding(.horizontal, AppSpacing.xl)
+            .padding(.top, AppSpacing.md)
             .padding(.bottom, 30)
         }
     }

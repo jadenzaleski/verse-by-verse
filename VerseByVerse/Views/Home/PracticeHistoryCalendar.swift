@@ -26,7 +26,7 @@ struct PracticeHistoryCalendar: View {
     }
 
     private let calendar = Calendar.current
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 10), count: 7)
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: AppSpacing.md), count: 7)
     private let monthsToShow = 12
 
     var body: some View {
@@ -58,7 +58,7 @@ struct PracticeHistoryCalendar: View {
                     withAnimation { scrollID = currentOffset - 1 }
                 } label: {
                     Image(systemName: "chevron.left")
-                        .foregroundStyle(Color.accentColor)
+                        .foregroundStyle(Color.appAccent)
                 }
                 .disabled(currentOffset <= -monthsToShow)
 
@@ -71,7 +71,7 @@ struct PracticeHistoryCalendar: View {
                     withAnimation { scrollID = currentOffset + 1 }
                 } label: {
                     Image(systemName: "chevron.right")
-                        .foregroundStyle(Color.accentColor)
+                        .foregroundStyle(Color.appAccent)
                 }
                 .disabled(currentOffset >= 0)
             }
@@ -82,7 +82,7 @@ struct PracticeHistoryCalendar: View {
                 ForEach(0 ..< 7, id: \.self) { i in Text(dayLabels[i]) }
             }
             .font(.app(.caption, weight: .semibold))
-            .padding(.top, 5)
+            .padding(.top, AppSpacing.xs)
             .padding(.horizontal)
 
             ScrollView(.horizontal, showsIndicators: false) {
@@ -99,7 +99,7 @@ struct PracticeHistoryCalendar: View {
             .scrollTargetBehavior(.viewAligned)
             .scrollPosition(id: $scrollID)
 
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: AppSpacing.xxs) {
                 if let day = selectedDayStart {
                     Text(day, format: .dateTime.weekday(.wide).month().day())
                         .font(.app(.subheadline, weight: .semibold))
@@ -138,7 +138,7 @@ struct PracticeHistoryCalendar: View {
                                 .font(.app(.caption, weight: isToday ? .heavy : .medium))
                                 .foregroundStyle(inCurrentMonth ? .primary : .tertiary)
                             if isSelected {
-                                Circle().stroke(Color.accentColor, lineWidth: 3)
+                                Circle().stroke(Color.appAccent, lineWidth: 3)
                             }
                         }
                     }
@@ -147,7 +147,7 @@ struct PracticeHistoryCalendar: View {
             }
         }
         .padding(.horizontal)
-        .padding(.vertical, 5)
+        .padding(.vertical, AppSpacing.xs)
     }
 
     private func daysInMonth(for date: Date) -> [Date] {
@@ -188,7 +188,7 @@ struct PracticeHistoryCalendar: View {
 
     private func heatmapColor(for count: Int) -> Color {
         guard count > 0 else { return Color.primary.opacity(0.05) }
-        return Color.accentColor.opacity(min(Double(count) * 0.2 + 0.1, 1.0))
+        return Color.appAccent.opacity(min(Double(count) * 0.2 + 0.1, 1.0))
     }
 }
 
@@ -212,6 +212,6 @@ struct PracticeHistoryCalendar: View {
 
     PracticeHistoryCalendar(sessions: sessions)
         .environment(\.font, .app())
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
         .padding()
 }

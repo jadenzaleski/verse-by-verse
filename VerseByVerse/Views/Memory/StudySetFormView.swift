@@ -58,14 +58,14 @@ struct StudySetFormView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
+                VStack(alignment: .leading, spacing: AppSpacing.xxl) {
                     Text("Appearance")
                         .font(.app(.headline))
 
                     ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 16) {
+                        HStack(spacing: AppSpacing.lg) {
                             ForEach(MeshTheme.allCases) { theme in
-                                VStack(spacing: 8) {
+                                VStack(spacing: AppSpacing.sm) {
                                     SetCard(
                                         title: name.isEmpty ? theme.displayName : name,
                                         positionSeed: positionSeed,
@@ -74,9 +74,9 @@ struct StudySetFormView: View {
                                     )
                                     .frame(width: 120)
                                     .overlay(alignment: .top) {
-                                        RoundedRectangle(cornerRadius: 20)
+                                        RoundedRectangle(cornerRadius: AppRadius.lg)
                                             .stroke(
-                                                selectedTheme == theme ? Color.accentColor : Color.clear,
+                                                selectedTheme == theme ? Color.appAccent : Color.clear,
                                                 lineWidth: 3,
                                             )
                                             .frame(width: 120, height: 120)
@@ -86,23 +86,23 @@ struct StudySetFormView: View {
                                     }
 
                                     Image(systemName: selectedTheme == theme ? "checkmark.circle.fill" : "circle")
-                                        .foregroundStyle(selectedTheme == theme ? Color.accentColor : .secondary)
+                                        .foregroundStyle(selectedTheme == theme ? Color.appAccent : .secondary)
                                 }
                             }
                         }
-                        .padding(.horizontal, 2)
+                        .padding(.horizontal, AppSpacing.xxs)
                     }
 
                     Divider()
 
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: AppSpacing.sm) {
                         Text("Name")
                             .font(.app(.headline))
 
                         TextField("e.g. The Gospels", text: $name)
                             .font(.app())
                             .padding()
-                            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
+                            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.md))
                             .submitLabel(.next)
 
                         if name.count > 100 {
@@ -112,7 +112,7 @@ struct StudySetFormView: View {
                         }
                     }
 
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: AppSpacing.sm) {
                         Text("Description")
                             .font(.app(.headline))
 
@@ -120,14 +120,14 @@ struct StudySetFormView: View {
                             .font(.app())
                             .lineLimit(3 ... 5)
                             .padding()
-                            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
+                            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.md))
                     }
 
                     if let error = studySetStore.lastError {
                         Text(error.localizedDescription)
                             .font(.app(.caption))
                             .foregroundStyle(.red)
-                            .padding(.top, 4)
+                            .padding(.top, AppSpacing.xs)
                     }
                 }
                 .padding()

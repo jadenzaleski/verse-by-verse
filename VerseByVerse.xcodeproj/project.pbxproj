@@ -104,23 +104,23 @@
 		D75E3E842ED2653A00B0DDC8 = {
 			isa = PBXGroup;
 			children = (
-				D7C1682B2FF5F4CB004E58A1 /* Local.xcconfig */,
-				D75908AB2FEC8DA700C07D82 /* .claude */,
 				D75908AC2FEC8DA700C07D82 /* .gitignore */,
 				D75908AD2FEC8DA700C07D82 /* .swiftformat */,
-				D75908AE2FEC8DA700C07D82 /* .swiftlint.yml */,
 				D75908B52FEC8DCE00C07D82 /* .release-please-manifest.json */,
-				D75908972FEC8CE400C07D82 /* .github */,
-				D74FF5E22FD647DF00166624 /* Beta.xcconfig */,
-				D74FF5E02FD6418D00166624 /* Release.xcconfig */,
-				D74FF5DE2FD2738600166624 /* Debug.xcconfig */,
-				D75E3E8F2ED2653A00B0DDC8 /* VerseByVerse */,
-				D75E3E8E2ED2653A00B0DDC8 /* Products */,
-				D75907CC2FEC8C4200C07D82 /* ci_scripts */,
+				D75907CF2FEC8C4200C07D82 /* release-please-config.json */,
 				D75907CD2FEC8C4200C07D82 /* CLAUDE.md */,
 				D75907CE2FEC8C4200C07D82 /* README.md */,
-				D75907CF2FEC8C4200C07D82 /* release-please-config.json */,
 				D75908392FEC8C4200C07D82 /* version.txt */,
+				D74FF5E22FD647DF00166624 /* Beta.xcconfig */,
+				D74FF5DE2FD2738600166624 /* Debug.xcconfig */,
+				D7C1682B2FF5F4CB004E58A1 /* Local.xcconfig */,
+				D74FF5E02FD6418D00166624 /* Release.xcconfig */,
+				D75908AE2FEC8DA700C07D82 /* .swiftlint.yml */,
+				D75908AB2FEC8DA700C07D82 /* .claude */,
+				D75908972FEC8CE400C07D82 /* .github */,
+				D75907CC2FEC8C4200C07D82 /* ci_scripts */,
+				D75E3E8E2ED2653A00B0DDC8 /* Products */,
+				D75E3E8F2ED2653A00B0DDC8 /* VerseByVerse */,
 			);
 			sourceTree = "<group>";
 		};
