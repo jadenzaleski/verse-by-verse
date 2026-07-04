@@ -161,7 +161,17 @@ struct AddPassageView: View {
                 }
                 .safeAreaInset(edge: .bottom) {
                     if focusedField != nil {
-                        keyboardBar()
+                        PassageKeyboardBar(
+                            namespace: namespace,
+                            limits: currentFieldLimits,
+                            isRefValid: isRefValid,
+                            onPrevious: focusPrevious,
+                            onNext: focusNext,
+                            onSetValue: setFieldValue,
+                        ) {
+                            focusedField = nil
+                            Task { await loadBibleSelection() }
+                        }
                     }
                 }
                 .task {
@@ -184,10 +194,18 @@ struct AddPassageView: View {
     private var formView: some View {
         Form {
             Section {
-                pickers
-                referenceInputGroup
+                PassagePickers(selectedTranslation: $selectedTranslation, selectedBook: $selectedBook)
+                ReferenceInputGroup(
+                    selectedBook: selectedBook,
+                    startChapter: $startChapter,
+                    startVerse: $startVerse,
+                    endChapter: $endChapter,
+                    endVerse: $endVerse,
+                    focusedField: $focusedField,
+                    onAdvance: focusNext,
+                )
             } footer: {
-                referenceFooter
+                ReferenceFooterView(startChapter: startChapter, selectedBook: selectedBook)
             }
 
             Section {
@@ -211,7 +229,9 @@ struct AddPassageView: View {
                         .foregroundStyle(.secondary)
                 }
             } header: {
-                headerView
+                PassageReferenceHeader(reference: reference, isRefValid: isRefValid) {
+                    Task { await loadBibleSelection() }
+                }
             } footer: {
                 Text(" ")
             }
@@ -283,245 +303,6 @@ struct AddPassageView: View {
             // but we keep the view open so the user can see it or retry.
             AppLog.category("AddPassageView").error("Failed to add passage: \(error.localizedDescription)")
         }
-    }
-}
-
-// MARK: Helper Views
-
-extension AddPassageView {
-    @ViewBuilder
-    private var headerView: some View {
-        let isLoading = bibleStore.state == .loading
-        let disableRefresh = !isRefValid || isLoading
-        HStack {
-            Text(reference.isEmpty ? "Reference" : reference)
-                .textCase(.uppercase)
-            Spacer()
-            Button {
-                Task { await loadBibleSelection() }
-            } label: {
-                Image(systemName: "arrow.clockwise")
-                    .symbolEffect(.bounce, value: isLoading)
-            }
-            .buttonStyle(.plain)
-            .disabled(disableRefresh)
-        }
-        .font(.app(.footnote, weight: .semibold))
-    }
-
-    @ViewBuilder
-    private var pickers: some View {
-        Picker("Translation", selection: $selectedTranslation) {
-            if let available = bibleStore.availableTranslations, !available.isEmpty {
-                ForEach(available, id: \.abbreviation) { translation in
-                    Text(translation.abbreviation).tag(translation.abbreviation)
-                }
-                // Ensure the current selection is always a valid tag to avoid Picker warnings
-                if !available.contains(where: { $0.abbreviation == selectedTranslation }) {
-                    Text(selectedTranslation).tag(selectedTranslation)
-                }
-            } else {
-                // While loading or if list is empty, ensure the selection has a tag
-                Text(selectedTranslation).tag(selectedTranslation)
-            }
-        }
-        .pickerStyle(.menu)
-        Picker("Book", selection: $selectedBook) {
-            ForEach(bibleStore.bibleBooksOrder, id: \.self) { book in
-                Text(book).tag(book)
-            }
-        }
-        .pickerStyle(.menu)
-    }
-
-    private var referenceInputGroup: some View {
-        HStack {
-            Text("Ref")
-            Spacer(minLength: 3)
-            NumericRefTextField(
-                placeholder: "Ch",
-                text: $startChapter,
-                isFocused: focusedField == .startChapter,
-                focus: $focusedField,
-                thisField: .startChapter,
-                submitLabel: .next,
-                width: 50,
-            ) {
-                focusNext()
-            } onChange: { newValue in
-                var value = newValue.filter(\.isNumber)
-                if value.count > 3 { value = String(value.prefix(3)) }
-                if let chapter = Int(value) {
-                    let max = bibleStore.chapterCount(for: selectedBook)
-                    if chapter > max { value = String(max) }
-                }
-                startChapter = value
-            }
-            Text(":")
-            NumericRefTextField(
-                placeholder: "Vs",
-                text: $startVerse,
-                isFocused: focusedField == .startVerse,
-                focus: $focusedField,
-                thisField: .startVerse,
-                submitLabel: .next,
-                width: 50,
-            ) {
-                focusNext()
-            } onChange: { newValue in
-                var value = newValue.filter(\.isNumber)
-                if value.count > 3 { value = String(value.prefix(3)) }
-                if let chapter = Int(startChapter), let verse = Int(value) {
-                    let max = bibleStore.verseCount(for: selectedBook, chapter: chapter)
-                    if verse > max { value = String(max) }
-                }
-                startVerse = value
-            }
-            Text("–")
-            NumericRefTextField(
-                placeholder: "Ch",
-                text: $endChapter,
-                isFocused: focusedField == .endChapter,
-                focus: $focusedField,
-                thisField: .endChapter,
-                submitLabel: .next,
-                width: 50,
-            ) {
-                focusNext()
-            } onChange: { newValue in
-                var value = newValue.filter(\.isNumber)
-                if value.count > 3 { value = String(value.prefix(3)) }
-                if let chapter = Int(value) {
-                    let max = bibleStore.chapterCount(for: selectedBook)
-                    if chapter > max { value = String(max) }
-                }
-                endChapter = value
-            }
-            Text(":")
-            NumericRefTextField(
-                placeholder: "Vs",
-                text: $endVerse,
-                isFocused: focusedField == .endVerse,
-                focus: $focusedField,
-                thisField: .endVerse,
-                submitLabel: .done,
-                width: 50,
-            ) {
-                focusNext()
-            } onChange: { newValue in
-                var value = newValue.filter(\.isNumber)
-                if value.count > 3 { value = String(value.prefix(3)) }
-                if let chapter = Int(endChapter.isEmpty ? startChapter : endChapter),
-                   let verse = Int(value)
-                {
-                    let max = bibleStore.verseCount(for: selectedBook, chapter: chapter)
-                    if verse > max { value = String(max) }
-                }
-                endVerse = value
-            }
-        }
-    }
-
-    private var referenceFooter: some View {
-        HStack {
-            if bibleStore.state == .loading {
-                ProgressView()
-                    .scaleEffect(0.5)
-                    .frame(width: 15, height: 15)
-            }
-
-            if let chapter = Int(startChapter), bibleStore.isValidChapter(chapter, for: selectedBook) {
-                let verseCount = bibleStore.verseCount(for: selectedBook, chapter: chapter)
-                Text("\(selectedBook) \(chapter) has \(verseCount) verses.")
-            } else {
-                let chapterCount = bibleStore.chapterCount(for: selectedBook)
-                Text("\(selectedBook) has \(chapterCount) chapters.")
-            }
-        }
-        .font(.app(.footnote))
-    }
-
-    func keyboardBar() -> some View {
-        let limits = currentFieldLimits
-        return HStack {
-            GlassEffectContainer {
-                HStack {
-                    Button {
-                        focusPrevious()
-                    } label: {
-                        Image(systemName: "chevron.left")
-                            .frame(width: 20, height: 20)
-                            .padding()
-                            .glassEffect(.regular.interactive())
-                            .glassEffectUnion(id: 1, namespace: namespace)
-                    }
-
-                    Button {
-                        focusNext()
-                    } label: {
-                        Image(systemName: "chevron.left")
-                            .rotationEffect(.degrees(180))
-                            .frame(width: 20, height: 20)
-                            .padding()
-                            .glassEffect(.regular.interactive())
-                            .glassEffectUnion(id: 1, namespace: namespace)
-                    }
-                }
-            }
-
-            Spacer()
-
-            GlassEffectContainer {
-                HStack {
-                    Button {
-                        setFieldValue(limits.min)
-                    } label: {
-                        Text("\(limits.min)")
-                            .padding()
-                            .padding(.leading, AppSpacing.md)
-                            .glassEffect(.regular.interactive())
-                            .glassEffectUnion(id: 2, namespace: namespace)
-                    }
-
-                    Divider()
-                        .frame(width: 1, height: 20)
-                        .overlay(.separator)
-                        .glassEffect()
-                        .glassEffectUnion(id: 2, namespace: namespace)
-
-                    Button {
-                        setFieldValue(limits.max)
-                    } label: {
-                        Text("\(limits.max)")
-                            .padding()
-                            .padding(.trailing, AppSpacing.md)
-                            .glassEffect(.regular.interactive())
-                            .glassEffectUnion(id: 2, namespace: namespace)
-                    }
-                }
-            }
-
-            Button {
-                withAnimation {
-                    focusedField = nil
-                    Task {
-                        await loadBibleSelection()
-                    }
-                }
-            } label: {
-                Image(systemName: "checkmark")
-                    .frame(width: 20, height: 20)
-                    .padding()
-                    .glassEffect(.regular.interactive())
-                    .glassEffectUnion(id: 3, namespace: namespace)
-            }
-            .tint(isRefValid ? .green : .primary)
-            .disabled(!isRefValid)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, AppSpacing.md)
-        .padding(.horizontal)
-        .transition(.move(edge: .bottom).combined(with: .opacity))
     }
 }
 
