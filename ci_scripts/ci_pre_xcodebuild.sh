@@ -24,3 +24,13 @@ echo "ci_pre_xcodebuild: version.txt='$RAW' -> MARKETING_VERSION='$MARKETING', C
 cd "$CI_PRIMARY_REPOSITORY_PATH"
 agvtool new-marketing-version "$MARKETING"
 agvtool new-version -all "$BUILD"
+
+# Generate the gitignored Secrets.xcconfig from Xcode Cloud's environment so
+# the app key never lives in the repo. Set APP_API_KEY in the Xcode Cloud
+# workflow's environment variables (same value as the API's APP_API_KEY).
+if [ -n "${APP_API_KEY:-}" ]; then
+    printf 'APP_API_KEY = %s\n' "$APP_API_KEY" > "$CI_PRIMARY_REPOSITORY_PATH/Secrets.xcconfig"
+    echo "ci_pre_xcodebuild: wrote Secrets.xcconfig"
+else
+    echo "ci_pre_xcodebuild: WARNING - APP_API_KEY not set; app will send no X-App-Key"
+fi

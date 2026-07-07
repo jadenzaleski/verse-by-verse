@@ -21,6 +21,18 @@ nonisolated enum AppFunctions {
         return url
     }()
 
+    /// Static key sent as `X-App-Key` to the Bible API. Injected at build time
+    /// from the gitignored `Secrets.xcconfig` (see Secrets.example.xcconfig);
+    /// `nil` when unset. Never log this value.
+    static let appAPIKey: String? = {
+        guard let raw = Bundle.main.object(forInfoDictionaryKey: "APP_API_KEY") as? String,
+              !raw.isEmpty
+        else {
+            return nil
+        }
+        return raw
+    }()
+
     static func versionString() -> String? {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
         let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String

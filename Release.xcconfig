@@ -12,3 +12,6 @@ API_BASE_URL = https:/$()/vbv-api-dev.jadenzaleski.com
 
 // LogLevel raw values: 0=trace, 1=debug, 2=info, 3=warning, 4=error, 5=fault.
 DEFAULT_LOG_LEVEL = 2
+
+// Optional local secrets (gitignored); see Secrets.example.xcconfig.
+#include? "Secrets.xcconfig"
