@@ -35,7 +35,7 @@
             parallelizable = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "D75E3E992ED2653B00B0DDC8"
+               BlueprintIdentifier = "D7C16A8B2FFD45DE004E58A1"
                BuildableName = "VerseByVerseTests.xctest"
                BlueprintName = "VerseByVerseTests"
                ReferencedContainer = "container:VerseByVerse.xcodeproj">

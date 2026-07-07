@@ -6,6 +6,20 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		D7C16A992FFD4665004E58A1 /* FSRS in Frameworks */ = {isa = PBXBuildFile; productRef = D7C16A982FFD4665004E58A1 /* FSRS */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D7C16A902FFD45DE004E58A1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D75E3E852ED2653A00B0DDC8 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D75E3E8C2ED2653A00B0DDC8;
+			remoteInfo = VerseByVerse;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		D74FF5DE2FD2738600166624 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		D74FF5E02FD6418D00166624 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
@@ -25,6 +39,7 @@
 		D75908B52FEC8DCE00C07D82 /* .release-please-manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = ".release-please-manifest.json"; path = "/Users/jaden/Desktop/Developer/Apps/VerseByVerse/.release-please-manifest.json"; sourceTree = "<absolute>"; };
 		D75E3E8D2ED2653A00B0DDC8 /* VerseByVerse.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VerseByVerse.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D7C1682B2FF5F4CB004E58A1 /* Local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Local.xcconfig; sourceTree = "<group>"; };
+		D7C16A8C2FFD45DE004E58A1 /* VerseByVerseTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VerseByVerseTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -46,10 +61,23 @@
 			path = VerseByVerse;
 			sourceTree = "<group>";
 		};
+		D7C16A8D2FFD45DE004E58A1 /* VerseByVerseTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = VerseByVerseTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		D75E3E8A2ED2653A00B0DDC8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D7C16A992FFD4665004E58A1 /* FSRS in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D7C16A892FFD45DE004E58A1 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -119,6 +147,7 @@
 				D75908AB2FEC8DA700C07D82 /* .claude */,
 				D75908972FEC8CE400C07D82 /* .github */,
 				D75907CC2FEC8C4200C07D82 /* ci_scripts */,
+				D7C16A8D2FFD45DE004E58A1 /* VerseByVerseTests */,
 				D75E3E8E2ED2653A00B0DDC8 /* Products */,
 				D75E3E8F2ED2653A00B0DDC8 /* VerseByVerse */,
 			);
@@ -128,6 +157,7 @@
 			isa = PBXGroup;
 			children = (
 				D75E3E8D2ED2653A00B0DDC8 /* VerseByVerse.app */,
+				D7C16A8C2FFD45DE004E58A1 /* VerseByVerseTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -154,10 +184,34 @@
 			);
 			name = VerseByVerse;
 			packageProductDependencies = (
+				D7C16A982FFD4665004E58A1 /* FSRS */,
 			);
 			productName = VerseByVerse;
 			productReference = D75E3E8D2ED2653A00B0DDC8 /* VerseByVerse.app */;
 			productType = "com.apple.product-type.application";
+		};
+		D7C16A8B2FFD45DE004E58A1 /* VerseByVerseTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D7C16A922FFD45DE004E58A1 /* Build configuration list for PBXNativeTarget "VerseByVerseTests" */;
+			buildPhases = (
+				D7C16A882FFD45DE004E58A1 /* Sources */,
+				D7C16A892FFD45DE004E58A1 /* Frameworks */,
+				D7C16A8A2FFD45DE004E58A1 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D7C16A912FFD45DE004E58A1 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				D7C16A8D2FFD45DE004E58A1 /* VerseByVerseTests */,
+			);
+			name = VerseByVerseTests;
+			packageProductDependencies = (
+			);
+			productName = VerseByVerseTests;
+			productReference = D7C16A8C2FFD45DE004E58A1 /* VerseByVerseTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -166,11 +220,15 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2610;
+				LastSwiftUpdateCheck = 2660;
 				LastUpgradeCheck = 2620;
 				TargetAttributes = {
 					D75E3E8C2ED2653A00B0DDC8 = {
 						CreatedOnToolsVersion = 26.1.1;
+					};
+					D7C16A8B2FFD45DE004E58A1 = {
+						CreatedOnToolsVersion = 26.6;
+						TestTargetID = D75E3E8C2ED2653A00B0DDC8;
 					};
 				};
 			};
@@ -183,18 +241,29 @@
 			);
 			mainGroup = D75E3E842ED2653A00B0DDC8;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				D7C16A972FFD4665004E58A1 /* XCRemoteSwiftPackageReference "swift-fsrs" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = D75E3E8E2ED2653A00B0DDC8 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				D75E3E8C2ED2653A00B0DDC8 /* VerseByVerse */,
+				D7C16A8B2FFD45DE004E58A1 /* VerseByVerseTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		D75E3E8B2ED2653A00B0DDC8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D7C16A8A2FFD45DE004E58A1 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -252,7 +321,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D7C16A882FFD45DE004E58A1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D7C16A912FFD45DE004E58A1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D75E3E8C2ED2653A00B0DDC8 /* VerseByVerse */;
+			targetProxy = D7C16A902FFD45DE004E58A1 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		D7590B9D2FECB8B800C07D82 /* Beta */ = {
@@ -669,6 +753,95 @@
 			};
 			name = Local;
 		};
+		D7C16A932FFD45DE004E58A1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = A6M3VA78J8;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jadenzaleski.VerseByVerseTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VerseByVerse.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/VerseByVerse";
+			};
+			name = Debug;
+		};
+		D7C16A942FFD45DE004E58A1 /* Local */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = A6M3VA78J8;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jadenzaleski.VerseByVerseTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VerseByVerse.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/VerseByVerse";
+			};
+			name = Local;
+		};
+		D7C16A952FFD45DE004E58A1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = A6M3VA78J8;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jadenzaleski.VerseByVerseTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VerseByVerse.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/VerseByVerse";
+			};
+			name = Release;
+		};
+		D7C16A962FFD45DE004E58A1 /* Beta */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = A6M3VA78J8;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jadenzaleski.VerseByVerseTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VerseByVerse.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/VerseByVerse";
+			};
+			name = Beta;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -694,7 +867,37 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		D7C16A922FFD45DE004E58A1 /* Build configuration list for PBXNativeTarget "VerseByVerseTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D7C16A932FFD45DE004E58A1 /* Debug */,
+				D7C16A942FFD45DE004E58A1 /* Local */,
+				D7C16A952FFD45DE004E58A1 /* Release */,
+				D7C16A962FFD45DE004E58A1 /* Beta */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		D7C16A972FFD4665004E58A1 /* XCRemoteSwiftPackageReference "swift-fsrs" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/open-spaced-repetition/swift-fsrs";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		D7C16A982FFD4665004E58A1 /* FSRS */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D7C16A972FFD4665004E58A1 /* XCRemoteSwiftPackageReference "swift-fsrs" */;
+			productName = FSRS;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = D75E3E852ED2653A00B0DDC8 /* Project object */;
 }
