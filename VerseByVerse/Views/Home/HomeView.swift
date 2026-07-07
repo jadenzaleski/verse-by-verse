@@ -5,15 +5,16 @@
 //  Created by Jaden Zaleski on 11/25/25.
 //
 
+import SwiftData
 import SwiftUI
 
 struct HomeView: View {
     @Environment(UserStore.self) private var userStore
-    @Environment(PassageStore.self) private var passageStore
-    @Environment(PracticeStore.self) private var practiceStore
+    @Query private var passages: [Passage]
+    @Query private var sessions: [PracticeSession]
     private let log = AppLog.category("HomeView")
 
-    @State private var practicePassage: UserPassage?
+    @State private var practicePassage: Passage?
 
     private var greeting: String {
         let hour = Calendar.current.component(.hour, from: Date())
@@ -25,13 +26,14 @@ struct HomeView: View {
         }
     }
 
-    private var duePassages: [UserPassage] {
+    private var duePassages: [Passage] {
         let now = Date()
-        let overdue = passageStore.userPassages
-            .filter { $0.nextPractice != nil && $0.nextPractice! <= now }
+        let overdue = passages
+            .filter { passage in
+                if let next = passage.nextPractice { next <= now } else { false }
+            }
             .sorted { ($0.nextPractice ?? now) < ($1.nextPractice ?? now) }
-        let new = passageStore.userPassages
-            .filter { $0.reps == 0 && $0.nextPractice == nil }
+        let new = passages.filter { $0.reps == 0 && $0.nextPractice == nil }
         return overdue + new
     }
 
@@ -39,45 +41,34 @@ struct HomeView: View {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         let weekday = calendar.component(.weekday, from: today)
-        let startOfWeek = calendar.date(byAdding: .day, value: -(weekday - 1), to: today)!
+        guard let startOfWeek = calendar.date(byAdding: .day, value: -(weekday - 1), to: today) else {
+            return Array(repeating: false, count: 7)
+        }
         return (0 ..< 7).map { offset in
-            let day = calendar.date(byAdding: .day, value: offset, to: startOfWeek)!
-            guard day <= today else { return false }
-            return practiceStore.sessions.contains {
+            guard let day = calendar.date(byAdding: .day, value: offset, to: startOfWeek), day <= today else {
+                return false
+            }
+            return sessions.contains {
                 $0.isCompleted && calendar.isDate($0.startDate, inSameDayAs: day)
             }
         }
     }
 
     private var currentStreak: Int {
-        PracticeStats.currentStreak(from: practiceStore.sessions)
+        PracticeStats.currentStreak(from: sessions)
     }
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 15) {
+            VStack(spacing: AppSpacing.lg) {
                 StreakWidget(completed: weeklyCompletion, streakCount: currentStreak)
                     .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
                 upNextSection
                     .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
-                PracticeHistoryCalendar(sessions: practiceStore.sessions)
+                PracticeHistoryCalendar(sessions: sessions)
                     .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
             }
             .padding(.horizontal)
-        }
-        .refreshable {
-            log.debug("refreshed")
-            await userStore.loadUser(lookInCache: false)
-            await passageStore.loadMyPassages()
-            await practiceStore.loadMyPracticeSessions()
-        }
-        .task {
-            if passageStore.userPassages.isEmpty {
-                await passageStore.loadMyPassages()
-            }
-            if practiceStore.sessions.isEmpty {
-                await practiceStore.loadMyPracticeSessions()
-            }
         }
         .sheet(item: $practicePassage) { passage in
             SessionView(passage: passage)
@@ -96,17 +87,7 @@ struct HomeView: View {
                 .padding(.horizontal)
                 .padding(.top)
 
-            if passageStore.state == .loading, passageStore.userPassages.isEmpty {
-                HStack {
-                    ProgressView()
-                        .padding(.trailing, AppSpacing.xs)
-                    Text("Loading passages…")
-                        .font(.app(.subheadline))
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                }
-                .padding()
-            } else if passageStore.userPassages.isEmpty {
+            if passages.isEmpty {
                 HStack(spacing: AppSpacing.md) {
                     Image(systemName: "book.closed")
                         .font(.title3)
@@ -142,18 +123,18 @@ struct HomeView: View {
                         if index > 0 {
                             Divider().padding(.horizontal)
                         }
-                        HStack(spacing: AppSpacing.md) {
-                            VStack(alignment: .leading, spacing: AppSpacing.xs) {
-                                Text(passage.reference)
-                                    .font(.app(.body, weight: .semibold))
-                                Text(badgeText(for: passage))
-                                    .font(.app(.caption))
-                                    .foregroundStyle(badgeColor(for: passage))
-                            }
-                            Spacer()
-                            Button {
-                                practicePassage = passage
-                            } label: {
+                        Button {
+                            practicePassage = passage
+                        } label: {
+                            HStack(spacing: AppSpacing.md) {
+                                VStack(alignment: .leading, spacing: AppSpacing.xs) {
+                                    Text(passage.reference)
+                                        .font(.app(.body, weight: .semibold))
+                                    Text(badgeText(for: passage))
+                                        .font(.app(.caption))
+                                        .foregroundStyle(badgeColor(for: passage))
+                                }
+                                Spacer()
                                 Text("Practice")
                                     .font(.app(.subheadline, weight: .semibold))
                                     .padding(.horizontal, AppSpacing.lg)
@@ -161,12 +142,11 @@ struct HomeView: View {
                                     .background(Color.appAccent, in: Capsule())
                                     .foregroundStyle(.white)
                             }
-                            .buttonStyle(.plain)
+                            .padding(.horizontal)
+                            .padding(.vertical, AppSpacing.md)
+                            .contentShape(Rectangle())
                         }
-                        .padding(.horizontal)
-                        .padding(.vertical, AppSpacing.md)
-                        .contentShape(Rectangle())
-                        .onTapGesture { practicePassage = passage }
+                        .buttonStyle(.plain)
                     }
                 }
                 .padding(.bottom, AppSpacing.xs)
@@ -176,13 +156,13 @@ struct HomeView: View {
 
     // MARK: - Helpers
 
-    private func badgeText(for passage: UserPassage) -> String {
+    private func badgeText(for passage: Passage) -> String {
         if passage.reps == 0 { return "New" }
         let days = Int(Date().timeIntervalSince(passage.nextPractice ?? Date()) / 86400)
         return days < 1 ? "Due today" : "\(days)d overdue"
     }
 
-    private func badgeColor(for passage: UserPassage) -> Color {
+    private func badgeColor(for passage: Passage) -> Color {
         if passage.reps == 0 { return .appAccent }
         let days = Int(Date().timeIntervalSince(passage.nextPractice ?? Date()) / 86400)
         return days < 1 ? .orange : .red
@@ -192,9 +172,8 @@ struct HomeView: View {
 #Preview {
     NavigationStack {
         HomeView()
+            .modelContainer(PreviewData.container)
             .environment(\.font, .app())
             .environment(UserStore.shared)
-            .environment(PassageStore.shared)
-            .environment(PracticeStore.shared)
     }
 }

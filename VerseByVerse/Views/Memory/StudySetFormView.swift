@@ -16,15 +16,14 @@ struct StudySetFormView: View {
     var colorSeed: Int
     var confirmSystemImage: String
     var confirmTint: Color
-    var onConfirm: (_ name: String, _ description: String?, _ theme: MeshTheme) async throws -> Void
+    var onConfirm: (_ name: String, _ description: String?, _ theme: MeshTheme) throws -> Void
 
-    @Environment(StudySetStore.self) private var studySetStore
     @Environment(\.dismiss) private var dismiss
 
     @State private var name: String
     @State private var description: String
     @State private var selectedTheme: MeshTheme
-    @State private var isWorking = false
+    @State private var errorMessage: String?
 
     init(
         title: String,
@@ -35,7 +34,7 @@ struct StudySetFormView: View {
         colorSeed: Int = 7,
         confirmSystemImage: String,
         confirmTint: Color,
-        onConfirm: @escaping (_ name: String, _ description: String?, _ theme: MeshTheme) async throws -> Void,
+        onConfirm: @escaping (_ name: String, _ description: String?, _ theme: MeshTheme) throws -> Void,
     ) {
         self.title = title
         self.initialName = initialName
@@ -123,8 +122,8 @@ struct StudySetFormView: View {
                             .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.md))
                     }
 
-                    if let error = studySetStore.lastError {
-                        Text(error.localizedDescription)
+                    if let errorMessage {
+                        Text(errorMessage)
                             .font(.app(.caption))
                             .foregroundStyle(.red)
                             .padding(.top, AppSpacing.xs)
@@ -141,33 +140,32 @@ struct StudySetFormView: View {
                     } label: {
                         Image(systemName: "xmark")
                     }
+                    .accessibilityLabel("Cancel")
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
-                        Task { await confirm() }
+                        confirm()
                     } label: {
                         Image(systemName: confirmSystemImage)
                     }
+                    .accessibilityLabel("Save set")
                     .tint(confirmTint)
                     .buttonStyle(.glassProminent)
-                    .disabled(!nameIsValid || isWorking)
+                    .disabled(!nameIsValid)
                 }
             }
         }
     }
 
-    private func confirm() async {
-        isWorking = true
-        defer { isWorking = false }
-
+    private func confirm() {
         let trimmedName = name.trimmingCharacters(in: .whitespaces)
         let trimmedDesc = description.trimmingCharacters(in: .whitespaces)
 
         do {
-            try await onConfirm(trimmedName, trimmedDesc.isEmpty ? nil : trimmedDesc, selectedTheme)
+            try onConfirm(trimmedName, trimmedDesc.isEmpty ? nil : trimmedDesc, selectedTheme)
             dismiss()
         } catch {
-            // error stored in studySetStore.lastError
+            errorMessage = error.localizedDescription
         }
     }
 }
@@ -181,5 +179,4 @@ struct StudySetFormView: View {
         confirmTint: .green,
     ) { _, _, _ in }
         .environment(\.font, .app())
-        .environment(StudySetStore.shared)
 }

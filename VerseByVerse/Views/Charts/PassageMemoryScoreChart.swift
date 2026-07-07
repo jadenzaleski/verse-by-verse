@@ -289,24 +289,16 @@ struct PassageMemoryScoreChart: View {
     let now = Date()
     let calendar = Calendar.current
 
-    let sessions: [PracticeSession] = [
-        PracticeSession(id: 1, userId: "u1", passageId: 1,
-                        startDate: calendar.date(byAdding: .day, value: -12, to: now)!,
-                        endDate: calendar.date(byAdding: .day, value: -12, to: now)!.addingTimeInterval(300),
-                        score: 0.85, rating: 3, scheduledDays: 2, elapsedDays: 1, state: 1),
-        PracticeSession(id: 2, userId: "u1", passageId: 1,
-                        startDate: calendar.date(byAdding: .day, value: -9, to: now)!,
-                        endDate: calendar.date(byAdding: .day, value: -9, to: now)!.addingTimeInterval(300),
-                        score: 0.92, rating: 4, scheduledDays: 5, elapsedDays: 3, state: 1),
-        PracticeSession(id: 3, userId: "u1", passageId: 1,
-                        startDate: calendar.date(byAdding: .day, value: -4, to: now)!,
-                        endDate: calendar.date(byAdding: .day, value: -4, to: now)!.addingTimeInterval(300),
-                        score: 0.70, rating: 2, scheduledDays: 4, elapsedDays: 5, state: 1),
-        PracticeSession(id: 4, userId: "u1", passageId: 1,
-                        startDate: calendar.date(byAdding: .day, value: -1, to: now)!,
-                        endDate: calendar.date(byAdding: .day, value: -1, to: now)!.addingTimeInterval(300),
-                        score: 0.95, rating: 5, scheduledDays: 10, elapsedDays: 3, state: 1),
-    ]
+    let daysAgoAndScores: [(Int, Double)] = [(-12, 0.85), (-9, 0.92), (-4, 0.70), (-1, 0.95)]
+    let sessions: [PracticeSession] = daysAgoAndScores.map { daysAgo, score in
+        let day = calendar.date(byAdding: .day, value: daysAgo, to: now) ?? now
+        let session = PracticeSession(startDate: day)
+        session.endDate = day.addingTimeInterval(300)
+        session.score = score
+        session.rating = MemoryScoring.rating(forScore: score)
+        session.scheduledDays = 5
+        return session
+    }
 
     PassageMemoryScoreChart(sessions: sessions)
         .environment(\.font, .app())

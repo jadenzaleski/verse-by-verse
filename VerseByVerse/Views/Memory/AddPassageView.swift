@@ -5,12 +5,15 @@
 //  Created by Jaden Zaleski on 3/1/26.
 //
 
+import SwiftData
 import SwiftUI
 
 struct AddPassageView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(BibleStore.self) private var bibleStore
-    @Environment(PassageStore.self) private var passageStore
+    @Environment(\.modelContext) private var modelContext
+
+    private let log = AppLog.category("AddPassageView")
 
     @AppStorage(.lastUsedTranslation) private var selectedTranslation = "KJV"
     @State private var selectedBook = "John"
@@ -144,19 +147,14 @@ struct AddPassageView: View {
                     }
                     ToolbarItem(placement: .confirmationAction) {
                         Button {
-                            Task {
-                                await handleAddPassage()
-                            }
+                            handleAddPassage()
                         } label: {
-                            if passageStore.state == .loading {
-                                ProgressView()
-                            } else {
-                                Image(systemName: "plus")
-                            }
+                            Image(systemName: "plus")
                         }
+                        .accessibilityLabel("Add passage")
                         .buttonStyle(.glassProminent)
                         .tint(.accent)
-                        .disabled(!isRefValid || passageStore.state == .loading)
+                        .disabled(!isRefValid)
                     }
                 }
                 .safeAreaInset(edge: .bottom) {
@@ -280,7 +278,9 @@ struct AddPassageView: View {
         await bibleStore.fetchSelection(key)
     }
 
-    private func handleAddPassage() async {
+    /// Upserts the passage: SwiftData with CloudKit-compatible models can't
+    /// enforce unique constraints, so adding an existing reference is a no-op.
+    private func handleAddPassage() {
         guard isRefValid else { return }
 
         let startCh = Int(startChapter) ?? 1
@@ -289,19 +289,33 @@ struct AddPassageView: View {
         let endVs = Int(endVerse.isEmpty ? startVerse : endVerse) ?? startVs
 
         do {
-            try await passageStore.createPassage(
-                book: selectedBook,
+            let existing = try Passage.existing(
+                matching: selectedBook,
                 startChapter: startCh,
                 endChapter: endCh,
                 startVerse: startVs,
                 endVerse: endVs,
                 translation: selectedTranslation,
+                in: modelContext,
             )
+            if existing == nil {
+                let passage = Passage(
+                    book: selectedBook,
+                    startChapter: startCh,
+                    endChapter: endCh,
+                    startVerse: startVs,
+                    endVerse: endVs,
+                    translation: selectedTranslation,
+                )
+                modelContext.insert(passage)
+                try modelContext.save()
+                log.info("Added passage \(passage.reference)")
+            } else {
+                log.info("Passage already exists, skipping insert")
+            }
             dismiss()
         } catch {
-            // Error is already handled in the store,
-            // but we keep the view open so the user can see it or retry.
-            AppLog.category("AddPassageView").error("Failed to add passage: \(error.localizedDescription)")
+            log.error("Failed to add passage: \(error.localizedDescription)")
         }
     }
 }

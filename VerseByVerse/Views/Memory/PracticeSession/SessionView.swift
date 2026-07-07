@@ -5,34 +5,34 @@
 //  Created by Jaden Zaleski on 6/8/26.
 //
 
+import SwiftData
 import SwiftUI
 
 private enum SessionPhase: Equatable {
     case loading
     case activity
-    case completing
     case done(nextReview: Date?, correct: Int, total: Int)
     case failed(String)
 }
 
 struct SessionView: View {
-    let passage: UserPassage
+    let passage: Passage
 
     @Environment(BibleStore.self) private var bibleStore
-    @Environment(PassageStore.self) private var passageStore
-    @Environment(PracticeStore.self) private var practiceStore
+    @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
     @State private var phase: SessionPhase = .loading
     @State private var showAbandonConfirmation = false
-    @State private var session: StartPracticeSessionResponse?
+    @State private var sessionStartDate = Date()
     @State private var steps: [ActivityStep] = []
     @State private var stepIndex = 0
     @State private var stepStartDate = Date()
     @State private var totalCorrect = 0
     @State private var totalPossible = 0
-    @State private var collectedActivities: [ActivityResult] = []
+    @State private var collectedActivities: [ActivityRecord] = []
 
+    private let scheduler = FSRSScheduler()
     private let log = AppLog.category("SessionView")
 
     private var verseText: String {
@@ -64,8 +64,6 @@ struct SessionView: View {
                     loadingView
                 case .activity:
                     activityContent
-                case .completing:
-                    completingView
                 case let .done(nextReview, correct, total):
                     doneView(nextReview: nextReview, correct: correct, total: total)
                 case let .failed(msg):
@@ -80,7 +78,7 @@ struct SessionView: View {
                             if phase == .activity {
                                 showAbandonConfirmation = true
                             } else {
-                                Task { await abandonSession() }
+                                dismiss()
                             }
                         } label: {
                             Image(systemName: "xmark")
@@ -97,7 +95,7 @@ struct SessionView: View {
             await startSession()
         }
         .alert("Quit Session?", isPresented: $showAbandonConfirmation) {
-            Button("Quit", role: .destructive) { Task { await abandonSession() } }
+            Button("Quit", role: .destructive) { dismiss() }
             Button("Keep Going", role: .cancel) {}
         } message: {
             Text("Your progress won't be saved.")
@@ -152,18 +150,7 @@ struct SessionView: View {
         VStack(spacing: AppSpacing.lg) {
             ProgressView()
                 .scaleEffect(1.5)
-            Text("Starting session...")
-                .font(.app(.subheadline))
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    private var completingView: some View {
-        VStack(spacing: AppSpacing.lg) {
-            ProgressView()
-                .scaleEffect(1.5)
-            Text("Saving your progress...")
+            Text("Loading passage...")
                 .font(.app(.subheadline))
                 .foregroundStyle(.secondary)
         }
@@ -235,7 +222,7 @@ struct SessionView: View {
                 .font(.app(.body, weight: .semibold))
             Spacer()
         }
-        .padding(.horizontal, 30)
+        .padding(.horizontal, AppSpacing.xxl)
     }
 
     // MARK: - Score helpers
@@ -265,7 +252,7 @@ struct SessionView: View {
         let now = Date()
         let step = steps[stepIndex]
 
-        collectedActivities.append(ActivityResult(
+        collectedActivities.append(ActivityRecord(
             type: step.activityType,
             phase: step.phase,
             isRetry: step.isRetry,
@@ -290,82 +277,86 @@ struct SessionView: View {
             }
             stepStartDate = now
         } else {
-            Task { await completeSession() }
+            completeSession()
         }
     }
 
-    private func abandonSession() async {
-        if let session {
-            do {
-                try await APIService.shared.deleteSession(id: session.id)
-                log.info("Abandoned and deleted session \(session.id)")
-            } catch {
-                log.error("Failed to delete abandoned session \(session.id): \(error)")
-            }
-        }
-        dismiss()
-    }
-
+    /// Fetches the verse text, then begins the standard activity plan.
+    /// Nothing is persisted until the session completes, so abandoning is free.
     private func startSession() async {
-        do {
-            let resp = try await APIService.shared.startPracticeSession(passageId: passage.id)
-            session = resp
-            steps = resp.plan.compactMap { ActivityStep.from($0) }
-            guard !steps.isEmpty else {
-                phase = .failed("Session plan is empty")
-                return
-            }
-            stepStartDate = Date()
-            phase = .activity
-            log.info("Started practice session \(resp.id) for passage \(passage.id), \(steps.count) steps")
-        } catch {
-            log.error("Failed to start session: \(error)")
-            phase = .failed(error.localizedDescription)
+        await bibleStore.fetchSelection(passage.selectionKey)
+        guard !verseText.isEmpty else {
+            phase = .failed("Couldn't load the passage text. Check your connection and try again.")
+            return
         }
+        steps = ActivityStep.standardPlan
+        sessionStartDate = Date()
+        stepStartDate = sessionStartDate
+        phase = .activity
+        log.info("Started practice session for passage \(passage.reference), \(steps.count) steps")
     }
 
-    private func completeSession() async {
-        guard let session else { return }
+    /// Applies the session to the passage's memory state via FSRS and persists
+    /// the session + activities. All local — no network involved.
+    private func completeSession() {
+        let now = Date()
         let correct = totalCorrect
         let total = totalPossible
-        let activities = collectedActivities
-        phase = .completing
-        do {
-            let result = try await APIService.shared.completePracticeSession(
-                id: session.id,
-                activities: activities,
+        let score = total > 0 ? Double(correct) / Double(total) : 0
+
+        // Capture pre-review values the session record needs.
+        let stateAtReview = passage.state
+        let previousReview = passage.lastPracticed
+
+        let outcome = scheduler.processReview(state: passage.memoryState, score: score, at: now)
+
+        let session = PracticeSession(startDate: sessionStartDate)
+        session.endDate = now
+        session.score = score
+        session.rating = outcome.rating
+        session.scheduledDays = Int(outcome.intervalDays)
+        session.elapsedDays = previousReview.map { max(0, Int(now.timeIntervalSince($0) / 86400)) } ?? 0
+        session.state = stateAtReview
+        session.passage = passage
+
+        for (position, record) in collectedActivities.enumerated() {
+            let activity = PracticeActivity(
+                position: position,
+                type: record.type,
+                phase: record.phase,
+                isRetry: record.isRetry,
+                correctCount: record.correctCount,
+                totalCount: record.totalCount,
+                startDate: record.startDate,
+                endDate: record.endDate,
             )
-            Task {
-                await passageStore.loadMyPassages(lookInCache: false)
-                await practiceStore.loadMyPracticeSessions()
-            }
-            phase = .done(nextReview: result.nextReview, correct: correct, total: total)
-            let score = total > 0 ? Double(correct) / Double(total) : 0
-            log.info("""
-            Completed session \(session.id), 
-            \(correct)/\(total) correct, 
-            score=\(String(format: "%.2f", score)), 
-            rating=\(result.rating)
-            """)
-        } catch {
-            log.error("Failed to complete session: \(error)")
-            phase = .failed(error.localizedDescription)
+            activity.session = session
         }
+
+        modelContext.insert(session)
+        passage.memoryState = outcome.state
+
+        do {
+            try modelContext.save()
+        } catch {
+            log.error("Failed to save practice session: \(error)")
+            phase = .failed("Couldn't save your progress: \(error.localizedDescription)")
+            return
+        }
+
+        phase = .done(nextReview: outcome.state.due, correct: correct, total: total)
+        log.info("""
+        Completed session for \(passage.reference), \
+        \(correct)/\(total) correct, \
+        score=\(String(format: "%.2f", score)), \
+        rating=\(outcome.rating)
+        """)
     }
 }
 
 #Preview {
-    let passage = UserPassage(
-        id: 1, userId: "test", book: "John",
-        startChapter: 3, endChapter: 3, startVerse: 16, endVerse: 16,
-        translation: "KJV",
-        lastPracticed: nil, nextPractice: nil,
-        stability: 1.0, difficulty: 5.0, state: 0,
-        reps: 0, lapses: 0, scheduledDays: 0, elapsedDays: 0,
-    )
-    SessionView(passage: passage)
+    SessionView(passage: PreviewData.samplePassage)
+        .modelContainer(PreviewData.container)
         .environment(BibleStore.shared)
-        .environment(PassageStore.shared)
-        .environment(PracticeStore.shared)
         .environment(\.font, .app())
 }

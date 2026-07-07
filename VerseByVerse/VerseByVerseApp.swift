@@ -5,6 +5,7 @@
 //  Created by Jaden Zaleski on 11/22/25.
 //
 
+import SwiftData
 import SwiftUI
 import UIKit
 
@@ -13,11 +14,9 @@ struct VerseByVerseApp: App {
     @State private var isReady = false
     @State private var statusText = "Loading…"
     @State private var showLogin = false
+    private let container = AppModelContainer.make()
     private let userStore = UserStore.shared
     private let bibleStore = BibleStore.shared
-    private let passageStore = PassageStore.shared
-    private let practiceStore = PracticeStore.shared
-    private let studySetStore = StudySetStore.shared
     private let log = AppLog.category("Init")
     private let cache = Cache.shared
 
@@ -60,25 +59,14 @@ struct VerseByVerseApp: App {
             .environment(\.font, .app())
             .environment(userStore)
             .environment(bibleStore)
-            .environment(passageStore)
-            .environment(practiceStore)
-            .environment(studySetStore)
         }
+        .modelContainer(container)
     }
 
     private func runStartup() async {
         await MainActor.run {
             statusText = "Preparing…"
             log.info("Cache URL: \(cache.cacheDirectory)")
-            if AppLog.minimumLevel == .debug {
-                KeychainManager.debugDump()
-                // dump AppStorage/UserDefaults
-                log.debug("App UserDefaults:")
-                let appDomain = Bundle.main.bundleIdentifier!
-                if let mySettings = UserDefaults.standard.persistentDomain(forName: appDomain) {
-                    log.debug("\(mySettings)")
-                }
-            }
         }
         // Verify we can reach the backend before making any other API calls.
         await MainActor.run { statusText = "Connecting…" }
@@ -119,9 +107,6 @@ struct VerseByVerseApp: App {
         await MainActor.run { statusText = "Fetching Bible data…" }
         await bibleStore.loadBibleData()
         await bibleStore.loadTranslations()
-        await MainActor.run { statusText = "Loading your data…" }
-        await passageStore.loadMyPassages()
-        await practiceStore.loadMyPracticeSessions()
         await MainActor.run { statusText = "Launching…" }
     }
 }

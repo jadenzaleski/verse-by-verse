@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ActivityView: View {
     let activityName: String
-    let passage: UserPassage
+    let passage: Passage
     let verseText: String
     /// Ordered word indices the user must type the first letter of.
     let maskedIndices: [Int]
@@ -287,14 +287,7 @@ private struct FlowLayout: Layout {
 // MARK: - Preview
 
 #Preview {
-    let passage = UserPassage(
-        id: 1, userId: "test", book: "John",
-        startChapter: 3, endChapter: 3, startVerse: 16, endVerse: 16,
-        translation: "KJV",
-        lastPracticed: nil, nextPractice: nil,
-        stability: 1.0, difficulty: 5.0, state: 0,
-        reps: 0, lapses: 0, scheduledDays: 0, elapsedDays: 0,
-    )
+    let passage = Passage(book: "John", startChapter: 3, endChapter: 3, startVerse: 16, endVerse: 16)
     let verse = """
     For God so loved the world that he gave his one and only Son,
     that whoever believes in him shall not perish but have eternal life.

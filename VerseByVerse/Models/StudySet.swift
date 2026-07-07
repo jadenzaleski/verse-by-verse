@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftData
 
 enum MeshTheme: String, CaseIterable, Identifiable {
     case ocean
@@ -21,40 +22,42 @@ enum MeshTheme: String, CaseIterable, Identifiable {
     }
 }
 
-struct StudySet: Identifiable, Equatable {
-    let id: Int
-    let userId: String
-    let name: String
-    let description: String?
-    let meshPositionSeed: Int
-    let meshColorSeed: Int
-    let meshTheme: MeshTheme
-    let createdAt: Date
-    let modifiedAt: Date
-}
+/// A user-defined collection of passages with a generated mesh-gradient cover.
+///
+/// CloudKit-compatible by design: defaults everywhere, optional relationships,
+/// no unique constraints. `description` is `setDescription` because `@Model`
+/// classes can't shadow `NSObject.description`.
+@Model
+final class StudySet {
+    var name: String = ""
+    var setDescription: String?
+    var meshPositionSeed: Int = 0
+    var meshColorSeed: Int = 0
+    private var meshThemeRaw: String = MeshTheme.ocean.rawValue
+    var createdAt: Date = Date()
+    var modifiedAt: Date = Date()
+    /// Record-format version for future lazy migrations (CloudKit is additive-only).
+    var schemaVersion: Int = 1
 
-extension MeshThemeResponse {
-    func toDomain() -> MeshTheme {
-        switch self {
-        case .ocean: .ocean
-        case .sunset: .sunset
-        case .forest: .forest
-        }
+    @Relationship(inverse: \Passage.studySets)
+    var passages: [Passage]? = []
+
+    init(
+        name: String = "",
+        setDescription: String? = nil,
+        meshPositionSeed: Int = Int.random(in: 1 ... 99999),
+        meshColorSeed: Int = Int.random(in: 1 ... 99999),
+        meshTheme: MeshTheme = .ocean,
+    ) {
+        self.name = name
+        self.setDescription = setDescription
+        self.meshPositionSeed = meshPositionSeed
+        self.meshColorSeed = meshColorSeed
+        meshThemeRaw = meshTheme.rawValue
     }
-}
 
-extension StudySetReadResponse {
-    func toDomain() -> StudySet {
-        StudySet(
-            id: id,
-            userId: userId,
-            name: name,
-            description: description,
-            meshPositionSeed: meshPositionSeed,
-            meshColorSeed: meshColorSeed,
-            meshTheme: meshTheme.toDomain(),
-            createdAt: createdAt,
-            modifiedAt: modifiedAt,
-        )
+    var meshTheme: MeshTheme {
+        get { MeshTheme(rawValue: meshThemeRaw) ?? .ocean }
+        set { meshThemeRaw = newValue.rawValue }
     }
 }

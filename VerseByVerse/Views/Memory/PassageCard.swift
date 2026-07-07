@@ -5,6 +5,7 @@
 //  Created by Jaden Zaleski on 2/8/26.
 //
 
+import SwiftData
 import SwiftUI
 
 enum PassageCardStyle {
@@ -14,7 +15,7 @@ enum PassageCardStyle {
 
 struct PassageCard: View {
     @Environment(BibleStore.self) private var bibleStore
-    let passage: UserPassage
+    let passage: Passage
     var style: PassageCardStyle = .full
 
     var body: some View {
@@ -73,23 +74,9 @@ struct PassageCard: View {
 }
 
 #Preview {
-    PassageCard(passage: UserPassage(id: 1,
-                                     userId: "test",
-                                     book: "John",
-                                     startChapter: 1,
-                                     endChapter: 2,
-                                     startVerse: 3,
-                                     endVerse: 4,
-                                     translation: "KJV",
-                                     lastPracticed: nil,
-                                     nextPractice: nil,
-                                     stability: 1.0,
-                                     difficulty: 1.0,
-                                     state: 1,
-                                     reps: 1,
-                                     lapses: 1,
-                                     scheduledDays: 1,
-                                     elapsedDays: 1))
+    PassageCard(passage: PreviewData.samplePassage)
+        .modelContainer(PreviewData.container)
         .padding()
+        .environment(BibleStore.shared)
         .environment(\.font, .app())
 }

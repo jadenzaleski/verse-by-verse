@@ -61,10 +61,6 @@ struct StudySetDetailResponse: Codable {
         case modifiedAt = "modified_at"
     }
 
-    func toPassages() -> [UserPassage] {
-        passages.map { $0.toDomain() }
-    }
-
     var passageIds: [Int] {
         passages.map(\.id)
     }

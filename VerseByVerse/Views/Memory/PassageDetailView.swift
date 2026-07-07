@@ -5,24 +5,27 @@
 //  Created by Jaden Zaleski on 5/4/26.
 //
 
+import SwiftData
 import SwiftUI
 
 struct PassageDetailView: View {
-    let passage: UserPassage
+    let passage: Passage
 
     @Environment(BibleStore.self) private var bibleStore
-    @Environment(PracticeStore.self) private var practiceStore
 
     @State private var showPractice = false
 
+    private let scheduler = FSRSScheduler()
+
     private var passageSessions: [PracticeSession] {
-        practiceStore.sessions.filter { $0.passageId == passage.id }
+        passage.sessions ?? []
     }
 
+    /// Probability of recall right now, straight from the FSRS engine — the
+    /// same curve that schedules reviews, so the score hits ~90% exactly when
+    /// a review comes due.
     private var retentionScore: Double {
-        guard let lastPracticed = passage.lastPracticed else { return 0.0 }
-        let daysSince = Date().timeIntervalSince(lastPracticed) / 86400
-        return pow(0.9, daysSince / max(1.0, passage.stability))
+        scheduler.retrievability(of: passage.memoryState, at: .now)
     }
 
     private var dueDateText: String {
@@ -68,9 +71,6 @@ struct PassageDetailView: View {
             SessionView(passage: passage)
         }
         .task {
-            if practiceStore.sessions.isEmpty {
-                await practiceStore.loadMyPracticeSessions()
-            }
             await bibleStore.fetchSelection(passage.selectionKey)
         }
         .navigationTitle(passage.reference)
@@ -211,22 +211,10 @@ struct PassageDetailView: View {
 }
 
 #Preview("PassageDetailView") {
-    let passage = UserPassage(
-        id: 1, userId: "test", book: "John",
-        startChapter: 3, endChapter: 3, startVerse: 16, endVerse: 16,
-        translation: "KJV",
-        lastPracticed: Calendar.current.date(byAdding: .day, value: -2, to: .now),
-        nextPractice: Calendar.current.date(byAdding: .day, value: 1, to: .now),
-        stability: 4.0, difficulty: 5.2, state: 2,
-        reps: 3, lapses: 0, scheduledDays: 3, elapsedDays: 2,
-    )
     NavigationStack {
-        PassageDetailView(passage: passage)
-            .navigationTitle(passage.reference)
-            .navigationBarTitleDisplayMode(.inline)
+        PassageDetailView(passage: PreviewData.samplePassage)
     }
+    .modelContainer(PreviewData.container)
     .environment(BibleStore.shared)
-    .environment(PassageStore.shared)
-    .environment(PracticeStore.shared)
     .environment(\.font, .app())
 }

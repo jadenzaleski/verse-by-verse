@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct VerbalActivityView: View {
-    let passage: UserPassage
+    let passage: Passage
     let verseText: String
     /// Called with (1, 1) if correct, (0, 1) if missed.
     let onContinue: (Int, Int) -> Void
@@ -117,14 +117,7 @@ struct VerbalActivityView: View {
 }
 
 #Preview {
-    let passage = UserPassage(
-        id: 1, userId: "test", book: "John",
-        startChapter: 3, endChapter: 3, startVerse: 16, endVerse: 16,
-        translation: "KJV",
-        lastPracticed: nil, nextPractice: nil,
-        stability: 1.0, difficulty: 5.0, state: 0,
-        reps: 0, lapses: 0, scheduledDays: 0, elapsedDays: 0,
-    )
+    let passage = Passage(book: "John", startChapter: 3, endChapter: 3, startVerse: 16, endVerse: 16)
     VerbalActivityView(
         passage: passage,
         verseText: """

@@ -217,20 +217,14 @@ struct WeeklySessionsChart: View {
 #Preview {
     let now = Date()
     let cal = Calendar.current
-    let sessions: [PracticeSession] = (0 ..< 80).map { i in
-        let day = cal.date(byAdding: .day, value: -Int.random(in: 0 ..< 60), to: now)!
-        return PracticeSession(
-            id: i,
-            userId: "u1",
-            passageId: 1,
-            startDate: day,
-            endDate: day.addingTimeInterval(300),
-            score: 0.8,
-            rating: 3,
-            scheduledDays: 5,
-            elapsedDays: 4,
-            state: 1,
-        )
+    let sessions: [PracticeSession] = (0 ..< 80).map { _ in
+        let day = cal.date(byAdding: .day, value: -Int.random(in: 0 ..< 60), to: now) ?? now
+        let session = PracticeSession(startDate: day)
+        session.endDate = day.addingTimeInterval(300)
+        session.score = 0.8
+        session.rating = 3
+        session.scheduledDays = 5
+        return session
     }
 
     WeeklySessionsChart(sessions: sessions)

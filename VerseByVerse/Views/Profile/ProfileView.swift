@@ -7,14 +7,15 @@
 
 import CryptoKit
 import Foundation
+import SwiftData
 import SwiftUI
 
 struct ProfileView: View {
     private let log = AppLog.category("ProfileView")
     private let jitter: Float = 0.5
     @Environment(UserStore.self) private var userStore
-    @Environment(PassageStore.self) private var passageStore
-    @Environment(PracticeStore.self) private var practiceStore
+    @Query private var passages: [Passage]
+    @Query private var sessions: [PracticeSession]
 
     var body: some View {
         let user = userStore.currentUser
@@ -102,7 +103,7 @@ struct ProfileView: View {
                 .glassEffect()
                 .shadow(color: .black.opacity(0.35), radius: 6, x: 2, y: 2)
                 .overlay {
-                    Text(firstName.first!.uppercased() + lastName.first!.uppercased())
+                    Text(initials(firstName: firstName, lastName: lastName))
                         .font(.app(size: 50, weight: .black))
                         .foregroundStyle(.ultraThinMaterial)
                 }
@@ -120,7 +121,7 @@ struct ProfileView: View {
 
                 lifetimeStats
 
-                WeeklySessionsChart(sessions: practiceStore.sessions)
+                WeeklySessionsChart(sessions: sessions)
                     .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
             }
             .padding(.horizontal)
@@ -138,12 +139,6 @@ struct ProfileView: View {
         .toolbarTitleDisplayMode(.large)
         .task {
             await userStore.loadUser()
-            if passageStore.userPassages.isEmpty {
-                await passageStore.loadMyPassages(lookInCache: true)
-            }
-            if practiceStore.sessions.isEmpty {
-                await practiceStore.loadMyPracticeSessions()
-            }
         }
     }
 
@@ -151,8 +146,6 @@ struct ProfileView: View {
 
     @ViewBuilder
     private var lifetimeStats: some View {
-        let passages = passageStore.userPassages
-        let sessions = practiceStore.sessions
         let avgScore = PracticeStats.averageScore(sessions)
 
         LazyVGrid(
@@ -210,6 +203,14 @@ struct ProfileView: View {
         }
     }
 
+    /// First letters of each name, safely — empty names contribute nothing.
+    private func initials(firstName: String, lastName: String) -> String {
+        let first = firstName.first.map(String.init) ?? ""
+        let last = lastName.first.map(String.init) ?? ""
+        let combined = (first + last).uppercased()
+        return combined.isEmpty ? "•" : combined
+    }
+
     private func jitteredNumber(_ number: Float, _ seed: Int) -> Float {
         var generator = SeededGenerator(seed: seed)
         // set min and max to ensure our result cannot be out of bounds [0.0, 1.0]
@@ -243,9 +244,8 @@ extension String {
 #Preview {
     NavigationStack {
         ProfileView()
+            .modelContainer(PreviewData.container)
             .environment(\.font, .app())
             .environment(UserStore.shared)
-            .environment(PassageStore.shared)
-            .environment(PracticeStore.shared)
     }
 }

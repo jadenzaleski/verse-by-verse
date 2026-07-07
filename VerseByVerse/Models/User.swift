@@ -22,10 +22,6 @@ struct User: Identifiable, Equatable {
     let fsrsParams: [String: Double]?
     let desiredRetention: Double
 
-    let passages: [UserPassage]?
-    let studySets: [StudySet]?
-    let practiceSessions: [PracticeSession]?
-
     var fullName: String {
         let first = firstName ?? ""
         let last = lastName ?? ""
@@ -49,9 +45,6 @@ extension UserResponse {
             modifiedAt: modifiedAt,
             fsrsParams: fsrsParams,
             desiredRetention: desiredRetention,
-            passages: passages?.map { $0.toDomain() },
-            studySets: studySets?.map { $0.toDomain() },
-            practiceSessions: practiceSessions?.map { $0.toDomain() },
         )
     }
 }
