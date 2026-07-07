@@ -9,7 +9,7 @@ import SwiftData
 import SwiftUI
 
 struct HomeView: View {
-    @Environment(UserStore.self) private var userStore
+    @AppStorage(.displayName) private var displayName = ""
     @Query private var passages: [Passage]
     @Query private var sessions: [PracticeSession]
     private let log = AppLog.category("HomeView")
@@ -75,7 +75,7 @@ struct HomeView: View {
         }
         .navigationTitle("Home")
         .toolbarTitleDisplayMode(.large)
-        .navigationSubtitle("\(greeting) \(userStore.currentUser?.firstName ?? "")!")
+        .navigationSubtitle(displayName.isEmpty ? "\(greeting)!" : "\(greeting) \(displayName)!")
     }
 
     // MARK: - Up Next
@@ -174,6 +174,5 @@ struct HomeView: View {
         HomeView()
             .modelContainer(PreviewData.container)
             .environment(\.font, .app())
-            .environment(UserStore.shared)
     }
 }

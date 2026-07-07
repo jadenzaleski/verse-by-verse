@@ -5,6 +5,7 @@
 //  Created by Jaden Zaleski on 11/22/25.
 //
 
+import SwiftData
 import SwiftUI
 
 struct ContentView: View {
@@ -42,6 +43,7 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .modelContainer(PreviewData.container)
         .environment(\.font, .app())
-        .environment(UserStore.shared)
+        .environment(BibleStore.shared)
 }

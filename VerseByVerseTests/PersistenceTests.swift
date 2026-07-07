@@ -34,26 +34,17 @@ struct PersistenceTests {
         let context = makeContext()
         _ = try insertJohn316(context)
 
-        let duplicate = try Passage.existing(
-            matching: "John", startChapter: 3, endChapter: 3,
-            startVerse: 16, endVerse: 16, translation: "KJV",
-            in: context,
-        )
-        #expect(duplicate != nil)
+        let same = Passage(book: "John", startChapter: 3, endChapter: 3, startVerse: 16, endVerse: 16)
+        #expect(try Passage.existingDuplicate(of: same, in: context) != nil)
 
-        let differentTranslation = try Passage.existing(
-            matching: "John", startChapter: 3, endChapter: 3,
+        let differentTranslation = Passage(
+            book: "John", startChapter: 3, endChapter: 3,
             startVerse: 16, endVerse: 16, translation: "NIV",
-            in: context,
         )
-        #expect(differentTranslation == nil)
+        #expect(try Passage.existingDuplicate(of: differentTranslation, in: context) == nil)
 
-        let differentRange = try Passage.existing(
-            matching: "John", startChapter: 3, endChapter: 3,
-            startVerse: 16, endVerse: 17, translation: "KJV",
-            in: context,
-        )
-        #expect(differentRange == nil)
+        let differentRange = Passage(book: "John", startChapter: 3, endChapter: 3, startVerse: 16, endVerse: 17)
+        #expect(try Passage.existingDuplicate(of: differentRange, in: context) == nil)
     }
 
     @Test func `practice completion persists session and updates memory state`() throws {

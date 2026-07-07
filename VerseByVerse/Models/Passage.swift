@@ -133,18 +133,18 @@ extension Passage {
 // MARK: - Uniqueness
 
 extension Passage {
-    /// Returns an existing passage with the same reference + translation, if any.
-    /// SwiftData with CloudKit can't enforce unique constraints, so the
-    /// Add Passage flow upserts instead of blindly inserting.
-    static func existing(
-        matching book: String,
-        startChapter: Int,
-        endChapter: Int,
-        startVerse: Int,
-        endVerse: Int,
-        translation: String,
-        in context: ModelContext,
-    ) throws -> Passage? {
+    /// Returns an existing passage with the same reference + translation as
+    /// the (not yet inserted) candidate, if any. SwiftData with CloudKit can't
+    /// enforce unique constraints, so the Add Passage flow upserts instead of
+    /// blindly inserting.
+    static func existingDuplicate(of candidate: Passage, in context: ModelContext) throws -> Passage? {
+        let book = candidate.book
+        let startChapter = candidate.startChapter
+        let endChapter = candidate.endChapter
+        let startVerse = candidate.startVerse
+        let endVerse = candidate.endVerse
+        let translation = candidate.translation
+
         var descriptor = FetchDescriptor<Passage>(
             predicate: #Predicate { passage in
                 passage.book == book

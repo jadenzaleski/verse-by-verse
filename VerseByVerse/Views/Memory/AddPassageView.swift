@@ -288,28 +288,20 @@ struct AddPassageView: View {
         let endCh = Int(endChapter.isEmpty ? startChapter : endChapter) ?? startCh
         let endVs = Int(endVerse.isEmpty ? startVerse : endVerse) ?? startVs
 
+        let candidate = Passage(
+            book: selectedBook,
+            startChapter: startCh,
+            endChapter: endCh,
+            startVerse: startVs,
+            endVerse: endVs,
+            translation: selectedTranslation,
+        )
+
         do {
-            let existing = try Passage.existing(
-                matching: selectedBook,
-                startChapter: startCh,
-                endChapter: endCh,
-                startVerse: startVs,
-                endVerse: endVs,
-                translation: selectedTranslation,
-                in: modelContext,
-            )
-            if existing == nil {
-                let passage = Passage(
-                    book: selectedBook,
-                    startChapter: startCh,
-                    endChapter: endCh,
-                    startVerse: startVs,
-                    endVerse: endVs,
-                    translation: selectedTranslation,
-                )
-                modelContext.insert(passage)
+            if try Passage.existingDuplicate(of: candidate, in: modelContext) == nil {
+                modelContext.insert(candidate)
                 try modelContext.save()
-                log.info("Added passage \(passage.reference)")
+                log.info("Added passage \(candidate.reference)")
             } else {
                 log.info("Passage already exists, skipping insert")
             }

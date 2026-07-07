@@ -13,12 +13,9 @@ import UIKit
 struct VerseByVerseApp: App {
     @State private var isReady = false
     @State private var statusText = "Loading…"
-    @State private var showLogin = false
     private let container = AppModelContainer.make()
-    private let userStore = UserStore.shared
     private let bibleStore = BibleStore.shared
     private let log = AppLog.category("Init")
-    private let cache = Cache.shared
 
     init() {
         log.info("--- Verse By Verse \(AppFunctions.versionString() ?? "") ---")
@@ -41,72 +38,21 @@ struct VerseByVerseApp: App {
                     .transition(.opacity)
                 }
             }
-            .fullScreenCover(isPresented: $showLogin) {
-                LoginOrRegisterView(showLogin: $showLogin)
-            }
-            .onChange(of: userStore.currentUser != nil) { wasLoggedIn, isLoggedIn in
-                // If the user was logged in (wasLoggedIn == true) and is now logged out (isLoggedIn == false)
-                // and the app is past the initial splash phase (isReady == true)
-                log.debug("userStore.currentUser change detected: wasLoggedIn: \(wasLoggedIn)"
-                    + "isLoggedIn: \(isLoggedIn) isReady: \(isReady)")
-                if wasLoggedIn, !isLoggedIn, isReady {
-                    withAnimation {
-                        showLogin = true
-                    }
-                }
-            }
             .animation(.easeOut(duration: 0.35), value: isReady)
             .environment(\.font, .app())
-            .environment(userStore)
             .environment(bibleStore)
         }
         .modelContainer(container)
     }
 
+    /// Warms the Bible metadata caches. The app is local-first: failures here
+    /// are non-fatal (verse text simply loads on demand later), so startup is
+    /// bounded by the network client's 15s timeout in the worst case.
     private func runStartup() async {
-        await MainActor.run {
-            statusText = "Preparing…"
-            log.info("Cache URL: \(cache.cacheDirectory)")
-        }
-        // Verify we can reach the backend before making any other API calls.
-        await MainActor.run { statusText = "Connecting…" }
-        var healthAttempts = 0
-        while await (try? APIService.shared.getHealth()) != true {
-            healthAttempts += 1
-            await MainActor.run {
-                statusText = healthAttempts < 3 ? "Connecting…" : "Can't reach the server. Retrying…"
-            }
-            try? await Task.sleep(nanoseconds: 2_000_000_000)
-        }
-
-        // Present login over the splash if needed
-        await MainActor.run {
-            statusText = "Logging in…"
-        }
-
-        let hasAccessToken = (try? KeychainManager.getAccessToken()) != nil
-        let hasRefreshToken = (try? KeychainManager.getRefreshToken()) != nil
-        if hasAccessToken, hasRefreshToken {
-            log.debug("There is a access token and refresh token, so we can attempt to load the user.")
-            await userStore.loadUser(lookInCache: false)
-        }
-
-        await MainActor.run {
-            let userLoaded = userStore.currentUser != nil
-            log.debug("setting showLogin to: " + (!userLoaded ? "true" : "false"))
-            showLogin = !userLoaded
-            if showLogin {
-                userStore.resetStateAndError()
-            }
-        }
-
-        while await MainActor.run(body: { showLogin && userStore.currentUser == nil }) {
-            try? await Task.sleep(nanoseconds: 250_000_000)
-        }
-
         await MainActor.run { statusText = "Fetching Bible data…" }
-        await bibleStore.loadBibleData()
-        await bibleStore.loadTranslations()
+        async let books: Void = bibleStore.loadBibleData()
+        async let translations: Void = bibleStore.loadTranslations()
+        _ = await (books, translations)
         await MainActor.run { statusText = "Launching…" }
     }
 }

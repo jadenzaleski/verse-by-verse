@@ -34,6 +34,12 @@
             passages.first ?? Passage(book: "John", startChapter: 3, endChapter: 3, startVerse: 16, endVerse: 16)
         }
 
+        private struct SeedSet {
+            let name: String
+            let details: String?
+            let theme: MeshTheme
+        }
+
         private struct SeedRef {
             let book: String
             let chapter: Int
@@ -83,18 +89,19 @@
                 }
             }
 
-            let setNames: [(String, String?, MeshTheme)] = [
-                ("Sermon on the Mount", "Matthew 5-7, the core teachings of Jesus.", .ocean),
-                ("Psalms of Praise", nil, .sunset),
-                ("Romans Road", "Key verses outlining the gospel.", .forest),
+            let seedSets: [SeedSet] = [
+                SeedSet(name: "Sermon on the Mount",
+                        details: "Matthew 5-7, the core teachings of Jesus.", theme: .ocean),
+                SeedSet(name: "Psalms of Praise", details: nil, theme: .sunset),
+                SeedSet(name: "Romans Road", details: "Key verses outlining the gospel.", theme: .forest),
             ]
-            for (index, entry) in setNames.enumerated() {
+            for (index, entry) in seedSets.enumerated() {
                 let set = StudySet(
-                    name: entry.0,
-                    setDescription: entry.1,
+                    name: entry.name,
+                    setDescription: entry.details,
                     meshPositionSeed: 1024 * (index + 1),
                     meshColorSeed: 4096 * (index + 1),
-                    meshTheme: entry.2,
+                    meshTheme: entry.theme,
                 )
                 set.passages = Array(passages.prefix(index + 2))
                 context.insert(set)

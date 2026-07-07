@@ -10,6 +10,7 @@ import SwiftUI
 enum StorageKeys: String, CaseIterable {
     case firstLaunch
     case lastUsedTranslation
+    case displayName
 }
 
 extension AppStorage {
