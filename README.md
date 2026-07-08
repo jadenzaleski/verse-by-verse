@@ -4,7 +4,7 @@ A local-first iOS app for Bible verse memorization: add passages, practice them 
 
 ## Development
 
-Open `VerseByVerse.xcodeproj`, copy `Secrets.example.xcconfig` → `Secrets.xcconfig` with the API's app key, pick a simulator, `Cmd+R`. Use the `VerseByVerse (local)` scheme against a locally running API. Unit tests live in `VerseByVerseTests` (Swift Testing), including the FSRS parity suite that pins the on-device scheduler to the py-fsrs reference. See `CLAUDE.md` for architecture and `docs/` for the audit, CloudKit, and FSRS guides.
+Open `VerseByVerse.xcodeproj`, pick a simulator, `Cmd+R`. Use the `VerseByVerse (local)` scheme against a locally running API. Unit tests live in `VerseByVerseTests` (Swift Testing). See `CLAUDE.md` for architecture notes.
 
 ## Releasing
 

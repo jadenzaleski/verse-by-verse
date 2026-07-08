@@ -15,6 +15,3 @@ DEFAULT_LOG_LEVEL = 2
 
 // Marks this as the beta/TestFlight channel.
 SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) BETA
-
-// Optional local secrets (gitignored); see Secrets.example.xcconfig.
-#include? "Secrets.xcconfig"

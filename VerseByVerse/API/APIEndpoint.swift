@@ -9,8 +9,8 @@ import CryptoKit
 import Foundation
 
 /// The VBV API surface: a Bible-text proxy plus a health check.
-/// All endpoints are GETs authenticated with a static app key
-/// (`X-App-Key`, injected via xcconfig — see Secrets.example.xcconfig).
+/// All endpoints are plain GETs; the server applies per-IP rate limiting
+/// (App Attest is planned before external release).
 enum APIEndpoint: Hashable {
     case getHealth
     case getBibleBooks
@@ -75,10 +75,6 @@ enum APIEndpoint: Hashable {
 
         var req = URLRequest(url: components?.url ?? base)
         req.httpMethod = "GET"
-        // Never log the key (see AppLog's no-secrets rule).
-        if let key = AppFunctions.appAPIKey {
-            req.setValue(key, forHTTPHeaderField: "X-App-Key")
-        }
         return req
     }
 }

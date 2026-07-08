@@ -12,6 +12,3 @@ API_BASE_URL = http:/$()/127.0.0.1:8000
 
 // LogLevel raw values: 0=trace, 1=debug, 2=info, 3=warning, 4=error, 5=fault.
 DEFAULT_LOG_LEVEL = 1
-
-// Optional local secrets (gitignored); see Secrets.example.xcconfig.
-#include? "Secrets.xcconfig"
