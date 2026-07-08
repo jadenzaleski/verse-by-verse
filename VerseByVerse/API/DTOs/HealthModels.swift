@@ -10,8 +10,7 @@
 import Foundation
 
 struct GetHealthResponse: Codable {
+    /// "ok" or "degraded" (Redis down — API still serves, uncached).
     let status: String
-    // swiftlint:disable:next identifier_name
-    let db: String
     let redis: String
 }

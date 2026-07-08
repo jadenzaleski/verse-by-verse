@@ -17,10 +17,9 @@ extension APIService {
                 saveToCache: false,
             )
 
-            return response.statusCode == 200 &&
-                response.body.status == "ok" &&
-                response.body.db == "ok" &&
-                response.body.redis == "ok"
+            // "degraded" (Redis down) still means the API can serve verses.
+            return response.statusCode == 200
+                && ["ok", "degraded"].contains(response.body.status)
         } catch let apiError as APIError {
             let code = apiError.statusCode.map(String.init) ?? "n/a"
             log.error("getHealth failed — statusCode: \(code), error: \(apiError.localizedDescription)")
