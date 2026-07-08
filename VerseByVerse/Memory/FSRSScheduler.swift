@@ -9,14 +9,10 @@ import Foundation
 import FSRS
 
 /// FSRS-6 implementation of ``MemoryScheduler`` over the official
-/// `open-spaced-repetition/swift-fsrs` package.
-///
-/// Configuration is pinned to the "VBV memory spec" and proven equivalent to
-/// the reference implementation (py-fsrs 6.3) by the parity fixtures in
-/// `VerseByVerseTests/Fixtures/fsrs-parity-fixtures.json`:
-/// - FSRS-6 default 21 weights
-/// - learning steps 1m/10m, relearning step 10m (library defaults)
-/// - fuzzing disabled (two devices computing the same review must agree)
+/// `open-spaced-repetition/swift-fsrs` package, used out of the box:
+/// FSRS-6 default 21 weights, library-default learning steps (1m/10m,
+/// relearning 10m), fuzzing disabled so scheduling is deterministic.
+/// Fine-tuning (per-user parameters, custom retention UI) can come later.
 struct FSRSScheduler: MemoryScheduler {
     private let engine: FSRS
     private let log = AppLog.category("FSRSScheduler")
