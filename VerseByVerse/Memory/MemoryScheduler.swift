@@ -58,13 +58,13 @@ protocol MemoryScheduler {
 }
 
 enum MemoryScoring {
-    /// Session score → FSRS rating. Thresholds are part of the VBV memory
-    /// spec (pinned by the parity fixtures): ≥0.90 Easy, ≥0.80 Good,
-    /// ≥0.60 Hard, else Again.
+    /// Convert session score to an FSRS rating.
+    /// - Parameter score: The score of the session
+    /// - Returns: The FSRS rating based on that score.
     static func rating(forScore score: Double) -> Int {
-        if score >= 0.90 { return 4 }
-        if score >= 0.80 { return 3 }
-        if score >= 0.60 { return 2 }
-        return 1
+        if score >= 0.97 { return 4 } // Easy
+        if score >= 0.90 { return 3 } // Good
+        if score >= 0.70 { return 2 } // Hard
+        return 1 // Again
     }
 }

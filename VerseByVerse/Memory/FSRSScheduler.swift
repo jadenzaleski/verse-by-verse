@@ -17,7 +17,7 @@ struct FSRSScheduler: MemoryScheduler {
     private let engine: FSRS
     private let log = AppLog.category("FSRSScheduler")
 
-    init(desiredRetention: Double = 0.9) {
+    init(desiredRetention: Double = 0.95) {
         engine = FSRS(parameters: FSRSParameters(
             requestRetention: desiredRetention,
             w: FSRSDefaults.defaultWv6,

@@ -110,9 +110,11 @@ struct ProfileView: View {
         .glassEffect()
         .shadow(color: .black.opacity(0.35), radius: 6, x: 2, y: 2)
         .overlay {
-            Text(initials)
-                .font(.app(size: 50, weight: .black))
-                .foregroundStyle(.ultraThinMaterial)
+            if !displayName.isEmpty {
+                Text(initials)
+                    .font(.app(size: 50, weight: .black))
+                    .foregroundStyle(.ultraThinMaterial)
+            }
         }
         .accessibilityHidden(true)
     }

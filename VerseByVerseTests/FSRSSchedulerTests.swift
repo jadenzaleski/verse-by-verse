@@ -16,19 +16,19 @@ struct FSRSSchedulerTests {
     private let epoch = Date(timeIntervalSince1970: 1_767_268_800) // 2026-01-01T12:00:00Z
 
     @Test func `score to rating thresholds`() {
-        #expect(MemoryScoring.rating(forScore: 0.95) == 4)
-        #expect(MemoryScoring.rating(forScore: 0.90) == 4)
-        #expect(MemoryScoring.rating(forScore: 0.89) == 3)
-        #expect(MemoryScoring.rating(forScore: 0.80) == 3)
-        #expect(MemoryScoring.rating(forScore: 0.79) == 2)
-        #expect(MemoryScoring.rating(forScore: 0.60) == 2)
-        #expect(MemoryScoring.rating(forScore: 0.59) == 1)
+        #expect(MemoryScoring.rating(forScore: 1.0) == 4)
+        #expect(MemoryScoring.rating(forScore: 0.97) == 4)
+        #expect(MemoryScoring.rating(forScore: 0.96) == 3)
+        #expect(MemoryScoring.rating(forScore: 0.90) == 3)
+        #expect(MemoryScoring.rating(forScore: 0.89) == 2)
+        #expect(MemoryScoring.rating(forScore: 0.70) == 2)
+        #expect(MemoryScoring.rating(forScore: 0.69) == 1)
         #expect(MemoryScoring.rating(forScore: 0.0) == 1)
     }
 
     @Test func `first review schedules the future`() {
         let scheduler = FSRSScheduler()
-        let outcome = scheduler.processReview(state: .new, score: 0.85, at: epoch)
+        let outcome = scheduler.processReview(state: .new, score: 0.92, at: epoch)
 
         #expect(outcome.rating == 3)
         #expect(outcome.state.reps == 1)
@@ -47,7 +47,7 @@ struct FSRSSchedulerTests {
         // Practice at each due date; once in review state (2), intervals
         // should be spaced repetition — strictly growing under Good scores.
         for _ in 0 ..< 8 {
-            let outcome = scheduler.processReview(state: state, score: 0.85, at: state.due ?? epoch)
+            let outcome = scheduler.processReview(state: state, score: 0.92, at: state.due ?? epoch)
             state = outcome.state
             if state.state == 2 {
                 #expect(outcome.intervalDays >= previousInterval)
@@ -64,7 +64,7 @@ struct FSRSSchedulerTests {
 
         // Build up some stability first.
         for _ in 0 ..< 4 {
-            state = scheduler.processReview(state: state, score: 0.9, at: state.due ?? epoch).state
+            state = scheduler.processReview(state: state, score: 0.92, at: state.due ?? epoch).state
         }
         let stabilityBefore = state.stability ?? 0
 
@@ -74,12 +74,12 @@ struct FSRSSchedulerTests {
     }
 
     @Test func `reps and lapses follow VBV spec`() {
-        // Every review increments reps; every Again (score < 0.60) is a lapse.
+        // Every review increments reps; every Again (score < 0.70) is a lapse.
         let scheduler = FSRSScheduler()
         var state = MemoryState.new
         var reviewDate = epoch
 
-        for (index, score) in [0.85, 0.85, 0.30, 0.85, 0.10].enumerated() {
+        for (index, score) in [0.92, 0.92, 0.30, 0.92, 0.10].enumerated() {
             let outcome = scheduler.processReview(state: state, score: score, at: reviewDate)
             state = outcome.state
             #expect(state.reps == index + 1)
@@ -89,13 +89,15 @@ struct FSRSSchedulerTests {
     }
 
     @Test func `retrievability decays over time`() throws {
-        let scheduler = FSRSScheduler()
+        // Explicit retention so the test states its own target.
+        let target = 0.95
+        let scheduler = FSRSScheduler(desiredRetention: target)
         var state = MemoryState.new
 
         // Two reviews to graduate into review state with real stability.
-        state = scheduler.processReview(state: state, score: 0.85, at: epoch).state
+        state = scheduler.processReview(state: state, score: 0.92, at: epoch).state
         let firstDue = try #require(state.due)
-        state = scheduler.processReview(state: state, score: 0.85, at: firstDue).state
+        state = scheduler.processReview(state: state, score: 0.92, at: firstDue).state
 
         let lastReviewed = try #require(state.lastReviewed)
         let due = try #require(state.due)
@@ -104,17 +106,17 @@ struct FSRSSchedulerTests {
         let wayLater = scheduler.retrievability(of: state, at: due.addingTimeInterval(30 * 86400))
 
         #expect(justAfter > 0.98)
-        // At the due date, retrievability should sit near the 0.9 target —
+        // At the due date, retrievability should sit near the retention target —
         // the property that makes the Memory Score meaningful.
-        #expect(abs(atDue - 0.9) < 0.02, "retrievability at due was \(atDue)")
+        #expect(abs(atDue - target) < 0.02, "retrievability at due was \(atDue)")
         #expect(wayLater < atDue)
         #expect(scheduler.retrievability(of: .new, at: epoch) == 0)
     }
 
     @Test func `scheduling is deterministic`() {
         // Fuzz is off: two devices replaying the same reviews must agree.
-        let first = FSRSScheduler().processReview(state: .new, score: 0.85, at: epoch)
-        let second = FSRSScheduler().processReview(state: .new, score: 0.85, at: epoch)
+        let first = FSRSScheduler().processReview(state: .new, score: 0.92, at: epoch)
+        let second = FSRSScheduler().processReview(state: .new, score: 0.92, at: epoch)
         #expect(first == second)
     }
 }

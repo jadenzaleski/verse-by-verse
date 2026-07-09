@@ -54,10 +54,10 @@ struct PersistenceTests {
         let reviewDate = Date(timeIntervalSince1970: 1_767_268_800)
 
         // Mirror SessionView.completeSession's write path.
-        let outcome = scheduler.processReview(state: passage.memoryState, score: 0.85, at: reviewDate)
+        let outcome = scheduler.processReview(state: passage.memoryState, score: 0.92, at: reviewDate)
         let session = PracticeSession(startDate: reviewDate.addingTimeInterval(-180))
         session.endDate = reviewDate
-        session.score = 0.85
+        session.score = 0.92
         session.rating = outcome.rating
         session.scheduledDays = Int(outcome.intervalDays)
         session.state = passage.state
