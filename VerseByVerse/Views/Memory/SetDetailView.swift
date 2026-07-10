@@ -17,12 +17,18 @@ struct SetDetailView: View {
     @State private var showingEditSheet = false
     @State private var showingDeleteConfirmation = false
     @State private var showingAddPassages = false
+    @State private var showingAddVerses = false
 
     private let log = AppLog.category("SetDetailView")
 
     /// The set's passages, newest first.
     private var passages: [Passage] {
         (set.passages ?? []).sorted { $0.createdAt > $1.createdAt }
+    }
+
+    /// The set's loose verses, in biblical order.
+    private var looseVerses: [Verse] {
+        (set.verses ?? []).sorted { ($0.book, $0.chapter, $0.number) < ($1.book, $1.chapter, $1.number) }
     }
 
     var body: some View {
@@ -70,6 +76,32 @@ struct SetDetailView: View {
                         }
                     }
                 }
+
+                if !looseVerses.isEmpty {
+                    HStack {
+                        Text("Verses")
+                            .font(.app(.headline, weight: .semibold))
+                        Spacer()
+                        Text("\(looseVerses.count)")
+                            .font(.app(.subheadline))
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.top, AppSpacing.sm)
+
+                    ForEach(looseVerses) { verse in
+                        NavigationLink(destination: VerseDetailView(verse: verse)) {
+                            VerseCard(verse: verse)
+                        }
+                        .buttonStyle(.plain)
+                        .contextMenu {
+                            Button(role: .destructive) {
+                                remove(verse)
+                            } label: {
+                                Label("Remove from Set", systemImage: "minus.circle")
+                            }
+                        }
+                    }
+                }
             }
         }
         .padding(.horizontal)
@@ -96,16 +128,28 @@ struct SetDetailView: View {
                 .accessibilityLabel("Set options")
             }
             ToolbarItem {
-                Button {
-                    showingAddPassages = true
+                Menu {
+                    Button {
+                        showingAddPassages = true
+                    } label: {
+                        Label("Add Passages", systemImage: "text.book.closed")
+                    }
+                    Button {
+                        showingAddVerses = true
+                    } label: {
+                        Label("Add Verses", systemImage: "text.quote")
+                    }
                 } label: {
                     Image(systemName: "plus")
                 }
-                .accessibilityLabel("Add passages to set")
+                .accessibilityLabel("Add passages or verses to set")
             }
         }
         .sheet(isPresented: $showingAddPassages) {
             AddPassagesToSetView(set: set)
+        }
+        .sheet(isPresented: $showingAddVerses) {
+            AddVersesToSetView(set: set)
         }
         .sheet(isPresented: $showingEditSheet) {
             StudySetFormView(
@@ -141,6 +185,17 @@ struct SetDetailView: View {
     private func remove(_ passage: Passage) {
         set.passages?.removeAll { $0 === passage }
         set.modifiedAt = .now
+        save()
+    }
+
+    private func remove(_ verse: Verse) {
+        set.verses?.removeAll { $0 === verse }
+        set.modifiedAt = .now
+        do {
+            try Verse.sweepOrphans(in: modelContext)
+        } catch {
+            log.error("Orphan sweep failed: \(error)")
+        }
         save()
     }
 

@@ -10,6 +10,7 @@ import SwiftUI
 
 enum MemoryTopTab: String, CaseIterable {
     case passages = "Passages"
+    case verses = "Verses"
     case sets = "Sets"
 }
 
@@ -29,6 +30,7 @@ struct MemoryView: View {
     @Environment(BibleStore.self) private var bibleStore
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Passage.createdAt, order: .reverse) private var passages: [Passage]
+    @Query private var verses: [Verse]
     @Query(sort: \StudySet.modifiedAt, order: .reverse) private var studySets: [StudySet]
 
     @State private var searchText: String = ""
@@ -59,7 +61,7 @@ struct MemoryView: View {
         .searchable(
             text: $searchText,
             placement: .navigationBarDrawer(displayMode: .automatic),
-            prompt: "Search passages and sets",
+            prompt: "Search passages, verses, and sets",
         )
         .navigationTitle("Memory")
         .toolbar {
@@ -113,6 +115,25 @@ struct MemoryView: View {
         }
     }
 
+    /// Due first, then by reference.
+    private var sortedVerses: [Verse] {
+        verses.sorted { lhs, rhs in
+            let lhsDue = lhs.isDue()
+            let rhsDue = rhs.isDue()
+            if lhsDue != rhsDue { return lhsDue }
+            return (lhs.book, lhs.chapter, lhs.number, lhs.translation)
+                < (rhs.book, rhs.chapter, rhs.number, rhs.translation)
+        }
+    }
+
+    private var filteredVerses: [Verse] {
+        guard hasQuery else { return sortedVerses }
+        return sortedVerses.filter {
+            $0.reference.localizedCaseInsensitiveContains(searchText)
+                || $0.translation.localizedCaseInsensitiveContains(searchText)
+        }
+    }
+
     private var filteredSets: [StudySet] {
         guard hasQuery else { return studySets }
         return studySets.filter {
@@ -143,6 +164,32 @@ struct MemoryView: View {
                             delete(passage)
                         } label: {
                             Label("Delete Passage", systemImage: "trash")
+                        }
+                    }
+                }
+            }
+
+        case .verses:
+            VStack(spacing: AppSpacing.md) {
+                if filteredVerses.isEmpty {
+                    emptyMessage(
+                        hasQuery
+                            ? "No verses match your search."
+                            : "No verses yet — verses appear here when you add them or a passage.",
+                    )
+                }
+                ForEach(filteredVerses) { verse in
+                    NavigationLink(destination: VerseDetailView(verse: verse)) {
+                        VerseCard(verse: verse)
+                    }
+                    .buttonStyle(.plain)
+                    .contextMenu {
+                        if verse.addedDirectly {
+                            Button(role: .destructive) {
+                                delete(verse)
+                            } label: {
+                                Label("Delete Verse", systemImage: "trash")
+                            }
                         }
                     }
                 }
@@ -220,6 +267,18 @@ struct MemoryView: View {
     private func setVerseCount(_ set: StudySet) -> Int? {
         set.passages.map { passages in
             passages.reduce(0) { $0 + $1.verseCount(using: bibleStore) }
+        }
+    }
+
+    private func delete(_ verse: Verse) {
+        // Standalone flag off first; the sweep then applies the shared rules
+        // (kept alive if any passage/set still references it).
+        verse.addedDirectly = false
+        do {
+            try Verse.sweepOrphans(in: modelContext)
+            try modelContext.save()
+        } catch {
+            log.error("Failed to delete verse: \(error)")
         }
     }
 

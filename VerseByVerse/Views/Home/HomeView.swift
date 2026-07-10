@@ -11,10 +11,12 @@ import SwiftUI
 struct HomeView: View {
     @AppStorage(.displayName) private var displayName = ""
     @Query private var passages: [Passage]
+    @Query private var verses: [Verse]
     @Query private var sessions: [PracticeSession]
     private let log = AppLog.category("HomeView")
 
     @State private var practicePassage: Passage?
+    @State private var practiceVerse: Verse?
 
     private var greeting: String {
         let hour = Calendar.current.component(.hour, from: Date())
@@ -30,6 +32,17 @@ struct HomeView: View {
         let now = Date()
         return passages
             .filter { $0.isDue(at: now) }
+            .sorted {
+                ($0.nextPractice ?? .distantPast, $0.reference) < ($1.nextPractice ?? .distantPast, $1.reference)
+            }
+    }
+
+    /// Standalone verses that are due — verses inside passages are practiced
+    /// through their passage instead.
+    private var dueVerses: [Verse] {
+        let now = Date()
+        return verses
+            .filter { $0.addedDirectly && $0.isDue(at: now) }
             .sorted {
                 ($0.nextPractice ?? .distantPast, $0.reference) < ($1.nextPractice ?? .distantPast, $1.reference)
             }
@@ -71,6 +84,9 @@ struct HomeView: View {
         .sheet(item: $practicePassage) { passage in
             SessionView(passage: passage)
         }
+        .sheet(item: $practiceVerse) { verse in
+            SessionView(verse: verse)
+        }
         .navigationTitle("Home")
         .toolbarTitleDisplayMode(.large)
         .navigationSubtitle(displayName.isEmpty ? "\(greeting)!" : "\(greeting) \(displayName)!")
@@ -85,7 +101,7 @@ struct HomeView: View {
                 .padding(.horizontal)
                 .padding(.top)
 
-            if passages.isEmpty {
+            if passages.isEmpty, verses.isEmpty {
                 HStack(spacing: AppSpacing.md) {
                     Image(systemName: "book.closed")
                         .font(.title3)
@@ -100,7 +116,7 @@ struct HomeView: View {
                     Spacer()
                 }
                 .padding()
-            } else if duePassages.isEmpty {
+            } else if duePassages.isEmpty, dueVerses.isEmpty {
                 HStack(spacing: AppSpacing.md) {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.title3)
@@ -117,20 +133,23 @@ struct HomeView: View {
                 .padding()
             } else {
                 VStack(spacing: 0) {
-                    ForEach(Array(duePassages.enumerated()), id: \.element.id) { index, passage in
+                    ForEach(Array(upNextItems.enumerated()), id: \.element.id) { index, item in
                         if index > 0 {
                             Divider().padding(.horizontal)
                         }
                         Button {
-                            practicePassage = passage
+                            switch item {
+                            case let .passage(passage): practicePassage = passage
+                            case let .verse(verse): practiceVerse = verse
+                            }
                         } label: {
                             HStack(spacing: AppSpacing.md) {
                                 VStack(alignment: .leading, spacing: AppSpacing.xs) {
-                                    Text(passage.reference)
+                                    Text(item.reference)
                                         .font(.app(.body, weight: .semibold))
-                                    Text(badgeText(for: passage))
+                                    Text(badgeText(isNew: item.isNew, nextPractice: item.nextPractice))
                                         .font(.app(.caption))
-                                        .foregroundStyle(badgeColor(for: passage))
+                                        .foregroundStyle(badgeColor(isNew: item.isNew, nextPractice: item.nextPractice))
                                 }
                                 Spacer()
                                 Text("Practice")
@@ -152,17 +171,59 @@ struct HomeView: View {
         }
     }
 
+    // MARK: - Up Next items
+
+    private enum UpNextItem: Identifiable {
+        case passage(Passage)
+        case verse(Verse)
+
+        var id: PersistentIdentifier {
+            switch self {
+            case let .passage(passage): passage.persistentModelID
+            case let .verse(verse): verse.persistentModelID
+            }
+        }
+
+        var reference: String {
+            switch self {
+            case let .passage(passage): passage.reference
+            case let .verse(verse): verse.reference
+            }
+        }
+
+        var isNew: Bool {
+            switch self {
+            case let .passage(passage): passage.isNew
+            case let .verse(verse): verse.isNew
+            }
+        }
+
+        var nextPractice: Date? {
+            switch self {
+            case let .passage(passage): passage.nextPractice
+            case let .verse(verse): verse.nextPractice
+            }
+        }
+    }
+
+    private var upNextItems: [UpNextItem] {
+        let items = duePassages.map(UpNextItem.passage) + dueVerses.map(UpNextItem.verse)
+        return items.sorted {
+            ($0.nextPractice ?? .distantPast, $0.reference) < ($1.nextPractice ?? .distantPast, $1.reference)
+        }
+    }
+
     // MARK: - Helpers
 
-    private func badgeText(for passage: Passage) -> String {
-        if passage.isNew { return "New" }
-        let days = Int(Date().timeIntervalSince(passage.nextPractice ?? Date()) / 86400)
+    private func badgeText(isNew: Bool, nextPractice: Date?) -> String {
+        if isNew { return "New" }
+        let days = Int(Date().timeIntervalSince(nextPractice ?? Date()) / 86400)
         return days < 1 ? "Due today" : "\(days)d overdue"
     }
 
-    private func badgeColor(for passage: Passage) -> Color {
-        if passage.isNew { return .appAccent }
-        let days = Int(Date().timeIntervalSince(passage.nextPractice ?? Date()) / 86400)
+    private func badgeColor(isNew: Bool, nextPractice: Date?) -> Color {
+        if isNew { return .appAccent }
+        let days = Int(Date().timeIntervalSince(nextPractice ?? Date()) / 86400)
         return days < 1 ? .orange : .red
     }
 }

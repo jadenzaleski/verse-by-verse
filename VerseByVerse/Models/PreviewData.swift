@@ -57,7 +57,6 @@
             let theme: MeshTheme
         }
 
-        // swiftlint:disable:next function_body_length
         private static func seed(_ context: ModelContext) {
             let scheduler = FSRSScheduler()
             let refs: [SeedRef] = [
