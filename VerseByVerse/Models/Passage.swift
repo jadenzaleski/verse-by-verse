@@ -8,11 +8,15 @@
 import Foundation
 import SwiftData
 
-/// A Bible passage the user is memorizing, with its FSRS memory state.
+/// A contiguous range of Bible verses the user memorizes together.
 ///
-/// CloudKit-compatible by design (see docs/cloudkit-implementation-guide.md §2):
-/// every property has a default or is optional, relationships are optional,
-/// and uniqueness is enforced by ``upsert(in:)`` rather than constraints.
+/// Carries **no memory state of its own** — the FSRS cards are its
+/// ``Verse`` members (shared app-globally), and everything schedule- or
+/// score-like on a passage is derived from them: due when its earliest
+/// verse is due, Memory Score = average of verse retrievability.
+///
+/// CloudKit-compatible by design: defaults/optionals everywhere, optional
+/// relationships, no unique constraints (uniqueness via upsert).
 @Model
 final class Passage {
     var book: String = ""
@@ -22,24 +26,14 @@ final class Passage {
     var endVerse: Int = 1
     var translation: String = "KJV"
 
-    // MARK: FSRS memory state (device-managed via MemoryScheduler)
-
-    var lastPracticed: Date?
-    var nextPractice: Date?
-    var stability: Double?
-    var difficulty: Double?
-    /// 0 = new, 1 = learning, 2 = review, 3 = relearning.
-    var state: Int = 0
-    /// Learning/relearning step index; meaningful only in states 1 and 3.
-    var step: Int = 0
-    var reps: Int = 0
-    var lapses: Int = 0
-
     var createdAt: Date = Date()
     /// Record-format version for future lazy migrations (CloudKit is additive-only).
-    var schemaVersion: Int = 1
+    var schemaVersion: Int = 2
 
-    @Relationship(deleteRule: .cascade, inverse: \PracticeSession.passage)
+    @Relationship(inverse: \Verse.passages)
+    var verses: [Verse]? = []
+
+    @Relationship(inverse: \PracticeSession.passage)
     var sessions: [PracticeSession]? = []
 
     var studySets: [StudySet]? = []
@@ -100,43 +94,70 @@ extension Passage {
     }
 }
 
-// MARK: - Memory state bridge
+// MARK: - Derived memory values (from member verses)
 
 extension Passage {
-    /// Snapshot of the FSRS fields for the ``MemoryScheduler`` seam.
-    var memoryState: MemoryState {
-        get {
-            MemoryState(
-                stability: stability,
-                difficulty: difficulty,
-                state: state,
-                step: step,
-                due: nextPractice,
-                lastReviewed: lastPracticed,
-                reps: reps,
-                lapses: lapses,
-            )
+    /// Member verses in recitation order.
+    var orderedVerses: [Verse] {
+        (verses ?? []).sorted {
+            ($0.chapter, $0.number) < ($1.chapter, $1.number)
         }
-        set {
-            stability = newValue.stability
-            difficulty = newValue.difficulty
-            state = newValue.state
-            step = newValue.step
-            nextPractice = newValue.due
-            lastPracticed = newValue.lastReviewed
-            reps = newValue.reps
-            lapses = newValue.lapses
+    }
+
+    /// Never practiced at all: every verse is still new.
+    var isNew: Bool {
+        (verses ?? []).allSatisfy(\.isNew)
+    }
+
+    /// The passage is due when any of its verses is due (or still new).
+    func isDue(at date: Date = .now) -> Bool {
+        (verses ?? []).contains { $0.isDue(at: date) }
+    }
+
+    /// Earliest scheduled review among the verses; nil while all are new.
+    var nextPractice: Date? {
+        (verses ?? []).compactMap(\.nextPractice).min()
+    }
+
+    /// Most recent practice among the verses.
+    var lastPracticed: Date? {
+        (verses ?? []).compactMap(\.lastPracticed).max()
+    }
+
+    /// Total completed reviews across all verses.
+    var totalReps: Int {
+        (verses ?? []).reduce(0) { $0 + $1.reps }
+    }
+
+    /// Total lapses (Again ratings) across all verses.
+    var totalLapses: Int {
+        (verses ?? []).reduce(0) { $0 + $1.lapses }
+    }
+
+    /// Average completed reviews per verse (rounded down).
+    var averageReps: Int {
+        let verses = verses ?? []
+        guard !verses.isEmpty else { return 0 }
+        return verses.reduce(0) { $0 + $1.reps } / verses.count
+    }
+
+    /// Average retrievability across all verses (unpracticed verses count
+    /// as 0), or nil when nothing has been practiced yet.
+    func memoryScore(using scheduler: MemoryScheduler, at date: Date = .now) -> Double? {
+        let verses = verses ?? []
+        guard !verses.isEmpty, verses.contains(where: { $0.lastPracticed != nil }) else { return nil }
+        let total = verses.reduce(0.0) { sum, verse in
+            sum + scheduler.retrievability(of: verse.memoryState, at: date)
         }
+        return total / Double(verses.count)
     }
 }
 
-// MARK: - Uniqueness
+// MARK: - Uniqueness & creation
 
 extension Passage {
     /// Returns an existing passage with the same reference + translation as
-    /// the (not yet inserted) candidate, if any. SwiftData with CloudKit can't
-    /// enforce unique constraints, so the Add Passage flow upserts instead of
-    /// blindly inserting.
+    /// the (not yet inserted) candidate, if any.
     static func existingDuplicate(of candidate: Passage, in context: ModelContext) throws -> Passage? {
         let book = candidate.book
         let startChapter = candidate.startChapter
@@ -157,5 +178,23 @@ extension Passage {
         )
         descriptor.fetchLimit = 1
         return try context.fetch(descriptor).first
+    }
+
+    /// Attaches the shared `Verse` cards for this passage's range, creating
+    /// any that don't exist yet. Requires Bible metadata for per-chapter
+    /// verse counts on cross-chapter ranges.
+    func attachVerses(using bibleStore: BibleStore, in context: ModelContext) throws {
+        var members: [Verse] = []
+        for chapter in startChapter ... endChapter {
+            let first = chapter == startChapter ? startVerse : 1
+            let last = chapter == endChapter ? endVerse : bibleStore.verseCount(for: book, chapter: chapter)
+            guard last >= first else { continue }
+            for number in first ... last {
+                try members.append(Verse.findOrCreate(
+                    translation: translation, book: book, chapter: chapter, number: number, in: context,
+                ))
+            }
+        }
+        verses = members
     }
 }

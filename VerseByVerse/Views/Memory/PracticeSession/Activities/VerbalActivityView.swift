@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct VerbalActivityView: View {
-    let passage: Passage
+    let reference: String
     let verseText: String
     /// Called with (1, 1) if correct, (0, 1) if missed.
     let onContinue: (Int, Int) -> Void
@@ -27,7 +27,7 @@ struct VerbalActivityView: View {
                             .background(Color.appAccent.opacity(0.15), in: Capsule())
                             .foregroundStyle(Color.appAccent)
                         Spacer()
-                        Text(passage.reference)
+                        Text(reference)
                             .font(.app(.caption))
                             .foregroundStyle(.secondary)
                     }
@@ -117,9 +117,8 @@ struct VerbalActivityView: View {
 }
 
 #Preview {
-    let passage = Passage(book: "John", startChapter: 3, endChapter: 3, startVerse: 16, endVerse: 16)
     VerbalActivityView(
-        passage: passage,
+        reference: "John 3:16",
         verseText: """
         For God so loved the world that he gave his one and only 
         Son, that whoever believes in him shall not perish but have 

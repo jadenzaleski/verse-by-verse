@@ -278,8 +278,10 @@ struct AddPassageView: View {
         await bibleStore.fetchSelection(key)
     }
 
-    /// Upserts the passage: SwiftData with CloudKit-compatible models can't
-    /// enforce unique constraints, so adding an existing reference is a no-op.
+    /// Adds what the reference describes: a single verse becomes a standalone
+    /// `Verse` card; a range becomes a `Passage` whose shared verse cards are
+    /// created or reused (memory state carries across containers). Upserts
+    /// throughout — re-adding an existing reference is a no-op.
     private func handleAddPassage() {
         guard isRefValid else { return }
 
@@ -288,22 +290,35 @@ struct AddPassageView: View {
         let endCh = Int(endChapter.isEmpty ? startChapter : endChapter) ?? startCh
         let endVs = Int(endVerse.isEmpty ? startVerse : endVerse) ?? startVs
 
-        let candidate = Passage(
-            book: selectedBook,
-            startChapter: startCh,
-            endChapter: endCh,
-            startVerse: startVs,
-            endVerse: endVs,
-            translation: selectedTranslation,
-        )
-
         do {
-            if try Passage.existingDuplicate(of: candidate, in: modelContext) == nil {
-                modelContext.insert(candidate)
+            if startCh == endCh, startVs == endVs {
+                let verse = try Verse.findOrCreate(
+                    translation: selectedTranslation,
+                    book: selectedBook,
+                    chapter: startCh,
+                    number: startVs,
+                    in: modelContext,
+                )
+                verse.addedDirectly = true
                 try modelContext.save()
-                log.info("Added passage \(candidate.reference)")
+                log.info("Added standalone verse \(verse.reference)")
             } else {
-                log.info("Passage already exists, skipping insert")
+                let candidate = Passage(
+                    book: selectedBook,
+                    startChapter: startCh,
+                    endChapter: endCh,
+                    startVerse: startVs,
+                    endVerse: endVs,
+                    translation: selectedTranslation,
+                )
+                if try Passage.existingDuplicate(of: candidate, in: modelContext) == nil {
+                    modelContext.insert(candidate)
+                    try candidate.attachVerses(using: bibleStore, in: modelContext)
+                    try modelContext.save()
+                    log.info("Added passage \(candidate.reference)")
+                } else {
+                    log.info("Passage already exists, skipping insert")
+                }
             }
             dismiss()
         } catch {

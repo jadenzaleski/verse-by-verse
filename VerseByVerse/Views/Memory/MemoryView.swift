@@ -226,6 +226,7 @@ struct MemoryView: View {
     private func delete(_ passage: Passage) {
         modelContext.delete(passage)
         do {
+            try Verse.sweepOrphans(in: modelContext)
             try modelContext.save()
         } catch {
             log.error("Failed to delete passage: \(error)")

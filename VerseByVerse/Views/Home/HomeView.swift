@@ -28,13 +28,11 @@ struct HomeView: View {
 
     private var duePassages: [Passage] {
         let now = Date()
-        let overdue = passages
-            .filter { passage in
-                if let next = passage.nextPractice { next <= now } else { false }
+        return passages
+            .filter { $0.isDue(at: now) }
+            .sorted {
+                ($0.nextPractice ?? .distantPast, $0.reference) < ($1.nextPractice ?? .distantPast, $1.reference)
             }
-            .sorted { ($0.nextPractice ?? now) < ($1.nextPractice ?? now) }
-        let new = passages.filter { $0.reps == 0 && $0.nextPractice == nil }
-        return overdue + new
     }
 
     private var weeklyCompletion: [Bool] {
@@ -157,13 +155,13 @@ struct HomeView: View {
     // MARK: - Helpers
 
     private func badgeText(for passage: Passage) -> String {
-        if passage.reps == 0 { return "New" }
+        if passage.isNew { return "New" }
         let days = Int(Date().timeIntervalSince(passage.nextPractice ?? Date()) / 86400)
         return days < 1 ? "Due today" : "\(days)d overdue"
     }
 
     private func badgeColor(for passage: Passage) -> Color {
-        if passage.reps == 0 { return .appAccent }
+        if passage.isNew { return .appAccent }
         let days = Int(Date().timeIntervalSince(passage.nextPractice ?? Date()) / 86400)
         return days < 1 ? .orange : .red
     }

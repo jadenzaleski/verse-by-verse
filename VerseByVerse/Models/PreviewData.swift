@@ -30,14 +30,18 @@
             )) ?? []
         }
 
-        static var samplePassage: Passage {
-            passages.first ?? Passage(book: "John", startChapter: 3, endChapter: 3, startVerse: 16, endVerse: 16)
+        static var verses: [Verse] {
+            (try? container.mainContext.fetch(
+                FetchDescriptor<Verse>(sortBy: [SortDescriptor(\.createdAt)]),
+            )) ?? []
         }
 
-        private struct SeedSet {
-            let name: String
-            let details: String?
-            let theme: MeshTheme
+        static var samplePassage: Passage {
+            passages.first ?? Passage(book: "John", startChapter: 3, endChapter: 3, startVerse: 16, endVerse: 17)
+        }
+
+        static var sampleVerse: Verse {
+            verses.first ?? Verse(book: "John", chapter: 3, number: 16)
         }
 
         private struct SeedRef {
@@ -47,10 +51,17 @@
             let endVerse: Int
         }
 
+        private struct SeedSet {
+            let name: String
+            let details: String?
+            let theme: MeshTheme
+        }
+
+        // swiftlint:disable:next function_body_length
         private static func seed(_ context: ModelContext) {
             let scheduler = FSRSScheduler()
-            let books: [SeedRef] = [
-                SeedRef(book: "John", chapter: 3, startVerse: 16, endVerse: 16),
+            let refs: [SeedRef] = [
+                SeedRef(book: "John", chapter: 3, startVerse: 16, endVerse: 17),
                 SeedRef(book: "Romans", chapter: 8, startVerse: 28, endVerse: 30),
                 SeedRef(book: "Psalms", chapter: 23, startVerse: 1, endVerse: 6),
                 SeedRef(book: "Genesis", chapter: 1, startVerse: 1, endVerse: 3),
@@ -59,34 +70,69 @@
             ]
 
             var passages: [Passage] = []
-            for (index, entry) in books.enumerated() {
+            for (index, ref) in refs.enumerated() {
                 let passage = Passage(
-                    book: entry.book,
-                    startChapter: entry.chapter,
-                    endChapter: entry.chapter,
-                    startVerse: entry.startVerse,
-                    endVerse: entry.endVerse,
+                    book: ref.book,
+                    startChapter: ref.chapter,
+                    endChapter: ref.chapter,
+                    startVerse: ref.startVerse,
+                    endVerse: ref.endVerse,
                     translation: ["KJV", "NIV", "ESV"][index % 3],
                 )
                 context.insert(passage)
+
+                // Attach shared verse cards (single-chapter seeds; no Bible data needed).
+                var members: [Verse] = []
+                for number in ref.startVerse ... ref.endVerse {
+                    if let verse = try? Verse.findOrCreate(
+                        translation: passage.translation,
+                        book: ref.book,
+                        chapter: ref.chapter,
+                        number: number,
+                        in: context,
+                    ) {
+                        members.append(verse)
+                    }
+                }
+                passage.verses = members
                 passages.append(passage)
 
                 // Give the first few passages a practice history.
                 guard index < 4 else { continue }
                 var reviewDate = Date().addingTimeInterval(Double(-(10 - index)) * 86400)
-                for score in [0.85, 0.9, 0.7].prefix(3 - (index % 2)) {
-                    let outcome = scheduler.processReview(state: passage.memoryState, score: score, at: reviewDate)
+                for score in [0.92, 0.95, 0.75].prefix(3 - (index % 2)) {
                     let session = PracticeSession(startDate: reviewDate)
                     session.endDate = reviewDate.addingTimeInterval(180)
                     session.score = score
-                    session.rating = outcome.rating
-                    session.scheduledDays = Int(outcome.intervalDays)
-                    session.state = passage.state
+                    session.rating = MemoryScoring.rating(forScore: score)
                     session.passage = passage
                     context.insert(session)
-                    passage.memoryState = outcome.state
+
+                    for verse in members {
+                        let outcome = scheduler.processReview(
+                            state: verse.memoryState, score: score, at: reviewDate,
+                        )
+                        let review = VerseReview(reviewedAt: reviewDate)
+                        review.score = score
+                        review.rating = outcome.rating
+                        review.correctCount = Int(score * 10)
+                        review.totalCount = 10
+                        review.stabilityAfter = outcome.state.stability ?? 0
+                        review.difficultyAfter = outcome.state.difficulty ?? 0
+                        review.stateAfter = outcome.state.state
+                        review.verse = verse
+                        review.session = session
+                        verse.memoryState = outcome.state
+                    }
                     reviewDate = min(passage.nextPractice ?? reviewDate, Date())
                 }
+            }
+
+            // A standalone verse the user memorizes on its own.
+            if let standalone = try? Verse.findOrCreate(
+                translation: "KJV", book: "Philippians", chapter: 4, number: 13, in: context,
+            ) {
+                standalone.addedDirectly = true
             }
 
             let seedSets: [SeedSet] = [

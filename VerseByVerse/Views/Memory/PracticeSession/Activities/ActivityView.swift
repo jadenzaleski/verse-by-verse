@@ -9,15 +9,16 @@ import SwiftUI
 
 struct ActivityView: View {
     let activityName: String
-    let passage: Passage
+    let reference: String
     let verseText: String
     /// Ordered word indices the user must type the first letter of.
     let maskedIndices: [Int]
     let instruction: String
     /// Show the rest of each masked word as a faded hint (true for Every Other Word).
     let showWordHints: Bool
-    /// Called with (correct, total) when the user taps Continue.
-    let onContinue: (Int, Int) -> Void
+    /// Called with (correct, total, per-word correctness keyed by word index)
+    /// when the user taps Continue.
+    let onContinue: (Int, Int, [Int: Bool]) -> Void
 
     @State private var inputText = ""
     @FocusState private var fieldFocused: Bool
@@ -63,6 +64,15 @@ struct ActivityView: View {
         (0 ..< totalToType).count(where: { isCorrect(at: $0) == true })
     }
 
+    /// Correctness of every masked word, keyed by its index in `words`.
+    private var perWordCorrectness: [Int: Bool] {
+        var result: [Int: Bool] = [:]
+        for (typingIdx, wordIdx) in maskedIndices.enumerated() {
+            result[wordIdx] = isCorrect(at: typingIdx) == true
+        }
+        return result
+    }
+
     private var scoreColor: Color {
         let pct = totalToType > 0 ? Double(correctCount) / Double(totalToType) : 0
         if pct >= 0.8 { return .green }
@@ -82,7 +92,7 @@ struct ActivityView: View {
                             .background(Color.appAccent.opacity(0.15), in: Capsule())
                             .foregroundStyle(Color.appAccent)
                         Spacer()
-                        Text(passage.reference)
+                        Text(reference)
                             .font(.app(.caption))
                             .foregroundStyle(.secondary)
                     }
@@ -129,7 +139,7 @@ struct ActivityView: View {
                     }
 
                     Button {
-                        onContinue(correctCount, totalToType)
+                        onContinue(correctCount, totalToType, perWordCorrectness)
                     } label: {
                         Text("Continue")
                             .font(.app(.body, weight: .semibold))
@@ -157,8 +167,12 @@ struct ActivityView: View {
 
                 #if DEBUG
                     Button("Skip (debug — random score)") {
-                        let correct = Int.random(in: 0 ... totalToType)
-                        onContinue(correct, totalToType)
+                        var perWord: [Int: Bool] = [:]
+                        for wordIdx in maskedIndices {
+                            perWord[wordIdx] = Bool.random()
+                        }
+                        let correct = perWord.values.count(where: { $0 })
+                        onContinue(correct, totalToType, perWord)
                     }
                     .font(.app(.caption))
                     .foregroundStyle(.tertiary)
@@ -214,22 +228,45 @@ private struct TypedWordCell: View {
             }
 
             if word.count > 1 {
-                if typedChar != nil {
-                    Text(String(word.dropFirst()))
+                ZStack(alignment: .leading) {
+                    // Reserve the final width so layout doesn't shift when typing starts
+                    Text(remainder)
                         .font(.app(.body))
-                        .foregroundStyle(correctness == true ? Color.appSuccess : Color.appDestructive)
-                } else if showHint {
-                    Text(String(word.dropFirst()))
-                        .font(.app(.body))
-                        .foregroundStyle(Color.secondary.opacity(0.25))
-                } else {
-                    Text(String(repeating: "_", count: min(word.count - 1, 7)))
-                        .font(.system(size: 11, design: .monospaced))
-                        .foregroundStyle(Color.secondary.opacity(0.35))
-                        .baselineOffset(-2)
+                        .fontDesign(.monospaced)
+                        .lineLimit(1)
+                        .allowsTightening(false)
+                        .hidden()
+
+                    if typedChar != nil {
+                        Text(remainder)
+                            .font(.app(.body))
+                            .fontDesign(.monospaced)
+                            .lineLimit(1)
+                            .allowsTightening(false)
+                            .foregroundStyle(correctness == true ? Color.appSuccess : Color.appDestructive)
+                    } else if showHint {
+                        Text(remainder)
+                            .font(.app(.body))
+                            .fontDesign(.monospaced)
+                            .lineLimit(1)
+                            .allowsTightening(false)
+                            .foregroundStyle(Color.secondary.opacity(0.25))
+                    } else {
+                        Text(String(repeating: "_", count: remainder.count))
+                            .font(.app(.body))
+                            .fontDesign(.monospaced)
+                            .lineLimit(1)
+                            .allowsTightening(false)
+                            .foregroundStyle(Color.secondary.opacity(0.35))
+                    }
                 }
+                .fixedSize(horizontal: true, vertical: false)
             }
         }
+    }
+
+    private var remainder: String {
+        String(word.dropFirst())
     }
 
     private var boxColor: Color {
@@ -287,7 +324,6 @@ private struct FlowLayout: Layout {
 // MARK: - Preview
 
 #Preview {
-    let passage = Passage(book: "John", startChapter: 3, endChapter: 3, startVerse: 16, endVerse: 16)
     let verse = """
     For God so loved the world that he gave his one and only Son,
     that whoever believes in him shall not perish but have eternal life.
@@ -295,12 +331,12 @@ private struct FlowLayout: Layout {
     let words = verse.split(separator: " ", omittingEmptySubsequences: true)
     ActivityView(
         activityName: "Preview",
-        passage: passage,
+        reference: "John 3:16",
         verseText: verse,
         maskedIndices: Array(words.indices),
         instruction: "Type the first letter of each word.",
         showWordHints: false,
-        onContinue: { _, _ in },
+        onContinue: { _, _, _ in },
     )
     .environment(\.font, .app())
 }

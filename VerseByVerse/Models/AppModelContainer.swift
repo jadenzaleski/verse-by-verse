@@ -15,6 +15,8 @@ import SwiftData
 /// entitlements (docs/cloudkit-implementation-guide.md §1.1).
 enum AppModelContainer {
     static let schema = Schema([
+        Verse.self,
+        VerseReview.self,
         Passage.self,
         StudySet.self,
         PracticeSession.self,

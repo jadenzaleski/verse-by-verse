@@ -31,9 +31,15 @@ final class PracticeSession {
     var schemaVersion: Int = 1
 
     var passage: Passage?
+    /// Set when the session practiced a single standalone verse.
+    var standaloneVerse: Verse?
 
     @Relationship(deleteRule: .cascade, inverse: \PracticeActivity.session)
     var activities: [PracticeActivity]? = []
+
+    /// One FSRS outcome per verse practiced in this session.
+    @Relationship(deleteRule: .cascade, inverse: \VerseReview.session)
+    var verseReviews: [VerseReview]? = []
 
     init(startDate: Date = Date()) {
         self.startDate = startDate

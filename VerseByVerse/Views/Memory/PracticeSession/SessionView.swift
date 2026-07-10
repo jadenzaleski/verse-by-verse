@@ -15,8 +15,14 @@ private enum SessionPhase: Equatable {
     case failed(String)
 }
 
+/// Runs a practice session over an ordered list of verses — a whole passage
+/// or a single standalone verse. Every verse gets its own FSRS review at
+/// completion; nothing is persisted for abandoned sessions.
 struct SessionView: View {
-    let passage: Passage
+    private let verses: [Verse]
+    private let title: String
+    private let passage: Passage?
+    private let standaloneVerse: Verse?
 
     @Environment(BibleStore.self) private var bibleStore
     @Environment(\.modelContext) private var modelContext
@@ -31,12 +37,36 @@ struct SessionView: View {
     @State private var totalCorrect = 0
     @State private var totalPossible = 0
     @State private var collectedActivities: [ActivityRecord] = []
+    /// Per-verse tallies, indexed like `verses`.
+    @State private var verseCorrect: [Int] = []
+    @State private var verseTotal: [Int] = []
+    /// Word index (in the joined text) → index into `verses`.
+    @State private var wordOwners: [Int] = []
 
     private let scheduler = FSRSScheduler()
     private let log = AppLog.category("SessionView")
 
+    init(passage: Passage) {
+        verses = passage.orderedVerses
+        title = passage.reference
+        self.passage = passage
+        standaloneVerse = nil
+    }
+
+    init(verse: Verse) {
+        verses = [verse]
+        title = verse.reference
+        passage = nil
+        standaloneVerse = verse
+    }
+
+    private var selectionKey: BibleSelectionKey? {
+        if let passage { return passage.selectionKey }
+        return standaloneVerse?.selectionKey
+    }
+
     private var verseText: String {
-        bibleStore.selections[passage.selectionKey]?.fullText ?? ""
+        selectionKey.flatMap { bibleStore.selections[$0]?.fullText } ?? ""
     }
 
     private var words: [String] {
@@ -83,10 +113,11 @@ struct SessionView: View {
                         } label: {
                             Image(systemName: "xmark")
                         }
+                        .accessibilityLabel("Close session")
                     }
                 }
                 ToolbarItem(placement: .principal) {
-                    Text(passage.reference)
+                    Text(title)
                         .font(.app(.headline))
                 }
             }
@@ -111,7 +142,7 @@ struct SessionView: View {
             case let .everyOtherWord(phase):
                 ActivityView(
                     activityName: "Every Other Word",
-                    passage: passage,
+                    reference: title,
                     verseText: verseText,
                     maskedIndices: words.indices.filter { $0 % 2 == phase },
                     instruction: "Type the first letter of each missing word.",
@@ -123,7 +154,7 @@ struct SessionView: View {
             case .everyWord, .everyWordRetry:
                 ActivityView(
                     activityName: "Every Word",
-                    passage: passage,
+                    reference: title,
                     verseText: verseText,
                     maskedIndices: Array(words.indices),
                     instruction: "Type the first letter of every word from memory.",
@@ -134,9 +165,9 @@ struct SessionView: View {
                 .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
             case .verbalRecite:
                 VerbalActivityView(
-                    passage: passage,
+                    reference: title,
                     verseText: verseText,
-                    onContinue: advance,
+                    onContinue: { correct, total in advance(correct: correct, total: total, perWord: [:]) },
                 )
                 .id(stepIndex)
                 .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
@@ -248,7 +279,7 @@ struct SessionView: View {
 
     // MARK: - Actions
 
-    private func advance(correct: Int, total: Int) {
+    private func advance(correct: Int, total: Int, perWord: [Int: Bool]) {
         let now = Date()
         let step = steps[stepIndex]
 
@@ -264,6 +295,22 @@ struct SessionView: View {
 
         totalCorrect += correct
         totalPossible += total
+
+        // Attribute results to verses.
+        if case .verbalRecite = step {
+            // The recite verdict applies to every verse equally.
+            for index in verses.indices {
+                verseCorrect[index] += correct
+                verseTotal[index] += total
+            }
+        } else {
+            for (wordIndex, isCorrect) in perWord {
+                guard wordIndex < wordOwners.count else { continue }
+                let verseIndex = wordOwners[wordIndex]
+                verseTotal[verseIndex] += 1
+                if isCorrect { verseCorrect[verseIndex] += 1 }
+            }
+        }
 
         if case let .everyWord(allowsRetry) = step, allowsRetry, correct < total {
             withAnimation(.easeInOut(duration: 0.35)) {
@@ -281,43 +328,65 @@ struct SessionView: View {
         }
     }
 
-    /// Fetches the verse text, then begins the standard activity plan.
-    /// Nothing is persisted until the session completes, so abandoning is free.
+    /// Fetches the verse text, maps each word to its verse, and begins the
+    /// standard plan. Nothing persists until the session completes.
     private func startSession() async {
-        await bibleStore.fetchSelection(passage.selectionKey)
-        guard !verseText.isEmpty else {
+        guard let selectionKey, !verses.isEmpty else {
+            phase = .failed("Nothing to practice.")
+            return
+        }
+        await bibleStore.fetchSelection(selectionKey)
+        guard let selection = bibleStore.selections[selectionKey], !selection.fullText.isEmpty else {
             phase = .failed("Couldn't load the passage text. Check your connection and try again.")
             return
         }
+
+        wordOwners = Self.mapWordsToVerses(selection: selection, verses: verses)
+        verseCorrect = Array(repeating: 0, count: verses.count)
+        verseTotal = Array(repeating: 0, count: verses.count)
+
         steps = ActivityStep.standardPlan
         sessionStartDate = Date()
         stepStartDate = sessionStartDate
         phase = .activity
-        log.info("Started practice session for passage \(passage.reference), \(steps.count) steps")
+        log.info("Started session for \(title): \(verses.count) verses, \(steps.count) steps")
     }
 
-    /// Applies the session to the passage's memory state via FSRS and persists
-    /// the session + activities. All local — no network involved.
+    /// Builds word index → verse index using the per-verse texts of the
+    /// fetched selection, aligned with `fullText`'s word order.
+    static func mapWordsToVerses(selection: BibleSelection, verses: [Verse]) -> [Int] {
+        // Position of each tracked verse by (chapter, number) for alignment.
+        var verseIndexByRef: [String: Int] = [:]
+        for (index, verse) in verses.enumerated() {
+            verseIndexByRef["\(verse.chapter):\(verse.number)"] = index
+        }
+
+        var owners: [Int] = []
+        for selectionVerse in selection.verses {
+            let wordCount = selectionVerse.text
+                .split(separator: " ", omittingEmptySubsequences: true).count
+            // Fall back to the last verse if refs don't line up (defensive).
+            let owner = verseIndexByRef["\(selectionVerse.chapter):\(selectionVerse.verse)"]
+                ?? max(0, verses.count - 1)
+            owners.append(contentsOf: Array(repeating: owner, count: wordCount))
+        }
+        return owners
+    }
+
+    /// Applies one FSRS review per verse and persists the session, its
+    /// activities, and one `VerseReview` per verse — all in a single save.
     private func completeSession() {
         let now = Date()
         let correct = totalCorrect
         let total = totalPossible
-        let score = total > 0 ? Double(correct) / Double(total) : 0
-
-        // Capture pre-review values the session record needs.
-        let stateAtReview = passage.state
-        let previousReview = passage.lastPracticed
-
-        let outcome = scheduler.processReview(state: passage.memoryState, score: score, at: now)
+        let pooledScore = total > 0 ? Double(correct) / Double(total) : 0
 
         let session = PracticeSession(startDate: sessionStartDate)
         session.endDate = now
-        session.score = score
-        session.rating = outcome.rating
-        session.scheduledDays = Int(outcome.intervalDays)
-        session.elapsedDays = previousReview.map { max(0, Int(now.timeIntervalSince($0) / 86400)) } ?? 0
-        session.state = stateAtReview
+        session.score = pooledScore
+        session.rating = MemoryScoring.rating(forScore: pooledScore)
         session.passage = passage
+        session.standaloneVerse = standaloneVerse
 
         for (position, record) in collectedActivities.enumerated() {
             let activity = PracticeActivity(
@@ -333,8 +402,30 @@ struct SessionView: View {
             activity.session = session
         }
 
+        var longestIntervalDays = 0.0
+        for (index, verse) in verses.enumerated() {
+            let verseScore = verseTotal[index] > 0
+                ? Double(verseCorrect[index]) / Double(verseTotal[index])
+                : 0
+            let outcome = scheduler.processReview(state: verse.memoryState, score: verseScore, at: now)
+
+            let review = VerseReview(reviewedAt: now)
+            review.correctCount = verseCorrect[index]
+            review.totalCount = verseTotal[index]
+            review.score = verseScore
+            review.rating = outcome.rating
+            review.stabilityAfter = outcome.state.stability ?? 0
+            review.difficultyAfter = outcome.state.difficulty ?? 0
+            review.stateAfter = outcome.state.state
+            review.verse = verse
+            review.session = session
+
+            verse.memoryState = outcome.state
+            longestIntervalDays = max(longestIntervalDays, outcome.intervalDays)
+        }
+        session.scheduledDays = Int(longestIntervalDays)
+
         modelContext.insert(session)
-        passage.memoryState = outcome.state
 
         do {
             try modelContext.save()
@@ -344,19 +435,20 @@ struct SessionView: View {
             return
         }
 
-        phase = .done(nextReview: outcome.state.due, correct: correct, total: total)
+        let nextReview = verses.compactMap(\.nextPractice).min()
+        phase = .done(nextReview: nextReview, correct: correct, total: total)
         log.info("""
-        Completed session for \(passage.reference), \
-        \(correct)/\(total) correct, \
-        score=\(String(format: "%.2f", score)), \
-        rating=\(outcome.rating)
+        Completed session for \(title): \(correct)/\(total) pooled, \
+        \(verses.count) verse reviews written
         """)
     }
 }
 
 #Preview {
-    SessionView(passage: PreviewData.samplePassage)
-        .modelContainer(PreviewData.container)
-        .environment(BibleStore.shared)
-        .environment(\.font, .app())
+    if let passage = PreviewData.passages.first {
+        SessionView(passage: passage)
+            .modelContainer(PreviewData.container)
+            .environment(BibleStore.shared)
+            .environment(\.font, .app())
+    }
 }

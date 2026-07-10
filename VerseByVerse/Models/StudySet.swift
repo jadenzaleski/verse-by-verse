@@ -42,6 +42,9 @@ final class StudySet {
     @Relationship(inverse: \Passage.studySets)
     var passages: [Passage]? = []
 
+    @Relationship(inverse: \Verse.studySets)
+    var verses: [Verse]? = []
+
     init(
         name: String = "",
         setDescription: String? = nil,

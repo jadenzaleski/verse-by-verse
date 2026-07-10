@@ -36,7 +36,7 @@ struct PassageCard: View {
 
             SegmentedProgressBar(
                 totalSegments: 10,
-                completedSegments: min(passage.reps, 10),
+                completedSegments: min(passage.averageReps, 10),
             )
 
             HStack {

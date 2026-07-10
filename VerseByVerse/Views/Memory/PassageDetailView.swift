@@ -21,16 +21,15 @@ struct PassageDetailView: View {
         passage.sessions ?? []
     }
 
-    /// Probability of recall right now, straight from the FSRS engine — the
-    /// same curve that schedules reviews, so the score hits ~90% exactly when
-    /// a review comes due.
+    /// Average probability of recall across the passage's verses, straight
+    /// from the FSRS engine — the same curve that schedules reviews.
     private var retentionScore: Double {
-        scheduler.retrievability(of: passage.memoryState, at: .now)
+        passage.memoryScore(using: scheduler) ?? 0
     }
 
     private var dueDateText: String {
         guard let next = passage.nextPractice else {
-            return passage.state == 0 ? "New — start your first practice" : "Ready to practice"
+            return passage.isNew ? "New — start your first practice" : "Ready to practice"
         }
         let days = Calendar.current.dateComponents(
             [.day],
@@ -44,7 +43,7 @@ struct PassageDetailView: View {
 
     private var dueDateColor: Color {
         guard let next = passage.nextPractice else {
-            return passage.state == 0 ? .appAccent : .green
+            return passage.isNew ? .appAccent : .green
         }
         let days = Calendar.current.dateComponents(
             [.day],
@@ -100,8 +99,8 @@ struct PassageDetailView: View {
             }
 
             HStack(spacing: AppSpacing.xl) {
-                statItem(label: "Reviews", value: "\(passage.reps)")
-                statItem(label: "Missed", value: "\(passage.lapses)")
+                statItem(label: "Reviews", value: "\(passage.totalReps)")
+                statItem(label: "Missed", value: "\(passage.totalLapses)")
                 if let last = passage.lastPracticed {
                     statItem(label: "Last Practice", value: last.formatted(.relative(presentation: .named)))
                 }

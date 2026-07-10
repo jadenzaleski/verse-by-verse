@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Verse: Identifiable, Equatable {
+struct SelectionVerse: Identifiable, Equatable {
     let id: String
     let book: String
     let chapter: Int
@@ -49,7 +49,7 @@ struct BibleSelection: Equatable {
     let startVerse: Int
     let endChapter: Int
     let endVerse: Int
-    let verses: [Verse]
+    let verses: [SelectionVerse]
 
     var key: BibleSelectionKey {
         BibleSelectionKey(
@@ -80,8 +80,8 @@ struct BibleSelection: Equatable {
 }
 
 extension BibleVerse {
-    func toDomain() -> Verse {
-        Verse(id: id, book: book, chapter: chapter, verse: verse, text: text)
+    func toDomain() -> SelectionVerse {
+        SelectionVerse(id: id, book: book, chapter: chapter, verse: verse, text: text)
     }
 }
 
