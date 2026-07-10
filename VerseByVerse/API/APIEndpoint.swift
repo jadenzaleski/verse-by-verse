@@ -40,13 +40,16 @@ enum APIEndpoint: Hashable {
         }
     }
 
-    /// Time in seconds before a cached response expires. Verse text is
-    /// immutable, so Bible responses cache long.
+    /// Time in seconds before a cached response expires. Scripture text may
+    /// be stored locally for at most two weeks (licensing), so selections
+    /// cap at 14 days; books/translations are metadata and cache longer.
     var ttl: TimeInterval? {
         switch self {
         case .getHealth:
             nil
-        case .getBibleBooks, .getBibleTranslations, .getBibleSelection:
+        case .getBibleSelection:
+            14 * 24 * 60 * 60 // 14 days — licensing ceiling for verse text
+        case .getBibleBooks, .getBibleTranslations:
             30 * 24 * 60 * 60 // 30 days
         }
     }
