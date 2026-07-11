@@ -9,6 +9,7 @@ import SwiftData
 import SwiftUI
 
 struct HomeView: View {
+    @Environment(NetworkMonitor.self) private var networkMonitor
     @AppStorage(.displayName) private var displayName = ""
     @Query private var passages: [Passage]
     @Query private var verses: [Verse]
@@ -72,6 +73,10 @@ struct HomeView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: AppSpacing.lg) {
+                if !networkMonitor.isFullyOnline {
+                    NetworkWidget(issue: networkMonitor.isDeviceOnline ? .serverUnreachable : .deviceOffline)
+                        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
+                }
                 StreakWidget(completed: weeklyCompletion, streakCount: currentStreak)
                     .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
                 upNextSection
@@ -233,5 +238,6 @@ struct HomeView: View {
         HomeView()
             .modelContainer(PreviewData.container)
             .environment(\.font, .app())
+            .environment(NetworkMonitor.shared)
     }
 }

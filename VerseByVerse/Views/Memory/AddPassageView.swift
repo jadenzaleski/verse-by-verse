@@ -9,6 +9,11 @@ import SwiftData
 import SwiftUI
 
 struct AddPassageView: View {
+    /// Called after a successful add with the tab the new item belongs to
+    /// (`.verses` for a single verse, `.passages` for a range) so the caller
+    /// can surface it — the result type is derived from the selection.
+    var onAdded: ((MemoryTopTab) -> Void)?
+
     @Environment(\.dismiss) private var dismiss
     @Environment(BibleStore.self) private var bibleStore
     @Environment(\.modelContext) private var modelContext
@@ -135,7 +140,7 @@ struct AddPassageView: View {
     var body: some View {
         NavigationStack {
             formView
-                .navigationTitle("Add Passage")
+                .navigationTitle("Add to Memory")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
@@ -151,7 +156,7 @@ struct AddPassageView: View {
                         } label: {
                             Image(systemName: "plus")
                         }
-                        .accessibilityLabel("Add passage")
+                        .accessibilityLabel("Add to memory")
                         .buttonStyle(.glassProminent)
                         .tint(.accent)
                         .disabled(!isRefValid)
@@ -281,7 +286,8 @@ struct AddPassageView: View {
     /// Adds what the reference describes: a single verse becomes a standalone
     /// `Verse` card; a range becomes a `Passage` whose shared verse cards are
     /// created or reused (memory state carries across containers). Upserts
-    /// throughout — re-adding an existing reference is a no-op.
+    /// throughout — re-adding an existing reference is a no-op. Reports the
+    /// destination tab via ``onAdded`` so the caller can reveal the result.
     private func handleAddPassage() {
         guard isRefValid else { return }
 
@@ -302,6 +308,7 @@ struct AddPassageView: View {
                 verse.addedDirectly = true
                 try modelContext.save()
                 log.info("Added standalone verse \(verse.reference)")
+                onAdded?(.verses)
             } else {
                 let candidate = Passage(
                     book: selectedBook,
@@ -319,6 +326,7 @@ struct AddPassageView: View {
                 } else {
                     log.info("Passage already exists, skipping insert")
                 }
+                onAdded?(.passages)
             }
             dismiss()
         } catch {

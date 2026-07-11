@@ -46,4 +46,5 @@ struct ContentView: View {
         .modelContainer(PreviewData.container)
         .environment(\.font, .app())
         .environment(BibleStore.shared)
+        .environment(NetworkMonitor.shared)
 }

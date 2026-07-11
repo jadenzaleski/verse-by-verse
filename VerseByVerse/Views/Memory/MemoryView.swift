@@ -70,12 +70,12 @@ struct MemoryView: View {
                     Button {
                         activeSheet = .add
                     } label: {
-                        Label("New Passage", systemImage: "plus")
+                        Label("Add Verse/Passage", systemImage: "plus")
                     }
                     Button {
                         activeSheet = .addSet
                     } label: {
-                        Label("New Set", systemImage: "rectangle.stack.badge.plus")
+                        Label("Add Set", systemImage: "rectangle.stack.badge.plus")
                     }
                 } label: {
                     Image(systemName: "plus")
@@ -87,7 +87,9 @@ struct MemoryView: View {
         .sheet(item: $activeSheet) { sheet in
             switch sheet {
             case .add:
-                AddPassageView()
+                AddPassageView { destination in
+                    selectedTab = destination
+                }
             case .addSet:
                 StudySetFormView(
                     title: "New Set",
@@ -98,6 +100,7 @@ struct MemoryView: View {
                     modelContext.insert(set)
                     try modelContext.save()
                     log.info("Created study set \(name)")
+                    selectedTab = .sets
                 }
             }
         }

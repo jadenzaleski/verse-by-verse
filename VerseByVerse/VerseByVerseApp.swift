@@ -15,6 +15,7 @@ struct VerseByVerseApp: App {
     @State private var statusText = "Loading…"
     private let container = AppModelContainer.make()
     private let bibleStore = BibleStore.shared
+    private let networkMonitor = NetworkMonitor.shared
     private let log = AppLog.category("Init")
 
     init() {
@@ -41,18 +42,22 @@ struct VerseByVerseApp: App {
             .animation(.easeOut(duration: 0.35), value: isReady)
             .environment(\.font, .app())
             .environment(bibleStore)
+            .environment(networkMonitor)
         }
         .modelContainer(container)
     }
 
-    /// Warms the Bible metadata caches. The app is local-first: failures here
-    /// are non-fatal (verse text simply loads on demand later), so startup is
-    /// bounded by the network client's 15s timeout in the worst case.
+    /// Warms the Bible metadata caches and takes the network monitor's first
+    /// reading. The app is local-first: failures here are non-fatal (verse
+    /// text simply loads on demand later, and the Home network widget picks
+    /// up an offline/unreachable state), so startup is bounded by the
+    /// network client's 15s timeout in the worst case.
     private func runStartup() async {
         await MainActor.run { statusText = "Fetching Bible data…" }
         async let books: Void = bibleStore.loadBibleData()
         async let translations: Void = bibleStore.loadTranslations()
-        _ = await (books, translations)
+        async let network: Void = networkMonitor.start()
+        _ = await (books, translations, network)
         await MainActor.run { statusText = "Launching…" }
     }
 }
