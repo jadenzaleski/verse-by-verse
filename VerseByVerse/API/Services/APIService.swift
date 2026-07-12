@@ -52,27 +52,14 @@ final class APIService {
                 cache.set(key: cacheKey, response: apiResponse, ttl: endpoint.ttl)
             }
 
-            reportReachability(endpoint: endpoint, reachable: true)
+            reportReachability(endpoint: endpoint, status: .online)
             return apiResponse
         } catch {
             let mapped = mapError(error)
-            if let reachable = reachability(for: mapped) {
-                reportReachability(endpoint: endpoint, reachable: reachable)
+            if let status = NetworkMonitor.classify(mapped) {
+                reportReachability(endpoint: endpoint, status: status)
             }
             throw mapped
-        }
-    }
-
-    /// Whether an error tells us anything about server reachability.
-    /// `.network` means we couldn't reach the host at all; `.http`/
-    /// `.decoding` mean something answered, which still confirms the
-    /// server's up. `.cancelled`/`.unknown` say nothing either way — the
-    /// request was aborted or the failure is unclassified, so no signal.
-    private func reachability(for error: APIError) -> Bool? {
-        switch error {
-        case .network: false
-        case .http, .decoding: true
-        case .cancelled, .unknown: nil
         }
     }
 
@@ -80,14 +67,10 @@ final class APIService {
     /// "offline" apart from "server unreachable" without polling blindly.
     /// Skips `.getHealth` — that's the monitor's own probe request, not
     /// app-driven traffic, and reporting it back in would just be noise.
-    private func reportReachability(endpoint: APIEndpoint, reachable: Bool) {
+    private func reportReachability(endpoint: APIEndpoint, status: NetworkMonitor.Status) {
         guard endpoint != .getHealth else { return }
         Task { @MainActor in
-            if reachable {
-                NetworkMonitor.shared.reportSuccess()
-            } else {
-                NetworkMonitor.shared.reportFailure()
-            }
+            NetworkMonitor.shared.report(status)
         }
     }
 

@@ -74,7 +74,7 @@ struct HomeView: View {
         ScrollView {
             VStack(spacing: AppSpacing.lg) {
                 if !networkMonitor.isFullyOnline {
-                    NetworkWidget(issue: networkMonitor.isDeviceOnline ? .serverUnreachable : .deviceOffline)
+                    NetworkWidget(issue: networkMonitor.status == .deviceOffline ? .deviceOffline : .serverUnreachable)
                         .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
                 }
                 StreakWidget(completed: weeklyCompletion, streakCount: currentStreak)
@@ -95,6 +95,10 @@ struct HomeView: View {
         .navigationTitle("Home")
         .toolbarTitleDisplayMode(.large)
         .navigationSubtitle(displayName.isEmpty ? "\(greeting)!" : "\(greeting) \(displayName)!")
+        .refreshable {
+            log.debug("Refreshing...")
+            await networkMonitor.refresh()
+        }
     }
 
     // MARK: - Up Next

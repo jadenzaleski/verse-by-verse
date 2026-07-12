@@ -5,59 +5,45 @@
 //  Created by Jaden Zaleski on 7/11/26.
 //
 
-import Network
+import Foundation
 import Observation
 
-/// Tracks two independent things: whether the device has a network path at
-/// all (`isDeviceOnline`, pushed instantly by `NWPathMonitor`) and whether
-/// the VBV API actually answers (`serverStatus`). Distinguishing the two
-/// lets the UI tell "you're offline" apart from "we can't reach our server."
-///
-/// Server reachability is event-driven, not blindly polled: `APIService`
-/// reports every real request's outcome via ``reportSuccess()``/
-/// ``reportFailure()``, so an ordinary Bible fetch confirms reachability
-/// just as well as a dedicated check. A 30s retry loop only runs while
-/// something is actually known to be wrong — it stops the moment a request
-/// (organic or retry) succeeds.
+/// Tracks reachability purely from real request outcomes — no separate
+/// device-path monitor (an `NWPathMonitor`-based signal was tried first, but
+/// it can lag or flat-out disagree with reality, especially in the
+/// Simulator, and there's no recovering from two signals that disagree).
+/// `APIService` reports every request's outcome via ``report(_:)``,
+/// classifying transport failures by `URLError` code so "the device has no
+/// network at all" (`.notConnectedToInternet` and friends) is told apart
+/// from "reached *some* network, just not our server." A dedicated
+/// `/health` probe (``start()``/``refresh()``) establishes the state at
+/// launch and on manual refresh; a retry loop runs only while something's
+/// actually known to be wrong, and stops the moment any request succeeds.
 @Observable
 @MainActor
 final class NetworkMonitor {
     static let shared = NetworkMonitor()
 
-    enum ServerStatus {
+    enum Status: Equatable {
         case unknown
-        case reachable
-        case unreachable
+        case online
+        case deviceOffline
+        case serverUnreachable
     }
 
-    private(set) var isDeviceOnline = true
-    private(set) var serverStatus: ServerStatus = .unknown
+    private(set) var status: Status = .unknown
 
-    /// True only when the device has a path *and* the server has answered.
     var isFullyOnline: Bool {
-        isDeviceOnline && serverStatus == .reachable
+        status == .online
     }
 
-    private let pathMonitor = NWPathMonitor()
-    private let pathQueue = DispatchQueue(label: "com.verse-by-verse.network-monitor")
     private let retryInterval: Duration = .seconds(15)
     private var didStart = false
     private var retryTask: Task<Void, Never>?
-    private var inFlightProbe: Task<Bool, Never>?
+    private var inFlightProbe: Task<Status, Never>?
     private let log = AppLog.category("NetworkMonitor")
 
-    private init() {
-        // The weak capture must live on the inner `Task` closure, not this
-        // outer one — capturing a weak `self` on the outer closure and then
-        // referencing it from the nested concurrently-executing `Task` is
-        // what Swift 6 flags as a captured-var race.
-        pathMonitor.pathUpdateHandler = { path in
-            Task { @MainActor [weak self] in
-                self?.handlePathUpdate(path)
-            }
-        }
-        pathMonitor.start(queue: pathQueue)
-    }
+    private init() {}
 
     /// Runs one live `/health` check — so startup can await a real answer
     /// instead of showing "unknown" the moment the app appears, since
@@ -66,28 +52,30 @@ final class NetworkMonitor {
     func start() async {
         guard !didStart else { return }
         didStart = true
-        let reachable = await probe()
-        if !reachable {
+        if await probe() != .online {
             startRetryLoopIfNeeded()
         }
     }
 
-    /// Called by `APIService` when a real request reaches the server at all
-    /// — 2xx, or even an HTTP error response, since either way something
-    /// answered. Confirms reachability and stops any active retry loop.
-    func reportSuccess() {
-        serverStatus = .reachable
-        retryTask?.cancel()
-        retryTask = nil
+    /// Forces an immediate `/health` check — e.g. pull-to-refresh. Shares
+    /// the same in-flight dedup as everything else.
+    @discardableResult
+    func refresh() async -> Status {
+        await probe()
     }
 
-    /// Called by `APIService` when a real request fails at the transport
-    /// level (couldn't reach the host at all — not an HTTP error response).
-    /// Marks the server unreachable and starts retrying every 30s until a
-    /// probe succeeds again.
-    func reportFailure() {
-        serverStatus = .unreachable
-        startRetryLoopIfNeeded()
+    /// Called by `APIService` with the classification of every real
+    /// request's outcome, so ordinary fetches keep this accurate
+    /// without a separate poll. Starts the retry loop on anything but
+    /// `.online`, and clears it the moment something succeeds.
+    func report(_ outcome: Status) {
+        status = outcome
+        if outcome == .online {
+            retryTask?.cancel()
+            retryTask = nil
+        } else {
+            startRetryLoopIfNeeded()
+        }
     }
 
     private func startRetryLoopIfNeeded() {
@@ -96,55 +84,67 @@ final class NetworkMonitor {
             while let self, !Task.isCancelled {
                 try? await Task.sleep(for: self.retryInterval)
                 guard !Task.isCancelled else { break }
-                if await self.probe() { break }
+                if await self.probe() == .online { break }
             }
             self?.retryTask = nil
         }
     }
 
-    private func handlePathUpdate(_ path: NWPath) {
-        let wasOnline = isDeviceOnline
-        isDeviceOnline = path.status == .satisfied
-        log.debug("Device path \(isDeviceOnline ? "satisfied" : "unsatisfied")")
-
-        if isDeviceOnline, !wasOnline {
-            // Regained the device network — don't wait for the retry loop
-            // to find out if the server's reachable too.
-            Task {
-                if !(await probe()) {
-                    startRetryLoopIfNeeded()
-                }
-            }
-        } else if !isDeviceOnline {
-            serverStatus = .unreachable
-        }
-    }
-
-    /// Pings `/health` directly (bypassing the `APIService.fetch` report
-    /// hook via `HealthService`'s own cache-bypassing call). Skipped when
-    /// the device has no path at all. Concurrent callers share one
+    /// Pings `/health` directly, classifying the result the same way
+    /// `APIService.fetch`'s report hook does. Concurrent callers share one
     /// in-flight request rather than racing, so every caller gets the real
     /// result, never a stale one.
     @discardableResult
-    private func probe() async -> Bool {
-        guard isDeviceOnline else {
-            serverStatus = .unreachable
-            return false
-        }
-
+    private func probe() async -> Status {
         if let inFlightProbe {
             return await inFlightProbe.value
         }
 
-        let task = Task<Bool, Never> {
-            (try? await APIService.shared.getHealth()) ?? false
+        let task = Task<Status, Never> {
+            do {
+                let response: APIResponse<GetHealthResponse> = try await APIService.shared.fetch(
+                    endpoint: .getHealth,
+                    lookInCache: false,
+                    saveToCache: false,
+                )
+                return response.statusCode == 200 && ["ok", "degraded"].contains(response.body.status)
+                    ? .online
+                    : .serverUnreachable
+            } catch let apiError as APIError {
+                return NetworkMonitor.classify(apiError) ?? .serverUnreachable
+            } catch {
+                return .serverUnreachable
+            }
         }
         inFlightProbe = task
-        let reachable = await task.value
+        let result = await task.value
         inFlightProbe = nil
 
-        log.debug("Health probe: \(reachable ? "reachable" : "unreachable")")
-        serverStatus = reachable ? .reachable : .unreachable
-        return reachable
+        log.debug("Health probe: \(result)")
+        status = result
+        return result
+    }
+}
+
+extension NetworkMonitor {
+    /// Classifies a failed request — nil for errors that say nothing about
+    /// reachability (`.cancelled`, `.unknown`). `.notConnectedToInternet`
+    /// (and the cellular-restriction variants) mean the device itself has
+    /// no path; any other transport failure still implies *some* network,
+    /// just not this host.
+    static func classify(_ error: APIError) -> Status? {
+        switch error {
+        case let .network(underlying):
+            switch underlying.code {
+            case .notConnectedToInternet, .dataNotAllowed, .internationalRoamingOff, .callIsActive:
+                .deviceOffline
+            default:
+                .serverUnreachable
+            }
+        case .http, .decoding:
+            .online
+        case .cancelled, .unknown:
+            nil
+        }
     }
 }
