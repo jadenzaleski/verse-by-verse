@@ -52,9 +52,7 @@ final class NetworkMonitor {
     func start() async {
         guard !didStart else { return }
         didStart = true
-        if await probe() != .online {
-            startRetryLoopIfNeeded()
-        }
+        await probe()
     }
 
     /// Forces an immediate `/health` check — e.g. pull-to-refresh. Shares
@@ -80,12 +78,14 @@ final class NetworkMonitor {
 
     private func startRetryLoopIfNeeded() {
         guard retryTask == nil else { return }
+        log.debug("Retry loop starting")
         retryTask = Task { [weak self] in
             while let self, !Task.isCancelled {
                 try? await Task.sleep(for: self.retryInterval)
                 guard !Task.isCancelled else { break }
                 if await self.probe() == .online { break }
             }
+            self?.log.debug("Retry loop stopping")
             self?.retryTask = nil
         }
     }
@@ -122,6 +122,9 @@ final class NetworkMonitor {
 
         log.debug("Health probe: \(result)")
         status = result
+        if result != .online {
+            startRetryLoopIfNeeded()
+        }
         return result
     }
 }

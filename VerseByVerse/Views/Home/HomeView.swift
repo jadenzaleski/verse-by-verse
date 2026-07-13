@@ -76,6 +76,7 @@ struct HomeView: View {
                 if !networkMonitor.isFullyOnline {
                     NetworkWidget(issue: networkMonitor.status == .deviceOffline ? .deviceOffline : .serverUnreachable)
                         .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
+                        .transition(.scale.combined(with: .opacity))
                 }
                 StreakWidget(completed: weeklyCompletion, streakCount: currentStreak)
                     .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
@@ -99,6 +100,7 @@ struct HomeView: View {
             log.debug("Refreshing...")
             await networkMonitor.refresh()
         }
+        .animation(.spring(response: 0.35, dampingFraction: 0.9), value: networkMonitor.isFullyOnline)
     }
 
     // MARK: - Up Next
