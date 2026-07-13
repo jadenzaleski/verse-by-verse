@@ -18,6 +18,14 @@ struct PassageCard: View {
     let passage: Passage
     var style: PassageCardStyle = .full
 
+    private let scheduler = FSRSScheduler()
+
+    /// Average probability of recall across the passage's verses — the same
+    /// curve that schedules reviews, not raw rep counts.
+    private var retentionScore: Double {
+        passage.memoryScore(using: scheduler) ?? 0
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: AppSpacing.md) {
             HStack {
@@ -36,7 +44,7 @@ struct PassageCard: View {
 
             SegmentedProgressBar(
                 totalSegments: 10,
-                completedSegments: min(passage.averageReps, 10),
+                completedSegments: Int(retentionScore * 10),
             )
 
             HStack {

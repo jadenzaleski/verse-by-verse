@@ -12,6 +12,14 @@ import SwiftUI
 struct VerseCard: View {
     let verse: Verse
 
+    private let scheduler = FSRSScheduler()
+
+    /// Probability of recall right now — the same curve that schedules
+    /// reviews, not a raw rep count.
+    private var retentionScore: Double {
+        scheduler.retrievability(of: verse.memoryState, at: .now)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: AppSpacing.md) {
             HStack {
@@ -29,7 +37,7 @@ struct VerseCard: View {
 
             SegmentedProgressBar(
                 totalSegments: 10,
-                completedSegments: min(verse.reps, 10),
+                completedSegments: Int(retentionScore * 10),
             )
 
             HStack {
