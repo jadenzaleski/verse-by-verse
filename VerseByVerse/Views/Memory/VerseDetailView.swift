@@ -21,12 +21,6 @@ struct VerseDetailView: View {
 
     private let scheduler = FSRSScheduler()
 
-    /// Learning/relearning stability is hours-to-days, so a percentage would
-    /// swing wildly within a day — show a state badge instead.
-    private var isLearning: Bool {
-        verse.state == 1 || verse.state == 3
-    }
-
     private var retentionScore: Double {
         scheduler.retrievability(of: verse.memoryState, at: .now)
     }
@@ -35,41 +29,19 @@ struct VerseDetailView: View {
         (verse.reviews ?? []).sorted { $0.reviewedAt < $1.reviewedAt }
     }
 
-    private var dueDateText: String {
-        guard let next = verse.nextPractice else {
-            return verse.isNew ? "New — start your first practice" : "Ready to practice"
-        }
-        let days = Calendar.current.dateComponents(
-            [.day],
-            from: Calendar.current.startOfDay(for: .now),
-            to: Calendar.current.startOfDay(for: next),
-        ).day ?? 0
-        if days < 0 { return "Overdue by \(-days) day\(-days == 1 ? "" : "s")" }
-        if days == 0 { return "Due today" }
-        return "Due in \(days) day\(days == 1 ? "" : "s")"
-    }
-
-    private var dueDateColor: Color {
-        guard let next = verse.nextPractice else {
-            return verse.isNew ? .appAccent : .green
-        }
-        let days = Calendar.current.dateComponents(
-            [.day],
-            from: Calendar.current.startOfDay(for: .now),
-            to: Calendar.current.startOfDay(for: next),
-        ).day ?? 0
-        if days < 0 { return .red }
-        if days == 0 { return .orange }
-        return .secondary
-    }
-
     var body: some View {
         ScrollView {
             VStack(spacing: AppSpacing.md) {
-                memoryScoreCard
-                practiceCard
+                MemoryScoreCard(lastPracticed: verse.lastPracticed,
+                                totalReps: verse.reps,
+                                retentionScore: retentionScore)
+                PracticeCard(showPractice: $showPractice, nextPracticeDate: verse.nextPractice, isNew: verse.isNew)
                 historyCard
-                verseTextCard
+                LongTextCard(
+                    title: "Verse",
+                    translation: verse.translation,
+                    text: bibleStore.selections[verse.selectionKey]?.fullText ?? "Loading...",
+                )
                 if let passages = verse.passages, !passages.isEmpty {
                     containersCard(passages: passages)
                 }
@@ -89,81 +61,6 @@ struct VerseDetailView: View {
 
     // MARK: - Cards
 
-    private var memoryScoreCard: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.md) {
-            HStack {
-                Text("Memory Score")
-                    .font(.app(.title2))
-                Spacer()
-                if isLearning {
-                    Text("Learning")
-                        .font(.app(.caption, weight: .semibold))
-                        .padding(.horizontal, AppSpacing.sm)
-                        .padding(.vertical, AppSpacing.xxs)
-                        .background(Color.appAccent.opacity(0.15), in: Capsule())
-                        .foregroundStyle(Color.appAccent)
-                }
-            }
-
-            if verse.lastPracticed != nil {
-                Text("\(Int(retentionScore * 100))%")
-                    .font(.app(.largeTitle, weight: .semibold))
-                    .foregroundStyle(retentionScore < 0.6 ? .red : retentionScore < 0.8 ? .orange : .green)
-                SegmentedProgressBar(
-                    totalSegments: 10,
-                    completedSegments: Int(retentionScore * 10),
-                    height: 20,
-                )
-            } else {
-                Text("Complete your first practice session to start tracking your memory score.")
-                    .font(.app(.subheadline))
-                    .foregroundStyle(.secondary)
-            }
-
-            HStack(spacing: AppSpacing.xl) {
-                statItem(label: "Reviews", value: "\(verse.reps)")
-                statItem(label: "Missed", value: "\(verse.lapses)")
-                if let last = verse.lastPracticed {
-                    statItem(label: "Last Practice", value: last.formatted(.relative(presentation: .named)))
-                }
-            }
-        }
-        .padding()
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
-    }
-
-    private var practiceCard: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.lg) {
-            Text("Practice")
-                .font(.app(.title2))
-
-            HStack(spacing: AppSpacing.sm) {
-                Circle()
-                    .fill(dueDateColor)
-                    .frame(width: 8, height: 8)
-                Text(dueDateText)
-                    .font(.app(.subheadline))
-                    .foregroundStyle(dueDateColor)
-            }
-
-            Button {
-                showPractice = true
-            } label: {
-                Text("Practice This Verse")
-                    .font(.app(.body, weight: .semibold))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, AppRadius.md)
-                    .background(Color.appAccent, in: RoundedRectangle(cornerRadius: AppRadius.md))
-                    .foregroundStyle(.white)
-            }
-            .buttonStyle(.plain)
-        }
-        .padding()
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
-    }
-
     private var historyCard: some View {
         VStack(alignment: .leading, spacing: AppSpacing.sm) {
             Text("History")
@@ -176,27 +73,6 @@ struct VerseDetailView: View {
                 VerseMemoryChart(reviews: sortedReviews, scheduler: scheduler)
                     .frame(height: 180)
             }
-        }
-        .padding()
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
-    }
-
-    private var verseTextCard: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.md) {
-            HStack {
-                Text("Verse")
-                    .font(.app(.title2))
-                Spacer()
-                Text(verse.translation)
-                    .font(.app(.caption, weight: .semibold))
-                    .padding(.horizontal, AppSpacing.sm)
-                    .padding(.vertical, AppSpacing.xs)
-                    .background(Color.secondary.opacity(0.15), in: Capsule())
-                    .foregroundStyle(.secondary)
-            }
-            Text(bibleStore.selections[verse.selectionKey]?.fullText ?? "Loading...")
-                .font(.app(.body))
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -227,15 +103,6 @@ struct VerseDetailView: View {
         .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
     }
 
-    private func statItem(label: String, value: String) -> some View {
-        VStack(alignment: .leading, spacing: AppSpacing.xxs) {
-            Text(value)
-                .font(.app(.body, weight: .semibold))
-            Text(label)
-                .font(.app(.caption))
-                .foregroundStyle(.secondary)
-        }
-    }
 }
 
 // MARK: - Sawtooth history chart
