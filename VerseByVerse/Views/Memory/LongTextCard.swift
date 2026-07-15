@@ -7,11 +7,10 @@
 
 import SwiftUI
 
-/// A text card that clamps to n lines and only reveals a Show/Hide toggle
-/// when the text actually overflows that limit. Truncation is detected by
-/// comparing two hidden measurement renders (full height vs. n-line height)
-/// against each other rather than guessing from character count, since line
-/// count depends on the device width and Dynamic Type size.
+/// A text card that collapses long text and reveals a Show/Hide toggle only
+/// when the text overflows. The visible `Text` is laid out once at full size
+/// (`fixedSize`) and only a clip window's height is animated over it, so words
+/// never re-wrap mid-animation — expanding just uncovers more of it.
 struct LongTextCard: View {
     let title: String
     let translation: String
@@ -19,12 +18,21 @@ struct LongTextCard: View {
 
     @State private var isExpanded = false
     @State private var fullHeight: CGFloat = 0
-    @State private var clampedHeight: CGFloat = 0
+    @State private var collapsedHeight: CGFloat = 0
 
+    /// Collapsed cap, in lines so it adapts to Dynamic Type.
     private let collapsedLineLimit = 5
 
     private var isTruncated: Bool {
-        fullHeight > clampedHeight + 1
+        fullHeight > collapsedHeight + 1
+    }
+
+    /// Clip-window height: `nil` (natural, no clip) until measured or when the
+    /// text fits; otherwise concrete so the frame animates between two known
+    /// values rather than toward an un-interpolatable `nil`/`.infinity`.
+    private var clipHeight: CGFloat? {
+        guard isTruncated, fullHeight > 0, collapsedHeight > 0 else { return nil }
+        return isExpanded ? fullHeight : collapsedHeight
     }
 
     var body: some View {
@@ -38,12 +46,8 @@ struct LongTextCard: View {
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
         .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
-        // Animating only `textContent`'s own frame left the toggle button's
-        // reposition (a sibling layout effect, not that view's own size)
-        // outside the transaction — it snapped to its final spot instantly
-        // while the text was still easing, producing a double-image ghost.
-        // One animation on the whole card keeps both in the same beat.
-        .animation(.easeInOut(duration: 0.2), value: isExpanded)
+        // Card-level so the text reveal and toggle reposition share one transaction.
+        .animation(.smooth(duration: 0.3), value: isExpanded)
     }
 
     private var header: some View {
@@ -60,59 +64,46 @@ struct LongTextCard: View {
         }
     }
 
-    /// The visible text is never line-limited — `lineLimit` changes can't
-    /// animate (there's no interpolation between two line counts), so
-    /// instead the *height* is clamped via `.frame` + `.clipped()`, which
-    /// SwiftUI animates natively. Trade-off: the collapsed edge is a hard
-    /// clip rather than lineLimit's "…" ellipsis.
     private var textContent: some View {
         Text(text)
             .font(.app(.body))
-            // Both endpoints must be concrete, already-measured values —
-            // animating toward `.infinity` has no interpolation path, so
-            // SwiftUI can't ease it and just snaps instead.
-            .frame(maxHeight: isExpanded ? fullHeight : clampedHeight, alignment: .top)
+            // fixedSize: lay out once at full size so the animating clip height
+            // is never re-proposed to the Text (which would re-wrap it).
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(height: clipHeight, alignment: .top)
             .clipped()
-            .background(
-                // Same width, no limit — its natural height is the "fully
-                // expanded" measurement. A `.background` never grows the
-                // parent's own reported size, so this can't affect layout.
-                Text(text)
-                    .font(.app(.body))
-                    .fixedSize(horizontal: false, vertical: true)
-                    .hidden()
-                    .onGeometryChange(for: CGFloat.self, of: { $0.size.height }, action: { fullHeight = $0 }),
-            )
-            .background(
-                // Always clamped to 5 lines regardless of `isExpanded`, so
-                // this stays a stable baseline to compare against even
-                // after the visible text expands, and is the collapsed
-                // height target for the frame animation above.
-                Text(text)
-                    .font(.app(.body))
-                    .lineLimit(collapsedLineLimit)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .hidden()
-                    .onGeometryChange(for: CGFloat.self, of: { $0.size.height }, action: { clampedHeight = $0 }),
-            )
+            .background(heightProbes)
+    }
+
+    /// Hidden copies that report the full and collapsed heights at the live
+    /// width/Dynamic Type without affecting the visible layout.
+    private var heightProbes: some View {
+        ZStack {
+            Text(text)
+                .font(.app(.body))
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .onGeometryChange(for: CGFloat.self, of: { $0.size.height }, action: { fullHeight = $0 })
+            Text(text)
+                .font(.app(.body))
+                .lineLimit(collapsedLineLimit)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .onGeometryChange(for: CGFloat.self, of: { $0.size.height }, action: { collapsedHeight = $0 })
+        }
+        .hidden()
     }
 
     private var toggleButton: some View {
         Button {
             isExpanded.toggle()
         } label: {
-            HStack(spacing: AppSpacing.xs) {
-                // One glyph that rotates 180° rather than swapping between
-                // "chevron.up"/"chevron.down" — a discrete symbol swap can't
-                // interpolate, so it just double-exposes both icons for a
-                // frame; a rotation is a single continuous value to animate.
-                Image(systemName: "chevron.down")
-                    .rotationEffect(.degrees(isExpanded ? 180 : 0))
-                Text(isExpanded ? "Hide" : "Show")
-                    .contentTransition(.opacity)
-            }
-            .font(.app(.subheadline, weight: .semibold))
-            .foregroundStyle(Color.appAccent)
+            // Chevron interpolated into the Text so it sits on the text
+            // baseline (genuinely inline) and can't detach during animation.
+            Text("\(Image(systemName: isExpanded ? "chevron.up" : "chevron.down"))  \(isExpanded ? "Hide" : "Show")")
+                .font(.app(.subheadline, weight: .semibold))
+                .foregroundStyle(Color.appAccent)
         }
         .buttonStyle(.plain)
     }
