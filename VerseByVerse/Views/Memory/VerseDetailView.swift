@@ -40,7 +40,7 @@ struct VerseDetailView: View {
                 LongTextCard(
                     title: "Verse",
                     translation: verse.translation,
-                    text: bibleStore.selections[verse.selectionKey]?.fullText ?? "Loading...",
+                    text: bibleStore.selections[verse.selectionKey]?.annotatedText ?? Text("Loading..."),
                 )
 
                 appearsInCard()

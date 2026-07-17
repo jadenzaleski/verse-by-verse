@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import SwiftUI
+import UIKit
 
 struct SelectionVerse: Identifiable, Equatable {
     let id: String
@@ -64,6 +66,24 @@ struct BibleSelection: Equatable {
 
     var fullText: String {
         verses.map(\.text).joined(separator: " ")
+    }
+
+    /// Verse text with superscript verse numbers interleaved — use this for all
+    /// read-only display. `fullText` is reserved for session word-mapping logic.
+    var annotatedText: Text {
+        var result = AttributedString()
+        for (index, selectionVerse) in verses.enumerated() {
+            if index > 0 {
+                result += AttributedString(" ")
+            }
+            var num = AttributedString("\(selectionVerse.verse)")
+            num.swiftUI.font = .bible(.caption2)
+            num.swiftUI.foregroundColor = Color.secondary
+            num.uiKit.baselineOffset = 5
+            result += num
+            result += AttributedString(" \(selectionVerse.text)")
+        }
+        return Text(result).font(.bible())
     }
 
     var reference: String {

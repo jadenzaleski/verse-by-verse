@@ -14,7 +14,7 @@ import SwiftUI
 struct LongTextCard: View {
     let title: String
     let translation: String
-    let text: String
+    let text: Text
 
     @State private var isExpanded = false
     @State private var fullHeight: CGFloat = 0
@@ -65,8 +65,7 @@ struct LongTextCard: View {
     }
 
     private var textContent: some View {
-        Text(text)
-            .font(.bible())
+        text
             // fixedSize: lay out once at full size so the animating clip height
             // is never re-proposed to the Text (which would re-wrap it).
             .fixedSize(horizontal: false, vertical: true)
@@ -80,13 +79,11 @@ struct LongTextCard: View {
     /// width/Dynamic Type without affecting the visible layout.
     private var heightProbes: some View {
         ZStack {
-            Text(text)
-                .font(.bible())
+            text
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .onGeometryChange(for: CGFloat.self, of: { $0.size.height }, action: { fullHeight = $0 })
-            Text(text)
-                .font(.bible())
+            text
                 .lineLimit(collapsedLineLimit)
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -110,21 +107,33 @@ struct LongTextCard: View {
 }
 
 #Preview("Long Text") {
-    LongTextCard(
-        title: "Passage",
-        translation: "KJV",
-        text: String(repeating: "For God so loved the world that he gave his only begotten Son. ", count: 8),
-    )
-    .padding()
-    .environment(\.font, .bible())
+    let attributed: AttributedString = {
+        var result = AttributedString()
+        for (index, number) in (1...8).enumerated() {
+            if index > 0 { result += AttributedString(" ") }
+            var num = AttributedString("\(number)")
+            num.swiftUI.font = .bible(.caption2)
+            num.swiftUI.foregroundColor = Color.secondary
+            num.uiKit.baselineOffset = 5
+            result += num
+            result += AttributedString(" For God so loved the world that he gave his only begotten Son.")
+        }
+        return result
+    }()
+    LongTextCard(title: "Passage", translation: "KJV", text: Text(attributed))
+        .padding()
+        .environment(\.font, .bible())
 }
 
 #Preview("Short Text") {
-    LongTextCard(
-        title: "Verse",
-        translation: "KJV",
-        text: "For God so loved the world, that he gave his only begotten Son.",
-    )
-    .padding()
-    .environment(\.font, .bible())
+    let attributed: AttributedString = {
+        var num = AttributedString("16")
+        num.swiftUI.font = .bible(.caption2)
+        num.swiftUI.foregroundColor = Color.secondary
+        num.uiKit.baselineOffset = 5
+        return num + AttributedString(" For God so loved the world, that he gave his only begotten Son.")
+    }()
+    LongTextCard(title: "Verse", translation: "KJV", text: Text(attributed))
+        .padding()
+        .environment(\.font, .bible())
 }

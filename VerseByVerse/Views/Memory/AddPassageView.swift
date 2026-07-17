@@ -220,8 +220,7 @@ struct AddPassageView: View {
                         Spacer()
                     }
                 } else if let key = currentSelectionKey, let selection = bibleStore.selections[key] {
-                    Text(selection.fullText)
-                        .font(.bible(.body))
+                    selection.annotatedText
                         .transition(.opacity)
                 } else if case let .error(apiError) = bibleStore.state {
                     Text(apiError.localizedDescription)

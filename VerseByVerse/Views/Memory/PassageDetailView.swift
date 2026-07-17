@@ -39,7 +39,7 @@ struct PassageDetailView: View {
                 LongTextCard(
                     title: "Passage",
                     translation: passage.translation,
-                    text: bibleStore.selections[passage.selectionKey]?.fullText ?? "Loading...",
+                    text: bibleStore.selections[passage.selectionKey]?.annotatedText ?? Text("Loading..."),
                 )
             }
             .padding(.horizontal, AppSpacing.md)
