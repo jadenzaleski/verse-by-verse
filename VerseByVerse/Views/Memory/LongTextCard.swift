@@ -66,7 +66,7 @@ struct LongTextCard: View {
 
     private var textContent: some View {
         Text(text)
-            .font(.app(.body))
+            .font(.bible())
             // fixedSize: lay out once at full size so the animating clip height
             // is never re-proposed to the Text (which would re-wrap it).
             .fixedSize(horizontal: false, vertical: true)
@@ -81,12 +81,12 @@ struct LongTextCard: View {
     private var heightProbes: some View {
         ZStack {
             Text(text)
-                .font(.app(.body))
+                .font(.bible())
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .onGeometryChange(for: CGFloat.self, of: { $0.size.height }, action: { fullHeight = $0 })
             Text(text)
-                .font(.app(.body))
+                .font(.bible())
                 .lineLimit(collapsedLineLimit)
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -116,7 +116,7 @@ struct LongTextCard: View {
         text: String(repeating: "For God so loved the world that he gave his only begotten Son. ", count: 8),
     )
     .padding()
-    .environment(\.font, .app())
+    .environment(\.font, .bible())
 }
 
 #Preview("Short Text") {
@@ -126,5 +126,5 @@ struct LongTextCard: View {
         text: "For God so loved the world, that he gave his only begotten Son.",
     )
     .padding()
-    .environment(\.font, .app())
+    .environment(\.font, .bible())
 }

@@ -55,4 +55,13 @@ extension Font {
         let resolvedSize: CGFloat = size ?? style.baseSize
         return .custom(name, size: resolvedSize, relativeTo: style.relative).italic(italic).weight(resolvedWeight)
     }
+
+    static func bible(
+        _ style: AppTypography = .body,
+        size: CGFloat? = nil,
+        weight: Font.Weight? = nil,
+    ) -> Font {
+        let resolvedWeight: Font.Weight = weight ?? (style == .headline ? .semibold : .regular)
+        return .system(style.relative, design: .serif, weight: resolvedWeight)
+    }
 }

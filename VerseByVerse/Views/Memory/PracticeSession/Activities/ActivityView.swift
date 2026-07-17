@@ -196,7 +196,7 @@ struct ActivityView: View {
             )
         } else {
             Text(word)
-                .font(.app(.body))
+                .font(.bible(.body))
         }
     }
 }

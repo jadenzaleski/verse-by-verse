@@ -42,9 +42,8 @@ struct VerseDetailView: View {
                     translation: verse.translation,
                     text: bibleStore.selections[verse.selectionKey]?.fullText ?? "Loading...",
                 )
-                if let passages = verse.passages, !passages.isEmpty {
-                    containersCard(passages: passages)
-                }
+
+                appearsInCard()
             }
             .padding(.horizontal, AppSpacing.md)
             .padding(.bottom, AppSpacing.xxl)
@@ -79,30 +78,66 @@ struct VerseDetailView: View {
         .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
     }
 
-    private func containersCard(passages: [Passage]) -> some View {
-        VStack(alignment: .leading, spacing: AppSpacing.sm) {
-            Text("Appears In")
-                .font(.app(.title2))
-            ForEach(passages) { passage in
-                NavigationLink(destination: PassageDetailView(passage: passage)) {
-                    HStack {
-                        Text(passage.reference)
-                            .font(.app(.subheadline, weight: .semibold))
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.app(.caption))
-                            .foregroundStyle(.tertiary)
-                    }
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-            }
-        }
-        .padding()
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
-    }
+    @ViewBuilder
+    private func appearsInCard() -> some View {
+        let passages = verse.passages ?? []
+        let sets = verse.studySets ?? []
 
+        if !passages.isEmpty || !sets.isEmpty {
+            VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                Text("Appears In")
+                    .font(.app(.title2))
+
+                if !passages.isEmpty {
+                    Text("Passage" + (passages.count > 1 ? "s" : ""))
+                        .font(.app(.headline))
+                    ForEach(passages) { passage in
+                        NavigationLink(destination: PassageDetailView(passage: passage)) {
+                            HStack {
+                                Text(passage.reference)
+                                    .font(.app(.subheadline, weight: .semibold))
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.app(.caption))
+                                    .foregroundStyle(.tertiary)
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+
+                        if passages.last != passage {
+                            Divider()
+                        }
+                    }
+                }
+
+                if !sets.isEmpty {
+                    Text("Set" + (sets.count > 1 ? "s" : ""))
+                        .font(.app(.headline))
+                    ForEach(sets) { set in
+                        NavigationLink(destination: SetDetailView(set: set)) {
+                            HStack {
+                                Text(set.name)
+                                    .font(.app(.subheadline, weight: .semibold))
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.app(.caption))
+                                    .foregroundStyle(.tertiary)
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        if sets.last != set {
+                            Divider()
+                        }
+                    }
+                }
+            }
+            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
+        }
+    }
 }
 
 // MARK: - Sawtooth history chart

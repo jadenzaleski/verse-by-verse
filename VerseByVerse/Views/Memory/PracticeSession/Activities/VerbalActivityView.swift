@@ -34,7 +34,7 @@ struct VerbalActivityView: View {
 
                     if revealed {
                         Text(verseText)
-                            .font(.app(.body))
+                            .font(.bible(.body))
                             .transition(.opacity)
                     } else {
                         VStack(spacing: AppSpacing.lg) {

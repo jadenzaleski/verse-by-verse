@@ -39,7 +39,7 @@ struct PassageCard: View {
             if style == .full {
                 Text(bibleStore.selections[passage.selectionKey]?.fullText ?? "...")
                     .lineLimit(2)
-                    .font(.app(.subheadline))
+                    .font(.bible(.subheadline))
             }
 
             SegmentedProgressBar(
