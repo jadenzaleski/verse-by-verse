@@ -71,22 +71,6 @@ struct BibleSelection: Equatable {
     /// Verse text with superscript verse numbers interleaved — use this for all
     /// read-only display. `fullText` is reserved for session word-mapping logic.
     var annotatedText: Text {
-        Text(numberedAttributedString()).font(.bible())
-    }
-
-    /// Same as `annotatedText`, but appends the passage's reference (e.g.
-    /// "- John 3:16-18") once at the end — used during practice-session
-    /// recite so the passage stays anchored to its reference while spoken aloud.
-    var annotatedTextWithReference: Text {
-        var result = numberedAttributedString()
-        var ref = AttributedString(" - \(reference)")
-        ref.swiftUI.font = .bible(.callout)
-        ref.swiftUI.foregroundColor = Color.secondary
-        result += ref
-        return Text(result).font(.bible())
-    }
-
-    private func numberedAttributedString() -> AttributedString {
         var result = AttributedString()
         for (index, selectionVerse) in verses.enumerated() {
             if index > 0 {
@@ -99,7 +83,7 @@ struct BibleSelection: Equatable {
             result += num
             result += AttributedString(" \(selectionVerse.text)")
         }
-        return result
+        return Text(result).font(.bible())
     }
 
     var reference: String {

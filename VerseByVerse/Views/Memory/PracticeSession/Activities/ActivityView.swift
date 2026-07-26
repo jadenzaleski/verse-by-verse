@@ -162,18 +162,15 @@ struct ActivityView: View {
 
 #Preview {
     let verse = """
-    For God so loved the world that he gave his one and only Son, \
+    For God so loved the world that he gave his one and only Son,
     that whoever believes in him shall not perish but have eternal life.
     """
-    let reference = "John 3:16"
-    let passageText = "\(verse) - \(reference)"
-    let words = passageText.split(separator: " ", omittingEmptySubsequences: true)
-    let dashIndex = words.firstIndex(of: "-") ?? words.count
+    let words = verse.split(separator: " ", omittingEmptySubsequences: true)
     ActivityView(
         activityName: "Preview",
-        reference: reference,
-        passageText: passageText,
-        maskedIndices: words.indices.filter { $0 != dashIndex },
+        reference: "John 3:16",
+        passageText: verse,
+        maskedIndices: Array(words.indices),
         instruction: "Type the first letter of each word.",
         showWordHints: false,
         onContinue: { _, _, _ in },
