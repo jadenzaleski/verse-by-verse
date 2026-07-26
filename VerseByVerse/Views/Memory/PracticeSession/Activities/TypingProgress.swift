@@ -71,8 +71,11 @@ struct TypingProgress {
         return inputText[inputText.index(inputText.startIndex, offsetBy: idx)]
     }
 
+    /// The character the user must type for a word: its first letter, or —
+    /// for a token with no letters at all (e.g. a reference's "3:16-18") —
+    /// its first character.
     private func expectedLetter(of word: String) -> Character? {
-        word.first { $0.isLetter }
+        word.first { $0.isLetter } ?? word.first
     }
 
     private func isCorrect(at typingIdx: Int) -> Bool? {

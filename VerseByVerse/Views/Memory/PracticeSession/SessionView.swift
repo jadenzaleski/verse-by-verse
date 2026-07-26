@@ -73,6 +73,24 @@ struct SessionView: View {
         verseText.split(separator: " ", omittingEmptySubsequences: true).map(String.init)
     }
 
+    /// The passage text with its reference appended (e.g. "... eternal life.
+    /// - John 3:16") — typing activities require the reference to be typed
+    /// just like the rest of the passage.
+    private var passageTextWithReference: String {
+        "\(verseText) - \(title)"
+    }
+
+    private var wordsWithReference: [String] {
+        passageTextWithReference.split(separator: " ", omittingEmptySubsequences: true).map(String.init)
+    }
+
+    /// Index of the reference's leading "-" separator in `wordsWithReference`
+    /// — always excluded from `maskedIndices`, since it's punctuation, not
+    /// something to type.
+    private var referenceDashIndex: Int {
+        words.count
+    }
+
     private var canDismiss: Bool {
         phase == .loading || phase == .activity
     }
@@ -143,8 +161,8 @@ struct SessionView: View {
                 ActivityView(
                     activityName: "Every Other Word",
                     reference: title,
-                    verseText: verseText,
-                    maskedIndices: words.indices.filter { $0 % 2 == phase },
+                    passageText: passageTextWithReference,
+                    maskedIndices: wordsWithReference.indices.filter { $0 % 2 == phase && $0 != referenceDashIndex },
                     instruction: "Type the first letter of each missing word.",
                     showWordHints: true,
                     onContinue: advance,
@@ -155,8 +173,8 @@ struct SessionView: View {
                 ActivityView(
                     activityName: "Every Word",
                     reference: title,
-                    verseText: verseText,
-                    maskedIndices: Array(words.indices),
+                    passageText: passageTextWithReference,
+                    maskedIndices: wordsWithReference.indices.filter { $0 != referenceDashIndex },
                     instruction: "Type the first letter of every word from memory.",
                     showWordHints: false,
                     onContinue: advance,
@@ -166,7 +184,9 @@ struct SessionView: View {
             case .verbalRecite:
                 VerbalActivityView(
                     reference: title,
-                    verseText: verseText,
+                    text: selectionKey.flatMap {
+                        bibleStore.selections[$0]?.annotatedTextWithReference
+                    } ?? Text(verseText).font(.bible()),
                     onContinue: { correct, total in advance(correct: correct, total: total, perWord: [:]) },
                 )
                 .id(stepIndex)
