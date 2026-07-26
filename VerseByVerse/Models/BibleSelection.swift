@@ -79,7 +79,7 @@ struct BibleSelection: Equatable {
             var num = AttributedString("\(selectionVerse.verse)")
             num.swiftUI.font = .bible(.caption2)
             num.swiftUI.foregroundColor = Color.secondary
-            num.uiKit.baselineOffset = 5
+            num.uiKit.baselineOffset = UIFontMetrics(forTextStyle: .caption2).scaledValue(for: 5)
             result += num
             result += AttributedString(" \(selectionVerse.text)")
         }

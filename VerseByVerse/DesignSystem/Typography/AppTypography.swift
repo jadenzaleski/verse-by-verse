@@ -43,6 +43,26 @@ enum AppTypography {
     }
 }
 
+private extension Font.Weight {
+    /// Montserrat's per-weight PostScript name suffix. Apple's weight names
+    /// skew one step lighter than OpenType's weight-class names (Apple's
+    /// `.thin` is OpenType "ExtraLight"; Apple's `.ultraLight` is OpenType
+    /// "Thin") — this maps to what's actually embedded in the font files.
+    var montserratStyleName: String {
+        switch self {
+        case .ultraLight: "Thin"
+        case .thin: "ExtraLight"
+        case .light: "Light"
+        case .medium: "Medium"
+        case .semibold: "SemiBold"
+        case .bold: "Bold"
+        case .heavy: "ExtraBold"
+        case .black: "Black"
+        default: "Regular"
+        }
+    }
+}
+
 extension Font {
     static func app(
         _ style: AppTypography = .body,
@@ -50,10 +70,17 @@ extension Font {
         weight: Font.Weight? = nil,
         italic: Bool = false,
     ) -> Font {
-        let name = "Montserrat"
         let resolvedWeight: Font.Weight = weight ?? (style == .headline ? .semibold : .regular)
         let resolvedSize: CGFloat = size ?? style.baseSize
-        return .custom(name, size: resolvedSize, relativeTo: style.relative).italic(italic).weight(resolvedWeight)
+        let styleName = resolvedWeight.montserratStyleName
+        // The roman and italic Montserrat files register under the same
+        // family name, so weight+italic together only resolve to a single
+        // font by naming the exact static instance. The regular-weight
+        // italic instance is "Montserrat-Italic", not "Montserrat-RegularItalic".
+        let name = italic
+            ? (styleName == "Regular" ? "Montserrat-Italic" : "Montserrat-\(styleName)Italic")
+            : "Montserrat-\(styleName)"
+        return .custom(name, size: resolvedSize, relativeTo: style.relative)
     }
 
     static func bible(

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 /// A text card that collapses long text and reveals a Show/Hide toggle only
 /// when the text overflows. The visible `Text` is laid out once at full size
@@ -114,7 +115,7 @@ struct LongTextCard: View {
             var num = AttributedString("\(number)")
             num.swiftUI.font = .bible(.caption2)
             num.swiftUI.foregroundColor = Color.secondary
-            num.uiKit.baselineOffset = 5
+            num.uiKit.baselineOffset = UIFontMetrics(forTextStyle: .caption2).scaledValue(for: 5)
             result += num
             result += AttributedString(" For God so loved the world that he gave his only begotten Son.")
         }
@@ -130,7 +131,7 @@ struct LongTextCard: View {
         var num = AttributedString("16")
         num.swiftUI.font = .bible(.caption2)
         num.swiftUI.foregroundColor = Color.secondary
-        num.uiKit.baselineOffset = 5
+        num.uiKit.baselineOffset = UIFontMetrics(forTextStyle: .caption2).scaledValue(for: 5)
         return num + AttributedString(" For God so loved the world, that he gave his only begotten Son.")
     }()
     LongTextCard(title: "Verse", translation: "KJV", text: Text(attributed))
