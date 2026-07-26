@@ -9,7 +9,7 @@ import SwiftUI
 
 struct VerbalActivityView: View {
     let reference: String
-    let verseText: String
+    let text: Text
     /// Called with (1, 1) if correct, (0, 1) if missed.
     let onContinue: (Int, Int) -> Void
 
@@ -33,8 +33,7 @@ struct VerbalActivityView: View {
                     }
 
                     if revealed {
-                        Text(verseText)
-                            .font(.bible(.body))
+                        text
                             .transition(.opacity)
                     } else {
                         VStack(spacing: AppSpacing.lg) {
@@ -119,11 +118,11 @@ struct VerbalActivityView: View {
 #Preview {
     VerbalActivityView(
         reference: "John 3:16",
-        verseText: """
-        For God so loved the world that he gave his one and only 
-        Son, that whoever believes in him shall not perish but have 
+        text: Text("""
+        For God so loved the world that he gave his one and only \
+        Son, that whoever believes in him shall not perish but have \
         eternal life.
-        """,
+        """).font(.bible(.body)),
         onContinue: { _, _ in },
     )
     .environment(\.font, .app())
