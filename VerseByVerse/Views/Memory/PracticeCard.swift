@@ -16,46 +16,7 @@ struct PracticeCard: View {
         guard let next = nextPracticeDate else {
             return isNew ? "New" : "Ready to practice"
         }
-
-        // Normalize to the current moment
-        let now = Date()
-
-        // Compute difference components between now and the next practice date
-        let components = Calendar.current.dateComponents([.day, .hour, .minute], from: now, to: next)
-        let days = components.day ?? 0
-        let hours = components.hour ?? 0
-        let minutes = components.minute ?? 0
-
-        // If it's overdue (next is in the past), compute how overdue it is
-        if next < now {
-            let overdueComponents = Calendar.current.dateComponents([.day, .hour, .minute], from: next, to: now)
-            let oDays = overdueComponents.day ?? 0
-            let oHours = overdueComponents.hour ?? 0
-            let oMinutes = overdueComponents.minute ?? 0
-
-            if oDays > 0 {
-                return "Overdue by \(oDays) day\(oDays == 1 ? "" : "s")"
-            } else if oHours > 0 {
-                return "Overdue by \(oHours) hour\(oHours == 1 ? "" : "s")"
-            } else if oMinutes > 0 {
-                return "Overdue by \(oMinutes) minute\(oMinutes == 1 ? "" : "s")"
-            } else {
-                return "Due now"
-            }
-        }
-
-        // If due today or in the future
-        if days == 0 {
-            if hours > 0 {
-                return "Due in \(hours) hour\(hours == 1 ? "" : "s")"
-            } else if minutes > 0 {
-                return "Due in \(minutes) minute\(minutes == 1 ? "" : "s")"
-            } else {
-                return "Due now"
-            }
-        } else {
-            return "Due in \(days) day\(days == 1 ? "" : "s")"
-        }
+        return DueText.precise(to: next)
     }
 
     private var dueDateColor: Color {

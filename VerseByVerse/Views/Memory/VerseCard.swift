@@ -57,10 +57,7 @@ struct VerseCard: View {
         guard let next = verse.nextPractice else {
             return verse.isNew ? "New" : "Not scheduled"
         }
-        let days = Calendar.current.dateComponents([.day], from: .now, to: next).day ?? 0
-        if days > 0 { return "Due in \(days) day\(days == 1 ? "" : "s")" }
-        if days == 0 { return "Due today" }
-        return "Overdue \(-days) day\(-days == 1 ? "" : "s")"
+        return DueText.precise(to: next)
     }
 
     private var lastPracticedText: String {

@@ -228,14 +228,13 @@ struct HomeView: View {
 
     private func badgeText(isNew: Bool, nextPractice: Date?) -> String {
         if isNew { return "New" }
-        let days = Int(Date().timeIntervalSince(nextPractice ?? Date()) / 86400)
-        return days < 1 ? "Due today" : "\(days)d overdue"
+        return DueText.precise(to: nextPractice ?? .now)
     }
 
     private func badgeColor(isNew: Bool, nextPractice: Date?) -> Color {
         if isNew { return .appAccent }
-        let days = Int(Date().timeIntervalSince(nextPractice ?? Date()) / 86400)
-        return days < 1 ? .orange : .red
+        let days = Calendar.current.dateComponents([.day], from: .now, to: nextPractice ?? .now).day ?? 0
+        return days == 0 ? .orange : .red
     }
 }
 
