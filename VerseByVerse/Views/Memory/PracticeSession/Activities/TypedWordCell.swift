@@ -47,35 +47,32 @@ struct TypedWordCell: View {
             }
 
             if word.count > 1 {
-                ZStack(alignment: .leading) {
-                    // Reserve the final width so layout doesn't shift when typing starts
-                    Text(remainder)
-                        .bibleWordStyle()
-                        .lineLimit(1)
-                        .allowsTightening(false)
-                        .hidden()
-
-                    if typedChar != nil {
-                        Text(remainder)
-                            .bibleWordStyle()
-                            .lineLimit(1)
-                            .allowsTightening(false)
-                            .foregroundStyle(correctness == true ? Color.appSuccess : Color.appDestructive)
-                    } else if showHint {
-                        Text(remainder)
-                            .bibleWordStyle()
-                            .lineLimit(1)
-                            .allowsTightening(false)
-                            .foregroundStyle(Color.secondary.opacity(0.25))
-                    } else {
-                        Text(String(repeating: "_", count: remainder.count))
-                            .bibleWordStyle()
-                            .lineLimit(1)
-                            .allowsTightening(false)
-                            .foregroundStyle(Color.secondary.opacity(0.35))
+                Text(remainder)
+                    .bibleWordStyle()
+                    .lineLimit(1)
+                    .allowsTightening(false)
+                    .hidden()
+                    .overlay(alignment: .leading) {
+                        if typedChar != nil {
+                            Text(remainder)
+                                .bibleWordStyle()
+                                .lineLimit(1)
+                                .allowsTightening(false)
+                                .foregroundStyle(correctness == true ? Color.appSuccess : Color.appDestructive)
+                        } else if showHint {
+                            Text(remainder)
+                                .bibleWordStyle()
+                                .lineLimit(1)
+                                .allowsTightening(false)
+                                .foregroundStyle(Color.secondary.opacity(0.25))
+                        } else {
+                            Capsule()
+                                .fill(Color.secondary.opacity(0.35))
+                                .frame(height: 1.5)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                        }
                     }
-                }
-                .fixedSize(horizontal: true, vertical: false)
+                    .fixedSize(horizontal: true, vertical: false)
             }
         }
     }
