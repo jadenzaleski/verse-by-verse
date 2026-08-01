@@ -337,7 +337,7 @@ struct SessionView: View {
         }
         await bibleStore.fetchSelection(selectionKey)
         guard let selection = bibleStore.selections[selectionKey], !selection.fullText.isEmpty else {
-            phase = .failed("Couldn't load the passage text. Check your connection and try again.")
+            phase = .failed("Couldn't load the Bible verse(s). Check your connection and try again.")
             return
         }
 
