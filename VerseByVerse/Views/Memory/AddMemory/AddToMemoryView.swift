@@ -1,5 +1,5 @@
 //
-//  AddPassageView.swift
+//  AddToMemoryView.swift
 //  VerseByVerse
 //
 //  Created by Jaden Zaleski on 3/1/26.
@@ -8,7 +8,7 @@
 import SwiftData
 import SwiftUI
 
-struct AddPassageView: View {
+struct AddToMemoryView: View {
     /// Called after a successful add with the tab the new item belongs to
     /// (`.verses` for a single verse, `.passages` for a range) so the caller
     /// can surface it — the result type is derived from the selection.
@@ -18,7 +18,7 @@ struct AddPassageView: View {
     @Environment(BibleStore.self) private var bibleStore
     @Environment(\.modelContext) private var modelContext
 
-    private let log = AppLog.category("AddPassageView")
+    private let log = AppLog.category("AddToMemoryView")
 
     @AppStorage(.lastUsedTranslation) private var selectedTranslation = "KJV"
     @State private var selectedBook = "John"
@@ -336,7 +336,7 @@ struct AddPassageView: View {
 
 // MARK: Helper Utils
 
-extension AddPassageView {
+extension AddToMemoryView {
     private func focusNext() {
         switch focusedField {
         case .startChapter:
@@ -383,7 +383,7 @@ extension AddPassageView {
 }
 
 #Preview {
-    AddPassageView()
+    AddToMemoryView()
         .environment(\.font, .app())
         .environment(BibleStore.shared)
 }

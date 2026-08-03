@@ -87,11 +87,11 @@ struct MemoryView: View {
         .sheet(item: $activeSheet) { sheet in
             switch sheet {
             case .add:
-                AddPassageView { destination in
+                AddToMemoryView { destination in
                     selectedTab = destination
                 }
             case .addSet:
-                StudySetFormView(
+                AddSetView(
                     title: "New Set",
                     confirmSystemImage: "plus",
                     confirmTint: .green,

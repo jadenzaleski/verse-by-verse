@@ -152,7 +152,7 @@ struct SetDetailView: View {
             AddVersesToSetView(set: set)
         }
         .sheet(isPresented: $showingEditSheet) {
-            StudySetFormView(
+            AddSetView(
                 title: "Edit Set",
                 initialName: set.name,
                 initialDescription: set.setDescription ?? "",

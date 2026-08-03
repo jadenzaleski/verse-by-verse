@@ -11,8 +11,8 @@ struct NumericRefTextField: View {
     let placeholder: String
     @Binding var text: String
     let isFocused: Bool
-    @FocusState.Binding var focus: AddPassageView.Field?
-    let thisField: AddPassageView.Field
+    @FocusState.Binding var focus: AddToMemoryView.Field?
+    let thisField: AddToMemoryView.Field
     let submitLabel: SubmitLabel
     let width: CGFloat
     let onSubmitAction: () -> Void
@@ -21,8 +21,8 @@ struct NumericRefTextField: View {
     init(placeholder: String,
          text: Binding<String>,
          isFocused: Bool,
-         focus: FocusState<AddPassageView.Field?>.Binding,
-         thisField: AddPassageView.Field,
+         focus: FocusState<AddToMemoryView.Field?>.Binding,
+         thisField: AddToMemoryView.Field,
          submitLabel: SubmitLabel,
          width: CGFloat,
          onSubmit: @escaping () -> Void,

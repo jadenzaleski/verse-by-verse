@@ -15,7 +15,7 @@ struct ReferenceInputGroup: View {
     @Binding var startVerse: String
     @Binding var endChapter: String
     @Binding var endVerse: String
-    @FocusState.Binding var focusedField: AddPassageView.Field?
+    @FocusState.Binding var focusedField: AddToMemoryView.Field?
     let onAdvance: () -> Void
 
     init(
@@ -24,7 +24,7 @@ struct ReferenceInputGroup: View {
         startVerse: Binding<String>,
         endChapter: Binding<String>,
         endVerse: Binding<String>,
-        focusedField: FocusState<AddPassageView.Field?>.Binding,
+        focusedField: FocusState<AddToMemoryView.Field?>.Binding,
         onAdvance: @escaping () -> Void,
     ) {
         self.selectedBook = selectedBook

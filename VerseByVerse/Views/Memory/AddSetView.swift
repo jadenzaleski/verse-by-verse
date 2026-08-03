@@ -1,5 +1,5 @@
 //
-//  StudySetFormView.swift
+//  AddSetView.swift
 //  VerseByVerse
 //
 //  Created by Jaden Zaleski on 6/11/26.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct StudySetFormView: View {
+struct AddSetView: View {
     var title: String
     var initialName: String
     var initialDescription: String
@@ -173,7 +173,7 @@ struct StudySetFormView: View {
 // MARK: - Preview
 
 #Preview("Create") {
-    StudySetFormView(
+    AddSetView(
         title: "New Set",
         confirmSystemImage: "plus",
         confirmTint: .green,
