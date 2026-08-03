@@ -16,6 +16,8 @@ struct ProfileView: View {
     @AppStorage(.displayName) private var displayName = ""
     @Query private var passages: [Passage]
     @Query private var sessions: [PracticeSession]
+    @State private var showSettings = false
+    @Namespace private var namespace
 
     private var sinceDate: String? {
         let earliest = passages.map(\.createdAt).min()
@@ -49,15 +51,22 @@ struct ProfileView: View {
         .navigationTitle(displayName.isEmpty ? "Your Profile" : displayName)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                NavigationLink {
-                    SettingsView()
+                Button {
+                    showSettings = true
                 } label: {
                     Image(systemName: "gear")
                 }
                 .accessibilityLabel("Settings")
+                .matchedTransitionSource(id: "settings", in: namespace)
             }
         }
         .toolbarTitleDisplayMode(.large)
+        .sheet(isPresented: $showSettings) {
+            NavigationStack {
+                SettingsView()
+            }
+            .navigationTransition(.zoom(sourceID: "settings", in: namespace))
+        }
     }
 
     // MARK: - Avatar
@@ -106,8 +115,7 @@ struct ProfileView: View {
         )
         .scaledToFill()
         .frame(width: 150, height: 150)
-        .clipShape(Circle())
-        .glassEffect()
+        .glassEffect(.regular, in: Circle())
         .shadow(color: .black.opacity(0.35), radius: 6, x: 2, y: 2)
         .overlay {
             if !displayName.isEmpty {
@@ -116,6 +124,7 @@ struct ProfileView: View {
                     .foregroundStyle(.ultraThinMaterial)
             }
         }
+        .clipShape(Circle())
         .accessibilityHidden(true)
     }
 
