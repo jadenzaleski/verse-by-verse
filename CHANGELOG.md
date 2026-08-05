@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.0-beta.1](https://github.com/jadenzaleski/verse-by-verse-app/compare/v0.1.0-beta.0...v0.1.0-beta.1) (2026-08-05)
+
+
+### Bug Fixes
+
+* Fixed several release issues and restrucuted workflows. ([a8af149](https://github.com/jadenzaleski/verse-by-verse-app/commit/a8af14937980c1e0638becb9fcb27b297d159f5a))
+
 ## [0.1.0-beta.0](https://github.com/jadenzaleski/verse-by-verse-app/compare/v0.0.0-beta.0...v0.1.0-beta.0) (2026-08-05)
 
 
