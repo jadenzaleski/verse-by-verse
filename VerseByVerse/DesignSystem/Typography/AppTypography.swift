@@ -85,7 +85,7 @@ extension Font {
 
     static func bible(
         _ style: AppTypography = .body,
-        size: CGFloat? = nil,
+        size _: CGFloat? = nil,
         weight: Font.Weight? = nil,
     ) -> Font {
         let resolvedWeight: Font.Weight = weight ?? (style == .headline ? .semibold : .regular)

@@ -11,7 +11,7 @@ struct MemoryScoreCard: View {
     let lastPracticed: Date?
     let totalReps: Int
     let retentionScore: Double
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: AppSpacing.md) {
             Text("Memory Score")

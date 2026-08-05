@@ -81,9 +81,9 @@ final class NetworkMonitor {
         log.debug("Retry loop starting")
         retryTask = Task { [weak self] in
             while let self, !Task.isCancelled {
-                try? await Task.sleep(for: self.retryInterval)
+                try? await Task.sleep(for: retryInterval)
                 guard !Task.isCancelled else { break }
-                if await self.probe() == .online { break }
+                if await probe() == .online { break }
             }
             self?.log.debug("Retry loop stopping")
             self?.retryTask = nil

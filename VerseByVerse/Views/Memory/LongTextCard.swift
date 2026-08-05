@@ -110,7 +110,7 @@ struct LongTextCard: View {
 #Preview("Long Text") {
     let attributed: AttributedString = {
         var result = AttributedString()
-        for (index, number) in (1...8).enumerated() {
+        for (index, number) in (1 ... 8).enumerated() {
             if index > 0 { result += AttributedString(" ") }
             var num = AttributedString("\(number)")
             num.swiftUI.font = .bible(.caption2)

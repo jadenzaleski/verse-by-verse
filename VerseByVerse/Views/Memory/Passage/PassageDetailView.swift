@@ -12,9 +12,13 @@ struct PassageDetailView: View {
     let passage: Passage
 
     @Environment(BibleStore.self) private var bibleStore
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
 
     @State private var showPractice = false
+    @State private var showDeleteConfirmation = false
 
+    private let log = AppLog.category("PassageDetailView")
     private let scheduler = FSRSScheduler()
 
     private var passageSessions: [PracticeSession] {
@@ -33,7 +37,8 @@ struct PassageDetailView: View {
                 MemoryScoreCard(
                     lastPracticed: passage.lastPracticed,
                     totalReps: passage.totalReps,
-                    retentionScore: retentionScore)
+                    retentionScore: retentionScore,
+                )
                 PracticeCard(showPractice: $showPractice, nextPracticeDate: passage.nextPractice, isNew: passage.isNew)
                 historyCard
                 LongTextCard(
@@ -53,6 +58,30 @@ struct PassageDetailView: View {
         }
         .navigationTitle(passage.reference)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button(role: .destructive) {
+                    showDeleteConfirmation = true
+                } label: {
+                    Image(systemName: "trash")
+                }
+                .confirmationDialog(
+                    "Delete \(passage.reference)?",
+                    isPresented: $showDeleteConfirmation,
+                    titleVisibility: .visible,
+                ) {
+                    Button("Delete Passage", role: .destructive) {
+                        deletePassage(alsoDeleteVerses: false)
+                    }
+                    Button("Delete Passage & Verses", role: .destructive) {
+                        deletePassage(alsoDeleteVerses: true)
+                    }
+                } message: {
+                    Text("Delete Passage keeps its verses; Delete Passage & Verses also removes the verses. This can't be undone.")
+                }
+                .accessibilityLabel("Delete Passage")
+            }
+        }
     }
 
     // MARK: - Cards
@@ -83,6 +112,29 @@ struct PassageDetailView: View {
         }
     }
 
+    private func deletePassage(alsoDeleteVerses: Bool) {
+        if !alsoDeleteVerses {
+            for verse in passage.verses ?? [] {
+                verse.addedDirectly = true
+            }
+        }
+        modelContext.delete(passage)
+        do {
+            try Verse.sweepOrphans(in: modelContext)
+        } catch {
+            log.error("Orphan sweep failed: \(error)")
+        }
+        save()
+        dismiss()
+    }
+
+    private func save() {
+        do {
+            try modelContext.save()
+        } catch {
+            log.error("Failed to save passage change: \(error)")
+        }
+    }
 }
 
 #Preview("PassageDetailView") {
