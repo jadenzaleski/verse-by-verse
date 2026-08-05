@@ -8,6 +8,10 @@
 // Configuration settings file format documentation can be found at:
 // https://developer.apple.com/documentation/xcode/adding-a-build-configuration-file-to-your-project
 
+// Xcode Cloud's tag-triggered workflow archives with this config and then
+// ci_pre_xcodebuild.sh overrides these values per-tag (vbv-api-beta for
+// "-beta" tags, vbv-api-prod for stable tags) — see that script. The literal
+// value below is only a fallback for a manual local archive with this scheme.
 API_BASE_URL = https:/$()/vbv-api-dev.jadenzaleski.com
 
 // LogLevel raw values: 0=trace, 1=debug, 2=info, 3=warning, 4=error, 5=fault.
