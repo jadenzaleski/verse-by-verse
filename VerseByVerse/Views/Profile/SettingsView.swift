@@ -10,6 +10,7 @@ import SwiftUI
 struct SettingsView: View {
     private let log = AppLog.category("SettingsView")
     @AppStorage(.displayName) private var displayName = ""
+    @State private var showConfirmClearCache = false
 
     var body: some View {
         List {
@@ -32,8 +33,19 @@ struct SettingsView: View {
 
             Section {
                 Button("Clear Cache") {
-                    Cache.shared.removeAll()
+                    showConfirmClearCache = true
                 }
+                .confirmationDialog(
+                    "Clear Cache",
+                    isPresented: $showConfirmClearCache,
+                ) {
+                    Button("Clear", role: .destructive) {
+                        Cache.shared.removeAll()
+                    }
+                } message: {
+                    Text("Are you sure you want to clear the cache?")
+                }
+                .accessibilityLabel("Clear Cache")
             } header: {
                 Text("GENERAL")
                     .font(Font.app(.footnote, weight: .semibold))
