@@ -56,80 +56,62 @@ struct AddSetView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: AppSpacing.xxl) {
-                    Text("Appearance")
-                        .font(.app(.headline))
+            Form {
+                Section {
+                    NavigationLink {
+                        SetThemePickerView(
+                            selectedTheme: $selectedTheme,
+                            positionSeed: positionSeed,
+                            colorSeed: colorSeed,
+                        )
+                    } label: {
+                        HStack(spacing: AppSpacing.sm) {
+                            SetMesh(
+                                colorPallette: selectedTheme.palette,
+                                colorShuffleSeed: colorSeed,
+                                positionSeed: positionSeed,
+                            )
+                            .aspectRatio(1, contentMode: .fit)
+                            .clipShape(RoundedRectangle(cornerRadius: AppRadius.sm, style: .continuous))
+                            .frame(width: 36, height: 36)
 
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: AppSpacing.lg) {
-                            ForEach(MeshTheme.allCases) { theme in
-                                VStack(spacing: AppSpacing.sm) {
-                                    SetCard(
-                                        title: name.isEmpty ? theme.displayName : name,
-                                        positionSeed: positionSeed,
-                                        colorShuffleSeed: colorSeed,
-                                        colorPallette: theme.palette,
-                                    )
-                                    .frame(width: 120)
-                                    .overlay(alignment: .top) {
-                                        RoundedRectangle(cornerRadius: AppRadius.lg)
-                                            .stroke(
-                                                selectedTheme == theme ? Color.appAccent : Color.clear,
-                                                lineWidth: 3,
-                                            )
-                                            .frame(width: 120, height: 120)
-                                    }
-                                    .onTapGesture {
-                                        withAnimation(.snappy) { selectedTheme = theme }
-                                    }
+                            Text("Appearance")
 
-                                    Image(systemName: selectedTheme == theme ? "checkmark.circle.fill" : "circle")
-                                        .foregroundStyle(selectedTheme == theme ? Color.appAccent : .secondary)
-                                }
-                            }
+                            Spacer()
+
+                            Text(selectedTheme.displayName)
+                                .foregroundStyle(.secondary)
                         }
-                        .padding(.horizontal, AppSpacing.xxs)
-                    }
-
-                    Divider()
-
-                    VStack(alignment: .leading, spacing: AppSpacing.sm) {
-                        Text("Name")
-                            .font(.app(.headline))
-
-                        TextField("e.g. The Gospels", text: $name)
-                            .font(.app())
-                            .padding()
-                            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.md))
-                            .submitLabel(.next)
-
-                        if name.count > 100 {
-                            Text("Name must be 100 characters or fewer")
-                                .font(.app(.caption))
-                                .foregroundStyle(.red)
-                        }
-                    }
-
-                    VStack(alignment: .leading, spacing: AppSpacing.sm) {
-                        Text("Description")
-                            .font(.app(.headline))
-
-                        TextField("Optional", text: $description, axis: .vertical)
-                            .font(.app())
-                            .lineLimit(3 ... 5)
-                            .padding()
-                            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.md))
-                    }
-
-                    if let errorMessage {
-                        Text(errorMessage)
-                            .font(.app(.caption))
-                            .foregroundStyle(.red)
-                            .padding(.top, AppSpacing.xs)
                     }
                 }
-                .padding()
+
+                Section {
+                    TextField("e.g. The Gospels", text: $name)
+                        .font(.app())
+                        .submitLabel(.next)
+                } header: {
+                    Text("Name")
+                } footer: {
+                    if name.count > 100 {
+                        Text("Name must be 100 characters or fewer")
+                            .foregroundStyle(.red)
+                    }
+                }
+
+                Section {
+                    TextField("Optional", text: $description, axis: .vertical)
+                        .font(.app())
+                        .lineLimit(3 ... 5)
+                } header: {
+                    Text("Description")
+                }
+
+                if let errorMessage {
+                    Section {
+                        Text(errorMessage)
+                            .foregroundStyle(.red)
+                    }
+                }
             }
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
