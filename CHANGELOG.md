@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.0-beta.2](https://github.com/jadenzaleski/verse-by-verse-app/compare/v0.1.0-beta.1...v0.1.0-beta.2) (2026-08-05)
+
+
+### Bug Fixes
+
+* Removed debug condition around PreviewData. ([86bfa33](https://github.com/jadenzaleski/verse-by-verse-app/commit/86bfa33996f1cec7f03cb2f0b6b0625f642d421e))
+
 ## [0.1.0-beta.1](https://github.com/jadenzaleski/verse-by-verse-app/compare/v0.1.0-beta.0...v0.1.0-beta.1) (2026-08-05)
 
 
