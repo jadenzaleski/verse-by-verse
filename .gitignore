@@ -16,3 +16,7 @@ CLAUDE.md
 .xcodebuildmcp/
 
 docs/
+
+# Generated per-build by ci_scripts/ci_post_xcodebuild.sh; Xcode Cloud reads
+# this to populate TestFlight's "What to Test" notes — not meant to be committed.
+TestFlight/
