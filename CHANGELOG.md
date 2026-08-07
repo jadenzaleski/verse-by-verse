@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.0-beta.3](https://github.com/jadenzaleski/verse-by-verse-app/compare/v0.1.0-beta.2...v0.1.0-beta.3) (2026-08-07)
+
+
+### Features
+
+* Added better clear cache confirmation. ([6256beb](https://github.com/jadenzaleski/verse-by-verse-app/commit/6256beb8c3caeebc2b29c3d04f0a56eddd1953f8))
+* Added three new themes: Slate, Blush, and Twilight. ([80b18fc](https://github.com/jadenzaleski/verse-by-verse-app/commit/80b18fc9c920d734ee422fed2d45d492c351e0ef))
+* Reworked adding a set to make it easier to select themes. ([35de5eb](https://github.com/jadenzaleski/verse-by-verse-app/commit/35de5eb2f8c6f528df56f4983d11b7e7fde6b5db))
+
+
+### Bug Fixes
+
+* Fixed the ability to refresh the passage when attempt to add a new one. ([4081440](https://github.com/jadenzaleski/verse-by-verse-app/commit/408144089545b85c7bf5d220576b58dceeb858eb))
+
 ## [0.1.0-beta.2](https://github.com/jadenzaleski/verse-by-verse-app/compare/v0.1.0-beta.1...v0.1.0-beta.2) (2026-08-05)
 
 
