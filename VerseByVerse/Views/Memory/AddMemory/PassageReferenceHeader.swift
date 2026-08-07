@@ -30,7 +30,6 @@ struct PassageReferenceHeader: View {
                 onRefresh()
             } label: {
                 Image(systemName: "arrow.clockwise")
-                    .symbolEffect(.bounce, value: isLoading)
             }
             .buttonStyle(.plain)
             .disabled(disableRefresh)

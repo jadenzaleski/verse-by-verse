@@ -81,12 +81,11 @@ struct PassageKeyboardBar: View {
                 }
             } label: {
                 Image(systemName: "checkmark")
+                    .foregroundStyle(.windowBackground)
                     .frame(width: 20, height: 20)
                     .padding()
-                    .glassEffect(.regular.interactive())
-                    .glassEffectUnion(id: 3, namespace: namespace)
+                    .glassEffect(.regular.tint(isRefValid ? .green : Color(.systemGray4)).interactive())
             }
-            .tint(isRefValid ? .green : .primary)
             .disabled(!isRefValid)
         }
         .frame(maxWidth: .infinity)

@@ -98,9 +98,9 @@ final class BibleStore: Store {
     }
 
     @MainActor
-    func fetchSelection(_ key: BibleSelectionKey, strip: Bool = true) async {
-        // Check cache first
-        if selections[key] != nil {
+    func fetchSelection(_ key: BibleSelectionKey, strip: Bool = true, forceRefresh: Bool = false) async {
+        // Check cache first, unless the caller explicitly wants a fresh remote fetch
+        if !forceRefresh, selections[key] != nil {
             state = .success
             return
         }
@@ -114,6 +114,7 @@ final class BibleStore: Store {
                 start: key.startRef,
                 end: key.endRef,
                 strip: strip,
+                lookInCache: !forceRefresh,
             )
             let selection = passageResponse.toDomain()
             selections[key] = selection

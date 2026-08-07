@@ -232,7 +232,7 @@ struct AddToMemoryView: View {
                 }
             } header: {
                 PassageReferenceHeader(reference: reference, isRefValid: isRefValid) {
-                    Task { await loadBibleSelection() }
+                    Task { await loadBibleSelection(forceRefresh: true) }
                 }
             } footer: {
                 Text(" ")
@@ -277,9 +277,9 @@ struct AddToMemoryView: View {
         }
     }
 
-    private func loadBibleSelection() async {
+    private func loadBibleSelection(forceRefresh: Bool = false) async {
         guard let key = currentSelectionKey, isRefValid else { return }
-        await bibleStore.fetchSelection(key)
+        await bibleStore.fetchSelection(key, forceRefresh: forceRefresh)
     }
 
     /// Adds what the reference describes: a single verse becomes a standalone
