@@ -161,7 +161,7 @@ struct SetDetailView: View {
                 colorSeed: set.meshColorSeed,
                 confirmSystemImage: "checkmark",
                 confirmTint: .blue,
-            ) { name, description, theme in
+            ) { name, description, theme, _, _ in
                 set.name = name
                 set.setDescription = description
                 set.meshTheme = theme

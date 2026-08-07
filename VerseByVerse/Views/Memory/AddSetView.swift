@@ -16,7 +16,13 @@ struct AddSetView: View {
     var colorSeed: Int
     var confirmSystemImage: String
     var confirmTint: Color
-    var onConfirm: (_ name: String, _ description: String?, _ theme: MeshTheme) throws -> Void
+    var onConfirm: (
+        _ name: String,
+        _ description: String?,
+        _ theme: MeshTheme,
+        _ positionSeed: Int,
+        _ colorSeed: Int,
+    ) throws -> Void
 
     @Environment(\.dismiss) private var dismiss
 
@@ -30,11 +36,17 @@ struct AddSetView: View {
         initialName: String = "",
         initialDescription: String = "",
         initialTheme: MeshTheme = .ocean,
-        positionSeed: Int = 42,
-        colorSeed: Int = 7,
+        positionSeed: Int = Int.random(in: 1 ... 99999),
+        colorSeed: Int = Int.random(in: 1 ... 99999),
         confirmSystemImage: String,
         confirmTint: Color,
-        onConfirm: @escaping (_ name: String, _ description: String?, _ theme: MeshTheme) throws -> Void,
+        onConfirm: @escaping (
+            _ name: String,
+            _ description: String?,
+            _ theme: MeshTheme,
+            _ positionSeed: Int,
+            _ colorSeed: Int,
+        ) throws -> Void,
     ) {
         self.title = title
         self.initialName = initialName
@@ -144,7 +156,13 @@ struct AddSetView: View {
         let trimmedDesc = description.trimmingCharacters(in: .whitespaces)
 
         do {
-            try onConfirm(trimmedName, trimmedDesc.isEmpty ? nil : trimmedDesc, selectedTheme)
+            try onConfirm(
+                trimmedName,
+                trimmedDesc.isEmpty ? nil : trimmedDesc,
+                selectedTheme,
+                positionSeed,
+                colorSeed,
+            )
             dismiss()
         } catch {
             errorMessage = error.localizedDescription
@@ -159,6 +177,6 @@ struct AddSetView: View {
         title: "New Set",
         confirmSystemImage: "plus",
         confirmTint: .green,
-    ) { _, _, _ in }
+    ) { _, _, _, _, _ in }
         .environment(\.font, .app())
 }

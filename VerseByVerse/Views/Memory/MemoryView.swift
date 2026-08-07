@@ -95,8 +95,14 @@ struct MemoryView: View {
                     title: "New Set",
                     confirmSystemImage: "plus",
                     confirmTint: .green,
-                ) { name, description, theme in
-                    let set = StudySet(name: name, setDescription: description, meshTheme: theme)
+                ) { name, description, theme, positionSeed, colorSeed in
+                    let set = StudySet(
+                        name: name,
+                        setDescription: description,
+                        meshPositionSeed: positionSeed,
+                        meshColorSeed: colorSeed,
+                        meshTheme: theme,
+                    )
                     modelContext.insert(set)
                     try modelContext.save()
                     log.info("Created study set \(name)")

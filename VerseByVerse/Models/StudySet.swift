@@ -12,6 +12,9 @@ enum MeshTheme: String, CaseIterable, Identifiable {
     case ocean
     case sunset
     case forest
+    case slate
+    case blush
+    case twilight
 
     var id: String {
         rawValue
