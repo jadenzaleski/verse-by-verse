@@ -33,6 +33,10 @@ struct AddToMemoryView: View {
 
     enum Field: Hashable { case startChapter, startVerse, endChapter, endVerse }
 
+    private var selectedTranslationInfo: BibleTranslationInfo {
+        bibleStore.translationInfo(forAbbreviation: selectedTranslation)
+    }
+
     private var currentSelectionKey: BibleSelectionKey? {
         guard let startCh = Int(startChapter), let startVs = Int(startVerse) else { return nil }
         let endCh = Int(endChapter) ?? startCh
@@ -235,7 +239,12 @@ struct AddToMemoryView: View {
                     Task { await loadBibleSelection(forceRefresh: true) }
                 }
             } footer: {
-                Text(" ")
+                if !selectedTranslationInfo.copyright.isEmpty {
+                    selectedTranslationInfo.copyrightText
+                        .font(.app(.footnote))
+                } else {
+                    Text(" ")
+                }
             }
         }
     }

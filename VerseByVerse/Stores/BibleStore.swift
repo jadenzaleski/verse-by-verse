@@ -75,6 +75,14 @@ final class BibleStore: Store {
         }
     }
 
+    /// Resolves an abbreviation (as stored on `Verse`/`Passage`) to its full
+    /// translation info. Falls back to a copyright-less placeholder when
+    /// translations haven't loaded yet or the abbreviation isn't recognized.
+    func translationInfo(forAbbreviation abbreviation: String) -> BibleTranslationInfo {
+        availableTranslations?.first { $0.abbreviation == abbreviation }
+            ?? BibleTranslationInfo(id: abbreviation, abbreviation: abbreviation, name: abbreviation, copyright: "", provider: "")
+    }
+
     /// Returns the number of chapters for a given book name.
     func chapterCount(for book: String) -> Int {
         bibleData?.chapters(for: book) ?? 0

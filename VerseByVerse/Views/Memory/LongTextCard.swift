@@ -14,12 +14,14 @@ import UIKit
 /// never re-wrap mid-animation — expanding just uncovers more of it.
 struct LongTextCard: View {
     let title: String
-    let translation: String
+    let translation: BibleTranslationInfo
     let text: Text
 
+    @Environment(\.dismiss) private var dismiss
     @State private var isExpanded = false
     @State private var fullHeight: CGFloat = 0
     @State private var collapsedHeight: CGFloat = 0
+    @State private var isShowingCopyright: Bool = false
 
     /// Collapsed cap, in lines so it adapts to Dynamic Type.
     private let collapsedLineLimit = 5
@@ -47,8 +49,12 @@ struct LongTextCard: View {
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
         .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
-        // Card-level so the text reveal and toggle reposition share one transaction.
         .animation(.smooth(duration: 0.3), value: isExpanded)
+        .sheet(isPresented: $isShowingCopyright, onDismiss: {}) {
+            CopyrightSheetView(translation: translation)
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
+        }
     }
 
     private var header: some View {
@@ -56,19 +62,24 @@ struct LongTextCard: View {
             Text(title)
                 .font(.app(.title2))
             Spacer()
-            Text(translation)
-                .font(.app(.caption, weight: .semibold))
-                .padding(.horizontal, AppSpacing.sm)
-                .padding(.vertical, AppSpacing.xs)
-                .background(Color.secondary.opacity(0.15), in: Capsule())
-                .foregroundStyle(.secondary)
+            Button {
+                isShowingCopyright = true
+            } label: {
+                Text(translation.abbreviation)
+                    .font(.app(.caption, weight: .semibold))
+                    .padding(.horizontal, AppSpacing.sm)
+                    .padding(.vertical, AppSpacing.xs)
+                    .background(Color.secondary.opacity(0.15), in: Capsule())
+                    .foregroundStyle(.secondary)
+                Image(systemName: "info.circle")
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
         }
     }
 
     private var textContent: some View {
         text
-            // fixedSize: lay out once at full size so the animating clip height
-            // is never re-proposed to the Text (which would re-wrap it).
             .fixedSize(horizontal: false, vertical: true)
             .frame(maxWidth: .infinity, alignment: .leading)
             .frame(height: clipHeight, alignment: .top)
@@ -97,8 +108,6 @@ struct LongTextCard: View {
         Button {
             isExpanded.toggle()
         } label: {
-            // Chevron interpolated into the Text so it sits on the text
-            // baseline (genuinely inline) and can't detach during animation.
             Text("\(Image(systemName: isExpanded ? "chevron.up" : "chevron.down"))  \(isExpanded ? "Hide" : "Show")")
                 .font(.app(.subheadline, weight: .semibold))
                 .foregroundStyle(Color.appAccent)
@@ -121,9 +130,13 @@ struct LongTextCard: View {
         }
         return result
     }()
-    LongTextCard(title: "Passage", translation: "KJV", text: Text(attributed))
-        .padding()
-        .environment(\.font, .bible())
+    LongTextCard(
+        title: "Passage",
+        translation: BibleTranslationInfo(id: "KJV", abbreviation: "KJV", name: "King James Version", copyright: "Public Domain", provider: "Public Domain"),
+        text: Text(attributed),
+    )
+    .padding()
+    .environment(\.font, .bible())
 }
 
 #Preview("Short Text") {
@@ -134,7 +147,11 @@ struct LongTextCard: View {
         num.uiKit.baselineOffset = UIFontMetrics(forTextStyle: .caption2).scaledValue(for: 5)
         return num + AttributedString(" For God so loved the world, that he gave his only begotten Son.")
     }()
-    LongTextCard(title: "Verse", translation: "KJV", text: Text(attributed))
-        .padding()
-        .environment(\.font, .bible())
+    LongTextCard(
+        title: "Verse",
+        translation: BibleTranslationInfo(id: "KJV", abbreviation: "KJV", name: "King James Version", copyright: "Public Domain", provider: "Public Domain"),
+        text: Text(attributed),
+    )
+    .padding()
+    .environment(\.font, .bible())
 }

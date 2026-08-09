@@ -43,7 +43,7 @@ struct VerseDetailView: View {
                 historyCard
                 LongTextCard(
                     title: "Verse",
-                    translation: verse.translation,
+                    translation: bibleStore.translationInfo(forAbbreviation: verse.translation),
                     text: bibleStore.selections[verse.selectionKey]?.annotatedText ?? Text("Loading..."),
                 )
 
@@ -179,7 +179,7 @@ struct VerseDetailView: View {
     }
 
     private var deleteMessage: String {
-        var message = if owningPassages.isEmpty {
+        let message = if owningPassages.isEmpty {
             "This verse will be removed from any sets and deleted."
         } else if owningPassages.count == 1 {
             "This will delete \(owningPassages[0].reference) and all its verses."

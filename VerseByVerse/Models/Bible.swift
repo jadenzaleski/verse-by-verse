@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 struct BibleTranslationInfo: Identifiable, Equatable {
     let id: String
@@ -13,6 +14,16 @@ struct BibleTranslationInfo: Identifiable, Equatable {
     let name: String
     let copyright: String
     let provider: String
+}
+
+extension BibleTranslationInfo {
+    var copyrightText: Text {
+        let options = AttributedString.MarkdownParsingOptions(interpretedSyntax: .inlineOnlyPreservingWhitespace)
+        guard let attributed = try? AttributedString(markdown: copyright, options: options) else {
+            return Text(copyright)
+        }
+        return Text(attributed)
+    }
 }
 
 struct BibleStructure: Equatable {

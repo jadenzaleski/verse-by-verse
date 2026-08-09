@@ -43,7 +43,7 @@ struct PassageDetailView: View {
                 historyCard
                 LongTextCard(
                     title: "Passage",
-                    translation: passage.translation,
+                    translation: bibleStore.translationInfo(forAbbreviation: passage.translation),
                     text: bibleStore.selections[passage.selectionKey]?.annotatedText ?? Text("Loading..."),
                 )
             }
