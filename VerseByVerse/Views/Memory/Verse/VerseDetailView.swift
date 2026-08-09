@@ -16,10 +16,14 @@ struct VerseDetailView: View {
     let verse: Verse
 
     @Environment(BibleStore.self) private var bibleStore
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
 
     @State private var showPractice = false
+    @State private var showDeleteConfirmation = false
 
     private let scheduler = FSRSScheduler()
+    private let log = AppLog.category("VerseDetailView")
 
     private var retentionScore: Double {
         scheduler.retrievability(of: verse.memoryState, at: .now)
@@ -56,6 +60,27 @@ struct VerseDetailView: View {
         }
         .navigationTitle(verse.reference)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button(role: .destructive) {
+                    showDeleteConfirmation = true
+                } label: {
+                    Image(systemName: "trash")
+                }
+                .confirmationDialog(
+                    "Delete \(verse.reference)?",
+                    isPresented: $showDeleteConfirmation,
+                    titleVisibility: .visible,
+                ) {
+                    Button(deleteButtonLabel, role: .destructive) {
+                        deleteVerse()
+                    }
+                } message: {
+                    Text(deleteMessage)
+                }
+                .accessibilityLabel("Delete Verse")
+            }
+        }
     }
 
     // MARK: - Cards
@@ -136,6 +161,50 @@ struct VerseDetailView: View {
             .padding()
             .frame(maxWidth: .infinity, alignment: .leading)
             .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
+        }
+    }
+
+    // MARK: - Delete
+
+    private var owningPassages: [Passage] {
+        verse.passages ?? []
+    }
+
+    private var owningSets: [StudySet] {
+        verse.studySets ?? []
+    }
+
+    private var deleteButtonLabel: String {
+        owningPassages.isEmpty ? "Delete" : "Delete Passage & Verses"
+    }
+
+    private var deleteMessage: String {
+        var message = if owningPassages.isEmpty {
+            "This verse will be removed from any sets and deleted."
+        } else if owningPassages.count == 1 {
+            "This will delete \(owningPassages[0].reference) and all its verses."
+        } else {
+            "This will delete \(owningPassages.count) passages and all their verses."
+        }
+
+        return message + " This can't be undone."
+    }
+
+    private func deleteVerse() {
+        for set in owningSets {
+            set.verses?.removeAll { $0 === verse }
+            set.modifiedAt = .now
+        }
+        for passage in owningPassages {
+            modelContext.delete(passage)
+        }
+        verse.addedDirectly = false
+        do {
+            try Verse.sweepOrphans(in: modelContext)
+            try modelContext.save()
+            dismiss()
+        } catch {
+            log.error("Failed to delete verse: \(error)")
         }
     }
 }

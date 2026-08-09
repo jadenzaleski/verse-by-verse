@@ -168,13 +168,6 @@ struct MemoryView: View {
                         PassageCard(passage: passage)
                     }
                     .buttonStyle(.plain)
-                    .contextMenu {
-                        Button(role: .destructive) {
-                            delete(passage)
-                        } label: {
-                            Label("Delete Passage", systemImage: "trash")
-                        }
-                    }
                 }
             }
 
@@ -192,15 +185,6 @@ struct MemoryView: View {
                         VerseCard(verse: verse)
                     }
                     .buttonStyle(.plain)
-                    .contextMenu {
-                        if verse.addedDirectly {
-                            Button(role: .destructive) {
-                                delete(verse)
-                            } label: {
-                                Label("Delete Verse", systemImage: "trash")
-                            }
-                        }
-                    }
                 }
             }
 
@@ -276,28 +260,6 @@ struct MemoryView: View {
     private func setVerseCount(_ set: StudySet) -> Int? {
         set.passages.map { passages in
             passages.reduce(0) { $0 + $1.verseCount(using: bibleStore) }
-        }
-    }
-
-    private func delete(_ verse: Verse) {
-        // Standalone flag off first; the sweep then applies the shared rules
-        // (kept alive if any passage/set still references it).
-        verse.addedDirectly = false
-        do {
-            try Verse.sweepOrphans(in: modelContext)
-            try modelContext.save()
-        } catch {
-            log.error("Failed to delete verse: \(error)")
-        }
-    }
-
-    private func delete(_ passage: Passage) {
-        modelContext.delete(passage)
-        do {
-            try Verse.sweepOrphans(in: modelContext)
-            try modelContext.save()
-        } catch {
-            log.error("Failed to delete passage: \(error)")
         }
     }
 
