@@ -182,6 +182,64 @@ struct PersistenceTests {
         #expect(try context.fetch(FetchDescriptor<Verse>()).isEmpty)
     }
 
+    @Test func `deleting a verse that's in a passage deletes the passage and sweeps siblings`() throws {
+        let context = makeContext()
+        let passage = try insertJohn316to17(context)
+        let target = try #require(try Verse.existing(
+            translation: "KJV", book: "John", chapter: 3, number: 16, in: context,
+        ))
+
+        // Mirror VerseDetailView.deleteVerse(): remove set memberships (none here),
+        // delete owning passages, clear addedDirectly, sweep.
+        for set in target.studySets ?? [] {
+            set.verses?.removeAll { $0 === target }
+        }
+        for owningPassage in target.passages ?? [] {
+            context.delete(owningPassage)
+        }
+        target.addedDirectly = false
+        try Verse.sweepOrphans(in: context)
+        try context.save()
+
+        // Passage and both its verses (16 had no other reference) are gone.
+        #expect(try context.fetch(FetchDescriptor<Passage>()).isEmpty)
+        #expect(try context.fetch(FetchDescriptor<Verse>()).isEmpty)
+        _ = passage
+    }
+
+    @Test func `deleting a verse that's only in sets removes it from every set`() throws {
+        let context = makeContext()
+        let verse = try Verse.findOrCreate(
+            translation: "KJV", book: "Philippians", chapter: 4, number: 13, in: context,
+        )
+        verse.addedDirectly = true
+
+        let setA = StudySet(name: "Set A")
+        setA.verses = [verse]
+        let setB = StudySet(name: "Set B")
+        setB.verses = [verse]
+        context.insert(setA)
+        context.insert(setB)
+        try context.save()
+        #expect(verse.studySets?.count == 2)
+
+        // Mirror VerseDetailView.deleteVerse(): remove from every set, no owning
+        // passages, clear addedDirectly, sweep.
+        for set in verse.studySets ?? [] {
+            set.verses?.removeAll { $0 === verse }
+        }
+        for owningPassage in verse.passages ?? [] {
+            context.delete(owningPassage)
+        }
+        verse.addedDirectly = false
+        try Verse.sweepOrphans(in: context)
+        try context.save()
+
+        #expect(try context.fetch(FetchDescriptor<Verse>()).isEmpty)
+        #expect(setA.verses?.isEmpty == true)
+        #expect(setB.verses?.isEmpty == true)
+    }
+
     @Test func `sweeping a verse cascades its reviews`() throws {
         let context = makeContext()
         let passage = try insertJohn316to17(context)
