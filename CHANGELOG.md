@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.0-beta.4](https://github.com/jadenzaleski/verse-by-verse-app/compare/v0.1.0-beta.3...v0.1.0-beta.4) (2026-08-14)
+
+
+### Features
+
+* Added live transcription for reciting passages during practice sessions. ([1111c22](https://github.com/jadenzaleski/verse-by-verse-app/commit/1111c22c72b377a1ee1e41a6c8783183868a5ecf))
+* Added the ability to delete verses. ([1391986](https://github.com/jadenzaleski/verse-by-verse-app/commit/139198671b8580fe9d605a7094fdaa7e3c692280))
+* Added the ability to see the copyright of each translation. ([c8e7329](https://github.com/jadenzaleski/verse-by-verse-app/commit/c8e732930f679e2fc353c08cad0b2eaf6561a94f))
+
 ## [0.1.0-beta.3](https://github.com/jadenzaleski/verse-by-verse-app/compare/v0.1.0-beta.2...v0.1.0-beta.3) (2026-08-07)
 
 
