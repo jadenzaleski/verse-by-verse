@@ -34,8 +34,9 @@ struct CopyrightSheetView: View {
                                           abbreviation: "ABC",
                                           name: "Name",
                                           copyright: "copyright",
-                                          provider: "Jaden"))
-        .environment(\.font, .app())
+                                          provider: "Jaden"),
+    )
+    .environment(\.font, .app())
 }
 
 #Preview("With Markdown Link") {
