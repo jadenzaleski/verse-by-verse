@@ -415,6 +415,8 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Verse;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "VerseByVerse listens while you recite a verse aloud so it can check your memorization.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "VerseByVerse transcribes your spoken recitation on-device to grade it against the verse text.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -581,6 +583,8 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Verse;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "VerseByVerse listens while you recite a verse aloud so it can check your memorization.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "VerseByVerse transcribes your spoken recitation on-device to grade it against the verse text.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -622,6 +626,8 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Verse;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "VerseByVerse listens while you recite a verse aloud so it can check your memorization.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "VerseByVerse transcribes your spoken recitation on-device to grade it against the verse text.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -729,6 +735,8 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Verse;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "VerseByVerse listens while you recite a verse aloud so it can check your memorization.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "VerseByVerse transcribes your spoken recitation on-device to grade it against the verse text.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

@@ -48,17 +48,10 @@ struct PracticeCard: View {
                     .foregroundStyle(dueDateColor)
             }
 
-            Button {
+            Button("Start Practice") {
                 showPractice = true
-            } label: {
-                Text("Start Practice")
-                    .font(.app(.body, weight: .semibold))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, AppRadius.md)
-                    .background(Color.appAccent, in: RoundedRectangle(cornerRadius: AppRadius.md))
-                    .foregroundStyle(.white)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.primary)
 
             if let next = nextPracticeDate {
                 HStack(spacing: AppSpacing.sm) {

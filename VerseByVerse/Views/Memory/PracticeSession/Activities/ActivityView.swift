@@ -95,17 +95,10 @@ struct ActivityView: View {
                             .foregroundStyle(.secondary)
                     }
 
-                    Button {
+                    Button("Continue") {
                         onContinue(progress.correctCount, progress.totalToType, progress.perWordCorrectness)
-                    } label: {
-                        Text("Continue")
-                            .font(.app(.body, weight: .semibold))
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, AppRadius.md)
-                            .background(Color.appAccent, in: RoundedRectangle(cornerRadius: AppRadius.md))
-                            .foregroundStyle(.white)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.primary)
                 } else {
                     HStack {
                         Text("\(progress.currentTypingIndex) of \(progress.totalToType) typed")

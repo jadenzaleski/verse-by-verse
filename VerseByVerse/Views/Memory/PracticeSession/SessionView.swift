@@ -166,8 +166,9 @@ struct SessionView: View {
             case .verbalRecite:
                 VerbalActivityView(
                     reference: title,
-                    text: selectionKey.flatMap { bibleStore.selections[$0]?.annotatedText } ?? Text(verseText).font(.bible()),
-                    onContinue: { correct, total in advance(correct: correct, total: total, perWord: [:]) },
+                    passageWords: words,
+                    onContinue: advance,
+                    onSkip: skipStep,
                 )
                 .id(stepIndex)
                 .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
@@ -220,17 +221,10 @@ struct SessionView: View {
                 }
             }
 
-            Button {
+            Button("Done") {
                 dismiss()
-            } label: {
-                Text("Done")
-                    .font(.app(.body, weight: .semibold))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, AppRadius.md)
-                    .background(Color.appAccent, in: RoundedRectangle(cornerRadius: AppRadius.md))
-                    .foregroundStyle(.white)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.primary)
             .padding(.horizontal, AppSpacing.xl)
 
             Spacer()
@@ -279,6 +273,24 @@ struct SessionView: View {
 
     // MARK: - Actions
 
+    /// Moves past a step without recording an activity or any score — either
+    /// because spoken recitation can't run (mic denied, model unavailable, no
+    /// speech captured) or because the user chose to skip it. The step simply
+    /// didn't happen; nothing is penalized.
+    private func skipStep() {
+        let step = steps[stepIndex]
+        log.info("Skipping \(step.activityType)")
+
+        if stepIndex + 1 < steps.count {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                stepIndex += 1
+            }
+            stepStartDate = Date()
+        } else {
+            completeSession()
+        }
+    }
+
     private func advance(correct: Int, total: Int, perWord: [Int: Bool]) {
         let now = Date()
         let step = steps[stepIndex]
@@ -296,9 +308,11 @@ struct SessionView: View {
         totalCorrect += correct
         totalPossible += total
 
-        // Attribute results to verses.
-        if case .verbalRecite = step {
-            // The recite verdict applies to every verse equally.
+        // Attribute results to verses. Steps with real per-word data (typed
+        // steps, or a mic-graded recite) attribute word-by-word; a step with
+        // no per-word data (recite's manual fallback) spreads the verdict
+        // across every verse equally.
+        if perWord.isEmpty {
             for index in verses.indices {
                 verseCorrect[index] += correct
                 verseTotal[index] += total
