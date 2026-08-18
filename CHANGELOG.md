@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.0-beta.5](https://github.com/jadenzaleski/verse-by-verse-app/compare/v0.1.0-beta.4...v0.1.0-beta.5) (2026-08-18)
+
+
+### Bug Fixes
+
+* Gate the Listening preview behind #if DEBUG ([525de6e](https://github.com/jadenzaleski/verse-by-verse-app/commit/525de6e56599fd3613f38d06e1e79fea71a69a87))
+
 ## [0.1.0-beta.4](https://github.com/jadenzaleski/verse-by-verse-app/compare/v0.1.0-beta.3...v0.1.0-beta.4) (2026-08-14)
 
 
