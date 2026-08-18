@@ -353,22 +353,26 @@ private struct GradedWordCell: View {
     .environment(\.font, .app())
 }
 
-#Preview("Listening") {
-    let recorder = RecitationRecorder.previewRecording(
-        text: "For God so loved the world that he",
-        level: 0.7,
-    )
-    return VStack(alignment: .leading, spacing: AppSpacing.md) {
-        ListeningIndicator(recorder: recorder)
-        FlowLayout(spacing: 6, lineSpacing: 10) {
-            ForEach(["For", "God", "so", "loved", "the", "world", "that", "he"], id: \.self) { word in
-                Text(word)
-                    .bibleWordStyle()
-                    .foregroundStyle(.secondary)
+// `RecitationRecorder.previewRecording` is `#if DEBUG`-only, so this
+// preview cannot compile in Beta/Release.
+#if DEBUG
+    #Preview("Listening") {
+        let recorder = RecitationRecorder.previewRecording(
+            text: "For God so loved the world that he",
+            level: 0.7,
+        )
+        return VStack(alignment: .leading, spacing: AppSpacing.md) {
+            ListeningIndicator(recorder: recorder)
+            FlowLayout(spacing: 6, lineSpacing: 10) {
+                ForEach(["For", "God", "so", "loved", "the", "world", "that", "he"], id: \.self) { word in
+                    Text(word)
+                        .bibleWordStyle()
+                        .foregroundStyle(.secondary)
+                }
+                LiveCaret(recorder: recorder)
             }
-            LiveCaret(recorder: recorder)
         }
+        .padding(AppSpacing.xl)
+        .environment(\.font, .app())
     }
-    .padding(AppSpacing.xl)
-    .environment(\.font, .app())
-}
+#endif
