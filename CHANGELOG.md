@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.0-beta.5](https://github.com/jadenzaleski/verse-by-verse-app/compare/v0.1.0-beta.4...v0.1.0-beta.5) (2026-09-25)
+
+
+### Features
+
+* Stop the microphone on backgrounding. Also Handle `AVAudioSession` interruptions and route changes; stop killing the user's music. ([0a18b00](https://github.com/jadenzaleski/verse-by-verse-app/commit/0a18b0009b25d7ea61b2bed73e0b3a72ef06288c))
+* Updated icon, and added PrivacyInfo. ([699b278](https://github.com/jadenzaleski/verse-by-verse-app/commit/699b2788c1d3f1e008ecbe4f21dc5b7f8296086a))
+* Updated the Settings page to provide more info. Also added a fallback alert incase the storage gets corrupted. Also enforced iOS 27.0 ([690eb8e](https://github.com/jadenzaleski/verse-by-verse-app/commit/690eb8e5fe25c447796e690c5401b5346f90e3a5))
+
 ## [0.1.0-beta.4](https://github.com/jadenzaleski/verse-by-verse-app/compare/v0.1.0-beta.3...v0.1.0-beta.4) (2026-08-14)
 
 
