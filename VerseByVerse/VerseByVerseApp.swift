@@ -13,6 +13,7 @@ import UIKit
 struct VerseByVerseApp: App {
     @State private var isReady = false
     @State private var statusText = "Loading…"
+    @State private var showCorruptStoreAlert = false
     private let container = AppModelContainer.make()
     private let bibleStore = BibleStore.shared
     private let networkMonitor = NetworkMonitor.shared
@@ -24,6 +25,7 @@ struct VerseByVerseApp: App {
         let backImage = UIImage(systemName: "chevron.left")
         UINavigationBar.appearance().backIndicatorImage = backImage
         UINavigationBar.appearance().backIndicatorTransitionMaskImage = backImage
+        showCorruptStoreAlert = AppModelContainer.didRecoverFromCorruptStore
     }
 
     var body: some Scene {
@@ -43,6 +45,11 @@ struct VerseByVerseApp: App {
             .environment(\.font, .app())
             .environment(bibleStore)
             .environment(networkMonitor)
+            .alert("Local Data Reset", isPresented: $showCorruptStoreAlert) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Your local data couldn't be read and had to be reset.")
+            }
         }
         .modelContainer(container)
     }

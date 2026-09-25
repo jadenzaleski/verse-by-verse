@@ -57,5 +57,8 @@ struct MemoryScoreCard: View {
 }
 
 #Preview {
-    MemoryScoreCard(lastPracticed: PreviewData.samplePassage.lastPracticed, totalReps: PreviewData.samplePassage.totalReps, retentionScore: 0.75)
+    MemoryScoreCard(
+        lastPracticed: PreviewData.samplePassage.lastPracticed,
+        totalReps: PreviewData.samplePassage.totalReps,
+        retentionScore: 0.75)
 }
