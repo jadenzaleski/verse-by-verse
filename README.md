@@ -40,8 +40,8 @@ Detailed rationale for every item lives in `docs/release-readiness.md` and `docs
 - [ ] Remove `fatalError` from `AppModelContainer.make()` — a corrupt store is currently an unrecoverable launch crash with total data loss
 - [ ] Remove `fatalError` from `AppFunctions.apiBaseURL` and the `FileManager…first!` force-unwraps
 - [ ] Bundle the Bible books metadata as an app resource — a first launch with no network currently leaves the Add screen permanently disabled with no explanation
-- [ ] Stop the microphone on backgrounding (observe `scenePhase`; `onDisappear` doesn't fire)
-- [ ] Handle `AVAudioSession` interruptions and route changes; stop killing the user's music
+- [x] Stop the microphone on backgrounding (observe `scenePhase`; `onDisappear` doesn't fire)
+- [x] Handle `AVAudioSession` interruptions and route changes; stop killing the user's music
 - [ ] Add retry affordances on network failure (`SessionView` dead-ends; use `ContentUnavailableView`)
 - [ ] VoiceOver for the practice flow — keystrokes go through an invisible `TextField` and correctness is conveyed by color alone
 - [ ] Don't rely on color alone for correct/incorrect, due/overdue, and score tiers

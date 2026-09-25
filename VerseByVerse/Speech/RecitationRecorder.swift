@@ -50,6 +50,7 @@ final class RecitationRecorder {
     private var audioEngine: AVAudioEngine?
     private var inputContinuation: AsyncStream<AnalyzerInput>.Continuation?
     private var resultsTask: Task<Void, Never>?
+    private var interruptionObserver: NotificationCenter.ObservationToken?
     private var finalizedTranscript = ""
     /// Loudest amplitude seen recently, used to auto-scale `audioLevel`.
     private var referencePeak: Double = 0
@@ -121,6 +122,7 @@ final class RecitationRecorder {
 
         finalizedTranscript = ""
         consumeResults(from: transcriber)
+        observeInterruptions()
 
         do {
             try await analyzer.start(inputSequence: inputSequence)
@@ -224,8 +226,12 @@ final class RecitationRecorder {
     /// fails with "… is not subscribed to transcription.<language>".
     private func installAssetsIfNeeded(for transcriber: SpeechTranscriber, locale: Locale) async throws {
         let status = await AssetInventory.status(forModules: [transcriber])
-        if status == .installed { return }
-        if status == .unsupported { throw RecitationAudioError.assetsUnsupported }
+        if status == .installed {
+            return
+        }
+        if status == .unsupported {
+            throw RecitationAudioError.assetsUnsupported
+        }
 
         let reserved = await AssetInventory.reservedLocales
         if !reserved.contains(where: { $0.identifier == locale.identifier }) {
@@ -247,6 +253,24 @@ final class RecitationRecorder {
             SFSpeechRecognizer.requestAuthorization { status in
                 continuation.resume(returning: status == .authorized)
             }
+        }
+    }
+
+    // MARK: - Interruptions
+
+    /// A phone call, Siri, or another app taking the mic deactivates our audio
+    /// session out from under us — without this, `state` stays `.recording`
+    /// forever with a dead engine. `.appDeactivated` is our own
+    /// `teardownAudio()` call and is ignored; only a system-caused
+    /// interruption cancels the step.
+    private func observeInterruptions() {
+        interruptionObserver = NotificationCenter.default.addObserver(
+            of: AVAudioSession.sharedInstance(),
+            for: AVAudioSession.DidBecomeInactiveMessage.self,
+        ) { [weak self] message in
+            guard case .systemInterruption = message.deactivationResult else { return }
+            self?.log.info("Recording interrupted by the system — cancelling")
+            self?.cancel()
         }
     }
 
@@ -279,7 +303,10 @@ final class RecitationRecorder {
         continuation: AsyncStream<AnalyzerInput>.Continuation,
     ) throws {
         let session = AVAudioSession.sharedInstance()
-        try session.setCategory(.record, mode: .measurement, options: [])
+        // `.mixWithOthers` needs `.playAndRecord` (unsupported on `.record`) —
+        // otherwise starting the mic silently kills any music the user has
+        // playing in the background.
+        try session.setCategory(.playAndRecord, mode: .measurement, options: [.mixWithOthers])
         try session.setActive(true)
 
         let engine = AVAudioEngine()
@@ -374,6 +401,11 @@ final class RecitationRecorder {
 
         inputContinuation?.finish()
         inputContinuation = nil
+
+        if let interruptionObserver {
+            NotificationCenter.default.removeObserver(interruptionObserver)
+            self.interruptionObserver = nil
+        }
 
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
     }

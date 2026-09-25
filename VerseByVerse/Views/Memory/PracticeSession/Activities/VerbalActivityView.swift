@@ -22,6 +22,7 @@ struct VerbalActivityView: View {
     let onSkip: () -> Void
 
     @State private var recorder = RecitationRecorder()
+    @Environment(\.scenePhase) private var scenePhase
     #if DEBUG
         /// Stands in for a real transcript so the grading UI is reachable on
         /// the simulator, where `SpeechTranscriber` is never available.
@@ -41,7 +42,9 @@ struct VerbalActivityView: View {
     /// state SwiftUI can just read.
     private var mode: Mode {
         #if DEBUG
-            if debugTranscript != nil { return .reviewing }
+            if debugTranscript != nil {
+                return .reviewing
+            }
         #endif
         switch recorder.state {
         case .idle, .unavailable: return .idle
@@ -91,12 +94,23 @@ struct VerbalActivityView: View {
             // Skip before offering a Start button that could only dead-end.
             // Permissions we haven't asked for yet don't count — those get
             // resolved by tapping Start, not by arriving here.
-            if RecitationRecorder.isKnownUnavailable { onSkip() }
+            if RecitationRecorder.isKnownUnavailable {
+                onSkip()
+            }
         }
         .onChange(of: recorder.state == .unavailable) { _, unavailable in
-            if unavailable { onSkip() }
+            if unavailable {
+                onSkip()
+            }
         }
         .onDisappear { recorder.cancel() }
+        .onChange(of: scenePhase) { _, phase in
+            // `.onDisappear` never fires on backgrounding, so without this the
+            // mic session stays live behind the scenes.
+            if phase == .inactive {
+                recorder.cancel()
+            }
+        }
     }
 
     // MARK: - Header
