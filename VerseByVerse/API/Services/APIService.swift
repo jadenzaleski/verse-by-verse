@@ -96,6 +96,11 @@ final class APIService {
             return .decoding(underlying: decodingError)
         }
 
+        if case let NetworkError.httpStatus(statusCode) = error {
+            log.error("Network error: non-HTTP response (status \(statusCode))")
+            return .http(statusCode: statusCode, message: nil, data: nil)
+        }
+
         log.error("Unknown error: \(error)")
         return .unknown(underlying: error)
     }

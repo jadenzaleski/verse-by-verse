@@ -46,8 +46,8 @@ Detailed rationale for every item lives in `docs/release-readiness.md` and `docs
 - [ ] VoiceOver for the practice flow — keystrokes go through an invisible `TextField` and correctness is conveyed by color alone
 - [ ] Don't rely on color alone for correct/incorrect, due/overdue, and score tiers
 - [ ] Verify the Developer screen is absent from a Release archive
-- [ ] Fix `BibleStore`'s shared `state` so metadata and selection fetches stop clobbering each other
-- [ ] Map `NetworkError` in `APIService.mapError` (currently degrades to `.unknown`, silently stalling reachability)
+- [x] Fix `BibleStore`'s shared `state` so metadata and selection fetches stop clobbering each other
+- [x] Map `NetworkError` in `APIService.mapError` (currently degrades to `.unknown`, silently stalling reachability)
 - [ ] Set the project-level deployment target to match the targets (still 26.1 while both targets are 27.0)
 - [x] In-app Contact Support + Share Diagnostics + Website + Privacy Policy rows
 - [ ] Commit the Xcode Cloud product manifest (`xcshareddata/xcodecloud/`)
