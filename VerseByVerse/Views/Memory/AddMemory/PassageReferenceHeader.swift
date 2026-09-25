@@ -8,14 +8,10 @@
 import SwiftUI
 
 struct PassageReferenceHeader: View {
-    @Environment(BibleStore.self) private var bibleStore
     let reference: String
     let isRefValid: Bool
+    let isLoading: Bool
     let onRefresh: () -> Void
-
-    private var isLoading: Bool {
-        bibleStore.state == .loading
-    }
 
     private var disableRefresh: Bool {
         !isRefValid || isLoading

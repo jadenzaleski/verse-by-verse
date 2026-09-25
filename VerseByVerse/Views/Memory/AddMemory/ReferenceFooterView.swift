@@ -14,7 +14,7 @@ struct ReferenceFooterView: View {
 
     var body: some View {
         HStack {
-            if bibleStore.state == .loading {
+            if bibleStore.bibleDataState == .loading {
                 ProgressView()
                     .scaleEffect(0.5)
                     .frame(width: 15, height: 15)

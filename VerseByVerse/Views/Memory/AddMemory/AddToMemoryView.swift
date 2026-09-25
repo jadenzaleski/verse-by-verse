@@ -37,6 +37,13 @@ struct AddToMemoryView: View {
         bibleStore.translationInfo(forAbbreviation: selectedTranslation)
     }
 
+    /// Loading/error state for the currently-entered reference's selection
+    /// fetch specifically — not the shared bibleData/translations load.
+    private var selectionState: DataState {
+        guard let key = currentSelectionKey else { return .idle }
+        return bibleStore.selectionState(for: key)
+    }
+
     private var currentSelectionKey: BibleSelectionKey? {
         guard let startCh = Int(startChapter), let startVs = Int(startVerse) else { return nil }
         let endCh = Int(endChapter) ?? startCh
@@ -216,7 +223,7 @@ struct AddToMemoryView: View {
             }
 
             Section {
-                if bibleStore.state == .loading {
+                if selectionState == .loading {
                     HStack {
                         Spacer()
                         ProgressView()
@@ -226,7 +233,7 @@ struct AddToMemoryView: View {
                 } else if let key = currentSelectionKey, let selection = bibleStore.selections[key] {
                     selection.annotatedText
                         .transition(.opacity)
-                } else if case let .error(apiError) = bibleStore.state {
+                } else if case let .error(apiError) = selectionState {
                     Text(apiError.localizedDescription)
                         .foregroundStyle(.red)
                         .font(.app(.subheadline))
@@ -235,7 +242,11 @@ struct AddToMemoryView: View {
                         .foregroundStyle(.secondary)
                 }
             } header: {
-                PassageReferenceHeader(reference: reference, isRefValid: isRefValid) {
+                PassageReferenceHeader(
+                    reference: reference,
+                    isRefValid: isRefValid,
+                    isLoading: selectionState == .loading,
+                ) {
                     Task { await loadBibleSelection(forceRefresh: true) }
                 }
             } footer: {

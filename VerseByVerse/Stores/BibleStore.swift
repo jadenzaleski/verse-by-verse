@@ -9,15 +9,23 @@ import Observation
 import SwiftUI
 
 @Observable
-final class BibleStore: Store {
+final class BibleStore {
     static let shared = BibleStore()
 
     private(set) var bibleData: BibleStructure?
     private(set) var availableTranslations: [BibleTranslationInfo]?
     private(set) var selections: [BibleSelectionKey: BibleSelection] = [:]
 
-    var state: DataState = .idle
-    var lastError: APIError?
+    /// Independent per-resource loading state. `loadBibleData()`,
+    /// `loadTranslations()`, and `fetchSelection()` are unrelated,
+    /// concurrently-triggered operations (startup warms metadata while a
+    /// detail view fetches a selection); sharing one `state` field let
+    /// whichever finished last stomp the others' loading/error signal.
+    private(set) var bibleDataState: DataState = .idle
+    private(set) var translationsState: DataState = .idle
+    private(set) var selectionStates: [BibleSelectionKey: DataState] = [:]
+
+    private let log = AppLog.category("BibleStore")
 
     private init() {}
 
@@ -39,39 +47,46 @@ final class BibleStore: Store {
         "2 Peter", "1 John", "2 John", "3 John", "Jude", "Revelation",
     ]
 
+    /// Loading/error state for a specific selection fetch. Views should read
+    /// this instead of a shared field so unrelated selections (or metadata
+    /// loads) can't clobber each other's signal.
+    func selectionState(for key: BibleSelectionKey) -> DataState {
+        selectionStates[key] ?? .idle
+    }
+
     @MainActor
     func loadBibleData() async {
         // If we already have data, don't reload unless state is error
-        if bibleData != nil, state == .success { return }
+        if bibleData != nil, bibleDataState == .success { return }
 
-        state = .loading
-        clearError()
+        bibleDataState = .loading
 
         do {
             let dataResponse = try await APIService.shared.getBibleBooks()
             bibleData = dataResponse.toDomain()
-            state = .success
+            bibleDataState = .success
             log.info("Bible data loaded successfully")
         } catch {
-            handle(error: error)
+            bibleDataState = .error(mapError(error))
+            log.error("Failed to load Bible data: \(error.localizedDescription)")
         }
     }
 
     @MainActor
     func loadTranslations() async {
         // If we already have translations, don't reload unless state is error
-        if availableTranslations != nil, state == .success { return }
+        if availableTranslations != nil, translationsState == .success { return }
 
-        state = .loading
-        clearError()
+        translationsState = .loading
 
         do {
             let translationsResponse = try await APIService.shared.getBibleTranslations()
             availableTranslations = translationsResponse.map { $0.toDomain() }
-            state = .success
+            translationsState = .success
             log.info("Bible translations loaded successfully")
         } catch {
-            handle(error: error)
+            translationsState = .error(mapError(error))
+            log.error("Failed to load translations: \(error.localizedDescription)")
         }
     }
 
@@ -114,12 +129,11 @@ final class BibleStore: Store {
     func fetchSelection(_ key: BibleSelectionKey, strip: Bool = true, forceRefresh: Bool = false) async {
         // Check cache first, unless the caller explicitly wants a fresh remote fetch
         if !forceRefresh, selections[key] != nil {
-            state = .success
+            selectionStates[key] = .success
             return
         }
 
-        state = .loading
-        clearError()
+        selectionStates[key] = .loading
 
         do {
             let passageResponse = try await APIService.shared.getBibleSelection(
@@ -131,10 +145,15 @@ final class BibleStore: Store {
             )
             let selection = passageResponse.toDomain()
             selections[key] = selection
-            state = .success
+            selectionStates[key] = .success
             log.info("BibleSelection fetched and cached: \(key)")
         } catch {
-            handle(error: error)
+            selectionStates[key] = .error(mapError(error))
+            log.error("Failed to fetch selection \(key): \(error.localizedDescription)")
         }
+    }
+
+    private func mapError(_ error: Error) -> APIError {
+        (error as? APIError) ?? .unknown(underlying: error)
     }
 }
