@@ -6,17 +6,22 @@
 //
 
 import SwiftUI
+import os
 
 /// Pure build/bundle info reads, no UI — safe to call from any thread, so it
 /// opts out of the project's default MainActor isolation.
 nonisolated enum AppFunctions {
     /// The API base URL for this build, resolved at compile time from the active
     /// build configuration's `API_BASE_URL` xcconfig setting (injected via Info.plist).
+    /// Logs via the raw `os.Logger` (not `AppLog`, which is MainActor-isolated)
+    /// since this type must stay callable from any thread.
     static let apiBaseURL: URL = {
         guard let raw = Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as? String,
               let url = URL(string: raw)
         else {
-            fatalError("API_BASE_URL missing or invalid in Info.plist")
+            Logger(subsystem: "com.jadenzaleski.vbv", category: "AppFunctions")
+                .fault("API_BASE_URL missing or invalid in Info.plist; falling back to an unreachable host.")
+            return URL(string: "https://api.invalid")!
         }
         return url
     }()

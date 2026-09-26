@@ -32,13 +32,13 @@ Detailed rationale for every item lives in `docs/release-readiness.md` and `docs
 - [ ] App Store Connect: content rights declaration (third-party Bible text → yes)
 - [ ] Screenshots for every shipped device class (6.9" iPhone; 13" iPad only if iPad ships)
 - [ ] Listing metadata: description, subtitle, keywords, promo text, What's New, copyright
-- [ ] Review notes: no account needed, mic/speech is on-device and optional, Bible text rights summary
+- [x] Review notes: no account needed, mic/speech is on-device and optional, Bible text rights summary
 - [x] Replace the `AppLinks.supportEmail` placeholder with the real address
 
 ### Quality — shouldn't submit without these
 
-- [ ] Remove `fatalError` from `AppModelContainer.make()` — a corrupt store is currently an unrecoverable launch crash with total data loss
-- [ ] Remove `fatalError` from `AppFunctions.apiBaseURL` and the `FileManager…first!` force-unwraps
+- [x] Remove `fatalError` from `AppModelContainer.make()` — a corrupt store is currently an unrecoverable launch crash with total data loss
+- [x] Remove `fatalError` from `AppFunctions.apiBaseURL` and the `FileManager…first!` force-unwraps
 - [ ] Bundle the Bible books metadata as an app resource — a first launch with no network currently leaves the Add screen permanently disabled with no explanation
 - [x] Stop the microphone on backgrounding (observe `scenePhase`; `onDisappear` doesn't fire)
 - [x] Handle `AVAudioSession` interruptions and route changes; stop killing the user's music
@@ -48,9 +48,9 @@ Detailed rationale for every item lives in `docs/release-readiness.md` and `docs
 - [ ] Verify the Developer screen is absent from a Release archive
 - [x] Fix `BibleStore`'s shared `state` so metadata and selection fetches stop clobbering each other
 - [x] Map `NetworkError` in `APIService.mapError` (currently degrades to `.unknown`, silently stalling reachability)
-- [ ] Set the project-level deployment target to match the targets (still 26.1 while both targets are 27.0)
+- [x] Set the project-level deployment target to match the targets (still 26.1 while both targets are 27.0)
 - [x] In-app Contact Support + Share Diagnostics + Website + Privacy Policy rows
-- [ ] Commit the Xcode Cloud product manifest (`xcshareddata/xcodecloud/`)
+- [x] Commit the Xcode Cloud product manifest (`xcshareddata/xcodecloud/`)
 - [ ] Add App Attest to the API and client
 - [ ] Raise API rate limits and return `429` + `Retry-After` so App Review's concentrated IPs don't get throttled
 
