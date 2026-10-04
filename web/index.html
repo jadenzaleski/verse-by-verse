@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Verse by Verse</title>
+    <meta content="Memorize scripture by reciting it out loud. Verse by Verse marks every word on your iPhone and schedules the next review for you. No account."
+          name="description">
+    <meta content="#f7f6fa" media="(prefers-color-scheme: light)" name="theme-color">
+    <meta content="#14121d" media="(prefers-color-scheme: dark)" name="theme-color">
+    <meta content="Verse by Verse" property="og:title">
+    <meta content="Memorize scripture by reciting it out loud. Marked on device, reviewed when you need it, no account."
+          property="og:description">
+    <meta content="website" property="og:type">
+    <meta content="assets/app-logo.png" property="og:image">
+    <meta content="summary_large_image" name="twitter:card">
+    <link rel="icon" type="image/png" href="/assets/favicon/favicon-96x96.png" sizes="96x96"/>
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon/favicon.svg"/>
+    <link rel="shortcut icon" href="/assets/favicon/favicon.ico"/>
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png"/>
+    <meta name="apple-mobile-web-app-title" content="Verse"/>
+    <link rel="manifest" href="/assets/favicon/site.webmanifest"/>
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400..700&family=Source+Serif+4:opsz,wght@8..60,300..600&display=swap"
+          rel="stylesheet">
+    <link href="dist/style.css" rel="stylesheet">
+    <script>
+        (function () {
+            var el = document.documentElement;
+            var mode = "system", accent = "violet";
+            try {
+                mode = localStorage.getItem("theme-mode") || mode;
+                accent = localStorage.getItem("theme-accent") || accent;
+            } catch (e) {
+                // Storage blocked (private mode, etc.) — fall back to the defaults.
+            }
+            var dark = mode === "dark" ||
+                (mode === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+            el.dataset.theme = dark ? "vbv-dark" : "vbv";
+            el.dataset.accent = accent;
+        })();
+    </script>
+</head>
+<body class="font-sans antialiased">
+
+<a class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-3 focus:rounded-md focus:bg-ink focus:px-4 focus:py-2 focus:text-paper"
+   href="#main">Skip to content</a>
+
+<header class="sticky top-0 z-40 border-b border-rule/70 bg-paper/80 backdrop-blur-xs">
+    <nav aria-label="Main" class="mx-auto flex max-w-6xl items-center gap-4 px-5 py-3.5 sm:px-8">
+        <a class="flex items-center gap-2.5" href="/">
+            <img alt="" class="h-6.5 w-6.5 bg-transparent" src="assets/logo.svg">
+            <span class="text-lg font-semibold tracking-tight">Verse by Verse</span>
+        </a>
+
+        <div class="ml-auto flex items-center gap-2 sm:gap-4">
+            <a class="nav-link hidden sm:inline" href="privacy.html">Privacy</a>
+
+            <details class="dropdown dropdown-end">
+                <summary aria-label="Appearance" class="btn btn-ghost btn-circle btn-sm">
+                    <i aria-hidden="true" class="w-5" data-lucide="sun-moon"></i>
+                </summary>
+                <div class="dropdown-content z-50 mt-2 w-60 rounded-box border border-rule bg-base-100 p-3 shadow-xl">
+                    <p class="px-1 pb-2 text-xs font-medium tracking-wide text-muted uppercase">Appearance</p>
+                    <ul class="menu menu-sm w-full gap-0.5 p-0">
+                        <li><button class="gap-2" data-theme-mode="system" type="button">
+                            <i aria-hidden="true" class="w-4" data-lucide="monitor"></i>System
+                        </button></li>
+                        <li><button class="gap-2" data-theme-mode="light" type="button">
+                            <i aria-hidden="true" class="w-4" data-lucide="sun"></i>Light
+                        </button></li>
+                        <li><button class="gap-2" data-theme-mode="dark" type="button">
+                            <i aria-hidden="true" class="w-4" data-lucide="moon"></i>Dark
+                        </button></li>
+                    </ul>
+
+                    <p class="px-1 pt-3 pb-2 text-xs font-medium tracking-wide text-muted uppercase">Accent</p>
+                    <div class="flex items-center justify-between px-1 pb-1" role="radiogroup"
+                         aria-label="Accent color">
+                        <button aria-label="Violet" class="accent-swatch" data-accent="violet" role="radio"
+                                type="button"></button>
+                        <button aria-label="Ocean" class="accent-swatch" data-accent="ocean" role="radio"
+                                type="button"></button>
+                        <button aria-label="Forest" class="accent-swatch" data-accent="forest" role="radio"
+                                type="button"></button>
+                        <button aria-label="Sunset" class="accent-swatch" data-accent="sunset" role="radio"
+                                type="button"></button>
+                        <button aria-label="Blush" class="accent-swatch" data-accent="blush" role="radio"
+                                type="button"></button>
+                        <button aria-label="Slate" class="accent-swatch" data-accent="slate" role="radio"
+                                type="button"></button>
+                        <button aria-label="Twilight" class="accent-swatch" data-accent="twilight" role="radio"
+                                type="button"></button>
+                    </div>
+                </div>
+            </details>
+
+            <!-- TODO: replace href with the real App Store URL -->
+            <a class="btn btn-primary btn-sm px-4 font-semibold" href="https://testflight.apple.com/join/2D4ByZCE">Get the app</a>
+        </div>
+    </nav>
+</header>
+
+<main id="main">
+
+    <section class="hero-wash">
+        <div class="mx-auto max-w-6xl px-5 pt-20 pb-24 text-center sm:px-8 sm:pt-28 sm:pb-32">
+            <img alt="Verse by Verse app icon" class="mx-auto h-28 theme-dark:hidden sm:h-32" src="assets/app-logo.png">
+            <img alt="Verse by Verse app icon" class="mx-auto hidden h-28 theme-dark:block sm:h-32"
+                 src="assets/app-logo-dark.png">
+
+            <h1 class="mx-auto mt-9 max-w-[16ch] text-4xl leading-[1.1] font-semibold tracking-tight sm:text-6xl">
+                Verse by Verse
+            </h1>
+            <p class="mx-auto mt-6 max-w-[46ch] text-lg copy">
+                Memorize what's important to you, one verse at a time.
+
+            </p>
+
+            <div class="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                <!-- TODO: Update with release URL -->
+                <a class="inline-flex shrink-0 transition-opacity hover:opacity-80" href="https://testflight.apple.com/join/2D4ByZCE">
+                    <img alt="Download on the App Store" class="h-13 w-auto theme-dark:hidden" height="52"
+                         src="assets/app-store-badge-black.svg" width="156">
+                    <img alt="Download on the App Store" class="hidden h-13 w-auto theme-dark:block" height="52"
+                         src="assets/app-store-badge-white.svg" width="156">
+                </a>
+                <a class="btn-outlined h-13 px-6" href="https://testflight.apple.com/join/2D4ByZCE">Join the beta</a>
+            </div>
+
+            <p class="mt-6 text-sm text-muted">iOS 27.0+</p>
+        </div>
+    </section>
+
+    <section class="reveal border-t border-rule/70 bg-base-200" id="features">
+        <div class="section grid gap-10 md:grid-cols-3 md:gap-12">
+            <div>
+                <i aria-hidden="true" class="w-6 text-brand" data-lucide="mic"></i>
+                <h2 class="mt-4 text-xl font-semibold tracking-tight">Say it out loud</h2>
+                <p class="mt-2.5 copy-sm">
+                    Verse by Verse lets you recite out loud, or type just the first letter of each word.
+                </p>
+            </div>
+            <div>
+                <i aria-hidden="true" class="w-6 text-brand" data-lucide="calendar-check"></i>
+                <h2 class="mt-4 text-xl font-semibold tracking-tight">Reviewed at the right time</h2>
+                <p class="mt-2.5 copy-sm">
+                    Verse by Verse intelligently schedules reviews so a passage always resurfaces just before you'd start to forget it.
+                </p>
+            </div>
+            <div>
+                <i aria-hidden="true" class="w-6 text-brand" data-lucide="lock"></i>
+                <h2 class="mt-4 text-xl font-semibold tracking-tight">Your data, not ours.</h2>
+                <p class="mt-2.5 copy-sm">
+                    Verse by Verse keeps everything local. No account, no external sync, no in-app purchases.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="reveal border-t border-rule/70" id="recitation">
+        <div class="section grid items-center gap-12 md:grid-cols-2 md:gap-16">
+            <div>
+                <h2 class="section-title max-w-[16ch]">Watch your memory get stronger.</h2>
+                <p class="mt-5 max-w-[44ch] copy">
+                    Every passage has a memory score that rises the more you practice it. See at a glance what's solid and what needs another pass.
+                </p>
+            </div>
+
+            <figure class="card border border-rule bg-base-200/50">
+                <div class="card-body items-center gap-4 p-6 text-center sm:p-8">
+                    <figcaption class="self-start text-sm text-muted">Psalm 119:11</figcaption>
+                    <div class="radial-progress bg-base-300 text-brand" style="--value:92; --size:7rem; --thickness:7px;"
+                         aria-valuenow="92" role="progressbar">
+                        <span class="text-2xl font-semibold text-ink">92%</span>
+                    </div>
+                    <p class="text-sm text-muted">Memory score</p>
+                    <div class="divider my-0 w-full"></div>
+                    <div class="stats stats-vertical bg-transparent text-center shadow-none sm:stats-horizontal">
+                        <div class="stat place-items-center px-4 py-0">
+                            <div class="stat-value text-lg">14</div>
+                            <div class="stat-desc">Sessions</div>
+                        </div>
+                        <div class="stat place-items-center px-4 py-0">
+                            <div class="stat-value text-lg">2 days ago</div>
+                            <div class="stat-desc">Last practiced</div>
+                        </div>
+                    </div>
+                </div>
+            </figure>
+        </div>
+    </section>
+
+    <section class="mesh-band border-t border-rule/70">
+        <div class="section text-center">
+            <h2 class="mx-auto max-w-[18ch] text-3xl leading-tight font-semibold tracking-tight sm:text-4xl">
+                One verse at a time.
+            </h2>
+            <div class="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                <!-- TODO: replace href with the App Store listing URL -->
+                <a class="inline-flex shrink-0 transition-opacity hover:opacity-80" href="https://testflight.apple.com/join/2D4ByZCE">
+                    <img alt="Download on the App Store" class="h-13 w-auto" height="52"
+                         src="assets/app-store-badge-white.svg" width="156">
+                </a>
+                <a class="btn-outlined btn-outlined-invert h-13 px-6" href="https://testflight.apple.com/join/2D4ByZCE">Join the beta</a>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<footer class="border-t border-rule/70" id="contact">
+    <div class="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-10 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+        <div class="flex items-center gap-2.5">
+            <img alt="" class="h-7 w-7 bg-transparent" src="assets/logo.svg">
+            <span class="font-semibold">Verse by Verse</span>
+        </div>
+        <nav aria-label="Footer" class="flex flex-wrap items-center gap-x-7 gap-y-2 text-sm text-muted">
+            <a class="footer-link" href="mailto:jadenzaleski@icloud.com?subject=Verse%20by%20Verse">Contact</a>
+            <a class="footer-link" href="privacy.html">Privacy</a>
+            <a aria-label="GitHub" class="footer-link" href="https://github.com/jadenzaleski/verse-by-verse-web">
+                <svg aria-hidden="true" class="h-5 w-5" fill="currentColor" viewBox="0 0 98 96">
+                    <path d="M41.4395 69.3848C28.8066 67.8535 19.9062 58.7617 19.9062 46.9902C19.9062 42.2051 21.6289 37.0371 24.5 33.5918C23.2559 30.4336 23.4473 23.7344 24.8828 20.959C28.7109 20.4805 33.8789 22.4902 36.9414 25.2656C40.5781 24.1172 44.4062 23.543 49.0957 23.543C53.7852 23.543 57.6133 24.1172 61.0586 25.1699C64.0254 22.4902 69.2891 20.4805 73.1172 20.959C74.457 23.543 74.6484 30.2422 73.4043 33.4961C76.4668 37.1328 78.0937 42.0137 78.0937 46.9902C78.0937 58.7617 69.1934 67.6621 56.3691 69.2891C59.623 71.3945 61.8242 75.9883 61.8242 81.252L61.8242 91.2051C61.8242 94.0762 64.2168 95.7031 67.0879 94.5547C84.4102 87.9512 98 70.6289 98 49.1914C98 22.1074 75.9883 0 48.9043 0C21.8203 0 0 22.1074 0 49.1914C0 70.4375 13.4941 88.0469 31.6777 94.6504C34.2617 95.6074 36.75 93.8848 36.75 91.3008L36.75 83.6445C35.4102 84.2188 33.6875 84.6016 32.1562 84.6016C25.8398 84.6016 22.1074 81.1563 19.4277 74.7441C18.375 72.1602 17.2266 70.6289 15.0254 70.3418C13.877 70.2461 13.4941 69.7676 13.4941 69.1934C13.4941 68.0449 15.4082 67.1836 17.3223 67.1836C20.0977 67.1836 22.4902 68.9063 24.9785 72.4473C26.8926 75.2227 28.9023 76.4668 31.2949 76.4668C33.6875 76.4668 35.2187 75.6055 37.4199 73.4043C39.0469 71.7773 40.291 70.3418 41.4395 69.3848Z"/>
+                </svg>
+            </a>
+        </nav>
+    </div>
+    <div class="mx-auto max-w-6xl px-5 pb-10 sm:px-8">
+        <p class="text-center text-xs text-muted">© <span data-year>2026</span> Jaden Zaleski</p>
+    </div>
+</footer>
+
+<script defer src="js/main.js"></script>
+<script defer src="https://unpkg.com/lucide@latest"></script>
+<script>
+    window.addEventListener("load", () => window.lucide && window.lucide.createIcons());
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><defs>
+        <linearGradient id="vbv-gradient" gradientUnits="userSpaceOnUse" x1="2" y1="3" x2="22" y2="21">
+            <stop offset="0" stop-color="#71B07A"></stop>
+            <stop offset="1" stop-color="#5D4CAC"></stop>
+        </linearGradient>
+    </defs><g stroke="url(#vbv-gradient)">
+        <path d="M12 5v16"></path>
+        <path d="M16 13h2"></path>
+        <path d="M16 9h2"></path>
+        <path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"></path>
+        <path d="M6 13h2"></path>
+        <path d="M6 9h2"></path>
+    </g><style>@media (prefers-color-scheme: light) { :root { filter: none; } }
+@media (prefers-color-scheme: dark) { :root { filter: none; } }
+</style></svg>

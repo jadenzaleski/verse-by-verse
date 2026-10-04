@@ -19,6 +19,12 @@ with that, please don't submit.
 3. Run the tests: `VerseByVerseTests` (Swift Testing), via Xcode or
    `xcodebuild test -scheme "VerseByVerse (debug)" -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:VerseByVerseTests`.
 
+## Website
+
+The site is in `web/`; see the [Website section of the README](README.md#website)
+for how to run it. It is published automatically when changes to `web/` reach
+`master`.
+
 ## Before you open a PR
 
 - Run `swiftformat .` and then `swiftlint`. Lint errors fail the build.

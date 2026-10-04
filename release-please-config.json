@@ -7,7 +7,10 @@
       "prerelease-type": "beta",
       "versioning": "prerelease",
       "changelog-path": "CHANGELOG.md",
-      "include-v-in-tag": true
+      "include-v-in-tag": true,
+      "exclude-paths": [
+        "web"
+      ]
     }
   }
 }
