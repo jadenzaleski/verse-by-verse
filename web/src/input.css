@@ -1,0 +1,401 @@
+@import "tailwindcss";
+
+@source "../*.html";
+@source "../js/*.js";
+
+@plugin "daisyui" {
+  themes: false;
+}
+
+/* Not the OS-level `dark:` (prefers-color-scheme) — this follows the
+   `data-theme` attribute we set on <html>, so it stays correct even when the
+   visitor overrides the OS preference in the appearance menu. Used for
+   swapping the app icon to its dark-mode PNG. */
+@custom-variant theme-dark (&:where(:root[data-theme="vbv-dark"] *));
+
+/* ---------------------------------------------------------------------------
+   Accent palettes
+
+   The iOS app lets you dress a study set in one of six mesh themes; the site
+   borrows those names so the two feel like one product. Each palette declares
+   four raw values and nothing else:
+
+     --brand-light / --brand-dark          the accent, per color scheme
+     --brand-alt-light / --brand-alt-dark  its partner, for gradients only
+
+   Only the first pair is ever used for text, and every one of them clears
+   4.5:1 against the page background in its own scheme. The `-alt` pair is
+   decorative — it exists so the mesh band and the swatches read as a gradient
+   rather than a flat fill — so it is held to no contrast bar.
+
+   The selector is a bare `[data-accent]`, not `:root[data-accent]`, on purpose:
+   the same rules then scope a palette to a single swatch button in the picker,
+   which is how each swatch paints itself in its own colors instead of the
+   page's.
+   --------------------------------------------------------------------------- */
+
+:root,
+[data-accent="violet"] {
+  --brand-light: #604bb2;
+  --brand-dark: #8f7fd6;
+  --brand-alt-light: #4e9c66;
+  --brand-alt-dark: #7bc794;
+}
+
+[data-accent="ocean"] {
+  --brand-light: #1f63c4;
+  --brand-dark: #7fabf5;
+  --brand-alt-light: #0d7f92;
+  --brand-alt-dark: #4fc4d6;
+}
+
+[data-accent="forest"] {
+  --brand-light: #2f7d4f;
+  --brand-dark: #6fc48c;
+  --brand-alt-light: #0f8f8a;
+  --brand-alt-dark: #5ac9bd;
+}
+
+[data-accent="sunset"] {
+  --brand-light: #c2410c;
+  --brand-dark: #f59e6b;
+  --brand-alt-light: #b3305c;
+  --brand-alt-dark: #f08a9b;
+}
+
+[data-accent="blush"] {
+  --brand-light: #c0455b;
+  --brand-dark: #ff9494;
+  --brand-alt-light: #c26a2a;
+  --brand-alt-dark: #ffc08a;
+}
+
+[data-accent="slate"] {
+  --brand-light: #0e7d84;
+  --brand-dark: #3ec9d0;
+  --brand-alt-light: #4a5568;
+  --brand-alt-dark: #a3b6c9;
+}
+
+[data-accent="twilight"] {
+  --brand-light: #a03d67;
+  --brand-dark: #e08aa8;
+  --brand-alt-light: #355c7d;
+  --brand-alt-dark: #8fb2d6;
+}
+
+/* The app icon's gradient is authored in Display P3. Match the default accent
+   exactly on wide-gamut screens; the hex above stays the sRGB fallback. The
+   other palettes are sRGB only — they are site dressing, not brand marks.
+
+   This must key off `[data-accent="violet"]` alone. A bare `:root` here would
+   match the document element whatever accent it carries, and — sitting below
+   every palette block — would quietly repaint all six of the others violet on
+   any wide-gamut screen. The inline head script always writes an explicit
+   `data-accent`, so the default still lands in P3; only a visitor with
+   JavaScript off falls back to the sRGB hex above, which is the point of it. */
+@supports (color: color(display-p3 1 1 1)) {
+  [data-accent="violet"] {
+    --brand-light: color(display-p3 0.36475 0.2981 0.67432);
+    --brand-alt-light: color(display-p3 0.33 0.6 0.42);
+    --brand-alt-dark: color(display-p3 0.44312 0.69043 0.47852);
+  }
+}
+
+/* Pick the pair that matches the current color scheme. Everything downstream
+   reads `--brand` / `--brand-alt` and never the raw values, so an accent and a
+   light/dark choice compose without either knowing about the other. */
+:root {
+  --brand: var(--brand-light);
+  --brand-alt: var(--brand-alt-light);
+}
+
+:root[data-theme="vbv-dark"] {
+  --brand: var(--brand-dark);
+  --brand-alt: var(--brand-alt-dark);
+}
+
+@plugin "daisyui/theme" {
+  name: "vbv";
+  default: true;
+  color-scheme: light;
+
+  --color-base-100: #f7f6fa;
+  --color-base-200: #efedf5;
+  --color-base-300: #ddd9e8;
+  --color-base-content: #191627;
+
+  --color-primary: var(--brand);
+  --color-primary-content: #f7f6fa;
+  --color-secondary: var(--brand-alt);
+  --color-secondary-content: #0f1c14;
+  --color-accent: var(--brand-alt);
+  --color-accent-content: #0f1c14;
+  --color-neutral: #191627;
+  --color-neutral-content: #f7f6fa;
+
+  --color-info: var(--brand);
+  --color-success: #3f8f5a;
+  --color-warning: #a8801f;
+  --color-error: #b2404b;
+
+  /* AppRadius.sm / .md / .lg from the iOS app */
+  --radius-selector: 0.5rem;
+  --radius-field: 0.875rem;
+  --radius-box: 1.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+@plugin "daisyui/theme" {
+  name: "vbv-dark";
+  default: false;
+  color-scheme: dark;
+
+  /* Surfaces carry only a trace of the brand's violet. They used to be
+     saturated enough to read as purple, which fought every accent but the
+     default one now that the accent is the visitor's to choose. */
+  --color-base-100: #14121d;
+  --color-base-200: #1c1a29;
+  --color-base-300: #272337;
+  --color-base-content: #f2f0f7;
+
+  --color-primary: var(--brand);
+  --color-primary-content: #14121d;
+  --color-secondary: var(--brand-alt);
+  --color-secondary-content: #0d1f16;
+  --color-accent: var(--brand-alt);
+  --color-accent-content: #0d1f16;
+  --color-neutral: #1c1a29;
+  --color-neutral-content: #f2f0f7;
+
+  --color-info: var(--brand);
+  --color-success: #7bc794;
+  --color-warning: #caa04a;
+  --color-error: #d9636e;
+
+  --radius-selector: 0.5rem;
+  --radius-field: 0.875rem;
+  --radius-box: 1.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+@theme {
+  /* Montserrat is the app's UI face; the serif is reserved for scripture,
+     mirroring the app's split between `.app()` and `.bible()`. */
+  --font-sans: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Source Serif 4", ui-serif, "New York", Georgia, serif;
+
+  --color-ink: #191627;
+  --color-paper: #f7f6fa;
+  --color-muted: #6e6883;
+  --color-rule: #ddd9e8;
+
+  /* Indirection, so `text-brand` and friends follow the accent the visitor
+     picked rather than baking one hex into the compiled utilities. */
+  --color-brand: var(--brand);
+  --color-brand-alt: var(--brand-alt);
+}
+
+/* --color-ink/paper/muted/rule live in the bare @theme block above (so Tailwind
+   generates text-ink, bg-paper, etc.), not inside a daisyUI theme block, so
+   daisyUI's theme engine never auto-scopes them. Re-declare their dark values
+   by hand under the same `data-theme` selector daisyUI's own vbv-dark tokens
+   are scoped to, so both sets of tokens flip together. */
+:root[data-theme="vbv-dark"] {
+  --color-ink: #f2f0f7;
+  --color-paper: #14121d;
+  --color-muted: #9d97b5;
+  --color-rule: #2c2740;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Clear the sticky header when jumping to an anchor. */
+:target,
+[id] {
+  scroll-margin-top: 5.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+:where(a, button, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Sections fade up as they come into view. `js/main.js` marks <html> with
+   `.js-reveal` and then adds `.is-in` per section via an IntersectionObserver.
+   Gating the hidden state on that class means the content is simply visible
+   when JavaScript never runs, rather than stuck at opacity 0; asking for
+   reduced motion opts out the same way. */
+@media (prefers-reduced-motion: no-preference) {
+  .js-reveal .reveal {
+    opacity: 0;
+    transform: translateY(0.75rem);
+    transition:
+      opacity 600ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .js-reveal .reveal.is-in {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* A soft wash of the accent behind the hero, echoing the mesh the app paints
+   behind a study set. Deliberately faint — it should register as warmth on the
+   page, not as a graphic. */
+.hero-wash {
+  position: relative;
+  isolation: isolate;
+  /* The wash is inset past both edges so it has room to fall off; clip it
+     here or those overhangs become a horizontal scrollbar. */
+  overflow: clip;
+}
+
+.hero-wash::before {
+  content: "";
+  position: absolute;
+  inset: -20% -10% auto -10%;
+  height: 34rem;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(42% 60% at 22% 30%, color-mix(in srgb, var(--brand) 22%, transparent), transparent 70%),
+    radial-gradient(38% 55% at 78% 18%, color-mix(in srgb, var(--brand-alt) 18%, transparent), transparent 72%);
+  filter: blur(8px);
+}
+
+/* Echoes the mesh gradient the app paints behind study sets, kept to the
+   single closing band so it reads as signature rather than decoration. The
+   band is dark in both color schemes, so it always takes the dark pair. */
+.mesh-band {
+  background-color: #191627;
+  color: #f7f6fa;
+  background-image:
+    radial-gradient(62% 90% at 10% 12%, color-mix(in srgb, var(--brand-alt-dark) 42%, transparent), transparent 68%),
+    radial-gradient(58% 85% at 90% 82%, color-mix(in srgb, var(--brand-dark) 58%, transparent), transparent 70%);
+}
+
+/* The app's OutlinedButtonStyle: 1.5px accent border at half strength. */
+.btn-outlined {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  border: 1.5px solid color-mix(in srgb, var(--color-brand) 50%, transparent);
+  color: var(--color-brand);
+  font-weight: 600;
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease;
+}
+
+.btn-outlined:hover {
+  border-color: var(--color-brand);
+  background-color: color-mix(in srgb, var(--color-brand) 6%, transparent);
+}
+
+/* The same outlined button, reversed for the dark closing band, where the
+   accent would not carry enough contrast. */
+.btn-outlined-invert {
+  background-color: transparent;
+  border-color: color-mix(in srgb, #fff 45%, transparent);
+  color: #fff;
+}
+
+.btn-outlined-invert:hover {
+  border-color: #fff;
+  background-color: color-mix(in srgb, #fff 12%, transparent);
+  color: #fff;
+}
+
+/* One swatch per accent in the appearance menu. Each button carries its own
+   `data-accent`, so the palette rules at the top of this file resolve to that
+   palette inside the button and it paints itself. */
+.accent-swatch {
+  width: 1.375rem;
+  height: 1.375rem;
+  border-radius: 9999px;
+  background-image: linear-gradient(135deg, var(--brand-light), var(--brand-alt-light));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-ink) 12%, transparent);
+  transition: transform 160ms ease;
+}
+
+:root[data-theme="vbv-dark"] .accent-swatch {
+  background-image: linear-gradient(135deg, var(--brand-dark), var(--brand-alt-dark));
+}
+
+.accent-swatch:hover {
+  transform: scale(1.12);
+}
+
+.accent-swatch[aria-checked="true"] {
+  box-shadow:
+    0 0 0 2px var(--color-base-100),
+    0 0 0 3.5px var(--color-brand);
+}
+
+/* daisyUI's own `menu-active` is a solid neutral pill, which lands heavily in
+   a menu this small. Tie the selected row to the accent instead, so choosing a
+   color scheme and choosing a color read as one control. */
+.menu :where(li > *).menu-active {
+  background-color: color-mix(in srgb, var(--color-brand) 12%, transparent);
+  color: var(--color-brand);
+  font-weight: 600;
+}
+
+/* Shared layout/type patterns repeated across index.html and privacy.html.
+   Kept as real Tailwind utilities (via @apply) rather than hand-rolled CSS
+   so responsive prefixes and hover variants keep working at the call site. */
+@utility nav-link {
+  @apply text-sm text-muted transition-colors hover:text-ink;
+}
+
+@utility footer-link {
+  @apply transition-colors hover:text-ink;
+}
+
+@utility section {
+  @apply mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-24;
+}
+
+@utility section-title {
+  @apply text-2xl font-semibold tracking-tight sm:text-3xl;
+}
+
+@utility copy {
+  @apply leading-relaxed text-muted;
+}
+
+@utility copy-sm {
+  @apply text-[0.9375rem] leading-relaxed text-muted;
+}
+
+@utility link-brand {
+  @apply font-medium text-brand underline decoration-brand/30 underline-offset-4 transition-colors hover:decoration-brand;
+}

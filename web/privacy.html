@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Privacy Policy - Verse by Verse</title>
+    <meta content="Verse by Verse keeps your passages, progress, and recitations on your device. This policy explains exactly what is and is not collected."
+          name="description">
+    <meta content="#f7f6fa" media="(prefers-color-scheme: light)" name="theme-color">
+    <meta content="#14121d" media="(prefers-color-scheme: dark)" name="theme-color">
+    <link rel="icon" type="image/png" href="/assets/favicon/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon/favicon.svg" />
+    <link rel="shortcut icon" href="/assets/favicon/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Verse" />
+    <link rel="manifest" href="/assets/favicon/site.webmanifest" />
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400..700&family=Source+Serif+4:opsz,wght@8..60,300..600&display=swap"
+          rel="stylesheet">
+    <link href="dist/style.css" rel="stylesheet">
+    <!-- Restore the saved appearance before first paint, so the page never
+         flashes the wrong scheme or accent. Deliberately inline and blocking:
+         deferring it is what causes the flash. -->
+    <script>
+        (function () {
+            var el = document.documentElement;
+            var mode = "system", accent = "violet";
+            try {
+                mode = localStorage.getItem("theme-mode") || mode;
+                accent = localStorage.getItem("theme-accent") || accent;
+            } catch (e) {
+                // Storage blocked (private mode, etc.) — fall back to the defaults.
+            }
+            var dark = mode === "dark" ||
+                (mode === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+            el.dataset.theme = dark ? "vbv-dark" : "vbv";
+            el.dataset.accent = accent;
+        })();
+    </script>
+</head>
+<body class="font-sans antialiased">
+
+<a class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-3 focus:rounded-md focus:bg-ink focus:px-4 focus:py-2 focus:text-paper"
+   href="#main">Skip to content</a>
+
+<header class="sticky top-0 z-40 border-b border-rule/70 bg-paper/80 backdrop-blur-xs">
+    <nav aria-label="Main" class="mx-auto flex max-w-6xl items-center gap-4 px-5 py-3.5 sm:px-8">
+        <a class="flex items-center gap-2.5" href="/">
+            <img alt="" class="h-6.5 w-6.5 bg-transparent" src="assets/logo.svg">
+            <span class="text-lg font-semibold tracking-tight">Verse by Verse</span>
+        </a>
+
+        <div class="ml-auto flex items-center gap-2 sm:gap-4">
+            <a class="nav-link hidden sm:inline" href="/">Home</a>
+
+            <details class="dropdown dropdown-end">
+                <summary aria-label="Appearance" class="btn btn-ghost btn-circle btn-sm">
+                    <i aria-hidden="true" class="w-5" data-lucide="sun-moon"></i>
+                </summary>
+                <div class="dropdown-content z-50 mt-2 w-60 rounded-box border border-rule bg-base-100 p-3 shadow-xl">
+                    <p class="px-1 pb-2 text-xs font-medium tracking-wide text-muted uppercase">Appearance</p>
+                    <ul class="menu menu-sm w-full gap-0.5 p-0">
+                        <li><button class="gap-2" data-theme-mode="system" type="button">
+                            <i aria-hidden="true" class="w-4" data-lucide="monitor"></i>System
+                        </button></li>
+                        <li><button class="gap-2" data-theme-mode="light" type="button">
+                            <i aria-hidden="true" class="w-4" data-lucide="sun"></i>Light
+                        </button></li>
+                        <li><button class="gap-2" data-theme-mode="dark" type="button">
+                            <i aria-hidden="true" class="w-4" data-lucide="moon"></i>Dark
+                        </button></li>
+                    </ul>
+
+                    <p class="px-1 pt-3 pb-2 text-xs font-medium tracking-wide text-muted uppercase">Accent</p>
+                    <div class="flex items-center justify-between px-1 pb-1" role="radiogroup"
+                         aria-label="Accent color">
+                        <button aria-label="Violet" class="accent-swatch" data-accent="violet" role="radio"
+                                type="button"></button>
+                        <button aria-label="Ocean" class="accent-swatch" data-accent="ocean" role="radio"
+                                type="button"></button>
+                        <button aria-label="Forest" class="accent-swatch" data-accent="forest" role="radio"
+                                type="button"></button>
+                        <button aria-label="Sunset" class="accent-swatch" data-accent="sunset" role="radio"
+                                type="button"></button>
+                        <button aria-label="Blush" class="accent-swatch" data-accent="blush" role="radio"
+                                type="button"></button>
+                        <button aria-label="Slate" class="accent-swatch" data-accent="slate" role="radio"
+                                type="button"></button>
+                        <button aria-label="Twilight" class="accent-swatch" data-accent="twilight" role="radio"
+                                type="button"></button>
+                    </div>
+                </div>
+            </details>
+
+            <!-- TODO: replace href with the real App Store URL -->
+            <a class="btn btn-primary btn-sm px-4 font-semibold" href="https://testflight.apple.com/join/2D4ByZCE">Get the app</a>
+        </div>
+    </nav>
+</header>
+
+<main class="mx-auto max-w-3xl px-5 py-16 sm:px-8 sm:py-24" id="main">
+
+    <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">Privacy Policy</h1>
+    <p class="mt-4 text-sm text-muted">Last updated 10 September 2026</p>
+
+    <div class="mt-12 space-y-10 text-[1.0625rem] leading-[1.7]">
+
+        <section>
+            <p class="max-w-[62ch]">
+                Verse by Verse is built to work without knowing who you are. There is no account,
+                no login, and no server that stores your data. This policy describes what stays on
+                your device, the one request the app makes to the internet, and what it does not collect.
+            </p>
+        </section>
+
+        <section>
+            <h2 class="text-xl font-semibold tracking-tight">What stays on your device</h2>
+            <p class="mt-4 max-w-[62ch]">
+                Your passages, review schedule, practice history, recitation results, and app settings
+                are stored in a local database on your iPhone. They are not transmitted to the developer
+                or to any third party. If you back up your device, this data is included in your own
+                backup under your control.
+            </p>
+        </section>
+
+        <section>
+            <h2 class="text-xl font-semibold tracking-tight">Microphone and speech recognition</h2>
+            <p class="mt-4 max-w-[62ch]">
+                The recitation activity records your voice and transcribes it so it can be compared
+                with the passage text. Transcription is performed on your device using Apple's speech
+                framework. Recorded audio is not uploaded, and transcripts are used only to grade the
+                recitation you just performed.
+            </p>
+            <p class="mt-4 max-w-[62ch]">
+                These permissions are optional. If you decline them, the recitation activity is
+                unavailable and the rest of the app continues to work.
+            </p>
+        </section>
+
+        <section>
+            <h2 class="text-xl font-semibold tracking-tight">Bible text requests</h2>
+            <p class="mt-4 max-w-[62ch]">
+                When you add a passage, the app requests that passage from a Bible text service
+                operated by the developer. The request contains the translation and the verse
+                reference you asked for. It does not contain an account identifier, a device
+                identifier, or any of your practice data.
+            </p>
+            <p class="mt-4 max-w-[62ch]">
+                As with any internet request, the service receives the IP address the request comes
+                from, and uses it only to apply rate limits that keep the service available. Retrieved
+                passage text is cached on your device so the same passage is not requested repeatedly.
+            </p>
+        </section>
+
+        <section>
+            <h2 class="text-xl font-semibold tracking-tight">What is not collected</h2>
+            <p class="mt-4 max-w-[62ch]">
+                Verse by Verse contains no third-party analytics, advertising, or tracking software.
+                It does not collect your name, email address, contacts, location, or a profile of
+                what you read or memorize. Nothing you do in the app is sold or shared.
+            </p>
+        </section>
+
+        <section>
+            <h2 class="text-xl font-semibold tracking-tight">Information Apple may provide</h2>
+            <p class="mt-4 max-w-[62ch]">
+                If you have chosen to share crash and usage data with developers in your iOS settings,
+                Apple may provide aggregate crash reports and download statistics through the App Store.
+                This information comes from Apple, is not linked to you individually, and is governed by
+                Apple's own privacy policy.
+            </p>
+        </section>
+
+        <section>
+            <h2 class="text-xl font-semibold tracking-tight">Children</h2>
+            <p class="mt-4 max-w-[62ch]">
+                Verse by Verse does not collect personal information from anyone, including children.
+            </p>
+        </section>
+
+        <section>
+            <h2 class="text-xl font-semibold tracking-tight">Changes to this policy</h2>
+            <p class="mt-4 max-w-[62ch]">
+                If the app ever begins collecting information that this policy does not describe, this
+                page will be updated before that change ships, and the date at the top will change with it.
+            </p>
+        </section>
+
+        <section>
+            <h2 class="text-xl font-semibold tracking-tight">Contact</h2>
+            <p class="mt-4 max-w-[62ch]">
+                Questions about this policy can be sent to
+                <a class="link-brand"
+                   href="mailto:jadenzaleski@icloud.com?subject=Verse%20by%20Verse%20privacy">jadenzaleski@icloud.com</a>.
+            </p>
+        </section>
+
+    </div>
+
+</main>
+
+<footer class="border-t border-rule/70">
+    <div class="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-10 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+        <div class="flex items-center gap-2.5">
+            <img alt="" class="h-7 w-7 bg-transparent" src="assets/logo.svg">
+            <span class="font-semibold">Verse by Verse</span>
+        </div>
+        <nav aria-label="Footer" class="flex flex-wrap items-center gap-x-7 gap-y-2 text-sm text-muted">
+            <a class="footer-link" href="/">Home</a>
+            <a class="footer-link" href="mailto:jadenzaleski@icloud.com?subject=Verse%20by%20Verse">Contact</a>
+            <a aria-label="GitHub" class="footer-link" href="https://github.com/jadenzaleski/verse-by-verse-web">
+                <svg aria-hidden="true" class="h-5 w-5" fill="currentColor" viewBox="0 0 98 96">
+                    <path d="M41.4395 69.3848C28.8066 67.8535 19.9062 58.7617 19.9062 46.9902C19.9062 42.2051 21.6289 37.0371 24.5 33.5918C23.2559 30.4336 23.4473 23.7344 24.8828 20.959C28.7109 20.4805 33.8789 22.4902 36.9414 25.2656C40.5781 24.1172 44.4062 23.543 49.0957 23.543C53.7852 23.543 57.6133 24.1172 61.0586 25.1699C64.0254 22.4902 69.2891 20.4805 73.1172 20.959C74.457 23.543 74.6484 30.2422 73.4043 33.4961C76.4668 37.1328 78.0937 42.0137 78.0937 46.9902C78.0937 58.7617 69.1934 67.6621 56.3691 69.2891C59.623 71.3945 61.8242 75.9883 61.8242 81.252L61.8242 91.2051C61.8242 94.0762 64.2168 95.7031 67.0879 94.5547C84.4102 87.9512 98 70.6289 98 49.1914C98 22.1074 75.9883 0 48.9043 0C21.8203 0 0 22.1074 0 49.1914C0 70.4375 13.4941 88.0469 31.6777 94.6504C34.2617 95.6074 36.75 93.8848 36.75 91.3008L36.75 83.6445C35.4102 84.2188 33.6875 84.6016 32.1562 84.6016C25.8398 84.6016 22.1074 81.1563 19.4277 74.7441C18.375 72.1602 17.2266 70.6289 15.0254 70.3418C13.877 70.2461 13.4941 69.7676 13.4941 69.1934C13.4941 68.0449 15.4082 67.1836 17.3223 67.1836C20.0977 67.1836 22.4902 68.9063 24.9785 72.4473C26.8926 75.2227 28.9023 76.4668 31.2949 76.4668C33.6875 76.4668 35.2187 75.6055 37.4199 73.4043C39.0469 71.7773 40.291 70.3418 41.4395 69.3848Z"/>
+                </svg>
+            </a>
+        </nav>
+    </div>
+    <div class="mx-auto max-w-6xl px-5 pb-10 sm:px-8">
+        <p class="text-center text-xs text-muted">© <span data-year>2026</span> Jaden Zaleski</p>
+    </div>
+</footer>
+
+<script defer src="js/main.js"></script>
+<script defer src="https://unpkg.com/lucide@latest"></script>
+<script>
+    window.addEventListener("load", () => window.lucide && window.lucide.createIcons());
+</script>
+</body>
+</html>
