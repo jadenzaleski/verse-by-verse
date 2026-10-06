@@ -146,7 +146,7 @@ struct SessionView: View {
                     passageText: verseText,
                     maskedIndices: words.indices.filter { $0 % 2 == phase },
                     instruction: "Type the first letter of each missing word.",
-                    showWordHints: true,
+                    showWordHints: false,
                     onContinue: advance,
                 )
                 .id(stepIndex)
