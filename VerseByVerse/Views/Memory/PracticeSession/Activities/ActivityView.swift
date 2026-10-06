@@ -105,12 +105,15 @@ struct ActivityView: View {
                             .font(.app(.caption))
                             .foregroundStyle(.secondary)
                         Spacer()
-                        Button {
-                            fieldFocused = true
-                        } label: {
-                            Label("Show keyboard", systemImage: "keyboard")
-                                .font(.app(.caption))
-                                .foregroundStyle(Color.appAccent)
+                        if fieldFocused {
+                            Button {
+                                fieldFocused = false
+                            } label: {
+                                Image(systemName: "keyboard.chevron.compact.down")
+                                    .font(.app(.body))
+                                    .foregroundStyle(Color.appAccent)
+                            }
+                            .accessibilityLabel("Hide keyboard")
                         }
                     }
                 }
