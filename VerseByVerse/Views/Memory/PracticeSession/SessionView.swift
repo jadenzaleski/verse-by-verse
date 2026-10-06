@@ -10,6 +10,7 @@ import SwiftUI
 
 private enum SessionPhase: Equatable {
     case loading
+    case preview
     case activity
     case done(nextReview: Date?, correct: Int, total: Int)
     case failed(String)
@@ -74,17 +75,17 @@ struct SessionView: View {
     }
 
     private var canDismiss: Bool {
-        phase == .loading || phase == .activity
+        phase == .loading || phase == .preview || phase == .activity
     }
 
     var body: some View {
         NavigationStack {
-            if phase == .activity {
+            if phase == .preview || phase == .activity {
                 SegmentedProgressBar(
                     totalSegments: steps.count,
-                    completedSegments: stepIndex,
+                    completedSegments: phase == .activity ? stepIndex : 0,
                     fill: .solid(.appAccent),
-                    highlightCurrent: true,
+                    highlightCurrent: phase == .activity,
                 )
                 .padding(.horizontal)
             }
@@ -92,6 +93,12 @@ struct SessionView: View {
                 switch phase {
                 case .loading:
                     loadingView
+                case .preview:
+                    SessionPreviewView(
+                        translation: selectionKey?.translation ?? "",
+                        text: selectionKey.flatMap { bibleStore.selections[$0]?.annotatedText },
+                        onStart: beginSession,
+                    )
                 case .activity:
                     activityContent
                 case let .done(nextReview, correct, total):
@@ -342,8 +349,8 @@ struct SessionView: View {
         }
     }
 
-    /// Fetches the verse text, maps each word to its verse, and begins the
-    /// standard plan. Nothing persists until the session completes.
+    /// Fetches the verse text, maps each word to its verse, and shows the
+    /// preview. Nothing persists until the session completes.
     private func startSession() async {
         guard let selectionKey, !verses.isEmpty else {
             phase = .failed("Nothing to practice.")
@@ -360,10 +367,18 @@ struct SessionView: View {
         verseTotal = Array(repeating: 0, count: verses.count)
 
         steps = ActivityStep.standardPlan
+        phase = .preview
+        log.info("Loaded session for \(title): \(verses.count) verses, \(steps.count) steps")
+    }
+
+    /// Leaves the preview and starts the first activity.
+    private func beginSession() {
         sessionStartDate = Date()
         stepStartDate = sessionStartDate
-        phase = .activity
-        log.info("Started session for \(title): \(verses.count) verses, \(steps.count) steps")
+        withAnimation(.easeInOut(duration: 0.3)) {
+            phase = .activity
+        }
+        log.info("Started session for \(title)")
     }
 
     /// Builds word index → verse index using the per-verse texts of the
