@@ -119,9 +119,12 @@ final class APIService {
             return detail
         }
 
+        // Short plain-text bodies are shown as-is. Markup (e.g. Cloudflare's
+        // 502 page, which replaces our JSON error) or anything long isn't a
+        // message — fall back to APIError's status-code text instead.
         if let text = String(data: data, encoding: .utf8) {
             let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !trimmed.isEmpty { return trimmed }
+            if !trimmed.isEmpty, !trimmed.hasPrefix("<"), trimmed.count <= 200 { return trimmed }
         }
         return nil
     }

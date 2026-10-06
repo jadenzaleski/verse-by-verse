@@ -21,7 +21,9 @@ enum APIError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case let .http(statusCode, message, _):
-            message ?? "Server returned status code \(statusCode)."
+            message ?? ((500 ... 599).contains(statusCode)
+                ? "The server ran into a problem (\(statusCode)). Try again in a moment."
+                : "Server returned status code \(statusCode).")
         case let .network(underlying):
             underlying.localizedDescription
         case let .decoding(underlying):
