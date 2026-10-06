@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.1.0-beta.6](https://github.com/jadenzaleski/verse-by-verse/compare/v0.1.0-beta.5...v0.1.0-beta.6) (2026-10-06)
+
+
+### Features
+
+* Added GitHub link. ([ac119d0](https://github.com/jadenzaleski/verse-by-verse/commit/ac119d07df67e81298f61391bf8e2445c724eb3f))
+* Made improvments to running multiple bible functions at the same time. ([7ecb8a0](https://github.com/jadenzaleski/verse-by-verse/commit/7ecb8a0796b7a1c8349654216ee0a05588b8cc93))
+* **web:** move the website into the app repo ([#12](https://github.com/jadenzaleski/verse-by-verse/issues/12)) ([20d775a](https://github.com/jadenzaleski/verse-by-verse/commit/20d775a2be9a8878f08b54fa860b2d23c0c44331))
+
+
+### Bug Fixes
+
+* "No passages yet" and "No passages due for review." now redirect to the memory tab. ([2caa352](https://github.com/jadenzaleski/verse-by-verse/commit/2caa352a2331d98e27348e4ea41413e8d8b504b7))
+* Better handle issues with the cache and API access. ([78d7b28](https://github.com/jadenzaleski/verse-by-verse/commit/78d7b281133af69eea739fd432999df57d831cca))
+* Better handle NetworkError. ([01f488d](https://github.com/jadenzaleski/verse-by-verse/commit/01f488da6d31587608df2f31b21f200db24e3347))
+* Removed the "Show keyboard" text and replaced it with an icon. ([c37375e](https://github.com/jadenzaleski/verse-by-verse/commit/c37375e8d2fcc54e1cf1b2dc581a37dddeb742c2))
+* Removed the grayed out answers during practices. ([7d0d753](https://github.com/jadenzaleski/verse-by-verse/commit/7d0d75300822077650a88fd5cdf1ee1692a65362))
+* Resolved issues with punctuation in practice sessions. ([408ef35](https://github.com/jadenzaleski/verse-by-verse/commit/408ef35d43967be7d073319da9d4cec5cbb3a61f))
+* The screen now scrolls as you type during long practice passages. ([62512f1](https://github.com/jadenzaleski/verse-by-verse/commit/62512f162544b7e8a3e496ce9ff173137914dc75))
+
 ## [0.1.0-beta.5](https://github.com/jadenzaleski/verse-by-verse-app/compare/v0.1.0-beta.4...v0.1.0-beta.5) (2026-09-25)
 
 
