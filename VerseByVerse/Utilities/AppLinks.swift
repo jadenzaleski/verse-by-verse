@@ -7,28 +7,14 @@
 
 import Foundation
 
-/// The app's outbound links and the support-contact payload.
-///
-/// Centralized so Settings, any future onboarding, and the App Store listing
-/// all point at the same places, and so the support-email body stays testable
-/// without having to go through a view. Pure value reads, no UI — safe from
-/// any thread, so it opts out of the project's default MainActor isolation.
-///
-/// - Note: The `URL(string:)` force-unwraps are literals validated by
-///   `AppLinksTests`, so a typo fails the test suite rather than shipping.
+/// Outbound links and the support-contact payload.
 nonisolated enum AppLinks {
     static let website = URL(string: "https://versebyverse.jadenzaleski.com")!
     static let privacyPolicy = URL(string: "https://versebyverse.jadenzaleski.com/privacy.html")!
+    static let github = URL(string: "https://github.com/jadenzaleski/verse-by-verse")!
     static let supportEmail = "jadenzaleski@icloud.com"
     static let supportSubject = "Verse by Verse support"
 
-    /// Build/OS details appended to a support email so the first reply doesn't
-    /// have to be "which version are you on?".
-    ///
-    /// Deliberately limited to app version, release channel, and OS version —
-    /// no device identifier, no hardware model, nothing that could fingerprint
-    /// the sender. The app's whole privacy posture is "collects nothing," and
-    /// a support form is not the place to start making exceptions.
     static func diagnosticSummary() -> String {
         """
         App: \(AppFunctions.versionString() ?? "unknown")
@@ -37,15 +23,12 @@ nonisolated enum AppLinks {
         """
     }
 
-    /// Body for a support email: blank space to type in, then the details
-    /// below a separator so they survive the user's reply without being the
-    /// first thing they see.
     static func supportBody() -> String {
         """
 
 
         ---
-        Please keep the details below — they help with troubleshooting.
+        Please keep the details below - they help with troubleshooting.
         \(diagnosticSummary())
         """
     }

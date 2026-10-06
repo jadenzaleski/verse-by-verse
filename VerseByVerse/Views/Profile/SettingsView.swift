@@ -110,7 +110,9 @@ struct SettingsView: View {
         } footer: {
             Text("""
             Contact Support opens an email with your app version and iOS version filled in. \
-            Diagnostics is a log of what the app did. This contains no personal information, and nothing is sent anywhere until you share it.
+            Diagnostics is a log of what the app did. \
+            This contains no personal information, \
+            and nothing is sent anywhere until you share it.
             """)
                 .font(.app(.caption2))
         }
@@ -145,6 +147,18 @@ struct SettingsView: View {
                 Label("Privacy Policy", systemImage: "hand.raised")
             }
             .accessibilityHint("Opens the privacy policy in your browser")
+
+            Link(destination: AppLinks.github) {
+                Label {
+                    Text("GitHub")
+                } icon: {
+                    Image("github")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 20, height: 20)
+                }
+            }
+            .accessibilityHint("Opens the GitHub repository in your browser")
         } header: {
             Text("ABOUT")
                 .font(Font.app(.footnote, weight: .semibold))
