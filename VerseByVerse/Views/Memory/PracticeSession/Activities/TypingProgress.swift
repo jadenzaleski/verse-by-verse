@@ -7,22 +7,40 @@
 
 import Foundation
 
-/// A passage word split around the character the user types.
+/// A passage word split into the part the user types and the punctuation
+/// around it. Punctuation is structure, not memory work: it's always shown
+/// and never scored or colored. `“This,` → (`“`, `T`, `his`, `,`).
+/// A word with no letter or digit (a lone `—` or `”`) has no `key` and is
+/// never masked.
 struct TypedWordParts: Equatable {
+    /// Punctuation before the typed character, e.g. `“` or `(`.
     let leading: String
+    /// The first letter or digit — the character the user types.
     let key: Character?
+    /// Letters (and inner marks like `’` or `-`) after the key, up to the
+    /// trailing punctuation.
+    let rest: String
+    /// Punctuation after the last letter or digit, e.g. `.”` or `,`.
     let trailing: String
 
     init(_ word: String) {
-        guard let keyIndex = word.firstIndex(where: { $0.isLetter || $0.isNumber }) else {
+        func isWordCharacter(_ char: Character) -> Bool {
+            char.isLetter || char.isNumber
+        }
+
+        guard let keyIndex = word.firstIndex(where: isWordCharacter),
+              let lastIndex = word.lastIndex(where: isWordCharacter)
+        else {
             leading = word
             key = nil
+            rest = ""
             trailing = ""
             return
         }
         leading = String(word[..<keyIndex])
         key = word[keyIndex]
-        trailing = String(word[word.index(after: keyIndex)...])
+        rest = keyIndex == lastIndex ? "" : String(word[word.index(after: keyIndex) ... lastIndex])
+        trailing = String(word[word.index(after: lastIndex)...])
     }
 
     var isTypeable: Bool {

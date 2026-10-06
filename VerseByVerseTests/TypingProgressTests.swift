@@ -17,20 +17,32 @@ struct TypingProgressTests {
     // MARK: - Word parts
 
     @Test func `plain word splits after its first letter`() {
-        expectParts("world", leading: "", key: "w", trailing: "orld")
+        expectParts("world", leading: "", key: "w", rest: "orld", trailing: "")
     }
 
-    @Test func `leading quote stays before the typed letter`() {
-        expectParts("“This", leading: "“", key: "T", trailing: "his")
-        expectParts("(about", leading: "(", key: "a", trailing: "bout")
+    @Test func `leading quote and paren stay outside the typed letter`() {
+        expectParts("“This", leading: "“", key: "T", rest: "his", trailing: "")
+        expectParts("(about", leading: "(", key: "a", rest: "bout", trailing: "")
     }
 
-    @Test func `trailing punctuation stays in the remainder`() {
-        expectParts("it.”", leading: "", key: "i", trailing: "t.”")
+    @Test func `trailing punctuation is split from the letters`() {
+        expectParts("it.”", leading: "", key: "i", rest: "t", trailing: ".”")
+        expectParts("Son,", leading: "", key: "S", rest: "on", trailing: ",")
+        expectParts("nothing),", leading: "", key: "n", rest: "othing", trailing: "),")
+    }
+
+    @Test func `punctuation on both sides of a one-letter word`() {
+        expectParts("“I,”", leading: "“", key: "I", rest: "", trailing: ",”")
+        expectParts("a,", leading: "", key: "a", rest: "", trailing: ",")
+    }
+
+    @Test func `inner marks stay with the letters`() {
+        expectParts("God’s,", leading: "", key: "G", rest: "od’s", trailing: ",")
+        expectParts("well-known.", leading: "", key: "w", rest: "ell-known", trailing: ".")
     }
 
     @Test func `word starting with a digit is typed by that digit`() {
-        expectParts("153", leading: "", key: "1", trailing: "53")
+        expectParts("153", leading: "", key: "1", rest: "53", trailing: "")
     }
 
     @Test func `punctuation-only token has nothing to type`() {
@@ -38,6 +50,7 @@ struct TypingProgressTests {
         #expect(dash.key == nil)
         #expect(!dash.isTypeable)
         #expect(dash.leading == "—")
+        #expect(dash.rest.isEmpty && dash.trailing.isEmpty)
     }
 
     // MARK: - Masking
@@ -60,6 +73,17 @@ struct TypingProgressTests {
         #expect(progress.isCorrect(forWord: 1) == true)
     }
 
+    @Test func `punctuation never counts as the answer`() {
+        // “Have (about it.” — only H / a / i are ever expected.
+        let progress = TypingProgress(
+            passageText: "“Have (about it.”",
+            maskedIndices: [0, 1, 2],
+            inputText: "hai",
+        )
+        #expect(progress.correctCount == 3)
+        #expect(TypingProgress(passageText: "“Have", maskedIndices: [0], inputText: "“").isCorrect(forWord: 0) == false)
+    }
+
     @Test func `typing the leading digit is correct`() {
         let progress = TypingProgress(passageText: "of 153 fish", maskedIndices: [1], inputText: "1")
         #expect(progress.isCorrect(forWord: 1) == true)
@@ -69,12 +93,14 @@ struct TypingProgressTests {
         _ word: String,
         leading: String,
         key: Character,
+        rest: String,
         trailing: String,
         sourceLocation: SourceLocation = #_sourceLocation,
     ) {
         let parts = TypedWordParts(word)
         #expect(parts.leading == leading, sourceLocation: sourceLocation)
         #expect(parts.key == key, sourceLocation: sourceLocation)
+        #expect(parts.rest == rest, sourceLocation: sourceLocation)
         #expect(parts.trailing == trailing, sourceLocation: sourceLocation)
     }
 }
