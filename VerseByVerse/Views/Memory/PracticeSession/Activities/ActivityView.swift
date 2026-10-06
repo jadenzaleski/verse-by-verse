@@ -30,6 +30,13 @@ struct ActivityView: View {
         TypingProgress(passageText: passageText, maskedIndices: maskedIndices, inputText: inputText)
     }
 
+    /// Passage word index of the word currently being typed (the last masked
+    /// word once everything is typed).
+    private var currentWordIndex: Int? {
+        let idx = progress.currentTypingIndex
+        return idx < maskedIndices.count ? maskedIndices[idx] : maskedIndices.last
+    }
+
     private var scoreColor: Color {
         let pct = progress.totalToType > 0 ? Double(progress.correctCount) / Double(progress.totalToType) : 0
         if pct >= 0.8 { return .green }
@@ -39,36 +46,46 @@ struct ActivityView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ScrollView {
-                VStack(alignment: .leading, spacing: AppSpacing.xl) {
-                    HStack(spacing: AppSpacing.sm) {
-                        Text(activityName)
-                            .font(.app(.caption, weight: .semibold))
-                            .padding(.horizontal, AppSpacing.md)
-                            .padding(.vertical, AppSpacing.xs)
-                            .background(Color.appAccent.opacity(0.15), in: Capsule())
-                            .foregroundStyle(Color.appAccent)
-                        Spacer()
-                        Text(reference)
-                            .font(.app(.caption))
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(alignment: .leading, spacing: AppSpacing.xl) {
+                        HStack(spacing: AppSpacing.sm) {
+                            Text(activityName)
+                                .font(.app(.caption, weight: .semibold))
+                                .padding(.horizontal, AppSpacing.md)
+                                .padding(.vertical, AppSpacing.xs)
+                                .background(Color.appAccent.opacity(0.15), in: Capsule())
+                                .foregroundStyle(Color.appAccent)
+                            Spacer()
+                            Text(reference)
+                                .font(.app(.caption))
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Text(instruction)
+                            .font(.app(.subheadline))
                             .foregroundStyle(.secondary)
-                    }
 
-                    Text(instruction)
-                        .font(.app(.subheadline))
-                        .foregroundStyle(.secondary)
-
-                    FlowLayout(spacing: 6, lineSpacing: 10) {
-                        ForEach(Array(progress.words.enumerated()), id: \.offset) { idx, word in
-                            wordCell(wordIndex: idx, word: word)
+                        FlowLayout(spacing: 6, lineSpacing: 10) {
+                            ForEach(Array(progress.words.enumerated()), id: \.offset) { idx, word in
+                                wordCell(wordIndex: idx, word: word)
+                                    .id(idx)
+                            }
                         }
                     }
+                    .padding(AppSpacing.xl)
+                    .padding(.top, AppSpacing.sm)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .padding(AppSpacing.xl)
-                .padding(.top, AppSpacing.sm)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .onTapGesture { fieldFocused = true }
+                // Keep the word being typed in view as the user works down the passage.
+                .onChange(of: progress.currentTypingIndex) {
+                    guard let wordIndex = currentWordIndex else { return }
+                    withAnimation(.easeOut(duration: 0.2)) {
+                        proxy.scrollTo(wordIndex, anchor: .center)
+                    }
+                }
             }
-            .onTapGesture { fieldFocused = true }
 
             // Hidden field that captures keystrokes
             TextField("", text: $inputText)

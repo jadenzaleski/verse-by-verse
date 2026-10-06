@@ -127,7 +127,7 @@ struct SessionView: View {
         }
         .alert("Quit Session?", isPresented: $showAbandonConfirmation) {
             Button("Quit", role: .destructive) { dismiss() }
-            Button("Keep Going", role: .cancel) {}
+            Button("Continue", role: .cancel) {}
         } message: {
             Text("Your progress won't be saved.")
         }
