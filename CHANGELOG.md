@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.0-beta.7](https://github.com/jadenzaleski/verse-by-verse/compare/v0.1.0-beta.6...v0.1.0-beta.7) (2026-10-06)
+
+
+### Features
+
+* Added a review page before the session starts. ([17e69e4](https://github.com/jadenzaleski/verse-by-verse/commit/17e69e48522d1ffdf32bd1cfd3191d8dc2d004f8))
+
+
+### Bug Fixes
+
+* Adjusting how punctuation is shown in practice sessions. ([923602f](https://github.com/jadenzaleski/verse-by-verse/commit/923602fc7242f545c0365fe3e89c2db21428a8f0))
+* Better handle 502 errors from server. ([a34e2f9](https://github.com/jadenzaleski/verse-by-verse/commit/a34e2f921bfc1bffd67f51e50768b57b4ee24665))
+
 ## [0.1.0-beta.6](https://github.com/jadenzaleski/verse-by-verse/compare/v0.1.0-beta.5...v0.1.0-beta.6) (2026-10-06)
 
 
