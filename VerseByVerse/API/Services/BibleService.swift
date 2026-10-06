@@ -74,7 +74,12 @@ extension APIService {
                 ),
                 lookInCache: lookInCache,
                 saveToCache: saveToCache,
+                isCacheable: { !$0.verses.isEmpty },
             )
+
+            guard !response.body.verses.isEmpty else {
+                throw APIError.emptySelection
+            }
 
             log.debug("getBibleSelection succeeded")
 

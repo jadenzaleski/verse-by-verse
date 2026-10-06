@@ -23,10 +23,11 @@ final class APIService {
         endpoint: APIEndpoint,
         lookInCache: Bool = true,
         saveToCache: Bool = true,
+        isCacheable: (T) -> Bool = { _ in true },
     ) async throws -> APIResponse<T> {
         let cacheKey = endpoint.cacheIdentifier
 
-        if lookInCache, let cached = cache.get(cacheKey, decode: T.self) {
+        if lookInCache, let cached = cache.get(cacheKey, decode: T.self), isCacheable(cached.body) {
             log.debug("Cache hit: \(endpoint.debugIdentifier)")
             return cached
         }
@@ -48,7 +49,7 @@ final class APIService {
                 as: T.self,
             )
 
-            if saveToCache {
+            if saveToCache, isCacheable(apiResponse.body) {
                 cache.set(key: cacheKey, response: apiResponse, ttl: endpoint.ttl)
             }
 

@@ -31,6 +31,12 @@ struct TypedWordCell: View {
 
     var body: some View {
         HStack(spacing: 1) {
+            if !parts.leading.isEmpty {
+                Text(parts.leading)
+                    .bibleWordStyle()
+                    .fixedSize()
+            }
+
             ZStack {
                 RoundedRectangle(cornerRadius: 4)
                     .fill(boxColor)
@@ -46,7 +52,7 @@ struct TypedWordCell: View {
                 }
             }
 
-            if word.count > 1 {
+            if !remainder.isEmpty {
                 Text(remainder)
                     .bibleWordStyle()
                     .lineLimit(1)
@@ -77,8 +83,12 @@ struct TypedWordCell: View {
         }
     }
 
+    private var parts: TypedWordParts {
+        TypedWordParts(word)
+    }
+
     private var remainder: String {
-        String(word.dropFirst())
+        parts.trailing
     }
 
     private var boxColor: Color {
@@ -95,6 +105,7 @@ struct TypedWordCell: View {
         TypedWordCell(word: "wrold", typedChar: "w", correctness: false, isCurrent: false, showHint: false)
         TypedWordCell(word: "world", typedChar: nil, correctness: nil, isCurrent: true, showHint: false)
         TypedWordCell(word: "that", typedChar: nil, correctness: nil, isCurrent: false, showHint: true)
+        TypedWordCell(word: "“This", typedChar: "t", correctness: true, isCurrent: false, showHint: false)
         TypedWordCell(word: "he", typedChar: nil, correctness: nil, isCurrent: false, showHint: false)
     }
     .padding()

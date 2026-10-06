@@ -14,6 +14,7 @@ enum APIError: Error, LocalizedError {
     case network(underlying: URLError)
     case decoding(underlying: DecodingError)
     case cancelled
+    case emptySelection
     case unknown(underlying: Error)
 
     /// A human-readable description suitable for UI.
@@ -27,6 +28,8 @@ enum APIError: Error, LocalizedError {
             "Failed to decode response: \(underlying.localizedDescription)"
         case .cancelled:
             "Request was cancelled."
+        case .emptySelection:
+            "No verse text was returned. Try again later."
         case let .unknown(underlying):
             underlying.localizedDescription
         }

@@ -7,10 +7,32 @@
 
 import Foundation
 
+/// A passage word split around the character the user types.
+struct TypedWordParts: Equatable {
+    let leading: String
+    let key: Character?
+    let trailing: String
+
+    init(_ word: String) {
+        guard let keyIndex = word.firstIndex(where: { $0.isLetter || $0.isNumber }) else {
+            leading = word
+            key = nil
+            trailing = ""
+            return
+        }
+        leading = String(word[..<keyIndex])
+        key = word[keyIndex]
+        trailing = String(word[word.index(after: keyIndex)...])
+    }
+
+    var isTypeable: Bool {
+        key != nil
+    }
+}
+
 /// Derives per-character typing correctness for a masked-word activity
 /// (Every Other Word / Every Word) from the raw passage text, which word
-/// indices are masked, and what's been typed so far. Pure and re-derivable —
-/// `ActivityView` recomputes it on every render rather than caching it.
+/// indices are masked, and what's been typed so far.
 struct TypingProgress {
     let words: [String]
     let maskedIndices: [Int]
@@ -20,6 +42,19 @@ struct TypingProgress {
         words = passageText.split(separator: " ", omittingEmptySubsequences: true).map(String.init)
         self.maskedIndices = maskedIndices
         self.inputText = inputText
+    }
+
+    /// Indices of the words that can be masked — those with a letter or digit.
+    static func typeableIndices(in words: [String]) -> [Int] {
+        words.indices.filter { TypedWordParts(words[$0]).isTypeable }
+    }
+
+    /// Every other typeable word, starting with the first (`phase` 0) or
+    /// second (`phase` 1). Punctuation-only tokens don't break the alternation.
+    static func everyOtherIndices(in words: [String], phase: Int) -> [Int] {
+        typeableIndices(in: words).enumerated()
+            .filter { $0.offset % 2 == phase }
+            .map(\.element)
     }
 
     private var typingIndexMap: [Int: Int] {
@@ -72,7 +107,7 @@ struct TypingProgress {
     }
 
     private func expectedLetter(of word: String) -> Character? {
-        word.first { $0.isLetter }
+        TypedWordParts(word).key
     }
 
     private func isCorrect(at typingIdx: Int) -> Bool? {

@@ -37,7 +37,7 @@ struct PassageCard: View {
             }
 
             if style == .full {
-                (bibleStore.selections[passage.selectionKey]?.annotatedText ?? Text("..."))
+                bibleStore.displayText(for: passage.selectionKey, placeholder: "...")
                     .lineLimit(2)
             }
 

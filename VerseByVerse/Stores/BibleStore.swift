@@ -54,6 +54,18 @@ final class BibleStore {
         selectionStates[key] ?? .idle
     }
 
+    /// Display text for a selection: the verses once loaded, a short failure
+    /// message if the fetch failed, otherwise `placeholder` while loading.
+    func displayText(for key: BibleSelectionKey, placeholder: String) -> Text {
+        if let selection = selections[key] {
+            return selection.annotatedText
+        }
+        if case .error = selectionState(for: key) {
+            return Text("Couldn't load verse text.").foregroundStyle(.secondary)
+        }
+        return Text(placeholder)
+    }
+
     @MainActor
     func loadBibleData() async {
         // If we already have data, don't reload unless state is error
