@@ -14,7 +14,7 @@ struct ContentView: View {
     var body: some View {
         TabView(selection: $selectedTab) {
             NavigationStack {
-                HomeView()
+                HomeView(onOpenMemory: { selectedTab = 1 })
             }
             .tabItem {
                 Label("Home", systemImage: "house")

@@ -16,6 +16,8 @@ struct HomeView: View {
     @Query private var sessions: [PracticeSession]
     private let log = AppLog.category("HomeView")
 
+    var onOpenMemory: () -> Void = {}
+
     @State private var practicePassage: Passage?
     @State private var practiceVerse: Verse?
 
@@ -113,35 +115,43 @@ struct HomeView: View {
                 .padding(.top)
 
             if passages.isEmpty, verses.isEmpty {
-                HStack(spacing: AppSpacing.md) {
-                    Image(systemName: "book.closed")
-                        .font(.title3)
-                        .foregroundStyle(.secondary)
-                    VStack(alignment: .leading, spacing: AppSpacing.xxs) {
-                        Text("No passages yet")
-                            .font(.app(.body, weight: .semibold))
-                        Text("Add one in the Memory tab to get started.")
-                            .font(.app(.caption))
+                Button(action: onOpenMemory) {
+                    HStack(spacing: AppSpacing.md) {
+                        Image(systemName: "book.closed")
+                            .font(.title3)
                             .foregroundStyle(.secondary)
+                        VStack(alignment: .leading, spacing: AppSpacing.xxs) {
+                            Text("No passages yet")
+                                .font(.app(.body, weight: .semibold))
+                            Text("Add one in the Memory tab to get started.")
+                                .font(.app(.caption))
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
                     }
-                    Spacer()
+                    .padding()
+                    .contentShape(Rectangle())
                 }
-                .padding()
+                .buttonStyle(.plain)
             } else if duePassages.isEmpty, dueVerses.isEmpty {
-                HStack(spacing: AppSpacing.md) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.title3)
-                        .foregroundStyle(.green)
-                    VStack(alignment: .leading, spacing: AppSpacing.xxs) {
-                        Text("All caught up!")
-                            .font(.app(.body, weight: .semibold))
-                        Text("No passages due for review.")
-                            .font(.app(.caption))
-                            .foregroundStyle(.secondary)
+                Button(action: onOpenMemory) {
+                    HStack(spacing: AppSpacing.md) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.title3)
+                            .foregroundStyle(.green)
+                        VStack(alignment: .leading, spacing: AppSpacing.xxs) {
+                            Text("All caught up!")
+                                .font(.app(.body, weight: .semibold))
+                            Text("No passages due for review.")
+                                .font(.app(.caption))
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
                     }
-                    Spacer()
+                    .padding()
+                    .contentShape(Rectangle())
                 }
-                .padding()
+                .buttonStyle(.plain)
             } else {
                 VStack(spacing: 0) {
                     ForEach(Array(upNextItems.enumerated()), id: \.element.id) { index, item in
