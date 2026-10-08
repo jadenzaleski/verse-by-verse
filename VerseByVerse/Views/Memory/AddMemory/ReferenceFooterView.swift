@@ -20,7 +20,9 @@ struct ReferenceFooterView: View {
                     .frame(width: 15, height: 15)
             }
 
-            if let chapter = Int(startChapter), bibleStore.isValidChapter(chapter, for: selectedBook) {
+            if case .error = bibleStore.bibleDataState {
+                Text("Bible data unavailable.")
+            } else if let chapter = Int(startChapter), bibleStore.isValidChapter(chapter, for: selectedBook) {
                 let verseCount = bibleStore.verseCount(for: selectedBook, chapter: chapter)
                 Text("\(selectedBook) \(chapter) has \(verseCount) verses.")
             } else {

@@ -27,7 +27,21 @@ final class BibleStore {
 
     private let log = AppLog.category("BibleStore")
 
-    private init() {}
+    private let booksLoader: () async throws -> BibleBooksResponse
+    private let translationsLoader: () async throws -> BibleTranslationsResponse
+
+    private init() {
+        booksLoader = { try await APIService.shared.getBibleBooks() }
+        translationsLoader = { try await APIService.shared.getBibleTranslations() }
+    }
+
+    init(
+        booksLoader: @escaping () async throws -> BibleBooksResponse,
+        translationsLoader: @escaping () async throws -> BibleTranslationsResponse,
+    ) {
+        self.booksLoader = booksLoader
+        self.translationsLoader = translationsLoader
+    }
 
     /// The list of Bible books in traditional biblical order.
     let bibleBooksOrder = [
@@ -68,13 +82,15 @@ final class BibleStore {
 
     @MainActor
     func loadBibleData() async {
-        // If we already have data, don't reload unless state is error
+        // Skip if loaded, or if a load is already in flight (rapid retries);
+        // an `.error` state falls through so callers can retry.
         if bibleData != nil, bibleDataState == .success { return }
+        if bibleDataState == .loading { return }
 
         bibleDataState = .loading
 
         do {
-            let dataResponse = try await APIService.shared.getBibleBooks()
+            let dataResponse = try await booksLoader()
             bibleData = dataResponse.toDomain()
             bibleDataState = .success
             log.info("Bible data loaded successfully")
@@ -86,13 +102,14 @@ final class BibleStore {
 
     @MainActor
     func loadTranslations() async {
-        // If we already have translations, don't reload unless state is error
+        // Same guard as `loadBibleData()`: retry on error, not while loading.
         if availableTranslations != nil, translationsState == .success { return }
+        if translationsState == .loading { return }
 
         translationsState = .loading
 
         do {
-            let translationsResponse = try await APIService.shared.getBibleTranslations()
+            let translationsResponse = try await translationsLoader()
             availableTranslations = translationsResponse.map { $0.toDomain() }
             translationsState = .success
             log.info("Bible translations loaded successfully")
