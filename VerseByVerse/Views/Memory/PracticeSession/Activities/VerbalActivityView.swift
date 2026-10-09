@@ -366,6 +366,7 @@ private struct GradedWordCell: View {
         Text(word)
             .bibleWordStyle()
             .foregroundStyle(isCorrect ? Color.appSuccess : Color.appDestructive)
+            .underline(!isCorrect, pattern: .dot, color: .red)
             .accessibilityLabel("\(word), \(isCorrect ? "correct" : "incorrect")")
     }
 }
