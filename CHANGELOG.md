@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.1.0-beta.8](https://github.com/jadenzaleski/verse-by-verse/compare/v0.1.0-beta.7...v0.1.0-beta.8) (2026-10-09)
+
+
+### Features
+
+* Improved Accessibility features for practice sessions. ([4acb4f5](https://github.com/jadenzaleski/verse-by-verse/commit/4acb4f5c449133fe6e31ece3121c541f434abed8))
+* Underline incorrect words during verbal recite. ([906a8ed](https://github.com/jadenzaleski/verse-by-verse/commit/906a8edea081eb77bf3f60b350f5923a62c0091c))
+* Updated the look for typed letter boxes. ([7e23916](https://github.com/jadenzaleski/verse-by-verse/commit/7e239166b91d30da03868b2209108ecb4eefa917))
+
+
+### Bug Fixes
+
+* Improved network error handling throughout the app. ([3c3ac04](https://github.com/jadenzaleski/verse-by-verse/commit/3c3ac04c4251d775e05d26d16ffea6c2f9bbaaf8))
+* Improved network issue detection when adding a passage. ([6f37c5e](https://github.com/jadenzaleski/verse-by-verse/commit/6f37c5e8b5e642ec5486b0bc97013ee02b8629a6))
+* Sessions now prevent the user from going backwards by hitting the delete/backspace. ([86f4398](https://github.com/jadenzaleski/verse-by-verse/commit/86f439861d45b221cc96a593fce3fd0ed6fd1d8c))
+
 ## [0.1.0-beta.7](https://github.com/jadenzaleski/verse-by-verse/compare/v0.1.0-beta.6...v0.1.0-beta.7) (2026-10-06)
 
 
