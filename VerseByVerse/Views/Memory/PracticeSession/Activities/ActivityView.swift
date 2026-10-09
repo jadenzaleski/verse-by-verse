@@ -17,8 +17,6 @@ struct ActivityView: View {
     /// Ordered word indices the user must type the first letter of.
     let maskedIndices: [Int]
     let instruction: String
-    /// Show the rest of each masked word as a faded hint (true for Every Other Word).
-    let showWordHints: Bool
     /// Called with (correct, total, per-word correctness keyed by word index)
     /// when the user taps Continue.
     let onContinue: (Int, Int, [Int: Bool]) -> Void
@@ -162,7 +160,6 @@ struct ActivityView: View {
                 typedChar: progress.typedChar(forWord: wordIndex),
                 correctness: progress.isCorrect(forWord: wordIndex),
                 isCurrent: typingIdx == progress.currentTypingIndex && !progress.isComplete,
-                showHint: showWordHints,
             )
         } else {
             Text(word)
@@ -185,7 +182,6 @@ struct ActivityView: View {
         passageText: verse,
         maskedIndices: Array(words.indices),
         instruction: "Type the first letter of each word.",
-        showWordHints: false,
         onContinue: { _, _, _ in },
     )
     .environment(\.font, .app())

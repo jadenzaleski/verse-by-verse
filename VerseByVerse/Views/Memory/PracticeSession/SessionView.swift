@@ -168,7 +168,6 @@ struct SessionView: View {
                     passageText: verseText,
                     maskedIndices: TypingProgress.everyOtherIndices(in: words, phase: phase),
                     instruction: "Type the first letter of each missing word.",
-                    showWordHints: false,
                     onContinue: advance,
                 )
                 .id(stepIndex)
@@ -180,7 +179,6 @@ struct SessionView: View {
                     passageText: verseText,
                     maskedIndices: TypingProgress.typeableIndices(in: words),
                     instruction: "Type the first letter of every word from memory.",
-                    showWordHints: false,
                     onContinue: advance,
                 )
                 .id(stepIndex)
