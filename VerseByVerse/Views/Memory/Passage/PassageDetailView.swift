@@ -41,20 +41,13 @@ struct PassageDetailView: View {
                 )
                 PracticeCard(showPractice: $showPractice, nextPracticeDate: passage.nextPractice, isNew: passage.isNew)
                 historyCard
-                LongTextCard(
-                    title: "Passage",
-                    translation: bibleStore.translationInfo(forAbbreviation: passage.translation),
-                    text: bibleStore.displayText(for: passage.selectionKey, placeholder: "Loading..."),
-                )
+                SelectionTextCard(title: "Passage", translation: passage.translation, key: passage.selectionKey)
             }
             .padding(.horizontal, AppSpacing.md)
             .padding(.bottom, AppSpacing.xxl)
         }
         .fullScreenCover(isPresented: $showPractice) {
             SessionView(passage: passage)
-        }
-        .task {
-            await bibleStore.fetchSelection(passage.selectionKey)
         }
         .navigationTitle(passage.reference)
         .navigationBarTitleDisplayMode(.inline)

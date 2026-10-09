@@ -13,6 +13,12 @@ enum DataState: Equatable {
     case success
     case error(APIError)
 
+    /// The failure, when in `.error`.
+    var apiError: APIError? {
+        guard case let .error(error) = self else { return nil }
+        return error
+    }
+
     static func == (lhs: DataState, rhs: DataState) -> Bool {
         switch (lhs, rhs) {
         case (.idle, .idle), (.loading, .loading), (.success, .success):

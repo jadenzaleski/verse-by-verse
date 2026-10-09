@@ -16,7 +16,6 @@ struct AddToMemoryView: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(BibleStore.self) private var bibleStore
-    @Environment(NetworkMonitor.self) private var networkMonitor
     @Environment(\.modelContext) private var modelContext
 
     private let log = AppLog.category("AddToMemoryView")
@@ -195,11 +194,8 @@ struct AddToMemoryView: View {
                 .onChange(of: bibleStore.availableTranslations) { _, newValue in
                     handleTranslationsChange(newValue)
                 }
-                .onChange(of: networkMonitor.status) { _, newValue in
-                    if newValue == .online, needsMetadataRetry {
-                        Task { await loadInitialData() }
-                    }
-                }
+                // First launch offline: recover on our own once a request gets through.
+                .retryWhenOnline(if: needsMetadataRetry) { await loadInitialData() }
                 .onChange(of: selectedBook) {
                     handleBookChange()
                 }
@@ -212,27 +208,19 @@ struct AddToMemoryView: View {
     }
 
     private var needsMetadataRetry: Bool {
-        if case .error = bibleStore.bibleDataState { return true }
-        if case .error = bibleStore.translationsState { return true }
-        return false
+        bibleStore.bibleDataState.apiError != nil || bibleStore.translationsState.apiError != nil
     }
 
     /// Without book metadata nothing can validate, so show why instead of a dead form.
     @ViewBuilder
     private var content: some View {
-        if case let .error(error) = bibleStore.bibleDataState {
-            ContentUnavailableView {
-                Label("Can't Load Bible Data", systemImage: "wifi.slash")
-            } description: {
-                if case .network = error {
-                    Text("Connect to the internet to add a passage.")
-                } else {
-                    Text(error.localizedDescription)
-                }
-            } actions: {
-                Button("Try Again") {
-                    Task { await loadInitialData() }
-                }
+        if let error = bibleStore.bibleDataState.apiError {
+            LoadFailureView(
+                title: "Can't Load Bible Data",
+                error: error,
+                offlineMessage: "Connect to the internet to add a passage.",
+            ) {
+                Task { await loadInitialData() }
             }
         } else {
             formView
@@ -440,5 +428,4 @@ extension AddToMemoryView {
     AddToMemoryView()
         .environment(\.font, .app())
         .environment(BibleStore.shared)
-        .environment(NetworkMonitor.shared)
 }

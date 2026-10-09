@@ -57,10 +57,15 @@ struct PassageCard: View {
         .padding()
         .frame(maxWidth: .infinity)
         .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
-        .task {
-            if style == .full {
-                await bibleStore.fetchSelection(passage.selectionKey)
-            }
+        .task { await loadText() }
+        .retryWhenOnline(if: bibleStore.selectionState(for: passage.selectionKey).apiError != nil) {
+            await loadText()
+        }
+    }
+
+    private func loadText() async {
+        if style == .full {
+            await bibleStore.fetchSelection(passage.selectionKey)
         }
     }
 

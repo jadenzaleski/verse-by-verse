@@ -16,6 +16,8 @@ struct LongTextCard: View {
     let title: String
     let translation: BibleTranslationInfo
     let text: Text
+    /// Shows a "Try Again" button under the text when set (a failed fetch).
+    var onRetry: (() -> Void)?
 
     @Environment(\.dismiss) private var dismiss
     @State private var isExpanded = false
@@ -42,6 +44,10 @@ struct LongTextCard: View {
         VStack(alignment: .leading, spacing: AppSpacing.md) {
             header
             textContent
+            if let onRetry {
+                Button("Try Again", action: onRetry)
+                    .font(.app(.subheadline, weight: .semibold))
+            }
             if isTruncated {
                 toggleButton
             }

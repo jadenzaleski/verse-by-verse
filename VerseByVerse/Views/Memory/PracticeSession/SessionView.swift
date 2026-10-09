@@ -14,6 +14,7 @@ private enum SessionPhase: Equatable {
     case activity
     case done(nextReview: Date?, correct: Int, total: Int)
     case failed(String)
+    case loadFailed
 }
 
 /// Runs a practice session over an ordered list of verses — a whole passage
@@ -30,6 +31,7 @@ struct SessionView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var phase: SessionPhase = .loading
+    @State private var loadAttempt = 0
     @State private var showAbandonConfirmation = false
     @State private var sessionStartDate = Date()
     @State private var steps: [ActivityStep] = []
@@ -74,6 +76,10 @@ struct SessionView: View {
         verseText.split(separator: " ", omittingEmptySubsequences: true).map(String.init)
     }
 
+    private var loadError: APIError? {
+        selectionKey.flatMap { bibleStore.selectionState(for: $0).apiError }
+    }
+
     private var canDismiss: Bool {
         phase == .loading || phase == .preview || phase == .activity
     }
@@ -105,6 +111,14 @@ struct SessionView: View {
                     doneView(nextReview: nextReview, correct: correct, total: total)
                 case let .failed(msg):
                     failedView(message: msg)
+                case .loadFailed:
+                    LoadFailureView(
+                        title: "Can't Load Verse Text",
+                        error: loadError,
+                        offlineMessage: "Connect to the internet to load the verse text and practice.",
+                        onRetry: retryLoad,
+                        onClose: { dismiss() },
+                    )
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
@@ -129,9 +143,10 @@ struct SessionView: View {
                 }
             }
         }
-        .task {
+        .task(id: loadAttempt) {
             await startSession()
         }
+        .retryWhenOnline(if: phase == .loadFailed) { retryLoad() }
         .alert("Quit Session?", isPresented: $showAbandonConfirmation) {
             Button("Quit", role: .destructive) { dismiss() }
             Button("Continue", role: .cancel) {}
@@ -239,22 +254,13 @@ struct SessionView: View {
     }
 
     private func failedView(message: String) -> some View {
-        VStack(spacing: AppSpacing.xl) {
-            Spacer()
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 48))
-                .foregroundStyle(.orange)
-            Text("Something went wrong")
-                .font(.app(.title3, weight: .semibold))
+        ContentUnavailableView {
+            Label("Something Went Wrong", systemImage: "exclamationmark.triangle")
+        } description: {
             Text(message)
-                .font(.app(.subheadline))
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-            Button("Dismiss") { dismiss() }
-                .font(.app(.body, weight: .semibold))
-            Spacer()
+        } actions: {
+            Button("Close") { dismiss() }
         }
-        .padding(.horizontal, AppSpacing.xxl)
     }
 
     // MARK: - Score helpers
@@ -358,7 +364,7 @@ struct SessionView: View {
         }
         await bibleStore.fetchSelection(selectionKey)
         guard let selection = bibleStore.selections[selectionKey], !selection.fullText.isEmpty else {
-            phase = .failed("Couldn't load the Bible verse(s). Check your connection and try again.")
+            phase = .loadFailed
             return
         }
 
@@ -369,6 +375,12 @@ struct SessionView: View {
         steps = ActivityStep.standardPlan
         phase = .preview
         log.info("Loaded session for \(title): \(verses.count) verses, \(steps.count) steps")
+    }
+
+    /// Shows the spinner again and re-runs the load.
+    private func retryLoad() {
+        phase = .loading
+        loadAttempt += 1
     }
 
     /// Leaves the preview and starts the first activity.

@@ -41,11 +41,7 @@ struct VerseDetailView: View {
                                 retentionScore: retentionScore)
                 PracticeCard(showPractice: $showPractice, nextPracticeDate: verse.nextPractice, isNew: verse.isNew)
                 historyCard
-                LongTextCard(
-                    title: "Verse",
-                    translation: bibleStore.translationInfo(forAbbreviation: verse.translation),
-                    text: bibleStore.displayText(for: verse.selectionKey, placeholder: "Loading..."),
-                )
+                SelectionTextCard(title: "Verse", translation: verse.translation, key: verse.selectionKey)
 
                 appearsInCard()
             }
@@ -54,9 +50,6 @@ struct VerseDetailView: View {
         }
         .fullScreenCover(isPresented: $showPractice) {
             SessionView(verse: verse)
-        }
-        .task {
-            await bibleStore.fetchSelection(verse.selectionKey)
         }
         .navigationTitle(verse.reference)
         .navigationBarTitleDisplayMode(.inline)
