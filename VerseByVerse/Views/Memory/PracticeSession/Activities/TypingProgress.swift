@@ -75,6 +75,18 @@ struct TypingProgress {
             .map(\.element)
     }
 
+    /// Typing is append-only: an answer can't be backspaced or edited and
+    /// retyped. Given a change in the hidden capture field (`old` → `new`),
+    /// returns `current` with whatever the field gained appended (capped at
+    /// `limit` characters). A field that shrank, or didn't grow, changes nothing.
+    ///
+    /// This watches the field's *growth* rather than mirroring its text, so
+    /// the field and the answer can't fall out of step after a backspace.
+    static func appending(fieldChangeFrom old: String, to new: String, onto current: String, limit: Int) -> String {
+        guard new.count > old.count else { return current }
+        return String((current + new.suffix(new.count - old.count)).prefix(limit))
+    }
+
     private var typingIndexMap: [Int: Int] {
         Dictionary(uniqueKeysWithValues: maskedIndices.enumerated().map { ($0.element, $0.offset) })
     }

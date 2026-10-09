@@ -89,6 +89,33 @@ struct TypingProgressTests {
         #expect(progress.isCorrect(forWord: 1) == true)
     }
 
+    // MARK: - Append-only input
+
+    private func type(_ old: String, _ new: String, onto current: String, limit: Int = 5) -> String {
+        TypingProgress.appending(fieldChangeFrom: old, to: new, onto: current, limit: limit)
+    }
+
+    @Test func `typing a letter appends it`() {
+        #expect(type("a", "ab", onto: "a") == "ab")
+        #expect(type("", "a", onto: "") == "a")
+    }
+
+    @Test func `backspace changes nothing`() {
+        #expect(type("ab", "a", onto: "ab") == "ab")
+        #expect(type("a", "", onto: "a") == "a")
+    }
+
+    @Test func `typing after a backspace still counts`() {
+        // The field shrank from "ab" to "a" (ignored), so it's now behind the
+        // answer — the next letter must still append, not be dropped.
+        #expect(type("a", "ac", onto: "ab") == "abc")
+    }
+
+    @Test func `input is capped at the number of words to type`() {
+        #expect(type("ab", "abcd", onto: "ab", limit: 3) == "abc")
+        #expect(type("abc", "abcd", onto: "abc", limit: 3) == "abc")
+    }
+
     private func expectParts(
         _ word: String,
         leading: String,

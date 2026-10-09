@@ -21,11 +21,17 @@ struct ActivityView: View {
     /// when the user taps Continue.
     let onContinue: (Int, Int, [Int: Bool]) -> Void
 
-    @State private var inputText = ""
+    /// The letters the user has committed so far, one per masked word. This is
+    /// the answer: scoring and the word boxes read from it, and it only grows.
+    @State private var typedLetters = ""
+    /// The hidden text field's raw contents. It's a keystroke sensor, not the
+    /// answer — backspace shrinks it, and only its growth is copied into
+    /// `typedLetters` (see `TypingProgress.appending`).
+    @State private var keyboardText = ""
     @FocusState private var fieldFocused: Bool
 
     private var progress: TypingProgress {
-        TypingProgress(passageText: passageText, maskedIndices: maskedIndices, inputText: inputText)
+        TypingProgress(passageText: passageText, maskedIndices: maskedIndices, inputText: typedLetters)
     }
 
     /// Passage word index of the word currently being typed (the last masked
@@ -86,17 +92,17 @@ struct ActivityView: View {
             }
 
             // Hidden field that captures keystrokes
-            TextField("", text: $inputText)
+            TextField("", text: $keyboardText)
                 .opacity(0)
                 .frame(height: 1)
                 .focused($fieldFocused)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
                 .keyboardType(.asciiCapable)
-                .onChange(of: inputText) { _, new in
-                    if new.count > progress.totalToType {
-                        inputText = String(new.prefix(progress.totalToType))
-                    }
+                .onChange(of: keyboardText) { old, new in
+                    typedLetters = TypingProgress.appending(
+                        fieldChangeFrom: old, to: new, onto: typedLetters, limit: progress.totalToType,
+                    )
                 }
 
             VStack(spacing: AppSpacing.md) {
