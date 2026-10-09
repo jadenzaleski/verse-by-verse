@@ -87,6 +87,17 @@ struct TypingProgress {
         return String((current + new.suffix(new.count - old.count)).prefix(limit))
     }
 
+    /// What VoiceOver should say after the latest keystroke
+    var latestAnswerAnnouncement: (message: String, isCorrect: Bool)? {
+        let latest = currentTypingIndex - 1
+        guard latest >= 0, let isCorrect = isCorrect(at: latest) else { return nil }
+        var message = isCorrect ? "Correct" : "Incorrect"
+        if isComplete {
+            message += ". All words typed. \(correctCount) of \(totalToType) correct."
+        }
+        return (message, isCorrect)
+    }
+
     private var typingIndexMap: [Int: Int] {
         Dictionary(uniqueKeysWithValues: maskedIndices.enumerated().map { ($0.element, $0.offset) })
     }

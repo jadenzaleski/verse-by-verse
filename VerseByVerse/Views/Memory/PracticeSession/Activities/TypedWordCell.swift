@@ -81,6 +81,19 @@ struct TypedWordCell: View {
 
             punctuation(parts.trailing)
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilityDescription)
+    }
+
+    /// One VoiceOver element per word, with its state. An unanswered word is
+    /// only ever "blank" — the hidden word is never spoken, same as on screen.
+    var accessibilityDescription: String {
+        guard typedChar != nil else {
+            return isCurrent ? "blank, current word" : "blank"
+        }
+        // Letters only — punctuation around the word would read as "said,, incorrect".
+        let spoken = parts.key.map { String($0) + parts.rest } ?? word
+        return "\(spoken), \(correctness == true ? "correct" : "incorrect")"
     }
 
     @ViewBuilder

@@ -44,6 +44,7 @@ struct PassageCard: View {
             SegmentedProgressBar(
                 totalSegments: 10,
                 completedSegments: Int(retentionScore * 10),
+                accessibilityLabel: "Memory score",
             )
 
             HStack {

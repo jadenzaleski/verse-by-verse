@@ -20,6 +20,10 @@ struct SegmentedProgressBar: View {
     var fill: ProgressBarFill = .dynamic
     /// When true, completed segments are dimmed and the segment at `completedSegments` is highlighted as active.
     var highlightCurrent: Bool = false
+    /// VoiceOver reads the bar as one element: this label and value (default
+    /// "x of y"), since the segments themselves carry no meaning.
+    var accessibilityLabel: String = "Progress"
+    var accessibilityValue: String?
     var emptyColor: Color = .gray.opacity(0.2)
     var spacing: CGFloat = 5
     var height: CGFloat = 5
@@ -61,6 +65,9 @@ struct SegmentedProgressBar: View {
             }
         }
         .frame(height: height)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilityLabel)
+        .accessibilityValue(accessibilityValue ?? "\(completedSegments) of \(totalSegments)")
     }
 
     private func animationDelay(for index: Int) -> Double {

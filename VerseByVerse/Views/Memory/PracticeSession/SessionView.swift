@@ -92,6 +92,8 @@ struct SessionView: View {
                     completedSegments: phase == .activity ? stepIndex : 0,
                     fill: .solid(.appAccent),
                     highlightCurrent: phase == .activity,
+                    accessibilityLabel: "Session progress",
+                    accessibilityValue: phase == .activity ? "Step \(stepIndex + 1) of \(steps.count)" : "Not started",
                 )
                 .padding(.horizontal)
             }
@@ -216,6 +218,7 @@ struct SessionView: View {
             Image(systemName: correct == total ? "star.circle.fill" : "checkmark.circle.fill")
                 .font(.system(size: 64))
                 .foregroundStyle(correct == total ? .yellow : .green)
+                .accessibilityHidden(true)
 
             VStack(spacing: AppSpacing.sm) {
                 Text("Session Complete!")
@@ -234,6 +237,7 @@ struct SessionView: View {
                 if let nextReview {
                     HStack(spacing: AppSpacing.sm) {
                         Image(systemName: "calendar")
+                            .accessibilityHidden(true)
                         Text("Next review: \(nextReview.formatted(.dateTime.month(.abbreviated).day().year()))")
                     }
                     .font(.app(.subheadline))

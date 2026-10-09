@@ -29,6 +29,7 @@ struct ActivityView: View {
     /// `typedLetters` (see `TypingProgress.appending`).
     @State private var keyboardText = ""
     @FocusState private var fieldFocused: Bool
+    @AccessibilityFocusState private var fieldHasVoiceOverFocus: Bool
 
     private var progress: TypingProgress {
         TypingProgress(passageText: passageText, maskedIndices: maskedIndices, inputText: typedLetters)
@@ -55,6 +56,7 @@ struct ActivityView: View {
                     VStack(alignment: .leading, spacing: AppSpacing.xl) {
                         HStack(spacing: AppSpacing.sm) {
                             Text(activityName)
+                                .accessibilityAddTraits(.isHeader)
                                 .font(.app(.caption, weight: .semibold))
                                 .padding(.horizontal, AppSpacing.md)
                                 .padding(.vertical, AppSpacing.xs)
@@ -99,6 +101,21 @@ struct ActivityView: View {
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
                 .keyboardType(.asciiCapable)
+                // Keystrokes go through this invisible field, so it's what
+                // VoiceOver users type into. Its raw text is a keystroke
+                // sensor (backspace shrinks it), so the value reports progress
+                // instead of reading it back.
+                .accessibilityLabel("Answer")
+                .accessibilityHint(instruction)
+                .accessibilityValue("\(progress.currentTypingIndex) of \(progress.totalToType) typed")
+                .accessibilityFocused($fieldHasVoiceOverFocus)
+                .onChange(of: typedLetters) { old, new in
+                    guard new.count > old.count, let result = progress.latestAnswerAnnouncement else { return }
+                    // A plain "Correct" can yield to other speech; mistakes and
+                    // the final score shouldn't be missed.
+                    let canYield = result.isCorrect && !progress.isComplete
+                    VoiceOver.announce(result.message, priority: canYield ? .low : .high)
+                }
                 .onChange(of: keyboardText) { old, new in
                     typedLetters = TypingProgress.appending(
                         fieldChangeFrom: old, to: new, onto: typedLetters, limit: progress.totalToType,
@@ -115,6 +132,7 @@ struct ActivityView: View {
                             .font(.app(.body))
                             .foregroundStyle(.secondary)
                     }
+                    .accessibilityElement(children: .combine)
 
                     Button("Continue") {
                         onContinue(progress.correctCount, progress.totalToType, progress.perWordCorrectness)
@@ -155,7 +173,10 @@ struct ActivityView: View {
             .padding(.horizontal, AppSpacing.xl)
             .padding(.vertical, AppSpacing.lg)
         }
-        .onAppear { fieldFocused = true }
+        .onAppear {
+            fieldFocused = true
+            fieldHasVoiceOverFocus = true
+        }
     }
 
     @ViewBuilder

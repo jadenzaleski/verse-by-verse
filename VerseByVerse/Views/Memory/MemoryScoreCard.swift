@@ -24,6 +24,7 @@ struct MemoryScoreCard: View {
                 SegmentedProgressBar(
                     totalSegments: 10,
                     completedSegments: Int(retentionScore * 10),
+                    accessibilityLabel: "Memory score",
                     height: 20,
                 )
             } else {

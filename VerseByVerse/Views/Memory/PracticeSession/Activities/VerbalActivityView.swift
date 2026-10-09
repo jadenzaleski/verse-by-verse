@@ -103,6 +103,14 @@ struct VerbalActivityView: View {
                 onSkip()
             }
         }
+        .onChange(of: mode) { _, newMode in
+            // The mic is off by now, so speaking over the review is safe.
+            guard newMode == .reviewing, let grader else { return }
+            VoiceOver.announce(
+                "Recitation graded. \(grader.correctCount) of \(grader.totalCount) words correct.",
+                priority: .high,
+            )
+        }
         .onDisappear { recorder.cancel() }
         .onChange(of: scenePhase) { _, phase in
             // `.onDisappear` never fires on backgrounding, so without this the
@@ -118,6 +126,7 @@ struct VerbalActivityView: View {
     private var header: some View {
         HStack(spacing: AppSpacing.sm) {
             Text("Verbal Recite")
+                .accessibilityAddTraits(.isHeader)
                 .font(.app(.caption, weight: .semibold))
                 .padding(.horizontal, AppSpacing.md)
                 .padding(.vertical, AppSpacing.xs)
@@ -137,6 +146,7 @@ struct VerbalActivityView: View {
             Image(systemName: "mic.fill")
                 .font(.system(size: 48))
                 .foregroundStyle(Color.appAccent)
+                .accessibilityHidden(true)
             Text("Say the verse aloud from memory.")
                 .font(.app(.title3, weight: .semibold))
                 .multilineTextAlignment(.center)
@@ -157,6 +167,7 @@ struct VerbalActivityView: View {
                 .font(.app(.subheadline))
                 .foregroundStyle(.secondary)
         }
+        .accessibilityElement(children: .combine)
         .frame(maxWidth: .infinity)
         .padding(.top, AppSpacing.xxl)
     }
@@ -182,6 +193,10 @@ struct VerbalActivityView: View {
                 }
             }
         }
+        // One quiet element: VoiceOver reading the live transcript aloud would
+        // be picked up by the very microphone that's listening for it.
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Listening")
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.top, AppSpacing.lg)
     }
@@ -207,6 +222,7 @@ struct VerbalActivityView: View {
                     .font(.app(.body))
                     .foregroundStyle(.secondary)
             }
+            .accessibilityElement(children: .combine)
         }
     }
 
@@ -350,6 +366,7 @@ private struct GradedWordCell: View {
         Text(word)
             .bibleWordStyle()
             .foregroundStyle(isCorrect ? Color.appSuccess : Color.appDestructive)
+            .accessibilityLabel("\(word), \(isCorrect ? "correct" : "incorrect")")
     }
 }
 
