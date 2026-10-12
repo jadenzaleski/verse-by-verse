@@ -30,6 +30,10 @@ struct SelectionTextCard: View {
         )
         .task { await load() }
         .retryWhenOnline(if: hasFailed) { await load() }
+        .task(id: bibleStore.selections[key] != nil) {
+            guard let selection = bibleStore.selections[key] else { return }
+            FUMSReporter.shared.report(tokens: selection.fumsTokens)
+        }
     }
 
     private func load() async {

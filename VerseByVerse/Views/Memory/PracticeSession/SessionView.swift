@@ -64,7 +64,9 @@ struct SessionView: View {
     }
 
     private var selectionKey: BibleSelectionKey? {
-        if let passage { return passage.selectionKey }
+        if let passage {
+            return passage.selectionKey
+        }
         return standaloneVerse?.selectionKey
     }
 
@@ -281,8 +283,12 @@ struct SessionView: View {
     private func scoreColor(correct: Int, total: Int) -> Color {
         guard total > 0 else { return .secondary }
         let pct = Double(correct) / Double(total)
-        if pct >= 0.8 { return .green }
-        if pct >= 0.5 { return .orange }
+        if pct >= 0.8 {
+            return .green
+        }
+        if pct >= 0.5 {
+            return .orange
+        }
         return .red
     }
 
@@ -337,7 +343,9 @@ struct SessionView: View {
                 guard wordIndex < wordOwners.count else { continue }
                 let verseIndex = wordOwners[wordIndex]
                 verseTotal[verseIndex] += 1
-                if isCorrect { verseCorrect[verseIndex] += 1 }
+                if isCorrect {
+                    verseCorrect[verseIndex] += 1
+                }
             }
         }
 
@@ -376,6 +384,7 @@ struct SessionView: View {
 
         steps = ActivityStep.standardPlan
         phase = .preview
+        FUMSReporter.shared.report(tokens: selection.fumsTokens)
         log.info("Loaded session for \(title): \(verses.count) verses, \(steps.count) steps")
     }
 

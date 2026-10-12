@@ -39,7 +39,9 @@ struct BibleSelectionKey: Hashable, Codable {
     }
 
     var endRef: String? {
-        if startChapter == endChapter, startVerse == endVerse { return nil }
+        if startChapter == endChapter, startVerse == endVerse {
+            return nil
+        }
         return "\(book) \(endChapter):\(endVerse)"
     }
 }
@@ -52,6 +54,8 @@ struct BibleSelection: Equatable {
     let endChapter: Int
     let endVerse: Int
     let verses: [SelectionVerse]
+
+    let fumsTokens: [String]
 
     var key: BibleSelectionKey {
         BibleSelectionKey(
@@ -115,6 +119,7 @@ extension BibleSelectionResponse {
             endChapter: endChapter,
             endVerse: endVerse,
             verses: verses.map { $0.toDomain() },
+            fumsTokens: fumsTokens ?? [],
         )
     }
 }
