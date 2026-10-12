@@ -61,5 +61,6 @@ struct MemoryScoreCard: View {
     MemoryScoreCard(
         lastPracticed: PreviewData.samplePassage.lastPracticed,
         totalReps: PreviewData.samplePassage.totalReps,
-        retentionScore: 0.75)
+        retentionScore: 0.75,
+    )
 }

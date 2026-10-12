@@ -5,8 +5,8 @@
 //  Created by Jaden Zaleski on 12/11/25.
 //
 
-import SwiftUI
 import os
+import SwiftUI
 
 /// Pure build/bundle info reads, no UI — safe to call from any thread, so it
 /// opts out of the project's default MainActor isolation.
@@ -41,9 +41,13 @@ nonisolated enum AppFunctions {
     private static var versionLabel: String {
         switch channel {
         case .development:
-            if let commit = gitCommit { return String(commit.prefix(7)) }
+            if let commit = gitCommit {
+                return String(commit.prefix(7))
+            }
         case .beta, .production:
-            if let tag = gitTag { return tag }
+            if let tag = gitTag {
+                return tag
+            }
         }
         if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
             return "v\(version)"

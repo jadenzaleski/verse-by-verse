@@ -237,12 +237,16 @@ struct HomeView: View {
     // MARK: - Helpers
 
     private func badgeText(isNew: Bool, nextPractice: Date?) -> String {
-        if isNew { return "New" }
+        if isNew {
+            return "New"
+        }
         return DueText.precise(to: nextPractice ?? .now)
     }
 
     private func badgeColor(isNew: Bool, nextPractice: Date?) -> Color {
-        if isNew { return .appAccent }
+        if isNew {
+            return .appAccent
+        }
         let days = Calendar.current.dateComponents([.day], from: .now, to: nextPractice ?? .now).day ?? 0
         return days == 0 ? .orange : .red
     }

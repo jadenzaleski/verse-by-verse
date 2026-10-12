@@ -129,7 +129,9 @@ struct MemoryView: View {
         verses.sorted { lhs, rhs in
             let lhsDue = lhs.isDue()
             let rhsDue = rhs.isDue()
-            if lhsDue != rhsDue { return lhsDue }
+            if lhsDue != rhsDue {
+                return lhsDue
+            }
             return (lhs.book, lhs.chapter, lhs.number, lhs.translation)
                 < (rhs.book, rhs.chapter, rhs.number, rhs.translation)
         }

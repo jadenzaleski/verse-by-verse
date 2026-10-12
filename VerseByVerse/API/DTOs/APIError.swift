@@ -39,7 +39,9 @@ enum APIError: Error, LocalizedError {
 
     /// The HTTP status code, if this is an HTTP error.
     var statusCode: Int? {
-        if case let .http(statusCode, _, _) = self { return statusCode }
+        if case let .http(statusCode, _, _) = self {
+            return statusCode
+        }
         return nil
     }
 }

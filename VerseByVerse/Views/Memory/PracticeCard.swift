@@ -29,8 +29,12 @@ struct PracticeCard: View {
             from: Calendar.current.startOfDay(for: .now),
             to: Calendar.current.startOfDay(for: next),
         ).day ?? 0
-        if days < 0 { return .red }
-        if days == 0 { return .orange }
+        if days < 0 {
+            return .red
+        }
+        if days == 0 {
+            return .orange
+        }
         return .secondary
     }
 

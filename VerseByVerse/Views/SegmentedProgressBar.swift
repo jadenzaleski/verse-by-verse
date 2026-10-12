@@ -34,8 +34,12 @@ struct SegmentedProgressBar: View {
             return color
         case .dynamic:
             let ratio = totalSegments > 0 ? Double(completedSegments) / Double(totalSegments) : 0
-            if ratio <= 0.33 { return .red }
-            if ratio <= 0.66 { return .orange }
+            if ratio <= 0.33 {
+                return .red
+            }
+            if ratio <= 0.66 {
+                return .orange
+            }
             return .green
         }
     }

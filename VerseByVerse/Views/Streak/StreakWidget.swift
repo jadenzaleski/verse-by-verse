@@ -105,7 +105,9 @@ struct StreakWidget: View {
                     for i in completed.indices {
                         let delay = Double(i) * dayDelaySeconds
                         DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                            if i < revealed.count { revealed[i] = true }
+                            if i < revealed.count {
+                                revealed[i] = true
+                            }
                         }
                     }
                     // Begin drawing today's outline shortly after reveals start

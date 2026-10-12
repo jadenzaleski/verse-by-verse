@@ -33,12 +33,16 @@ extension ActivityStep {
     }
 
     var phase: Int? {
-        if case let .everyOtherWord(phase) = self { return phase }
+        if case let .everyOtherWord(phase) = self {
+            return phase
+        }
         return nil
     }
 
     var isRetry: Bool {
-        if case .everyWordRetry = self { return true }
+        if case .everyWordRetry = self {
+            return true
+        }
         return false
     }
 }

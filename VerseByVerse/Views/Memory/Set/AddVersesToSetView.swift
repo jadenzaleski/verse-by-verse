@@ -101,7 +101,9 @@ struct AddVersesToSetView: View {
 
     private func confirm() {
         let additions = availableVerses.filter { selected.contains($0.persistentModelID) }
-        if set.verses == nil { set.verses = [] }
+        if set.verses == nil {
+            set.verses = []
+        }
         set.verses?.append(contentsOf: additions)
         set.modifiedAt = .now
         do {

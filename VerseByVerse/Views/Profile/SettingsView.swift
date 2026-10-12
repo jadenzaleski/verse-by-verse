@@ -114,7 +114,7 @@ struct SettingsView: View {
             This contains no personal information, \
             and nothing is sent anywhere until you share it.
             """)
-                .font(.app(.caption2))
+            .font(.app(.caption2))
         }
     }
 

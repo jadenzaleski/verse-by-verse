@@ -179,8 +179,12 @@ struct PracticeHistoryCalendar: View {
         }
         let needed = max(0, 42 - days.count)
         for day in 1 ... max(1, needed) {
-            if day > needed { break }
-            if let currentDay = calendar.date(bySetting: .day, value: day, of: nextMonth) { days.append(currentDay) }
+            if day > needed {
+                break
+            }
+            if let currentDay = calendar.date(bySetting: .day, value: day, of: nextMonth) {
+                days.append(currentDay)
+            }
         }
 
         return days

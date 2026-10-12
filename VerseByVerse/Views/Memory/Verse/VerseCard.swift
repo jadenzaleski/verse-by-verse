@@ -64,7 +64,9 @@ struct VerseCard: View {
     private var lastPracticedText: String {
         guard let last = verse.lastPracticed else { return "Never practiced" }
         let days = Calendar.current.dateComponents([.day], from: last, to: .now).day ?? 0
-        if days == 0 { return "Practiced today" }
+        if days == 0 {
+            return "Practiced today"
+        }
         return "\(days) day\(days == 1 ? "" : "s") ago"
     }
 }

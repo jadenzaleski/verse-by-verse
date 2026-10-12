@@ -126,7 +126,9 @@ struct LongTextCard: View {
     let attributed: AttributedString = {
         var result = AttributedString()
         for (index, number) in (1 ... 8).enumerated() {
-            if index > 0 { result += AttributedString(" ") }
+            if index > 0 {
+                result += AttributedString(" ")
+            }
             var num = AttributedString("\(number)")
             num.swiftUI.font = .bible(.caption2)
             num.swiftUI.foregroundColor = Color.secondary

@@ -84,8 +84,12 @@ final class BibleStore {
     func loadBibleData() async {
         // Skip if loaded, or if a load is already in flight (rapid retries);
         // an `.error` state falls through so callers can retry.
-        if bibleData != nil, bibleDataState == .success { return }
-        if bibleDataState == .loading { return }
+        if bibleData != nil, bibleDataState == .success {
+            return
+        }
+        if bibleDataState == .loading {
+            return
+        }
 
         bibleDataState = .loading
 
@@ -103,8 +107,12 @@ final class BibleStore {
     @MainActor
     func loadTranslations() async {
         // Same guard as `loadBibleData()`: retry on error, not while loading.
-        if availableTranslations != nil, translationsState == .success { return }
-        if translationsState == .loading { return }
+        if availableTranslations != nil, translationsState == .success {
+            return
+        }
+        if translationsState == .loading {
+            return
+        }
 
         translationsState = .loading
 
@@ -129,7 +137,8 @@ final class BibleStore {
                 abbreviation: abbreviation,
                 name: abbreviation,
                 copyright: "",
-                provider: "")
+                provider: "",
+            )
     }
 
     /// Returns the number of chapters for a given book name.

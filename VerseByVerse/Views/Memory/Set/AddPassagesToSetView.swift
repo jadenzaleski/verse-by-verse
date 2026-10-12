@@ -98,7 +98,9 @@ struct AddPassagesToSetView: View {
 
     private func confirm() {
         let additions = availablePassages.filter { selected.contains($0.persistentModelID) }
-        if set.passages == nil { set.passages = [] }
+        if set.passages == nil {
+            set.passages = []
+        }
         set.passages?.append(contentsOf: additions)
         set.modifiedAt = .now
         do {

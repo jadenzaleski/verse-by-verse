@@ -17,8 +17,12 @@ enum DueText {
     /// Calendar-day granularity between `now` and `date`.
     static func days(from now: Date = .now, to date: Date) -> String {
         let days = Calendar.current.dateComponents([.day], from: now, to: date).day ?? 0
-        if days > 0 { return "Due in \(pluralized(days, "day"))" }
-        if days == 0 { return "Due today" }
+        if days > 0 {
+            return "Due in \(pluralized(days, "day"))"
+        }
+        if days == 0 {
+            return "Due today"
+        }
         return "Overdue \(pluralized(-days, "day"))"
     }
 
@@ -35,9 +39,15 @@ enum DueText {
     }
 
     private static func largestUnit(_ components: DateComponents) -> (count: Int, unit: String)? {
-        if let days = components.day, days > 0 { return (days, "day") }
-        if let hours = components.hour, hours > 0 { return (hours, "hour") }
-        if let minutes = components.minute, minutes > 0 { return (minutes, "minute") }
+        if let days = components.day, days > 0 {
+            return (days, "day")
+        }
+        if let hours = components.hour, hours > 0 {
+            return (hours, "hour")
+        }
+        if let minutes = components.minute, minutes > 0 {
+            return (minutes, "minute")
+        }
         return nil
     }
 

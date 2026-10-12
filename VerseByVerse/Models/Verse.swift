@@ -89,7 +89,9 @@ extension Verse {
     }
 
     func isDue(at date: Date = .now) -> Bool {
-        if let next = nextPractice { return next <= date }
+        if let next = nextPractice {
+            return next <= date
+        }
         return isNew
     }
 }

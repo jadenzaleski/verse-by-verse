@@ -77,7 +77,9 @@ final class APIService {
 
     /// Maps an arbitrary thrown error to an `APIError`, logging along the way.
     private func mapError(_ error: Error) -> APIError {
-        if let apiError = error as? APIError { return apiError }
+        if let apiError = error as? APIError {
+            return apiError
+        }
 
         if error is CancellationError {
             return .cancelled
@@ -124,7 +126,9 @@ final class APIService {
         // message — fall back to APIError's status-code text instead.
         if let text = String(data: data, encoding: .utf8) {
             let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !trimmed.isEmpty, !trimmed.hasPrefix("<"), trimmed.count <= 200 { return trimmed }
+            if !trimmed.isEmpty, !trimmed.hasPrefix("<"), trimmed.count <= 200 {
+                return trimmed
+            }
         }
         return nil
     }

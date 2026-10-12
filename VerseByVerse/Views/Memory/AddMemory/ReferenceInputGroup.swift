@@ -52,10 +52,14 @@ struct ReferenceInputGroup: View {
                 onAdvance()
             } onChange: { newValue in
                 var value = newValue.filter(\.isNumber)
-                if value.count > 3 { value = String(value.prefix(3)) }
+                if value.count > 3 {
+                    value = String(value.prefix(3))
+                }
                 if let chapter = Int(value) {
                     let max = bibleStore.chapterCount(for: selectedBook)
-                    if chapter > max { value = String(max) }
+                    if chapter > max {
+                        value = String(max)
+                    }
                 }
                 startChapter = value
             }
@@ -72,10 +76,14 @@ struct ReferenceInputGroup: View {
                 onAdvance()
             } onChange: { newValue in
                 var value = newValue.filter(\.isNumber)
-                if value.count > 3 { value = String(value.prefix(3)) }
+                if value.count > 3 {
+                    value = String(value.prefix(3))
+                }
                 if let chapter = Int(startChapter), let verse = Int(value) {
                     let max = bibleStore.verseCount(for: selectedBook, chapter: chapter)
-                    if verse > max { value = String(max) }
+                    if verse > max {
+                        value = String(max)
+                    }
                 }
                 startVerse = value
             }
@@ -92,10 +100,14 @@ struct ReferenceInputGroup: View {
                 onAdvance()
             } onChange: { newValue in
                 var value = newValue.filter(\.isNumber)
-                if value.count > 3 { value = String(value.prefix(3)) }
+                if value.count > 3 {
+                    value = String(value.prefix(3))
+                }
                 if let chapter = Int(value) {
                     let max = bibleStore.chapterCount(for: selectedBook)
-                    if chapter > max { value = String(max) }
+                    if chapter > max {
+                        value = String(max)
+                    }
                 }
                 endChapter = value
             }
@@ -112,12 +124,16 @@ struct ReferenceInputGroup: View {
                 onAdvance()
             } onChange: { newValue in
                 var value = newValue.filter(\.isNumber)
-                if value.count > 3 { value = String(value.prefix(3)) }
+                if value.count > 3 {
+                    value = String(value.prefix(3))
+                }
                 if let chapter = Int(endChapter.isEmpty ? startChapter : endChapter),
                    let verse = Int(value)
                 {
                     let max = bibleStore.verseCount(for: selectedBook, chapter: chapter)
-                    if verse > max { value = String(max) }
+                    if verse > max {
+                        value = String(max)
+                    }
                 }
                 endVerse = value
             }

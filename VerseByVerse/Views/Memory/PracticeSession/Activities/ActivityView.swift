@@ -44,8 +44,12 @@ struct ActivityView: View {
 
     private var scoreColor: Color {
         let pct = progress.totalToType > 0 ? Double(progress.correctCount) / Double(progress.totalToType) : 0
-        if pct >= 0.8 { return .green }
-        if pct >= 0.5 { return .orange }
+        if pct >= 0.8 {
+            return .green
+        }
+        if pct >= 0.5 {
+            return .orange
+        }
         return .red
     }
 

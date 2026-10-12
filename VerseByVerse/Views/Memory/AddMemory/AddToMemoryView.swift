@@ -104,12 +104,20 @@ struct AddToMemoryView: View {
             guard let endCh = Int(endChapter), let endVs = Int(endVerse) else { return false }
 
             // Range checks (end must be logically after start)
-            if endCh < startCh { return false }
-            if endCh == startCh, endVs < startVs { return false }
+            if endCh < startCh {
+                return false
+            }
+            if endCh == startCh, endVs < startVs {
+                return false
+            }
 
             // Validate end range against Bible data
-            if !bibleStore.isValidChapter(endCh, for: selectedBook) { return false }
-            if !bibleStore.isValidVerse(endVs, for: selectedBook, chapter: endCh) { return false }
+            if !bibleStore.isValidChapter(endCh, for: selectedBook) {
+                return false
+            }
+            if !bibleStore.isValidVerse(endVs, for: selectedBook, chapter: endCh) {
+                return false
+            }
         }
 
         return true
@@ -294,7 +302,9 @@ struct AddToMemoryView: View {
 
         // If our current selection isn't in the list, we need a fallback
         let hasSelected = list.contains { $0.abbreviation == selectedTranslation }
-        if hasSelected { return }
+        if hasSelected {
+            return
+        }
 
         // Prefer KJV if present, otherwise first available
         let hasKJV = list.contains { $0.abbreviation == "KJV" }
