@@ -37,6 +37,12 @@ final class APIService {
         do {
             let (data, response) = try await network.raw(endpoint.request)
 
+            if response.statusCode == 429 {
+                let retryAfter = APIError.retryAfter(from: response)
+                log.error("Rate limited on \(endpoint.debugIdentifier); retry after \(retryAfter)s")
+                throw APIError.rateLimited(retryAfter: retryAfter)
+            }
+
             if !(200 ... 299).contains(response.statusCode) {
                 log.error("API returned code \(response.statusCode) for \(endpoint.debugIdentifier)")
                 let message = parseServerErrorMessage(from: data)

@@ -154,7 +154,7 @@ extension NetworkMonitor {
             isFromOurApp(data) ? .online : .serverUnreachable
         case .decoding, .emptySelection:
             .online
-        case .cancelled, .unknown:
+        case .cancelled, .unknown, .rateLimited:
             nil
         }
     }

@@ -15,6 +15,9 @@ enum APIError: Error, LocalizedError {
     case decoding(underlying: DecodingError)
     case cancelled
     case emptySelection
+    /// HTTP 429: the per-IP limit was hit. `retryAfter` is the server's
+    /// `Retry-After`, in seconds (see ``retryAfter(from:)``).
+    case rateLimited(retryAfter: TimeInterval)
     case unknown(underlying: Error)
 
     /// A human-readable description suitable for UI.
@@ -32,6 +35,8 @@ enum APIError: Error, LocalizedError {
             "Request was cancelled."
         case .emptySelection:
             "No verse text was returned. Try again later."
+        case .rateLimited:
+            "The server is busy. Try again in a moment."
         case let .unknown(underlying):
             underlying.localizedDescription
         }
@@ -39,9 +44,27 @@ enum APIError: Error, LocalizedError {
 
     /// The HTTP status code, if this is an HTTP error.
     var statusCode: Int? {
-        if case let .http(statusCode, _, _) = self {
-            return statusCode
+        switch self {
+        case let .http(statusCode, _, _):
+            statusCode
+        case .rateLimited:
+            429
+        default:
+            nil
         }
-        return nil
+    }
+
+    /// How long to wait before retrying a 429, from its `Retry-After` header.
+    /// The API sends whole seconds and its window is 60s, so the value is
+    /// clamped to 1...60; a missing or non-numeric header (including the
+    /// HTTP-date form, which the API never sends) falls back to a short default.
+    static func retryAfter(from response: HTTPURLResponse) -> TimeInterval {
+        let fallback: TimeInterval = 5
+        guard let raw = response.value(forHTTPHeaderField: "Retry-After"),
+              let seconds = Int(raw.trimmingCharacters(in: .whitespaces))
+        else {
+            return fallback
+        }
+        return TimeInterval(min(max(seconds, 1), 60))
     }
 }

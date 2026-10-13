@@ -151,6 +151,7 @@ struct SessionView: View {
             await startSession()
         }
         .retryWhenOnline(if: phase == .loadFailed) { retryLoad() }
+        .retryAfterRateLimit(error: { phase == .loadFailed ? loadError : nil }) { retryLoad() }
         .alert("Quit Session?", isPresented: $showAbandonConfirmation) {
             Button("Quit", role: .destructive) { dismiss() }
             Button("Continue", role: .cancel) {}
