@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.0-beta.9](https://github.com/jadenzaleski/verse-by-verse/compare/v0.1.0-beta.8...v0.1.0-beta.9) (2026-10-13)
+
+
+### Features
+
+* Add FUMS support to comply with API.Bible. ([72897f6](https://github.com/jadenzaleski/verse-by-verse/commit/72897f6b86372af7b294587498e499edb819a2e4))
+* Enable retry after a 429 error. ([be881c7](https://github.com/jadenzaleski/verse-by-verse/commit/be881c753ac29181ce3da12e06b5f3d50e184dda))
+
 ## [0.1.0-beta.8](https://github.com/jadenzaleski/verse-by-verse/compare/v0.1.0-beta.7...v0.1.0-beta.8) (2026-10-09)
 
 
