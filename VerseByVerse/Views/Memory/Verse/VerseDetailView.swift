@@ -65,11 +65,11 @@ struct VerseDetailView: View {
                     isPresented: $showDeleteConfirmation,
                     titleVisibility: .visible,
                 ) {
-                    Button(deleteButtonLabel, role: .destructive) {
+                    Button(verse.deleteConfirmationLabel, role: .destructive) {
                         deleteVerse()
                     }
                 } message: {
-                    Text(deleteMessage)
+                    Text(verse.deleteConfirmationMessage)
                 }
                 .accessibilityLabel("Delete Verse")
             }
@@ -158,26 +158,6 @@ struct VerseDetailView: View {
     }
 
     // MARK: - Delete
-
-    private var owningPassages: [Passage] {
-        verse.passages ?? []
-    }
-
-    private var deleteButtonLabel: String {
-        owningPassages.isEmpty ? "Delete" : "Delete Passage & Verses"
-    }
-
-    private var deleteMessage: String {
-        let message = if owningPassages.isEmpty {
-            "This verse will be removed from any sets and deleted."
-        } else if owningPassages.count == 1 {
-            "This will delete \(owningPassages[0].reference) and all its verses."
-        } else {
-            "This will delete \(owningPassages.count) passages and all their verses."
-        }
-
-        return message + " This can't be undone."
-    }
 
     private func deleteVerse() {
         do {

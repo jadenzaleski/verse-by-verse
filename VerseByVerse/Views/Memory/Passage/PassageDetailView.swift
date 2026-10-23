@@ -70,7 +70,7 @@ struct PassageDetailView: View {
                         deletePassage(alsoDeleteVerses: true)
                     }
                 } message: {
-                    Text("Delete Passage keeps its verses; Delete Passage & Verses also removes the verses. This can't be undone.")
+                    Text(Passage.deleteConfirmationMessage)
                 }
                 .accessibilityLabel("Delete Passage")
             }

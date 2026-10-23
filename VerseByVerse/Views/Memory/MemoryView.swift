@@ -38,6 +38,7 @@ struct MemoryView: View {
     @State private var activeSheet: ActiveSheet?
     @State private var scrollPosition: ScrollPosition = .init(y: 1)
     private let horizontalSetSize: CGFloat = 135
+    private let rowSpring = Animation.spring(duration: 0.45, bounce: 0.25)
 
     private let log = AppLog.category("MemoryView")
 
@@ -53,10 +54,11 @@ struct MemoryView: View {
                 .padding(.bottom, AppSpacing.md)
 
                 content
-                    .transaction { $0.animation = nil }
+                    .transaction(value: selectedTab) { $0.animation = nil }
             }
             .padding(.horizontal)
         }
+        .swipeActionsContainer()
         .scrollPosition($scrollPosition)
         .searchable(
             text: $searchText,
@@ -166,12 +168,12 @@ struct MemoryView: View {
                     )
                 }
                 ForEach(filteredPassages) { passage in
-                    NavigationLink(destination: PassageDetailView(passage: passage)) {
-                        PassageCard(passage: passage)
+                    PassageSwipeRow(passage: passage) { alsoDeleteVerses in
+                        delete(passage, alsoDeleteVerses: alsoDeleteVerses)
                     }
-                    .buttonStyle(.plain)
                 }
             }
+            .animation(rowSpring, value: filteredPassages.map(\.persistentModelID))
 
         case .verses:
             VStack(spacing: AppSpacing.md) {
@@ -179,16 +181,16 @@ struct MemoryView: View {
                     emptyMessage(
                         hasQuery
                             ? "No verses match your search."
-                            : "No verses yet — verses appear here when you add them or a passage.",
+                            : "No verses yet.",
                     )
                 }
                 ForEach(filteredVerses) { verse in
-                    NavigationLink(destination: VerseDetailView(verse: verse)) {
-                        VerseCard(verse: verse)
+                    VerseSwipeRow(verse: verse) {
+                        delete(verse)
                     }
-                    .buttonStyle(.plain)
                 }
             }
+            .animation(rowSpring, value: filteredVerses.map(\.persistentModelID))
 
         case .sets:
             VStack(alignment: .leading, spacing: AppSpacing.md) {
@@ -262,6 +264,22 @@ struct MemoryView: View {
     private func setVerseCount(_ set: StudySet) -> Int? {
         set.passages.map { passages in
             passages.reduce(0) { $0 + $1.verseCount(using: bibleStore) }
+        }
+    }
+
+    private func delete(_ passage: Passage, alsoDeleteVerses: Bool) {
+        do {
+            try passage.delete(alsoDeleteVerses: alsoDeleteVerses, in: modelContext)
+        } catch {
+            log.error("Failed to delete passage: \(error)")
+        }
+    }
+
+    private func delete(_ verse: Verse) {
+        do {
+            try verse.deleteFromLibrary(in: modelContext)
+        } catch {
+            log.error("Failed to delete verse: \(error)")
         }
     }
 

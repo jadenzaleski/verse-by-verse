@@ -15,6 +15,9 @@ import SwiftData
 // Callers must not follow these with `modelContext.save()`.
 
 extension Passage {
+    static let deleteConfirmationMessage =
+        "Delete Passage keeps its verses; Delete Passage & Verses also removes the verses."
+
     /// Deletes this passage. Its verses are kept as standalone cards when
     /// `alsoDeleteVerses` is false; otherwise any verse nothing else
     /// references is swept away along with its reviews.
@@ -31,6 +34,24 @@ extension Passage {
 }
 
 extension Verse {
+    /// Confirm-button title for ``deleteFromLibrary(in:)``: deleting a verse
+    /// that belongs to a passage deletes the passage too.
+    var deleteConfirmationLabel: String {
+        (passages ?? []).isEmpty ? "Delete" : "Delete Passage & Verses"
+    }
+
+    var deleteConfirmationMessage: String {
+        let owningPassages = passages ?? []
+        let message = if owningPassages.isEmpty {
+            "This verse will be removed from any sets and deleted."
+        } else if owningPassages.count == 1 {
+            "This will delete \(owningPassages[0].reference) and all its verses."
+        } else {
+            "This will delete \(owningPassages.count) passages and all their verses."
+        }
+        return message
+    }
+
     /// Deletes this verse from the library: removes it from every set, deletes
     /// every passage it belongs to (and so their sibling verses, unless
     /// referenced elsewhere), and sweeps what's left unreferenced.
