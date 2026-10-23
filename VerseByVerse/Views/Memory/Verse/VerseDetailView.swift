@@ -163,10 +163,6 @@ struct VerseDetailView: View {
         verse.passages ?? []
     }
 
-    private var owningSets: [StudySet] {
-        verse.studySets ?? []
-    }
-
     private var deleteButtonLabel: String {
         owningPassages.isEmpty ? "Delete" : "Delete Passage & Verses"
     }
@@ -184,17 +180,8 @@ struct VerseDetailView: View {
     }
 
     private func deleteVerse() {
-        for set in owningSets {
-            set.verses?.removeAll { $0 === verse }
-            set.modifiedAt = .now
-        }
-        for passage in owningPassages {
-            modelContext.delete(passage)
-        }
-        verse.addedDirectly = false
         do {
-            try Verse.sweepOrphans(in: modelContext)
-            try modelContext.save()
+            try verse.deleteFromLibrary(in: modelContext)
             dismiss()
         } catch {
             log.error("Failed to delete verse: \(error)")

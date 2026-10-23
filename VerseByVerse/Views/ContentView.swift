@@ -38,6 +38,7 @@ struct ContentView: View {
             .tag(2)
         }
         .tabBarMinimizeBehavior(.onScrollDown)
+        .supportsShakeToUndo()
     }
 }
 

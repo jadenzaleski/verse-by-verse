@@ -14,6 +14,7 @@ struct VerseByVerseApp: App {
     @State private var isReady = false
     @State private var statusText = "Loading…"
     @State private var showCorruptStoreAlert = false
+    @Environment(\.scenePhase) private var scenePhase
     private let container = AppModelContainer.make()
     private let bibleStore = BibleStore.shared
     private let networkMonitor = NetworkMonitor.shared
@@ -42,6 +43,11 @@ struct VerseByVerseApp: App {
                 }
             }
             .animation(.easeOut(duration: 0.35), value: isReady)
+            .onChange(of: scenePhase) { _, phase in
+                if phase != .active {
+                    commitPendingChanges()
+                }
+            }
             .environment(\.font, .app())
             .environment(bibleStore)
             .environment(networkMonitor)
@@ -52,6 +58,18 @@ struct VerseByVerseApp: App {
             }
         }
         .modelContainer(container)
+    }
+
+    /// Persists unsaved changes (e.g. deletes awaiting a possible undo) so
+    /// nothing is lost if the app is suspended and then terminated.
+    private func commitPendingChanges() {
+        let context = container.mainContext
+        guard context.hasChanges else { return }
+        do {
+            try context.save()
+        } catch {
+            log.error("Failed to commit pending changes: \(error)")
+        }
     }
 
     /// Warms the Bible metadata caches and takes the network monitor's first

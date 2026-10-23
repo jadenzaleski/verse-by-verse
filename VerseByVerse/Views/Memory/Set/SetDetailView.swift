@@ -200,13 +200,11 @@ struct SetDetailView: View {
     }
 
     private func deleteSet() {
-        modelContext.delete(set)
         do {
-            try Verse.sweepOrphans(in: modelContext)
+            try set.delete(in: modelContext)
         } catch {
-            log.error("Orphan sweep failed: \(error)")
+            log.error("Failed to delete set: \(error)")
         }
-        save()
         dismiss()
     }
 

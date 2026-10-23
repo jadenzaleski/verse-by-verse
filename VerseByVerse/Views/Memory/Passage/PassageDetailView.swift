@@ -106,27 +106,12 @@ struct PassageDetailView: View {
     }
 
     private func deletePassage(alsoDeleteVerses: Bool) {
-        if !alsoDeleteVerses {
-            for verse in passage.verses ?? [] {
-                verse.addedDirectly = true
-            }
-        }
-        modelContext.delete(passage)
         do {
-            try Verse.sweepOrphans(in: modelContext)
+            try passage.delete(alsoDeleteVerses: alsoDeleteVerses, in: modelContext)
         } catch {
-            log.error("Orphan sweep failed: \(error)")
+            log.error("Failed to delete passage: \(error)")
         }
-        save()
         dismiss()
-    }
-
-    private func save() {
-        do {
-            try modelContext.save()
-        } catch {
-            log.error("Failed to save passage change: \(error)")
-        }
     }
 }
 
