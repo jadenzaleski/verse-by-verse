@@ -276,11 +276,12 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+
 /* Begin PBXShellScriptBuildPhase section */
 		D73362E92F198D58005ACCD9 /* Run SwiftFormat */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
-			buildActionMask = 12;
+			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
@@ -294,7 +295,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Skip this build phase for now as it seems to be causing issues with Xcode autosave\nexit 0\n\nif [ \"$CI\" = \"TRUE\" ]; then\n  echo \"Skipping SwiftFormat on CI\"\n  exit 0\nfi\n\nif [[ \"$(uname -m)\" == arm64 ]]\nthen\n    export PATH=\"/opt/homebrew/bin:$PATH\"\nfi\n\nif command -v swiftformat >/dev/null 2>&1\nthen\n    swiftformat .\nelse\n    echo \"warning: `swiftformat` command not found - See https://github.com/nicklockwood/SwiftFormat\"\nfi\n";
+			shellScript = "if [ \"$CI\" = \"TRUE\" ]; then\n  exit 0\nfi\n\nif [[ \"$(uname -m)\" == arm64 ]]; then\n  export PATH=\"/opt/homebrew/bin:$PATH\"\nfi\n\n# Lint-only: report formatting issues as warnings without rewriting files\n# (rewriting during a build fights Xcode autosave).\nif command -v swiftformat >/dev/null 2>&1; then\n  swiftformat --lint . 2>&1 | sed \"s/: error: /: warning: /\"\n  exit 0\nelse\n  echo \"warning: swiftformat not installed - https://github.com/nicklockwood/SwiftFormat\"\nfi\n";
 		};
 		D75E3FC02EDE56C200B0DDC8 /* Run SwiftLint */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -313,7 +314,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ \"$CI\" = \"TRUE\" ]; then\n  echo \"Skipping SwiftLint on CI\"\n  exit 0\nfi\n\nif [[ \"$(uname -m)\" == arm64 ]]\nthen\n    export PATH=\"/opt/homebrew/bin:$PATH\"\nfi\n\nif command -v swiftlint >/dev/null 2>&1\nthen\n    swiftlint\nelse\n    echo \"warning: `swiftlint` command not found - See https://github.com/realm/SwiftLint#installation for installation instructions.\"\nfi\n";
+			shellScript = "if [ \"$CI\" = \"TRUE\" ]; then\n  exit 0\nfi\n\nif [[ \"$(uname -m)\" == arm64 ]]; then\n  export PATH=\"/opt/homebrew/bin:$PATH\"\nfi\n\nif command -v swiftlint >/dev/null 2>&1; then\n  swiftlint\nelse\n  echo \"warning: swiftlint not installed - https://github.com/realm/SwiftLint\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

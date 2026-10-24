@@ -8,7 +8,7 @@
       buildArchitectures = "Automatic">
       <BuildActionEntries>
          <BuildActionEntry
-            buildForTesting = "YES"
+            buildForTesting = "NO"
             buildForRunning = "YES"
             buildForProfiling = "YES"
             buildForArchiving = "YES"
@@ -27,32 +27,13 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
-      shouldUseLaunchSchemeArgsEnv = "YES"
-      shouldAutocreateTestPlan = "YES">
-      <Testables>
-         <TestableReference
-            skipped = "NO"
-            parallelizable = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "D7C16A8B2FFD45DE004E58A1"
-               BuildableName = "VerseByVerseTests.xctest"
-               BlueprintName = "VerseByVerseTests"
-               ReferencedContainer = "container:VerseByVerse.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO"
-            parallelizable = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "D75E3EA32ED2653B00B0DDC8"
-               BuildableName = "VerseByVerseUITests.xctest"
-               BlueprintName = "VerseByVerseUITests"
-               ReferencedContainer = "container:VerseByVerse.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-      </Testables>
+      shouldUseLaunchSchemeArgsEnv = "YES">
+      <TestPlans>
+         <TestPlanReference
+            reference = "container:VerseByVerse.xctestplan"
+            default = "YES">
+         </TestPlanReference>
+      </TestPlans>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"

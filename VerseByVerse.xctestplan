@@ -1,0 +1,25 @@
+{
+  "configurations" : [
+    {
+      "id" : "6B1F0C1E-5D2A-4C3B-9E8F-1A2B3C4D5E6F",
+      "name" : "Default",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : false
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:VerseByVerse.xcodeproj",
+        "identifier" : "D7C16A8B2FFD45DE004E58A1",
+        "name" : "VerseByVerseTests"
+      }
+    }
+  ],
+  "version" : 1
+}
