@@ -152,7 +152,7 @@ extension NetworkMonitor {
             }
         case let .http(_, _, data):
             isFromOurApp(data) ? .online : .serverUnreachable
-        case .decoding, .emptySelection:
+        case .decoding, .emptySelection, .attestationRequired:
             .online
         case .cancelled, .unknown, .rateLimited:
             nil

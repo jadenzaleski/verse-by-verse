@@ -127,6 +127,13 @@ final class BibleStore {
         }
     }
 
+    /// The translations a new passage can use: `availableTranslations` minus
+    /// licensed ones the server won't serve to an app that can't attest (the
+    /// Simulator).
+    var selectableTranslations: [BibleTranslationInfo]? {
+        availableTranslations?.filter { !$0.requiresAttestation || AppAttestClient.shared.isSupported }
+    }
+
     /// Resolves an abbreviation (as stored on `Verse`/`Passage`) to its full
     /// translation info. Falls back to a copyright-less placeholder when
     /// translations haven't loaded yet or the abbreviation isn't recognized.

@@ -9,8 +9,10 @@ import CryptoKit
 import Foundation
 
 /// The VBV API surface: a Bible-text proxy plus a health check.
-/// All endpoints are plain GETs; the server applies per-IP rate limiting
-/// (App Attest is planned before external release).
+/// All endpoints are plain GETs. `/bible*` requests carry the App Attest
+/// session token when there is one (see `AppAttestClient`); the server rate
+/// limits per attested key, or strictly per IP without one. The `/attest`
+/// routes themselves live in `APIAttestServer`.
 enum APIEndpoint: Hashable {
     case getHealth
     case getBibleBooks
@@ -23,6 +25,16 @@ enum APIEndpoint: Hashable {
         case .getBibleBooks: "/static/bible_books_array.min.json"
         case .getBibleTranslations: "/bible/translations"
         case .getBibleSelection: "/bible"
+        }
+    }
+
+    /// Whether the request should carry the App Attest session token. Only
+    /// verse text is gated; the translations list is the same for everyone,
+    /// so it never waits on a first-launch registration (startup stays fast).
+    var sendsAttestToken: Bool {
+        switch self {
+        case .getBibleSelection: true
+        case .getHealth, .getBibleBooks, .getBibleTranslations: false
         }
     }
 

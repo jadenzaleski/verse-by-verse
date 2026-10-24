@@ -29,6 +29,7 @@ struct DeveloperView: View {
                 LabeledContent("API URL", value: AppFunctions.apiBaseURL.absoluteString)
                     .lineLimit(1)
                 LabeledContent("Log Level", value: AppLog.minimumLevel.displayName)
+                LabeledContent("App Attest", value: AppAttestClient.shared.statusDescription)
             }
 
             Button("Clear Logs") {

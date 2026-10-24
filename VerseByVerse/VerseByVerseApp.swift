@@ -79,6 +79,10 @@ struct VerseByVerseApp: App {
     /// network client's 15s timeout in the worst case.
     private func runStartup() async {
         await MainActor.run { statusText = "Fetching Bible data…" }
+        // Register (first launch) or refresh the App Attest session in the
+        // background so the first verse fetch already has a token. Not
+        // awaited: startup never waits on Apple's attestation service.
+        Task { _ = await AppAttestClient.shared.token() }
         async let books: Void = bibleStore.loadBibleData()
         async let translations: Void = bibleStore.loadTranslations()
         async let network: Void = networkMonitor.start()

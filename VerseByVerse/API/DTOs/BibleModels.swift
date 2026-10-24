@@ -13,6 +13,15 @@ struct BibleBooksResponse: Codable {
 
 struct BibleTranslation: Codable, Equatable {
     let id, abbreviation, name, copyright, provider: String
+    /// True when this server currently withholds the translation from apps
+    /// that can't attest (licensed text while App Attest is enforced).
+    /// Absent from older servers and cached responses.
+    let requiresAttestation: Bool?
+
+    enum CodingKeys: String, CodingKey {
+        case id, abbreviation, name, copyright, provider
+        case requiresAttestation = "requires_attestation"
+    }
 }
 
 typealias BibleTranslationsResponse = [BibleTranslation]

@@ -27,7 +27,10 @@ struct BibleStoreLoadingTests {
 
         func translations() async throws -> BibleTranslationsResponse {
             guard isOnline else { throw APIError.network(underlying: URLError(.notConnectedToInternet)) }
-            return [BibleTranslation(id: "kjv", abbreviation: "KJV", name: "King James", copyright: "", provider: "")]
+            return [BibleTranslation(
+                id: "kjv", abbreviation: "KJV", name: "King James",
+                copyright: "", provider: "", requiresAttestation: nil,
+            )]
         }
     }
 

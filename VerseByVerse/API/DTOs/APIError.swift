@@ -18,6 +18,9 @@ enum APIError: Error, LocalizedError {
     /// HTTP 429: the per-IP limit was hit. `retryAfter` is the server's
     /// `Retry-After`, in seconds (see ``retryAfter(from:)``).
     case rateLimited(retryAfter: TimeInterval)
+    /// HTTP 403 `ATTESTATION_REQUIRED`: a licensed translation the server only
+    /// serves to an App Attest–verified app (never the Simulator).
+    case attestationRequired
     case unknown(underlying: Error)
 
     /// A human-readable description suitable for UI.
@@ -37,6 +40,8 @@ enum APIError: Error, LocalizedError {
             "No verse text was returned. Try again later."
         case .rateLimited:
             "The server is busy. Try again in a moment."
+        case .attestationRequired:
+            "This translation is only available in the App Store and TestFlight versions of the app."
         case let .unknown(underlying):
             underlying.localizedDescription
         }
@@ -49,6 +54,8 @@ enum APIError: Error, LocalizedError {
             statusCode
         case .rateLimited:
             429
+        case .attestationRequired:
+            403
         default:
             nil
         }

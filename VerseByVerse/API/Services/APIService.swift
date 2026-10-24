@@ -35,7 +35,22 @@ final class APIService {
         log.debug("Fetching: \(endpoint.debugIdentifier)")
 
         do {
-            let (data, response) = try await network.raw(endpoint.request)
+            var (data, response) = try await send(endpoint)
+
+            // The session token expired or was rejected: drop it and retry
+            // once — `send` refreshes it (or goes out unattested).
+            if response.statusCode == 401, endpoint.sendsAttestToken,
+               ["ATTEST_TOKEN_EXPIRED", "ATTEST_TOKEN_INVALID"].contains(parseServerErrorMessage(from: data))
+            {
+                log.info("Session token rejected on \(endpoint.debugIdentifier); refreshing and retrying once")
+                AppAttestClient.shared.invalidateToken()
+                (data, response) = try await send(endpoint)
+            }
+
+            if response.statusCode == 403, parseServerErrorMessage(from: data) == "ATTESTATION_REQUIRED" {
+                log.warning("Server requires App Attest for \(endpoint.debugIdentifier)")
+                throw APIError.attestationRequired
+            }
 
             if response.statusCode == 429 {
                 let retryAfter = APIError.retryAfter(from: response)
@@ -68,6 +83,18 @@ final class APIService {
             }
             throw mapped
         }
+    }
+
+    /// Sends the endpoint's request, attaching the App Attest session token
+    /// when the endpoint is gated and one is available. No token (Simulator,
+    /// unsupported device, attestation still pending or failing) just means
+    /// the request goes out unattested. Never log the header.
+    private func send(_ endpoint: APIEndpoint) async throws -> (Data, HTTPURLResponse) {
+        var request = endpoint.request
+        if endpoint.sendsAttestToken, let token = await AppAttestClient.shared.token() {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        return try await network.raw(request)
     }
 
     /// Feeds real request outcomes to `NetworkMonitor` so it can tell

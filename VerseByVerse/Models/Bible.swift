@@ -14,6 +14,8 @@ struct BibleTranslationInfo: Identifiable, Equatable {
     let name: String
     let copyright: String
     let provider: String
+    /// See `BibleTranslation.requiresAttestation`.
+    var requiresAttestation = false
 }
 
 extension BibleTranslationInfo {
@@ -53,6 +55,7 @@ extension BibleTranslation {
             name: name,
             copyright: copyright,
             provider: provider,
+            requiresAttestation: requiresAttestation ?? false,
         )
     }
 }

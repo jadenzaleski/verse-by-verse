@@ -14,7 +14,7 @@ struct PassagePickers: View {
 
     var body: some View {
         Picker("Translation", selection: $selectedTranslation) {
-            if let available = bibleStore.availableTranslations, !available.isEmpty {
+            if let available = bibleStore.selectableTranslations, !available.isEmpty {
                 ForEach(available, id: \.abbreviation) { translation in
                     Text(translation.abbreviation).tag(translation.abbreviation)
                 }

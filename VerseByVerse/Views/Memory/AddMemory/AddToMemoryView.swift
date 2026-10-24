@@ -198,9 +198,12 @@ struct AddToMemoryView: View {
                 }
                 .task {
                     await loadInitialData()
+                    // Translations may have loaded before this view (no onChange),
+                    // and the last-used one may be hidden here.
+                    handleTranslationsChange(bibleStore.selectableTranslations)
                 }
-                .onChange(of: bibleStore.availableTranslations) { _, newValue in
-                    handleTranslationsChange(newValue)
+                .onChange(of: bibleStore.availableTranslations) {
+                    handleTranslationsChange(bibleStore.selectableTranslations)
                 }
                 // First launch offline: recover on our own once a request gets through.
                 .retryWhenOnline(if: needsMetadataRetry) { await loadInitialData() }
