@@ -8,6 +8,7 @@
 import CryptoKit
 import DeviceCheck
 import Foundation
+import Observation
 
 /// Proves to the Bible API that requests come from a genuine copy of the app
 /// on real Apple hardware, and keeps a short-lived session token for them.
@@ -24,6 +25,7 @@ import Foundation
 /// unattested (public-domain text still works). **Never log tokens,
 /// assertions, or attestations** — log `fingerprint(of:)` instead.
 @MainActor
+@Observable
 final class AppAttestClient {
     static let shared = AppAttestClient(
         attest: SystemAppAttest(),
@@ -62,10 +64,17 @@ final class AppAttestClient {
         attest.isSupported
     }
 
+    /// True while this install holds an unexpired session token. Observable, so
+    /// views update when registration or a refresh completes.
+    var isAttested: Bool {
+        guard let session else { return false }
+        return session.expiresAt > now()
+    }
+
     /// A short description for the Developer screen. Contains no secrets.
     var statusDescription: String {
         guard isSupported else { return "Unsupported on this device" }
-        if let session, session.expiresAt > now() {
+        if isAttested {
             return "Attested (\(fingerprint(of: store.load()?.keyId)))"
         }
         if let retryAt, retryAt > now() {

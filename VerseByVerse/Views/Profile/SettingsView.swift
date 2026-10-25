@@ -133,6 +133,12 @@ struct SettingsView: View {
                             .background(Capsule().fill(AppFunctions.channel.badgeColor.opacity(0.15)))
                             .foregroundStyle(AppFunctions.channel.badgeColor)
                     }
+                    if AppAttestClient.shared.isAttested {
+                        Spacer()
+                        Label("Secure connection", systemImage: "lock")
+                            .labelStyle(.iconOnly)
+                            .opacity(0.5)
+                    }
                 }
             } icon: {
                 Image(systemName: "app.badge")
