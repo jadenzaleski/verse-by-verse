@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.0-beta.10](https://github.com/jadenzaleski/verse-by-verse/compare/v0.1.0-beta.9...v0.1.0-beta.10) (2026-10-29)
+
+
+### Features
+
+* Added the ability to sort and filter passages, verses, and sets. ([3783221](https://github.com/jadenzaleski/verse-by-verse/commit/3783221afaee0b3f206b674e518e7770c254ce0f))
+
 ## [0.1.0-beta.9](https://github.com/jadenzaleski/verse-by-verse/compare/v0.1.0-beta.8...v0.1.0-beta.9) (2026-10-25)
 
 
