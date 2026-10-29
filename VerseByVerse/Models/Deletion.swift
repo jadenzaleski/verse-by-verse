@@ -42,14 +42,13 @@ extension Verse {
 
     var deleteConfirmationMessage: String {
         let owningPassages = passages ?? []
-        let message = if owningPassages.isEmpty {
+        return if owningPassages.isEmpty {
             "This verse will be removed from any sets and deleted."
         } else if owningPassages.count == 1 {
             "This will delete \(owningPassages[0].reference) and all its verses."
         } else {
             "This will delete \(owningPassages.count) passages and all their verses."
         }
-        return message
     }
 
     /// Deletes this verse from the library: removes it from every set, deletes

@@ -12,6 +12,11 @@ enum StorageKeys: String, CaseIterable {
     case lastUsedTranslation
     case displayName
     case fumsDeviceId
+    case memorySort
+    case setSort
+    case sortReversed
+    case filterDueOnly
+    case filterTestament
 }
 
 extension AppStorage {
@@ -33,6 +38,12 @@ extension AppStorage {
 
     init(_ key: StorageKeys) where Value == Bool? {
         self.init(key.rawValue)
+    }
+
+    // MARK: - RawRepresentable (String) Support
+
+    init(wrappedValue: Value, _ key: StorageKeys) where Value: RawRepresentable, Value.RawValue == String {
+        self.init(wrappedValue: wrappedValue, key.rawValue)
     }
 
     // MARK: - Int Support

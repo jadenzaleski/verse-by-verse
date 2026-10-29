@@ -14,6 +14,99 @@ enum MemoryTopTab: String, CaseIterable {
     case sets = "Sets"
 }
 
+/// How passages and verses are ordered. Each case has a natural direction
+/// (see `MemoryView.sortKey`); "Reverse Order" flips it.
+enum MemorySort: String, CaseIterable, Identifiable {
+    case dueSoonest
+    case reference
+    case memoryScore
+    case dateAdded
+    case lastPracticed
+
+    var id: Self {
+        self
+    }
+
+    var title: LocalizedStringKey {
+        switch self {
+        case .dueSoonest: "Up Next"
+        case .reference: "Canonical Order"
+        case .memoryScore: "Memory Score"
+        case .dateAdded: "Date Added"
+        case .lastPracticed: "Date Practiced"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .dueSoonest: "clock.badge.exclamationmark"
+        case .reference: "books.vertical"
+        case .memoryScore: "brain"
+        case .dateAdded: "calendar.badge.plus"
+        case .lastPracticed: "calendar.badge.clock"
+        }
+    }
+}
+
+/// How study sets are ordered.
+enum SetSort: String, CaseIterable, Identifiable {
+    case dateModified
+    case dateAdded
+    case name
+
+    var id: Self {
+        self
+    }
+
+    var title: LocalizedStringKey {
+        switch self {
+        case .dateModified: "Date Modified"
+        case .dateAdded: "Date Added"
+        case .name: "Name"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .dateModified: "calendar.badge.clock"
+        case .dateAdded: "calendar.badge.plus"
+        case .name: "textformat"
+        }
+    }
+}
+
+/// Restricts passages and verses to one testament.
+enum TestamentFilter: String, CaseIterable, Identifiable {
+    case all
+    case old
+    case new
+
+    var id: Self {
+        self
+    }
+
+    var title: LocalizedStringKey {
+        switch self {
+        case .all: "All Books"
+        case .old: "Old Testament"
+        case .new: "New Testament"
+        }
+    }
+
+    /// Books in the Old Testament (Genesis through Malachi).
+    static let oldTestamentBookCount = 39
+}
+
+/// Sort key with a deterministic tiebreaker (`sorted` isn't stable).
+private struct SortKey: Comparable {
+    let primary: Double
+    let tiebreak: String
+
+    static func < (lhs: SortKey, rhs: SortKey) -> Bool {
+        (lhs.primary, lhs.tiebreak) < (rhs.primary, rhs.tiebreak)
+    }
+}
+
 struct MemoryView: View {
     private enum ActiveSheet: Identifiable {
         case add
@@ -29,17 +122,23 @@ struct MemoryView: View {
 
     @Environment(BibleStore.self) private var bibleStore
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \Passage.createdAt, order: .reverse) private var passages: [Passage]
+    @Query private var passages: [Passage]
     @Query private var verses: [Verse]
     @Query(sort: \StudySet.modifiedAt, order: .reverse) private var studySets: [StudySet]
+
+    @AppStorage(.memorySort) private var memorySort: MemorySort = .dueSoonest
+    @AppStorage(.setSort) private var setSort: SetSort = .dateModified
+    @AppStorage(.sortReversed) private var sortReversed = false
+    @AppStorage(.filterDueOnly) private var dueOnly = false
+    @AppStorage(.filterTestament) private var testament: TestamentFilter = .all
 
     @State private var searchText: String = ""
     @State private var selectedTab: MemoryTopTab = .passages
     @State private var activeSheet: ActiveSheet?
     @State private var scrollPosition: ScrollPosition = .init(y: 1)
-    private let horizontalSetSize: CGFloat = 135
-    private let rowSpring = Animation.spring(duration: 0.45, bounce: 0.25)
+    private let rowAnimation = Animation.snappy
 
+    private let scheduler = FSRSScheduler()
     private let log = AppLog.category("MemoryView")
 
     var body: some View {
@@ -67,6 +166,9 @@ struct MemoryView: View {
         )
         .navigationTitle("Memory")
         .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                sortMenu
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
                     Button {
@@ -118,38 +220,177 @@ struct MemoryView: View {
         !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
+    private var sortMenu: some View {
+        Menu {
+            if selectedTab == .sets {
+                Picker("Sort By", selection: $setSort) {
+                    ForEach(SetSort.allCases) { sort in
+                        Label(sort.title, systemImage: sort.systemImage).tag(sort)
+                    }
+                }
+                .pickerStyle(.inline)
+            } else {
+                Picker("Sort By", selection: $memorySort) {
+                    ForEach(MemorySort.allCases) { sort in
+                        Label(sort.title, systemImage: sort.systemImage).tag(sort)
+                    }
+                }
+                .pickerStyle(.inline)
+            }
+
+            Section {
+                Toggle(isOn: $sortReversed) {
+                    Label("Reverse Order", systemImage: "arrow.up.arrow.down")
+                }
+            }
+
+            if selectedTab != .sets {
+                Menu {
+                    Toggle(isOn: $dueOnly) {
+                        Label("Due Now", systemImage: "bell.badge")
+                    }
+                    Picker("Testament", selection: $testament) {
+                        ForEach(TestamentFilter.allCases) { filter in
+                            Text(filter.title).tag(filter)
+                        }
+                    }
+                } label: {
+                    Label(
+                        "Filter",
+                        systemImage: hasActiveFilter
+                            ? "line.3.horizontal.decrease.circle.fill"
+                            : "line.3.horizontal.decrease.circle",
+                    )
+                }
+            }
+        } label: {
+            Label("Sort and Filter", systemImage: "line.3.horizontal.decrease")
+        }
+        .accessibilityLabel("Sort and filter")
+    }
+
+    /// Canonical position of each book, for Bible-order sorting.
+    private var bookIndex: [String: Int] {
+        Dictionary(
+            uniqueKeysWithValues: bibleStore.bibleBooksOrder.enumerated().map { ($1, $0) },
+        )
+    }
+
+    /// Whether `book` passes the testament filter.
+    private func matchesTestament(_ book: String) -> Bool {
+        guard testament != .all else { return true }
+        let isOld = bookIndex[book].map { $0 < TestamentFilter.oldTestamentBookCount } ?? false
+        return isOld == (testament == .old)
+    }
+
+    private var hasActiveFilter: Bool {
+        dueOnly || testament != .all
+    }
+
+    /// Orders `items` by `key` (ascending), flipped when "Reverse Order" is on.
+    /// Keys are computed once per item rather than inside the comparator.
+    private func ordered<T>(_ items: [T], key: (T) -> SortKey) -> [T] {
+        items
+            .map { ($0, key($0)) }
+            .sorted { sortReversed ? $0.1 > $1.1 : $0.1 < $1.1 }
+            .map(\.0)
+    }
+
+    private func referenceKey(book: String, chapter: Int, verse: Int, books: [String: Int]) -> Double {
+        Double((books[book] ?? 999) * 1_000_000 + chapter * 1000 + verse)
+    }
+
+    private var sortedPassages: [Passage] {
+        let books = bookIndex
+        let now = Date.now
+        return ordered(passages) { passage in
+            let primary: Double = switch memorySort {
+            case .dueSoonest:
+                // Unpracticed verses count as due, so the passage is due now.
+                if (passage.verses ?? []).contains(where: \.isNew) {
+                    -.infinity
+                } else {
+                    passage.nextPractice?.timeIntervalSinceReferenceDate ?? .infinity
+                }
+            case .reference:
+                referenceKey(book: passage.book, chapter: passage.startChapter, verse: passage.startVerse, books: books)
+            case .memoryScore:
+                passage.memoryScore(using: scheduler, at: now) ?? 0
+            case .dateAdded:
+                -passage.createdAt.timeIntervalSinceReferenceDate
+            case .lastPracticed:
+                -(passage.lastPracticed?.timeIntervalSinceReferenceDate ?? -.infinity)
+            }
+            return SortKey(primary: primary, tiebreak: passage.reference + passage.translation)
+        }
+    }
+
     private var filteredPassages: [Passage] {
-        guard hasQuery else { return passages }
-        return passages.filter {
+        var result = sortedPassages
+        if dueOnly {
+            result = result.filter { $0.isDue() }
+        }
+        if testament != .all {
+            result = result.filter { matchesTestament($0.book) }
+        }
+        guard hasQuery else { return result }
+        return result.filter {
             $0.reference.localizedCaseInsensitiveContains(searchText)
                 || $0.translation.localizedCaseInsensitiveContains(searchText)
         }
     }
 
-    /// Due first, then by reference.
     private var sortedVerses: [Verse] {
-        verses.sorted { lhs, rhs in
-            let lhsDue = lhs.isDue()
-            let rhsDue = rhs.isDue()
-            if lhsDue != rhsDue {
-                return lhsDue
+        let books = bookIndex
+        let now = Date.now
+        return ordered(verses) { verse in
+            let primary: Double = switch memorySort {
+            case .dueSoonest:
+                verse.isNew ? -.infinity : (verse.nextPractice?.timeIntervalSinceReferenceDate ?? .infinity)
+            case .reference:
+                referenceKey(book: verse.book, chapter: verse.chapter, verse: verse.number, books: books)
+            case .memoryScore:
+                scheduler.retrievability(of: verse.memoryState, at: now)
+            case .dateAdded:
+                -verse.createdAt.timeIntervalSinceReferenceDate
+            case .lastPracticed:
+                -(verse.lastPracticed?.timeIntervalSinceReferenceDate ?? -.infinity)
             }
-            return (lhs.book, lhs.chapter, lhs.number, lhs.translation)
-                < (rhs.book, rhs.chapter, rhs.number, rhs.translation)
+            return SortKey(primary: primary, tiebreak: verse.reference + verse.translation)
         }
     }
 
     private var filteredVerses: [Verse] {
-        guard hasQuery else { return sortedVerses }
-        return sortedVerses.filter {
+        var result = sortedVerses
+        if dueOnly {
+            result = result.filter { $0.isDue() }
+        }
+        if testament != .all {
+            result = result.filter { matchesTestament($0.book) }
+        }
+        guard hasQuery else { return result }
+        return result.filter {
             $0.reference.localizedCaseInsensitiveContains(searchText)
                 || $0.translation.localizedCaseInsensitiveContains(searchText)
         }
     }
 
+    private var sortedSets: [StudySet] {
+        ordered(studySets) { set in
+            switch setSort {
+            case .dateModified:
+                SortKey(primary: -set.modifiedAt.timeIntervalSinceReferenceDate, tiebreak: set.name)
+            case .dateAdded:
+                SortKey(primary: -set.createdAt.timeIntervalSinceReferenceDate, tiebreak: set.name)
+            case .name:
+                SortKey(primary: 0, tiebreak: set.name.localizedLowercase)
+            }
+        }
+    }
+
     private var filteredSets: [StudySet] {
-        guard hasQuery else { return studySets }
-        return studySets.filter {
+        guard hasQuery else { return sortedSets }
+        return sortedSets.filter {
             $0.name.localizedCaseInsensitiveContains(searchText)
                 || ($0.setDescription?.localizedCaseInsensitiveContains(searchText) ?? false)
         }
@@ -164,6 +405,7 @@ struct MemoryView: View {
                     emptyMessage(
                         hasQuery
                             ? "No passages match your search."
+                            : hasActiveFilter ? "Nothing matches your filters."
                             : "No passages yet — tap \(Image(systemName: "plus")) to create one.",
                     )
                 }
@@ -173,7 +415,7 @@ struct MemoryView: View {
                     }
                 }
             }
-            .animation(rowSpring, value: filteredPassages.map(\.persistentModelID))
+            .animation(rowAnimation, value: filteredPassages.map(\.persistentModelID))
 
         case .verses:
             VStack(spacing: AppSpacing.md) {
@@ -181,6 +423,7 @@ struct MemoryView: View {
                     emptyMessage(
                         hasQuery
                             ? "No verses match your search."
+                            : hasActiveFilter ? "Nothing matches your filters."
                             : "No verses yet.",
                     )
                 }
@@ -190,12 +433,12 @@ struct MemoryView: View {
                     }
                 }
             }
-            .animation(rowSpring, value: filteredVerses.map(\.persistentModelID))
+            .animation(rowAnimation, value: filteredVerses.map(\.persistentModelID))
 
         case .sets:
             VStack(alignment: .leading, spacing: AppSpacing.md) {
                 if !hasQuery {
-                    let recentSets = filteredSets.prefix(5)
+                    let recentSets = studySets.prefix(5)
 
                     if !recentSets.isEmpty {
                         Text("Recent")
@@ -214,7 +457,7 @@ struct MemoryView: View {
                                             colorPallette: set.meshTheme.palette,
                                         )
                                     }
-                                    .frame(width: horizontalSetSize)
+                                    .containerRelativeFrame(.horizontal, count: 3, spacing: AppSpacing.xl)
                                     .buttonStyle(.plain)
                                 }
                             }
