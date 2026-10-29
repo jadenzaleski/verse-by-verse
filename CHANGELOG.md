@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.0-beta.9](https://github.com/jadenzaleski/verse-by-verse/compare/v0.1.0-beta.8...v0.1.0-beta.9) (2026-10-25)
+
+
+### Features
+
+* Add FUMS support to comply with API.Bible. ([72897f6](https://github.com/jadenzaleski/verse-by-verse/commit/72897f6b86372af7b294587498e499edb819a2e4))
+* Added a lock next to the version to determine if the app is attested. ([ddb4f65](https://github.com/jadenzaleski/verse-by-verse/commit/ddb4f652bf1c310bdcd79b6900243f7f2625f3e4))
+* Added the ability to shake to undo. ([5024529](https://github.com/jadenzaleski/verse-by-verse/commit/502452915e14d3488df9f1b75a8aaed0babadc23))
+* Added the ability to swipe to delete verses or passages. ([2a36e4f](https://github.com/jadenzaleski/verse-by-verse/commit/2a36e4fdc17f8dc0062c061cc85b8971b490f86d))
+* attest the app with App Attest before fetching verse text ([10036cb](https://github.com/jadenzaleski/verse-by-verse/commit/10036cb6bdf630be64bcdc34694a97cfccc079b0))
+* Enable retry after a 429 error. ([be881c7](https://github.com/jadenzaleski/verse-by-verse/commit/be881c753ac29181ce3da12e06b5f3d50e184dda))
+
 ## [0.1.0-beta.8](https://github.com/jadenzaleski/verse-by-verse/compare/v0.1.0-beta.7...v0.1.0-beta.8) (2026-10-09)
 
 
