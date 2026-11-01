@@ -41,10 +41,6 @@ struct DeveloperView: View {
                 }
             }
 
-            Button("Clear Cache") {
-                Cache.shared.removeAll()
-            }
-
             Button {
                 Task {
                     do {

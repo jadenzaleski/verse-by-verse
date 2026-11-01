@@ -18,6 +18,8 @@ struct BibleStoreLoadingTests {
     private final class FlakyBackend {
         var isOnline = false
         var booksCalls = 0
+        /// Flipped to model the server starting to offer the ESV.
+        var offersESV = false
 
         func books() async throws -> BibleBooksResponse {
             booksCalls += 1
@@ -27,10 +29,16 @@ struct BibleStoreLoadingTests {
 
         func translations() async throws -> BibleTranslationsResponse {
             guard isOnline else { throw APIError.network(underlying: URLError(.notConnectedToInternet)) }
-            return [BibleTranslation(
+            let kjv = BibleTranslation(
                 id: "kjv", abbreviation: "KJV", name: "King James",
                 copyright: "", provider: "", requiresAttestation: nil, passageLimit: nil,
-            )]
+            )
+            let esv = BibleTranslation(
+                id: "ESV", abbreviation: "ESV", name: "English Standard Version",
+                copyright: "", provider: "ESV API", requiresAttestation: nil,
+                passageLimit: PassageLimit(maxVerses: 500, halfBook: true),
+            )
+            return offersESV ? [kjv, esv] : [kjv]
         }
     }
 
@@ -85,5 +93,34 @@ struct BibleStoreLoadingTests {
 
         #expect(backend.booksCalls == 1)
         #expect(store.bibleDataState == .success)
+    }
+
+    @Test func `forced reload picks up a newly offered translation`() async {
+        let backend = FlakyBackend()
+        backend.isOnline = true
+        let store = makeStore(backend)
+        await store.loadBibleData()
+        await store.loadTranslations()
+
+        backend.offersESV = true
+        await store.loadTranslations()
+        #expect(store.availableTranslations?.map(\.abbreviation) == ["KJV"])
+
+        await store.loadBibleData(force: true)
+        await store.loadTranslations(force: true)
+        #expect(backend.booksCalls == 2)
+        #expect(store.availableTranslations?.map(\.abbreviation) == ["KJV", "ESV"])
+    }
+
+    @Test func `failed forced reload keeps the metadata already loaded`() async {
+        let backend = FlakyBackend()
+        backend.isOnline = true
+        let store = makeStore(backend)
+        await store.loadTranslations()
+
+        backend.isOnline = false
+        await store.loadTranslations(force: true)
+
+        #expect(store.availableTranslations?.first?.abbreviation == "KJV")
     }
 }

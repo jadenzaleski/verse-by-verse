@@ -80,11 +80,34 @@ final class BibleStore {
         return Text(placeholder)
     }
 
+    /// Settings' Clear Cache: empties the response cache (disk + memory),
+    /// drops the verse text held here, and re-fetches book and translation
+    /// metadata, so a translation the server just started (or stopped)
+    /// offering shows up without a relaunch. Text cards fetch again when they
+    /// next appear; the old metadata stays in place if the re-fetch fails
+    /// (offline).
     @MainActor
-    func loadBibleData() async {
+    func clearCache() async {
+        Cache.shared.removeAll()
+        clearSelections()
+        async let books: Void = loadBibleData(force: true)
+        async let translations: Void = loadTranslations(force: true)
+        _ = await (books, translations)
+    }
+
+    /// Forgets every fetched selection and its loading state.
+    @MainActor
+    func clearSelections() {
+        selections.removeAll()
+        selectionStates.removeAll()
+    }
+
+    /// - Parameter force: re-fetch even when already loaded (`clearCache()`).
+    @MainActor
+    func loadBibleData(force: Bool = false) async {
         // Skip if loaded, or if a load is already in flight (rapid retries);
         // an `.error` state falls through so callers can retry.
-        if bibleData != nil, bibleDataState == .success {
+        if !force, bibleData != nil, bibleDataState == .success {
             return
         }
         if bibleDataState == .loading {
@@ -104,10 +127,11 @@ final class BibleStore {
         }
     }
 
+    /// - Parameter force: re-fetch even when already loaded (`clearCache()`).
     @MainActor
-    func loadTranslations() async {
+    func loadTranslations(force: Bool = false) async {
         // Same guard as `loadBibleData()`: retry on error, not while loading.
-        if availableTranslations != nil, translationsState == .success {
+        if !force, availableTranslations != nil, translationsState == .success {
             return
         }
         if translationsState == .loading {

@@ -11,6 +11,7 @@ struct SettingsView: View {
     private let log = AppLog.category("SettingsView")
 
     @Environment(\.openURL) private var openURL
+    @Environment(BibleStore.self) private var bibleStore
     @AppStorage(.displayName) private var displayName = ""
 
     @State private var showConfirmClearCache = false
@@ -72,7 +73,7 @@ struct SettingsView: View {
                 isPresented: $showConfirmClearCache,
             ) {
                 Button("Clear", role: .destructive) {
-                    Cache.shared.removeAll()
+                    Task { await bibleStore.clearCache() }
                 }
             } message: {
                 Text("Are you sure you want to clear the cache?")
@@ -218,6 +219,7 @@ struct SettingsView: View {
 #Preview {
     NavigationStack {
         SettingsView()
+            .environment(BibleStore.shared)
             .environment(\.font, .app())
     }
 }

@@ -17,7 +17,17 @@ final class NetworkClient {
         // Fail fast: verse text is small and the app must stay usable offline,
         // so a hung request shouldn't stall the UI for the system default 60s.
         configuration.timeoutIntervalForRequest = 15
+        // Without this, URLSession would also keep its
+        // own copy of every response in Library/Caches/…/Cache.db.
+        configuration.urlCache = nil
         session = URLSession(configuration: configuration)
+        // Builds before this change wrote responses into the shared URL
+        // cache; nothing in the app uses it, so purge any leftovers once per
+        // launch, off the main thread (it's disk I/O).
+        // Remove before launch.
+        Task.detached(priority: .utility) {
+            URLCache.shared.removeAllCachedResponses()
+        }
         log.debug("URLSession initialized")
     }
 
