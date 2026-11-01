@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.0-beta.10](https://github.com/jadenzaleski/verse-by-verse/compare/v0.1.0-beta.9...v0.1.0-beta.10) (2026-11-01)
+
+
+### Features
+
+* Added support for ESV, complying with all terms. ([e2d9925](https://github.com/jadenzaleski/verse-by-verse/commit/e2d9925954e68483f95d4de5bc3ca9ba1f25c3f2))
+* Added the ability to sort and filter passages, verses, and sets. ([3783221](https://github.com/jadenzaleski/verse-by-verse/commit/3783221afaee0b3f206b674e518e7770c254ce0f))
+
+
+### Bug Fixes
+
+* make Clear Cache refresh translations and drop every copy of verse text ([8810acc](https://github.com/jadenzaleski/verse-by-verse/commit/8810accc00bd2e35031f7bd89e5cddfd952f20aa))
+
 ## [0.1.0-beta.9](https://github.com/jadenzaleski/verse-by-verse/compare/v0.1.0-beta.8...v0.1.0-beta.9) (2026-10-25)
 
 
