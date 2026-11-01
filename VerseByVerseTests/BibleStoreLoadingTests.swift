@@ -29,7 +29,7 @@ struct BibleStoreLoadingTests {
             guard isOnline else { throw APIError.network(underlying: URLError(.notConnectedToInternet)) }
             return [BibleTranslation(
                 id: "kjv", abbreviation: "KJV", name: "King James",
-                copyright: "", provider: "", requiresAttestation: nil,
+                copyright: "", provider: "", requiresAttestation: nil, passageLimit: nil,
             )]
         }
     }

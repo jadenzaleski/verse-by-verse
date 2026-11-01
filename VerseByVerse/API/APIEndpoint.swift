@@ -62,7 +62,7 @@ enum APIEndpoint: Hashable {
         case .getBibleSelection:
             14 * 24 * 60 * 60 // 14 days — licensing ceiling for verse text
         case .getBibleBooks, .getBibleTranslations:
-            30 * 24 * 60 * 60 // 30 days
+            7 * 24 * 60 * 60 // 7 days
         }
     }
 

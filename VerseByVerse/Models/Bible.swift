@@ -16,6 +16,8 @@ struct BibleTranslationInfo: Identifiable, Equatable {
     let provider: String
     /// See `BibleTranslation.requiresAttestation`.
     var requiresAttestation = false
+    /// See `BibleTranslation.passageLimit`.
+    var passageLimit: PassageLimit?
 }
 
 extension BibleTranslationInfo {
@@ -45,6 +47,23 @@ struct BibleStructure: Equatable {
         }
         return chapters[chapter - 1]
     }
+
+    /// Verses spanned by `startChapter:startVerse`–`endChapter:endVerse`
+    /// (inclusive), or `nil` when the book or range isn't valid.
+    func verseCount(
+        book: String,
+        startChapter: Int,
+        startVerse: Int,
+        endChapter: Int,
+        endVerse: Int,
+    ) -> Int? {
+        guard let chapters = books[book],
+              startChapter >= 1, endChapter <= chapters.count, startChapter <= endChapter
+        else { return nil }
+        let whole = chapters[(startChapter - 1) ..< endChapter].reduce(0, +)
+        let count = whole - (startVerse - 1) - (chapters[endChapter - 1] - endVerse)
+        return count > 0 ? count : nil
+    }
 }
 
 extension BibleTranslation {
@@ -56,6 +75,7 @@ extension BibleTranslation {
             copyright: copyright,
             provider: provider,
             requiresAttestation: requiresAttestation ?? false,
+            passageLimit: passageLimit,
         )
     }
 }

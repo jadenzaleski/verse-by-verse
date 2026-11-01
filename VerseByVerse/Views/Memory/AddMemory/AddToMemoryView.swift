@@ -89,7 +89,29 @@ struct AddToMemoryView: View {
         }
     }
 
+    /// A complete, in-bounds range the translation will also serve in one
+    /// request (the ESV caps passage length; see `passageLimitViolation`).
     private var isRefValid: Bool {
+        isRangeValid && passageLimitViolation == nil
+    }
+
+    /// Set when a valid range is longer than the selected translation allows
+    /// per request, so it's blocked before asking the server (which would
+    /// answer `400 PASSAGE_TOO_LONG`).
+    private var passageLimitViolation: PassageLimitViolation? {
+        guard isRangeValid, let key = currentSelectionKey else { return nil }
+        return bibleStore.passageLimitViolation(
+            translation: selectedTranslation,
+            book: selectedBook,
+            startChapter: key.startChapter,
+            startVerse: key.startVerse,
+            endChapter: key.endChapter,
+            endVerse: key.endVerse,
+        )
+    }
+
+    /// The reference is complete and inside the book's chapters/verses.
+    private var isRangeValid: Bool {
         guard let startCh = Int(startChapter), let startVs = Int(startVerse) else { return false }
 
         // Basic range check (already force-corrected in onChange, but good for safety)
@@ -256,7 +278,11 @@ struct AddToMemoryView: View {
             }
 
             Section {
-                if selectionState == .loading {
+                if let passageLimitViolation {
+                    Text(passageLimitViolation.message)
+                        .foregroundStyle(.red)
+                        .font(.app(.subheadline))
+                } else if selectionState == .loading {
                     HStack {
                         Spacer()
                         ProgressView()

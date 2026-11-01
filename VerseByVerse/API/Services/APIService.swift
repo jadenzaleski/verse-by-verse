@@ -47,21 +47,23 @@ final class APIService {
                 (data, response) = try await send(endpoint)
             }
 
-            if response.statusCode == 403, parseServerErrorMessage(from: data) == "ATTESTATION_REQUIRED" {
-                log.warning("Server requires App Attest for \(endpoint.debugIdentifier)")
-                throw APIError.attestationRequired
-            }
-
-            if response.statusCode == 429 {
-                let retryAfter = APIError.retryAfter(from: response)
-                log.error("Rate limited on \(endpoint.debugIdentifier); retry after \(retryAfter)s")
-                throw APIError.rateLimited(retryAfter: retryAfter)
-            }
-
             if !(200 ... 299).contains(response.statusCode) {
-                log.error("API returned code \(response.statusCode) for \(endpoint.debugIdentifier)")
-                let message = parseServerErrorMessage(from: data)
-                throw APIError.http(statusCode: response.statusCode, message: message, data: data)
+                let error = APIError.from(
+                    response: response,
+                    detail: parseServerErrorMessage(from: data),
+                    data: data,
+                )
+                switch error {
+                case .attestationRequired:
+                    log.warning("Server requires App Attest for \(endpoint.debugIdentifier)")
+                case let .rateLimited(retryAfter):
+                    log.error(
+                        "Throttled (\(response.statusCode)) on \(endpoint.debugIdentifier); retry after \(retryAfter)s",
+                    )
+                default:
+                    log.error("API returned code \(response.statusCode) for \(endpoint.debugIdentifier)")
+                }
+                throw error
             }
 
             let apiResponse = try network.decode(

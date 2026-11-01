@@ -17,10 +17,36 @@ struct BibleTranslation: Codable, Equatable {
     /// that can't attest (licensed text while App Attest is enforced).
     /// Absent from older servers and cached responses.
     let requiresAttestation: Bool?
+    /// Per-request size cap for licensed text (the ESV); requests over it get
+    /// `400 PASSAGE_TOO_LONG`. Absent when the translation has no cap, and
+    /// from older servers and cached responses.
+    let passageLimit: PassageLimit?
 
     enum CodingKeys: String, CodingKey {
         case id, abbreviation, name, copyright, provider
         case requiresAttestation = "requires_attestation"
+        case passageLimit = "passage_limit"
+    }
+}
+
+/// How much of a translation one request may ask for, as the server
+/// advertises it (the server owns the rule; the app only mirrors it to block
+/// a passage before asking).
+struct PassageLimit: Codable, Equatable {
+    let maxVerses: Int
+    /// Also cap at half the book's verses (rounded down); books with one or
+    /// two chapters are exempt.
+    let halfBook: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case maxVerses = "max_verses"
+        case halfBook = "half_book"
+    }
+
+    /// The cap for a book, given its per-chapter verse counts.
+    func maxVerses(forChapterVerseCounts chapters: [Int]) -> Int {
+        guard halfBook, chapters.count > 2 else { return maxVerses }
+        return min(maxVerses, chapters.reduce(0, +) / 2)
     }
 }
 

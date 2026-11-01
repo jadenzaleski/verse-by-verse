@@ -148,6 +148,32 @@ final class BibleStore {
             )
     }
 
+    /// The translation's `passageLimit` violation for a range, or `nil` when
+    /// the range is within it (or the translation has no cap, or metadata
+    /// hasn't loaded — the server still enforces the cap).
+    func passageLimitViolation(
+        translation: String,
+        book: String,
+        startChapter: Int,
+        startVerse: Int,
+        endChapter: Int,
+        endVerse: Int,
+    ) -> PassageLimitViolation? {
+        guard let limit = translationInfo(forAbbreviation: translation).passageLimit,
+              let chapters = bibleData?.books[book],
+              let requested = bibleData?.verseCount(
+                  book: book,
+                  startChapter: startChapter,
+                  startVerse: startVerse,
+                  endChapter: endChapter,
+                  endVerse: endVerse,
+              )
+        else { return nil }
+        let allowed = limit.maxVerses(forChapterVerseCounts: chapters)
+        guard requested > allowed else { return nil }
+        return PassageLimitViolation(translation: translation, book: book, requested: requested, allowed: allowed)
+    }
+
     /// Returns the number of chapters for a given book name.
     func chapterCount(for book: String) -> Int {
         bibleData?.chapters(for: book) ?? 0
@@ -200,5 +226,18 @@ final class BibleStore {
 
     private func mapError(_ error: Error) -> APIError {
         (error as? APIError) ?? .unknown(underlying: error)
+    }
+}
+
+/// A range longer than its translation allows in one request (see
+/// `BibleStore.passageLimitViolation`).
+struct PassageLimitViolation: Equatable {
+    let translation: String
+    let book: String
+    let requested: Int
+    let allowed: Int
+
+    var message: String {
+        "The \(translation) allows at most \(allowed) verses of \(book) at a time (\(requested) selected)."
     }
 }

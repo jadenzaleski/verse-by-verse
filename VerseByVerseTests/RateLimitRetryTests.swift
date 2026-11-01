@@ -51,6 +51,55 @@ struct RateLimitRetryTests {
         #expect(NetworkMonitor.classify(.rateLimited(retryAfter: 12)) == nil)
     }
 
+    // MARK: - 503 from a throttled upstream (Crossway's ESV limits)
+
+    private func unavailable(retryAfter: String?) throws -> HTTPURLResponse {
+        let url = try #require(URL(string: "https://example.com/bible"))
+        let headers = retryAfter.map { ["Retry-After": $0] }
+        return try #require(HTTPURLResponse(url: url, statusCode: 503, httpVersion: nil, headerFields: headers))
+    }
+
+    private let esvBusy = "The ESV is temporarily unavailable. Please try again shortly."
+
+    @Test func `short 503 retry-after retries automatically like a 429`() throws {
+        let error = try APIError.from(response: unavailable(retryAfter: "30"), detail: esvBusy, data: nil)
+        guard case .rateLimited(30) = error else {
+            Issue.record("Expected .rateLimited(30), got \(error)")
+            return
+        }
+    }
+
+    @Test func `long 503 retry-after waits for a manual retry`() throws {
+        let error = try APIError.from(response: unavailable(retryAfter: "3600"), detail: esvBusy, data: nil)
+        guard case let .temporarilyUnavailable(message) = error else {
+            Issue.record("Expected .temporarilyUnavailable, got \(error)")
+            return
+        }
+        #expect(message == esvBusy)
+        #expect(error.localizedDescription == esvBusy)
+        #expect(error.statusCode == 503)
+    }
+
+    @Test func `a 503 without retry-after stays a plain server error`() throws {
+        let error = try APIError.from(response: unavailable(retryAfter: nil), detail: nil, data: nil)
+        guard case .http(503, nil, _) = error else {
+            Issue.record("Expected .http(503), got \(error)")
+            return
+        }
+    }
+
+    @Test @MainActor func `upstream throttling says nothing about reachability`() {
+        #expect(NetworkMonitor.classify(.temporarilyUnavailable(message: nil)) == nil)
+    }
+
+    @Test func `a 429 still maps to rate limited`() throws {
+        let error = try APIError.from(response: response(retryAfter: "7"), detail: nil, data: nil)
+        guard case .rateLimited(7) = error else {
+            Issue.record("Expected .rateLimited(7), got \(error)")
+            return
+        }
+    }
+
     // MARK: - Retry loop
 
     /// Scripts what the screen's error is over time and records what the loop did.
