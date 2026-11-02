@@ -79,6 +79,9 @@ struct VerseByVerseApp: App {
     /// network client's 15s timeout in the worst case.
     private func runStartup() async {
         await MainActor.run { statusText = "Fetching Bible data…" }
+        // Verse text may be stored for at most 14 days. Entries expire lazily
+        // when read, so sweep the ones nobody asked for again.
+        Cache.shared.purgeExpired()
         // Register (first launch) or refresh the App Attest session in the
         // background so the first verse fetch already has a token. Not
         // awaited: startup never waits on Apple's attestation service.

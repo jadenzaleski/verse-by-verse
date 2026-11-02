@@ -18,13 +18,19 @@ final class Cache {
     private var memory: [String: DiskCacheEntry] = [:]
 
     // L2: disk cache directory
-    let cacheDirectory: URL = {
-        let base = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
-            ?? FileManager.default.temporaryDirectory
-        let dir = base.appending(path: "vbv-cache", directoryHint: .isDirectory)
+    let cacheDirectory: URL
+
+    /// - Parameter directory: Where entries live on disk. Defaults to
+    ///   `Caches/vbv-cache`; tests pass a temporary directory.
+    init(directory: URL? = nil) {
+        let dir = directory ?? {
+            let base = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
+                ?? FileManager.default.temporaryDirectory
+            return base.appending(path: "vbv-cache", directoryHint: .isDirectory)
+        }()
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        return dir
-    }()
+        cacheDirectory = dir
+    }
 }
 
 // MARK: - Public API
@@ -88,6 +94,37 @@ extension Cache {
         }
     }
 
+    /// Deletes every expired entry from memory and disk, plus any file that
+    /// can't be read back as an entry.
+    ///
+    /// Entries without an expiry are kept. Returns how many files were removed.
+    @discardableResult
+    func purgeExpired(now: Date = Date()) -> Int {
+        queue.sync {
+            memory = memory.filter { !isExpired($0.value.expiresAt, at: now) }
+
+            let files = (try? FileManager.default.contentsOfDirectory(
+                at: cacheDirectory,
+                includingPropertiesForKeys: nil,
+            )) ?? []
+
+            var removed = 0
+            for url in files {
+                // Decode only the expiry; the (large) payload is skipped.
+                let expiry = (try? Data(contentsOf: url))
+                    .flatMap { try? JSONDecoder().decode(EntryExpiry.self, from: $0) }
+                let shouldRemove = expiry.map { isExpired($0.expiresAt, at: now) } ?? true
+                if shouldRemove, (try? FileManager.default.removeItem(at: url)) != nil {
+                    removed += 1
+                }
+            }
+            if removed > 0 {
+                log.info("Purged \(removed) expired cache entries")
+            }
+            return removed
+        }
+    }
+
     func removeAll() {
         queue.async {
             self.memory.removeAll()
@@ -109,8 +146,12 @@ private extension Cache {
     }
 
     func isExpired(_ entry: DiskCacheEntry) -> Bool {
-        guard let expiresAt = entry.expiresAt else { return false }
-        return expiresAt < Date()
+        isExpired(entry.expiresAt, at: Date())
+    }
+
+    func isExpired(_ expiresAt: Date?, at now: Date) -> Bool {
+        guard let expiresAt else { return false }
+        return expiresAt < now
     }
 
     func decode<T: Decodable>(_ entry: DiskCacheEntry, as _: T.Type) -> APIResponse<T>? {
@@ -125,5 +166,10 @@ private extension Cache {
 private nonisolated struct DiskCacheEntry: Codable {
     let data: Data
     let statusCode: Int
+    let expiresAt: Date?
+}
+
+/// Just the expiry of a ``DiskCacheEntry``, so purging doesn't decode payloads.
+private nonisolated struct EntryExpiry: Decodable {
     let expiresAt: Date?
 }
