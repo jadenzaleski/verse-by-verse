@@ -17,6 +17,11 @@ enum StorageKeys: String, CaseIterable {
     case sortReversed
     case filterDueOnly
     case filterTestament
+    case dailyReminderEnabled
+    /// Minutes after midnight, local time.
+    case dailyReminderMinutes
+    case streakReminderEnabled
+    case dueBadgeEnabled
 }
 
 extension AppStorage {

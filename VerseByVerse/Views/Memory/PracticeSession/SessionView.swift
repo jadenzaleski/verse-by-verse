@@ -112,7 +112,7 @@ struct SessionView: View {
                 case .activity:
                     activityContent
                 case let .done(nextReview, correct, total):
-                    doneView(nextReview: nextReview, correct: correct, total: total)
+                    SessionCompleteView(nextReview: nextReview, correct: correct, total: total, onDone: { dismiss() })
                 case let .failed(msg):
                     failedView(message: msg)
                 case .loadFailed:
@@ -214,50 +214,6 @@ struct SessionView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    private func doneView(nextReview: Date?, correct: Int, total: Int) -> some View {
-        VStack(spacing: AppSpacing.xxl) {
-            Spacer()
-
-            Image(systemName: correct == total ? "star.circle.fill" : "checkmark.circle.fill")
-                .font(.system(size: 64))
-                .foregroundStyle(correct == total ? .yellow : .green)
-                .accessibilityHidden(true)
-
-            VStack(spacing: AppSpacing.sm) {
-                Text("Session Complete!")
-                    .font(.app(.title2, weight: .semibold))
-
-                if total > 0 {
-                    Text("\(correct) of \(total) correct")
-                        .font(.app(.title3))
-                        .foregroundStyle(scoreColor(correct: correct, total: total))
-                }
-
-                Text(scoreMessage(correct: correct, total: total))
-                    .font(.app(.subheadline))
-                    .foregroundStyle(.secondary)
-
-                if let nextReview {
-                    HStack(spacing: AppSpacing.sm) {
-                        Image(systemName: "calendar")
-                            .accessibilityHidden(true)
-                        Text("Next review: \(nextReview.formatted(.dateTime.month(.abbreviated).day().year()))")
-                    }
-                    .font(.app(.subheadline))
-                    .foregroundStyle(.secondary)
-                }
-            }
-
-            Button("Done") {
-                dismiss()
-            }
-            .buttonStyle(.primary)
-            .padding(.horizontal, AppSpacing.xl)
-
-            Spacer()
-        }
-    }
-
     private func failedView(message: String) -> some View {
         ContentUnavailableView {
             Label("Something Went Wrong", systemImage: "exclamationmark.triangle")
@@ -266,31 +222,6 @@ struct SessionView: View {
         } actions: {
             Button("Close") { dismiss() }
         }
-    }
-
-    // MARK: - Score helpers
-
-    private func scoreMessage(correct: Int, total: Int) -> String {
-        guard total > 0 else { return "Good work!" }
-        let pct = Double(correct) / Double(total)
-        switch pct {
-        case 1.0...: return "Perfect recall!"
-        case 0.7...: return "Great job!"
-        case 0.5...: return "Keep it up!"
-        default: return "Practice makes perfect."
-        }
-    }
-
-    private func scoreColor(correct: Int, total: Int) -> Color {
-        guard total > 0 else { return .secondary }
-        let pct = Double(correct) / Double(total)
-        if pct >= 0.8 {
-            return .green
-        }
-        if pct >= 0.5 {
-            return .orange
-        }
-        return .red
     }
 
     // MARK: - Actions

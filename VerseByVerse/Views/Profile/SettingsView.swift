@@ -15,6 +15,13 @@ struct SettingsView: View {
     @Environment(BibleStore.self) private var bibleStore
     @Environment(\.modelContext) private var modelContext
     @AppStorage(.displayName) private var displayName = ""
+    @AppStorage(.dailyReminderEnabled) private var dailyReminderEnabled = false
+    @AppStorage(.dailyReminderMinutes) private var dailyReminderMinutes = NotificationPreferences
+        .defaultDailyReminderMinutes
+    @AppStorage(.streakReminderEnabled) private var streakReminderEnabled = false
+    @AppStorage(.dueBadgeEnabled) private var dueBadgeEnabled = false
+
+    private let scheduler = NotificationScheduler.shared
 
     @State private var showConfirmClearCache = false
     @State private var showMailUnavailable = false
@@ -24,11 +31,13 @@ struct SettingsView: View {
     /// drives the spinner on the row.
     @State private var isExporting = false
     @State private var showExportFailed = false
+    @State private var showNotificationsDenied = false
 
     var body: some View {
         List {
             profileSection
             generalSection
+            notificationSection
             supportSection
             aboutSection
 
@@ -38,6 +47,22 @@ struct SettingsView: View {
         }
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.inline)
+        .task {
+            await scheduler.refreshAuthorizationStatus()
+        }
+        .onChange(of: dailyReminderMinutes) {
+            scheduler.refresh()
+        }
+        .alert("Notifications Are Off", isPresented: $showNotificationsDenied) {
+            Button("Open Settings") {
+                if let url = URL(string: UIApplication.openNotificationSettingsURLString) {
+                    openURL(url)
+                }
+            }
+            Button("Not Now", role: .cancel) {}
+        } message: {
+            Text("Turn on notifications for Verse by Verse in the Settings app to get reminders.")
+        }
         .alert("Couldn't Share Diagnostics", isPresented: $showDiagnosticsFailed) {
             Button("OK", role: .cancel) {}
         } message: {
@@ -111,6 +136,93 @@ struct SettingsView: View {
             """)
             .font(.app(.caption2))
         }
+    }
+
+    // MARK: - Notification
+
+    private var notificationSection: some View {
+        Section {
+            notificationToggle(
+                "Daily Reminder",
+                systemImage: "bell",
+                isOn: $dailyReminderEnabled,
+                hint: "Reminds you once a day when reviews are due",
+            )
+            if dailyReminderEnabled {
+                HStack {
+                    Label("Time", systemImage: "clock")
+                    Spacer()
+                    DatePicker("", selection: reminderTime, displayedComponents: .hourAndMinute)
+                }
+
+            }
+
+            notificationToggle(
+                "Streak Reminder",
+                systemImage: "flame",
+                isOn: $streakReminderEnabled,
+                hint: "Reminds you at 8 PM when your streak is about to end",
+            )
+
+            notificationToggle(
+                "Due Count Badge",
+                systemImage: "app.badge",
+                isOn: $dueBadgeEnabled,
+                hint: "Shows how many reviews are due on the app icon",
+            )
+        } header: {
+            Text("NOTIFICATIONS")
+                .font(Font.app(.footnote, weight: .semibold))
+        } footer: {
+            Text("""
+            Daily Reminder only goes out on days when something is due.
+            """)
+            .font(.app(.caption2))
+        }
+    }
+
+    /// The reminder time as a `Date` for the picker; stored as minutes after midnight.
+    private var reminderTime: Binding<Date> {
+        Binding {
+            let calendar = Calendar.current
+            return calendar.date(
+                bySettingHour: dailyReminderMinutes / 60,
+                minute: dailyReminderMinutes % 60,
+                second: 0,
+                of: .now,
+            ) ?? .now
+        } set: { newValue in
+            let parts = Calendar.current.dateComponents([.hour, .minute], from: newValue)
+            dailyReminderMinutes = (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
+        }
+    }
+
+    /// A switch that asks for notification permission the first time it is
+    /// turned on, and turns itself back off if the answer is no.
+    private func notificationToggle(
+        _ title: String,
+        systemImage: String,
+        isOn: Binding<Bool>,
+        hint: String,
+    ) -> some View {
+        Toggle(isOn: Binding(
+            get: { isOn.wrappedValue },
+            set: { newValue in
+                isOn.wrappedValue = newValue
+                Task { await notificationSettingChanged(isOn, enabled: newValue) }
+            },
+        )) {
+            Label(title, systemImage: systemImage)
+        }
+        .accessibilityHint(hint)
+    }
+
+    private func notificationSettingChanged(_ setting: Binding<Bool>, enabled: Bool) async {
+        if enabled, await !scheduler.requestAuthorizationIfNeeded() {
+            setting.wrappedValue = false
+            showNotificationsDenied = true
+        }
+        scheduler.refresh()
     }
 
     // MARK: - Support

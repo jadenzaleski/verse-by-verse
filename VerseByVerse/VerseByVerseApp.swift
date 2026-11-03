@@ -8,6 +8,7 @@
 import SwiftData
 import SwiftUI
 import UIKit
+import UserNotifications
 
 @main
 struct VerseByVerseApp: App {
@@ -27,6 +28,8 @@ struct VerseByVerseApp: App {
         UINavigationBar.appearance().backIndicatorImage = backImage
         UINavigationBar.appearance().backIndicatorTransitionMaskImage = backImage
         showCorruptStoreAlert = AppModelContainer.didRecoverFromCorruptStore
+        // Must be set before launch finishes so a tapped reminder reaches us.
+        UNUserNotificationCenter.current().delegate = NotificationDelegate.shared
     }
 
     var body: some Scene {
@@ -44,8 +47,12 @@ struct VerseByVerseApp: App {
             }
             .animation(.easeOut(duration: 0.35), value: isReady)
             .onChange(of: scenePhase) { _, phase in
-                if phase != .active {
+                if phase == .active {
+                    NotificationScheduler.shared.appBecameActive()
+                } else {
                     commitPendingChanges()
+                    // After the commit, so the schedule reflects what was just saved.
+                    NotificationScheduler.shared.refresh()
                 }
             }
             .environment(\.font, .app())
@@ -79,6 +86,8 @@ struct VerseByVerseApp: App {
     /// network client's 15s timeout in the worst case.
     private func runStartup() async {
         await MainActor.run { statusText = "Fetching Bible data…" }
+        NotificationScheduler.shared.configure(context: container.mainContext)
+        NotificationScheduler.shared.appBecameActive()
         // Verse text may be stored for at most 14 days. Entries expire lazily
         // when read, so sweep the ones nobody asked for again.
         Cache.shared.purgeExpired()

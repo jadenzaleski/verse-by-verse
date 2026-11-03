@@ -9,17 +9,28 @@ import Foundation
 
 /// Pure aggregate computations over a user's practice sessions.
 ///
-/// Single source of truth for streak/score math shared between Home (current
-/// streak) and Profile (lifetime stats). All functions consider only completed
-/// sessions, keyed by the calendar day of `startDate`.
+/// All functions consider only completed sessions,
+/// keyed by the calendar day of `startDate`.
 enum PracticeStats {
-    /// Number of consecutive days, counting back from today, that contain a
-    /// completed practice session. Returns 0 if today (and yesterday) have none.
-    static func currentStreak(from sessions: [PracticeSession], calendar: Calendar = .current) -> Int {
-        let days = completedDays(from: sessions, calendar: calendar)
-        guard !days.isEmpty else { return 0 }
+    /// Number of consecutive days with a completed practice session, counting
+    /// back from today. If today has no session *yet*, the streak is still alive
+    /// through yesterday and counts from there; it is 0 only once a whole day
+    /// has been missed.
+    static func currentStreak(
+        from sessions: [PracticeSession],
+        now: Date = Date(),
+        calendar: Calendar = .current,
+    ) -> Int {
+        streak(in: practiceDays(from: sessions, calendar: calendar), now: now, calendar: calendar)
+    }
 
-        var day = calendar.startOfDay(for: Date())
+    /// ``currentStreak(from:now:calendar:)`` over precomputed practice days.
+    static func streak(in days: Set<Date>, now: Date, calendar: Calendar) -> Int {
+        var day = calendar.startOfDay(for: now)
+        if !days.contains(day) {
+            // Today may simply not have been practiced yet.
+            day = calendar.date(byAdding: .day, value: -1, to: day)!
+        }
         var streak = 0
         while days.contains(day) {
             streak += 1
@@ -31,7 +42,7 @@ enum PracticeStats {
     /// Longest run of consecutive days containing a completed practice session,
     /// across the user's entire history.
     static func bestStreak(from sessions: [PracticeSession], calendar: Calendar = .current) -> Int {
-        let sortedDays = completedDays(from: sessions, calendar: calendar).sorted()
+        let sortedDays = practiceDays(from: sessions, calendar: calendar).sorted()
         guard !sortedDays.isEmpty else { return 0 }
 
         var best = 1
@@ -62,7 +73,7 @@ enum PracticeStats {
     }
 
     /// The distinct calendar days (start-of-day) that have at least one completed session.
-    private static func completedDays(from sessions: [PracticeSession], calendar: Calendar) -> Set<Date> {
+    static func practiceDays(from sessions: [PracticeSession], calendar: Calendar = .current) -> Set<Date> {
         Set(sessions.filter(\.isCompleted).map { calendar.startOfDay(for: $0.startDate) })
     }
 }
