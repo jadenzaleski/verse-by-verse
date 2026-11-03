@@ -5,6 +5,7 @@
 //  Created by Jaden Zaleski on 11/27/25.
 //
 
+import SwiftData
 import SwiftUI
 
 struct SettingsView: View {
@@ -12,13 +13,17 @@ struct SettingsView: View {
 
     @Environment(\.openURL) private var openURL
     @Environment(BibleStore.self) private var bibleStore
+    @Environment(\.modelContext) private var modelContext
     @AppStorage(.displayName) private var displayName = ""
 
     @State private var showConfirmClearCache = false
     @State private var showMailUnavailable = false
-    /// Exported log file backing the Share Diagnostics row. Prepared off the
-    /// main actor in `.task` so opening Settings never blocks on disk I/O.
-    @State private var diagnosticsURL: URL?
+    @State private var isSharingDiagnostics = false
+    @State private var showDiagnosticsFailed = false
+    /// True from tapping Export My Data until the share sheet is on screen;
+    /// drives the spinner on the row.
+    @State private var isExporting = false
+    @State private var showExportFailed = false
 
     var body: some View {
         List {
@@ -33,8 +38,15 @@ struct SettingsView: View {
         }
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.inline)
-        .task {
-            await prepareDiagnostics()
+        .alert("Couldn't Share Diagnostics", isPresented: $showDiagnosticsFailed) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("The log file couldn't be prepared. Please try again.")
+        }
+        .alert("Export Failed", isPresented: $showExportFailed) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Your data couldn't be prepared. Please try again.")
         }
         .alert("Mail Not Available", isPresented: $showMailUnavailable) {
             Button("OK", role: .cancel) {}
@@ -65,8 +77,18 @@ struct SettingsView: View {
 
     private var generalSection: some View {
         Section {
-            Button("Clear Cache") {
+            shareRow(
+                "Export My Data",
+                systemImage: "square.and.arrow.up",
+                isBusy: isExporting,
+                hint: "Saves your passages, sets and practice history as a JSON file",
+                action: exportData,
+            )
+
+            Button {
                 showConfirmClearCache = true
+            } label: {
+                Label("Clear Cache", systemImage: "shippingbox")
             }
             .confirmationDialog(
                 "Clear Cache",
@@ -83,8 +105,11 @@ struct SettingsView: View {
             Text("GENERAL")
                 .font(Font.app(.footnote, weight: .semibold))
         } footer: {
-            Text("Clears downloaded Bible text. Your passages and practice history are not affected.")
-                .font(.app(.caption2))
+            Text("""
+            Clear Cache removes downloaded Bible text.
+            Your passages and practice history are not affected.
+            """)
+            .font(.app(.caption2))
         }
     }
 
@@ -99,12 +124,13 @@ struct SettingsView: View {
             }
             .accessibilityHint("Opens a new email to the developer")
 
-            if let diagnosticsURL {
-                ShareLink(item: diagnosticsURL) {
-                    Label("Share Diagnostics", systemImage: "doc.text")
-                }
-                .accessibilityHint("Shares a log file you can attach to a support email")
-            }
+            shareRow(
+                "Share Diagnostics",
+                systemImage: "doc.text",
+                isBusy: isSharingDiagnostics,
+                hint: "Shares a log file you can attach to a support email",
+                action: shareDiagnostics,
+            )
         } header: {
             Text("SUPPORT")
                 .font(Font.app(.footnote, weight: .semibold))
@@ -207,12 +233,73 @@ struct SettingsView: View {
         }
     }
 
-    /// Writes the exportable log file off the main actor. Failure just leaves
-    /// the Share Diagnostics row hidden — Contact Support still works.
-    private func prepareDiagnostics() async {
-        diagnosticsURL = await Task.detached(priority: .utility) {
+    /// Snapshots the library on the main actor (the models live there), writes
+    /// the JSON file off it, then presents the share sheet. The spinner shows
+    /// for the whole stretch, including the share sheet's own start-up.
+    private func exportData() async {
+        isExporting = true
+        log.info("Export: started")
+        // Let the spinner render before any heavy work or presentation.
+        try? await Task.sleep(for: .milliseconds(50))
+        do {
+            let export = try DataExport.make(from: modelContext)
+            let url = try await Task.detached(priority: .userInitiated) {
+                try export.writeTemporaryFile()
+            }.value
+            log.info("Export: file ready, presenting share sheet")
+            ShareSheet.present(url) {
+                log.info("Export: share sheet presented")
+                isExporting = false
+            }
+        } catch {
+            log.error("Could not prepare the data export: \(error)")
+            isExporting = false
+            showExportFailed = true
+        }
+    }
+
+    /// Writes the log file off the main actor, then presents the share sheet.
+    private func shareDiagnostics() async {
+        isSharingDiagnostics = true
+        // Let the spinner render before any heavy work or presentation.
+        try? await Task.sleep(for: .milliseconds(50))
+        let url = await Task.detached(priority: .userInitiated) {
             LoggingService.shared.exportLogs()
         }.value
+        guard let url else {
+            log.error("Could not write the diagnostics file")
+            isSharingDiagnostics = false
+            showDiagnosticsFailed = true
+            return
+        }
+        ShareSheet.present(url) { isSharingDiagnostics = false }
+    }
+
+    /// A row that prepares something, then opens the share sheet. The spinner
+    /// on the right shows from the tap until the sheet is on screen, because
+    /// the system share sheet can take a couple of seconds to start (longer
+    /// the first time after a launch).
+    private func shareRow(
+        _ title: String,
+        systemImage: String,
+        isBusy: Bool,
+        hint: String,
+        action: @escaping () async -> Void,
+    ) -> some View {
+        Button {
+            Task { await action() }
+        } label: {
+            HStack {
+                Label(title, systemImage: systemImage)
+                Spacer()
+                if isBusy {
+                    ProgressView()
+                        .accessibilityLabel("Preparing")
+                }
+            }
+        }
+        .disabled(isBusy)
+        .accessibilityHint(hint)
     }
 }
 
@@ -222,4 +309,5 @@ struct SettingsView: View {
             .environment(BibleStore.shared)
             .environment(\.font, .app())
     }
+    .modelContainer(PreviewData.container)
 }

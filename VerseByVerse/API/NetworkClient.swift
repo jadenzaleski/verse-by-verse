@@ -75,7 +75,7 @@ enum NetworkError: Error {
 
 // MARK: - Shared JSON coding strategy
 
-extension JSONDecoder {
+nonisolated extension JSONDecoder {
     /// The app-wide decoder: ISO-8601 dates with or without fractional seconds.
     static var vbv: JSONDecoder {
         let decoder = JSONDecoder()
@@ -97,7 +97,7 @@ extension JSONDecoder {
     }
 }
 
-extension JSONEncoder {
+nonisolated extension JSONEncoder {
     /// The app-wide encoder: ISO-8601 dates with fractional seconds.
     static var vbv: JSONEncoder {
         let encoder = JSONEncoder()
@@ -109,7 +109,7 @@ extension JSONEncoder {
     }
 }
 
-private enum DateFormatters {
+private nonisolated enum DateFormatters {
     static let iso8601Fractional: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
