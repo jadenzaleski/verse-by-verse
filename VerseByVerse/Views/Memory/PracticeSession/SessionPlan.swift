@@ -45,6 +45,49 @@ extension ActivityStep {
         }
         return false
     }
+
+    /// Whether this step counts toward the session score (and so the FSRS rating).
+    var isScored: Bool {
+        switch self {
+        case .verbalRecite, .everyWord: true
+        case .everyOtherWord, .everyWordRetry: false
+        }
+    }
+}
+
+/// What counts toward a session's score, overall and per verse. Only
+/// ``ActivityStep/isScored`` steps contribute; every word counts as one.
+struct SessionTally {
+    private(set) var correct = 0
+    private(set) var total = 0
+    /// Per-verse tallies, indexed like the session's verses.
+    private(set) var verseCorrect: [Int]
+    private(set) var verseTotal: [Int]
+    /// Word index (in the joined text) → index into the session's verses.
+    private let wordOwners: [Int]
+
+    init(verseCount: Int = 0, wordOwners: [Int] = []) {
+        verseCorrect = Array(repeating: 0, count: verseCount)
+        verseTotal = Array(repeating: 0, count: verseCount)
+        self.wordOwners = wordOwners
+    }
+
+    /// Adds one finished step; unscored steps are ignored. Results are
+    /// attributed to verses word by word.
+    mutating func record(step: ActivityStep, correct: Int, total: Int, perWord: [Int: Bool]) {
+        guard step.isScored else { return }
+        self.correct += correct
+        self.total += total
+
+        for (wordIndex, isCorrect) in perWord {
+            guard wordIndex < wordOwners.count else { continue }
+            let verseIndex = wordOwners[wordIndex]
+            verseTotal[verseIndex] += 1
+            if isCorrect {
+                verseCorrect[verseIndex] += 1
+            }
+        }
+    }
 }
 
 /// One completed activity, collected during a session and persisted as a

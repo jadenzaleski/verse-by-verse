@@ -57,7 +57,7 @@ struct PracticeCard: View {
             }
             .buttonStyle(.primary)
 
-            if let next = nextPracticeDate {
+            if let next = nextPracticeDate, next > .now {
                 HStack(spacing: AppSpacing.sm) {
                     Image(systemName: "calendar")
                     Text("Next review: \(next.formatted(.dateTime.month(.abbreviated).minute().hour().day().year()))")

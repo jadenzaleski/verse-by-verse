@@ -124,6 +124,11 @@ extension Passage {
         (verses ?? []).compactMap(\.lastPracticed).max()
     }
 
+    /// What you actually got last session (0…1) — the newest completed session's score.
+    var lastResult: Double? {
+        (sessions ?? []).filter(\.isCompleted).max { $0.startDate < $1.startDate }?.score
+    }
+
     /// Total completed reviews across all verses.
     var totalReps: Int {
         (verses ?? []).reduce(0) { $0 + $1.reps }

@@ -88,6 +88,12 @@ extension Verse {
         reps == 0
     }
 
+    /// What you actually got last time (0…1) — the newest review's score.
+    /// A recorded fact, unlike the FSRS Memory Score, which is an estimate.
+    var lastResult: Double? {
+        (reviews ?? []).max { $0.reviewedAt < $1.reviewedAt }?.score
+    }
+
     func isDue(at date: Date = .now) -> Bool {
         if let next = nextPractice {
             return next <= date

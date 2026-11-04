@@ -58,6 +58,13 @@ protocol MemoryScheduler {
 }
 
 enum MemoryScoring {
+    /// A verse's score for one session: words correct ÷ words scored, or `nil`
+    /// when none of its words were scored (e.g. the translation omits the verse).
+    /// Such a verse must be skipped, not treated as a failed review.
+    static func score(correct: Int, total: Int) -> Double? {
+        total > 0 ? Double(correct) / Double(total) : nil
+    }
+
     /// Convert session score to an FSRS rating.
     /// - Parameter score: The score of the session
     /// - Returns: The FSRS rating based on that score.

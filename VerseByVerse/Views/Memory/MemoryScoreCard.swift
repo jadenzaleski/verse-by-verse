@@ -11,6 +11,8 @@ struct MemoryScoreCard: View {
     let lastPracticed: Date?
     let totalReps: Int
     let retentionScore: Double
+    /// What you got last practice (0…1), shown as a plain fact beside the estimate.
+    let lastResult: Double?
 
     var body: some View {
         VStack(alignment: .leading, spacing: AppSpacing.md) {
@@ -33,7 +35,10 @@ struct MemoryScoreCard: View {
                     .foregroundStyle(.secondary)
             }
 
-            HStack(spacing: AppSpacing.xl) {
+            HStack(spacing: AppSpacing.lg) {
+                if let lastResult {
+                    statItem(label: "Last Result", value: "\(Int((lastResult * 100).rounded()))%")
+                }
                 let sessionLabel = totalReps >= 2 ? "Sessions" : "Session"
                 statItem(label: sessionLabel, value: "\(totalReps)")
                 if let last = lastPracticed {
@@ -62,5 +67,6 @@ struct MemoryScoreCard: View {
         lastPracticed: PreviewData.samplePassage.lastPracticed,
         totalReps: PreviewData.samplePassage.totalReps,
         retentionScore: 0.75,
+        lastResult: 0.92,
     )
 }

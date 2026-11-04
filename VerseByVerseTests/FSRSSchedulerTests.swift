@@ -26,6 +26,13 @@ struct FSRSSchedulerTests {
         #expect(MemoryScoring.rating(forScore: 0.0) == 1)
     }
 
+    @Test func `verse with no scored words has no score`() {
+        // Skipped, not failed: nil score means no review and no lapse.
+        #expect(MemoryScoring.score(correct: 0, total: 0) == nil)
+        #expect(MemoryScoring.score(correct: 0, total: 5) == 0)
+        #expect(MemoryScoring.score(correct: 3, total: 4) == 0.75)
+    }
+
     @Test func `first review schedules the future`() {
         let scheduler = FSRSScheduler()
         let outcome = scheduler.processReview(state: .new, score: 0.92, at: epoch)
@@ -111,6 +118,16 @@ struct FSRSSchedulerTests {
         #expect(abs(atDue - target) < 0.02, "retrievability at due was \(atDue)")
         #expect(wayLater < atDue)
         #expect(scheduler.retrievability(of: .new, at: epoch) == 0)
+    }
+
+    @Test func `first review schedules days out, never minutes`() {
+        // A session already drills the passage; no minute-scale learning steps.
+        let scheduler = FSRSScheduler()
+        for score in [0.0, 0.75, 0.92, 1.0] {
+            let outcome = scheduler.processReview(state: .new, score: score, at: epoch)
+            #expect(outcome.state.state == 2, "score \(score) should land in review state")
+            #expect(outcome.intervalDays >= 1, "score \(score) scheduled \(outcome.intervalDays) days out")
+        }
     }
 
     @Test func `scheduling is deterministic`() {

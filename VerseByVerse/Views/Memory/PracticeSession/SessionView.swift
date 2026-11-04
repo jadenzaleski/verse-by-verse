@@ -37,14 +37,9 @@ struct SessionView: View {
     @State private var steps: [ActivityStep] = []
     @State private var stepIndex = 0
     @State private var stepStartDate = Date()
-    @State private var totalCorrect = 0
-    @State private var totalPossible = 0
     @State private var collectedActivities: [ActivityRecord] = []
-    /// Per-verse tallies, indexed like `verses`.
-    @State private var verseCorrect: [Int] = []
-    @State private var verseTotal: [Int] = []
-    /// Word index (in the joined text) → index into `verses`.
-    @State private var wordOwners: [Int] = []
+    /// Scored results only (see ``ActivityStep/isScored``).
+    @State private var tally = SessionTally()
 
     private let scheduler = FSRSScheduler()
     private let log = AppLog.category("SessionView")
@@ -107,6 +102,7 @@ struct SessionView: View {
                     SessionPreviewView(
                         translation: selectionKey?.translation ?? "",
                         text: selectionKey.flatMap { bibleStore.selections[$0]?.annotatedText },
+                        hidesText: verses.allSatisfy { !$0.isNew },
                         onStart: beginSession,
                     )
                 case .activity:
@@ -172,7 +168,8 @@ struct SessionView: View {
                     reference: title,
                     passageText: verseText,
                     maskedIndices: TypingProgress.everyOtherIndices(in: words, phase: phase),
-                    instruction: "Type the first letter of each missing word.",
+                    instruction: "Type the first letter of each missing word. This warm-up isn't scored.",
+                    unscoredLabel: "Warm-up",
                     onContinue: advance,
                 )
                 .id(stepIndex)
@@ -183,7 +180,10 @@ struct SessionView: View {
                     reference: title,
                     passageText: verseText,
                     maskedIndices: TypingProgress.typeableIndices(in: words),
-                    instruction: "Type the first letter of every word from memory.",
+                    instruction: steps[stepIndex].isRetry
+                        ? "Type the first letter of every word from memory. This retry isn't scored."
+                        : "Type the first letter of every word from memory.",
+                    unscoredLabel: steps[stepIndex].isRetry ? "Retry" : nil,
                     onContinue: advance,
                 )
                 .id(stepIndex)
@@ -258,28 +258,7 @@ struct SessionView: View {
             endDate: now,
         ))
 
-        totalCorrect += correct
-        totalPossible += total
-
-        // Attribute results to verses. Steps with real per-word data (typed
-        // steps, or a mic-graded recite) attribute word-by-word; a step with
-        // no per-word data (recite's manual fallback) spreads the verdict
-        // across every verse equally.
-        if perWord.isEmpty {
-            for index in verses.indices {
-                verseCorrect[index] += correct
-                verseTotal[index] += total
-            }
-        } else {
-            for (wordIndex, isCorrect) in perWord {
-                guard wordIndex < wordOwners.count else { continue }
-                let verseIndex = wordOwners[wordIndex]
-                verseTotal[verseIndex] += 1
-                if isCorrect {
-                    verseCorrect[verseIndex] += 1
-                }
-            }
-        }
+        tally.record(step: step, correct: correct, total: total, perWord: perWord)
 
         if case let .everyWord(allowsRetry) = step, allowsRetry, correct < total {
             withAnimation(.easeInOut(duration: 0.35)) {
@@ -310,9 +289,10 @@ struct SessionView: View {
             return
         }
 
-        wordOwners = Self.mapWordsToVerses(selection: selection, verses: verses)
-        verseCorrect = Array(repeating: 0, count: verses.count)
-        verseTotal = Array(repeating: 0, count: verses.count)
+        tally = SessionTally(
+            verseCount: verses.count,
+            wordOwners: Self.mapWordsToVerses(selection: selection, verses: verses),
+        )
 
         steps = ActivityStep.standardPlan
         phase = .preview
@@ -361,8 +341,8 @@ struct SessionView: View {
     /// activities, and one `VerseReview` per verse — all in a single save.
     private func completeSession() {
         let now = Date()
-        let correct = totalCorrect
-        let total = totalPossible
+        let correct = tally.correct
+        let total = tally.total
         let pooledScore = total > 0 ? Double(correct) / Double(total) : 0
 
         let session = PracticeSession(startDate: sessionStartDate)
@@ -388,14 +368,19 @@ struct SessionView: View {
 
         var longestIntervalDays = 0.0
         for (index, verse) in verses.enumerated() {
-            let verseScore = verseTotal[index] > 0
-                ? Double(verseCorrect[index]) / Double(verseTotal[index])
-                : 0
+            let verseCorrect = tally.verseCorrect[index]
+            let verseTotal = tally.verseTotal[index]
+            guard let verseScore = MemoryScoring.score(correct: verseCorrect, total: verseTotal) else {
+                // No words were scored for this verse, so there's nothing to
+                // judge: no review, no lapse, schedule untouched.
+                log.info("Skipping review for \(verse.reference): no scored words")
+                continue
+            }
             let outcome = scheduler.processReview(state: verse.memoryState, score: verseScore, at: now)
 
             let review = VerseReview(reviewedAt: now)
-            review.correctCount = verseCorrect[index]
-            review.totalCount = verseTotal[index]
+            review.correctCount = verseCorrect
+            review.totalCount = verseTotal
             review.score = verseScore
             review.rating = outcome.rating
             review.stabilityAfter = outcome.state.stability ?? 0

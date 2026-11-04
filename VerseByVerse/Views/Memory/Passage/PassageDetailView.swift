@@ -36,8 +36,9 @@ struct PassageDetailView: View {
             VStack(spacing: AppSpacing.md) {
                 MemoryScoreCard(
                     lastPracticed: passage.lastPracticed,
-                    totalReps: passage.totalReps,
+                    totalReps: PracticeStats.completedCount(passageSessions),
                     retentionScore: retentionScore,
+                    lastResult: passage.lastResult,
                 )
                 PracticeCard(showPractice: $showPractice, nextPracticeDate: passage.nextPractice, isNew: passage.isNew)
                 historyCard

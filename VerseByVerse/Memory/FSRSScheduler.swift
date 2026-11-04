@@ -9,9 +9,8 @@ import Foundation
 import FSRS
 
 /// FSRS-6 implementation of ``MemoryScheduler`` over the official
-/// `open-spaced-repetition/swift-fsrs` package, used out of the box:
-/// FSRS-6 default 21 weights, library-default learning steps (1m/10m,
-/// relearning 10m), fuzzing disabled so scheduling is deterministic.
+/// `open-spaced-repetition/swift-fsrs` package: FSRS-6 default 21 weights,
+/// fuzzing disabled so scheduling is deterministic.
 /// Fine-tuning (per-user parameters, custom retention UI) can come later.
 struct FSRSScheduler: MemoryScheduler {
     private let engine: FSRS
@@ -22,7 +21,7 @@ struct FSRSScheduler: MemoryScheduler {
             requestRetention: desiredRetention,
             w: FSRSDefaults.defaultWv6,
             enableFuzz: false,
-            enableShortTerm: true,
+            enableShortTerm: false,
         ))
     }
 

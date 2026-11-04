@@ -38,7 +38,8 @@ struct VerseDetailView: View {
             VStack(spacing: AppSpacing.md) {
                 MemoryScoreCard(lastPracticed: verse.lastPracticed,
                                 totalReps: verse.reps,
-                                retentionScore: retentionScore)
+                                retentionScore: retentionScore,
+                                lastResult: verse.lastResult)
                 PracticeCard(showPractice: $showPractice, nextPracticeDate: verse.nextPractice, isNew: verse.isNew)
                 historyCard
                 SelectionTextCard(title: "Verse", translation: verse.translation, key: verse.selectionKey)
