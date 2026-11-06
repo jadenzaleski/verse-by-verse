@@ -11,14 +11,13 @@ import SwiftUI
 /// correctness is derived by `TypingProgress`; this view is just layout and
 /// the hidden `TextField` that captures keystrokes.
 struct ActivityView: View {
-    let activityName: String
-    let reference: String
+    /// The step being run; drives the Scored / Warm-up / Retry badge.
+    let step: ActivityStep
+    let translation: BibleTranslationInfo
     let passageText: String
     /// Ordered word indices the user must type the first letter of.
     let maskedIndices: [Int]
     let instruction: String
-    /// Set on steps that don't count toward the score (warm-up, retry); shown as a pill.
-    var unscoredLabel: LocalizedStringKey?
     /// Called with (correct, total, per-word correctness keyed by word index)
     /// when the user taps Continue.
     let onContinue: (Int, Int, [Int: Bool]) -> Void
@@ -61,26 +60,9 @@ struct ActivityView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: AppSpacing.xl) {
                         HStack(spacing: AppSpacing.sm) {
-                            Text(activityName)
-                                .accessibilityAddTraits(.isHeader)
-                                .font(.app(.caption, weight: .semibold))
-                                .padding(.horizontal, AppSpacing.md)
-                                .padding(.vertical, AppSpacing.xs)
-                                .background(Color.appAccent.opacity(0.15), in: Capsule())
-                                .foregroundStyle(Color.appAccent)
-                            if let unscoredLabel {
-                                Text(unscoredLabel)
-                                    .font(.app(.caption, weight: .semibold))
-                                    .padding(.horizontal, AppSpacing.md)
-                                    .padding(.vertical, AppSpacing.xs)
-                                    .background(.quaternary, in: Capsule())
-                                    .foregroundStyle(.secondary)
-                                    .accessibilityHint("Not scored")
-                            }
+                            StepBadge(step: step)
                             Spacer()
-                            Text(reference)
-                                .font(.app(.caption))
-                                .foregroundStyle(.secondary)
+                            TranslationBadgeButton(translation: translation)
                         }
 
                         Text(instruction)
@@ -219,8 +201,11 @@ struct ActivityView: View {
     """
     let words = verse.split(separator: " ", omittingEmptySubsequences: true)
     ActivityView(
-        activityName: "Preview",
-        reference: "John 3:16",
+        step: .everyWord(allowsRetry: true),
+        translation: BibleTranslationInfo(
+            id: "kjv", abbreviation: "KJV", name: "King James Version",
+            copyright: "Public Domain.", provider: "local",
+        ),
         passageText: verse,
         maskedIndices: Array(words.indices),
         instruction: "Type the first letter of each word.",

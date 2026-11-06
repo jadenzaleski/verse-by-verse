@@ -12,7 +12,7 @@ import SwiftUI
 /// If the mic or transcription isn't usable for any reason, the step is
 /// skipped outright — no score, no penalty.
 struct VerbalActivityView: View {
-    let reference: String
+    let translation: BibleTranslationInfo
     /// Raw passage words, graded against the finalized transcript.
     let passageWords: [String]
     /// Called with (correct, total, per-word correctness keyed by word index).
@@ -125,17 +125,9 @@ struct VerbalActivityView: View {
 
     private var header: some View {
         HStack(spacing: AppSpacing.sm) {
-            Text("Verbal Recite")
-                .accessibilityAddTraits(.isHeader)
-                .font(.app(.caption, weight: .semibold))
-                .padding(.horizontal, AppSpacing.md)
-                .padding(.vertical, AppSpacing.xs)
-                .background(Color.appAccent.opacity(0.15), in: Capsule())
-                .foregroundStyle(Color.appAccent)
+            StepBadge(step: .verbalRecite)
             Spacer()
-            Text(reference)
-                .font(.app(.caption))
-                .foregroundStyle(.secondary)
+            TranslationBadgeButton(translation: translation)
         }
     }
 
@@ -373,7 +365,10 @@ private struct GradedWordCell: View {
 
 #Preview {
     VerbalActivityView(
-        reference: "John 3:16",
+        translation: BibleTranslationInfo(
+            id: "kjv", abbreviation: "KJV", name: "King James Version",
+            copyright: "Public Domain.", provider: "local",
+        ),
         passageWords: """
         For God so loved the world that he gave his one and only \
         Son, that whoever believes in him shall not perish but have \

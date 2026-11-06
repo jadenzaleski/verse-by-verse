@@ -7,41 +7,50 @@
 
 import SwiftUI
 
-/// The whole passage, read once before a session's first activity. The
-/// session clock and progress only start when the user taps Start.
-///
-/// For material already practiced, the text starts hidden so the first scored
-/// step tests real recall; the user can tap Show Text to peek.
+/// An outline of the session ahead, shown before the first activity: one
+/// linked step per activity, each marked as scored or warm-up. It's the same
+/// for every session, new material or not. The session clock and progress
+/// only start when the user taps Start.
 struct SessionPreviewView: View {
-    let translation: String
-    let text: Text?
-    /// Hide the text until asked (a review of something already learned).
-    let hidesText: Bool
+    let steps: [ActivityStep]
     let onStart: () -> Void
 
-    @State private var showsText = false
+    private struct Row: Identifiable {
+        /// Position in the plan; the plan is fixed for the preview's lifetime.
+        let id: Int
+        let step: ActivityStep
+    }
+
+    /// The plan, plus the retry that follows Every Word when a word is missed.
+    private var rows: [Row] {
+        let hasRetry = steps.contains { step in
+            if case .everyWord(allowsRetry: true) = step {
+                true
+            } else {
+                false
+            }
+        }
+        let outline = hasRetry ? steps + [.everyWordRetry] : steps
+        return outline.enumerated().map { Row(id: $0.offset, step: $0.element) }
+    }
 
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: AppSpacing.xl) {
-                    HStack(spacing: AppSpacing.sm) {
-                        Text("Review")
-                            .font(.app(.caption, weight: .semibold))
-                            .padding(.horizontal, AppSpacing.md)
-                            .padding(.vertical, AppSpacing.xs)
-                            .background(Color.appAccent.opacity(0.15), in: Capsule())
-                            .foregroundStyle(Color.appAccent)
-                        Spacer()
-                        Text(translation)
-                            .font(.app(.caption))
+                    VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                        Text("Overview")
+                            .font(.app(.title2, weight: .semibold))
+                            .accessibilityAddTraits(.isHeader)
+                        Text("Only scored steps count toward your result.")
+                            .font(.app(.subheadline))
                             .foregroundStyle(.secondary)
                     }
 
-                    if hidesText, !showsText {
-                        recallPrompt
-                    } else {
-                        text
+                    VStack(alignment: .leading, spacing: 0) {
+                        ForEach(rows) { row in
+                            stepRow(row, isLast: row.id == rows.count - 1)
+                        }
                     }
                 }
                 .padding(AppSpacing.xl)
@@ -56,37 +65,48 @@ struct SessionPreviewView: View {
         }
     }
 
-    private var recallPrompt: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.md) {
-            Text("Try to recall it first")
-                .font(.app(.title3, weight: .semibold))
-            Text("What you remember without looking is what gets scored.")
-                .font(.app(.subheadline))
-                .foregroundStyle(.secondary)
-            Button("Show Text") {
-                showsText = true
+    private func stepRow(_ row: Row, isLast: Bool) -> some View {
+        HStack(alignment: .top, spacing: AppSpacing.lg) {
+            VStack(spacing: 0) {
+                Label(row.step.outlineTitle, systemImage: row.step.outlineSymbol)
+                    .labelStyle(.iconOnly)
+                    .font(.app(.title3))
+                    .frame(width: 28, height: 28)
+                    .foregroundStyle(row.step.isScored ? Color.appAccent : Color.secondary)
+                    .accessibilityHidden(true)
+                if !isLast {
+                    Rectangle()
+                        .fill(.quaternary)
+                        .frame(width: 2)
+                        .frame(maxHeight: .infinity)
+                }
             }
-            .buttonStyle(.bordered)
+
+            VStack(alignment: .leading, spacing: AppSpacing.xs) {
+                HStack(spacing: AppSpacing.sm) {
+                    Text(row.step.outlineTitle)
+                        .font(.app(.headline))
+                    Text(row.step.outlineTag)
+                        .font(.app(.caption2, weight: .semibold))
+                        .padding(.horizontal, AppSpacing.sm)
+                        .padding(.vertical, AppSpacing.xxs)
+                        .background(
+                            row.step.isScored ? Color.appAccent.opacity(0.15) : Color.secondary.opacity(0.15),
+                            in: Capsule(),
+                        )
+                        .foregroundStyle(row.step.isScored ? Color.appAccent : Color.secondary)
+                }
+                Text(row.step.outlineDetail)
+                    .font(.app(.subheadline))
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.bottom, isLast ? 0 : AppSpacing.xl)
+            .accessibilityElement(children: .combine)
         }
     }
 }
 
 #Preview {
-    SessionPreviewView(
-        translation: "KJV",
-        text: Text("For God so loved the world, that he gave his only begotten Son.").font(.bible()),
-        hidesText: false,
-        onStart: {},
-    )
-    .environment(\.font, .app())
-}
-
-#Preview("Review, text hidden") {
-    SessionPreviewView(
-        translation: "KJV",
-        text: Text("For God so loved the world, that he gave his only begotten Son.").font(.bible()),
-        hidesText: true,
-        onStart: {},
-    )
-    .environment(\.font, .app())
+    SessionPreviewView(steps: ActivityStep.standardPlan, onStart: {})
+        .environment(\.font, .app())
 }

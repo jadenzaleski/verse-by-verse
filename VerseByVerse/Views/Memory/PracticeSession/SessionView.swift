@@ -65,6 +65,10 @@ struct SessionView: View {
         return standaloneVerse?.selectionKey
     }
 
+    private var translationInfo: BibleTranslationInfo {
+        bibleStore.translationInfo(forAbbreviation: selectionKey?.translation ?? "")
+    }
+
     private var verseText: String {
         selectionKey.flatMap { bibleStore.selections[$0]?.fullText } ?? ""
     }
@@ -99,12 +103,7 @@ struct SessionView: View {
                 case .loading:
                     loadingView
                 case .preview:
-                    SessionPreviewView(
-                        translation: selectionKey?.translation ?? "",
-                        text: selectionKey.flatMap { bibleStore.selections[$0]?.annotatedText },
-                        hidesText: verses.allSatisfy { !$0.isNew },
-                        onStart: beginSession,
-                    )
+                    SessionPreviewView(steps: steps, onStart: beginSession)
                 case .activity:
                     activityContent
                 case let .done(nextReview, correct, total):
@@ -164,33 +163,31 @@ struct SessionView: View {
             switch steps[stepIndex] {
             case let .everyOtherWord(phase):
                 ActivityView(
-                    activityName: "Every Other Word",
-                    reference: title,
+                    step: steps[stepIndex],
+                    translation: translationInfo,
                     passageText: verseText,
                     maskedIndices: TypingProgress.everyOtherIndices(in: words, phase: phase),
                     instruction: "Type the first letter of each missing word. This warm-up isn't scored.",
-                    unscoredLabel: "Warm-up",
                     onContinue: advance,
                 )
                 .id(stepIndex)
                 .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
             case .everyWord, .everyWordRetry:
                 ActivityView(
-                    activityName: "Every Word",
-                    reference: title,
+                    step: steps[stepIndex],
+                    translation: translationInfo,
                     passageText: verseText,
                     maskedIndices: TypingProgress.typeableIndices(in: words),
                     instruction: steps[stepIndex].isRetry
                         ? "Type the first letter of every word from memory. This retry isn't scored."
                         : "Type the first letter of every word from memory.",
-                    unscoredLabel: steps[stepIndex].isRetry ? "Retry" : nil,
                     onContinue: advance,
                 )
                 .id(stepIndex)
                 .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
             case .verbalRecite:
                 VerbalActivityView(
-                    reference: title,
+                    translation: translationInfo,
                     passageWords: words,
                     onContinue: advance,
                     onSkip: skipStep,

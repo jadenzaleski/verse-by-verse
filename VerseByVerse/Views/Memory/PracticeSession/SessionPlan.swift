@@ -32,6 +32,42 @@ extension ActivityStep {
         }
     }
 
+    /// One line for the session outline: what the step asks of you.
+    var outlineDetail: String {
+        switch self {
+        case .verbalRecite: "Optional. Say the verse aloud."
+        case let .everyOtherWord(phase): phase == 0
+            ? "Type the first letter of every odd word."
+            : "Type the first letter of every even word."
+        case .everyWord: "Type the first letter of every word."
+        case .everyWordRetry: "Type it again if you missed any words."
+        }
+    }
+
+    /// Title for the session outline (the retry reads as its own step).
+    var outlineTitle: String {
+        isRetry ? "Retry" : activityType
+    }
+
+    /// SF Symbol for the session outline.
+    var outlineSymbol: String {
+        switch self {
+        case .verbalRecite: "mic.fill"
+        case .everyOtherWord: "circle.lefthalf.fill"
+        case .everyWord: "circle.fill"
+        case .everyWordRetry: "circle.dotted"
+        }
+    }
+
+    /// Short tag for the session outline.
+    var outlineTag: String {
+        switch self {
+        case .verbalRecite, .everyWord: "Scored"
+        case .everyOtherWord: "Warm-up"
+        case .everyWordRetry: "If needed"
+        }
+    }
+
     var phase: Int? {
         if case let .everyOtherWord(phase) = self {
             return phase

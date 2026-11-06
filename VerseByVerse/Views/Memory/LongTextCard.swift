@@ -23,7 +23,6 @@ struct LongTextCard: View {
     @State private var isExpanded = false
     @State private var fullHeight: CGFloat = 0
     @State private var collapsedHeight: CGFloat = 0
-    @State private var isShowingCopyright: Bool = false
 
     /// Collapsed cap, in lines so it adapts to Dynamic Type.
     private let collapsedLineLimit = 5
@@ -56,11 +55,6 @@ struct LongTextCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
         .animation(.smooth(duration: 0.3), value: isExpanded)
-        .sheet(isPresented: $isShowingCopyright, onDismiss: {}) {
-            CopyrightSheetView(translation: translation)
-                .presentationDetents([.medium])
-                .presentationDragIndicator(.visible)
-        }
     }
 
     private var header: some View {
@@ -68,19 +62,7 @@ struct LongTextCard: View {
             Text(title)
                 .font(.app(.title2))
             Spacer()
-            Button {
-                isShowingCopyright = true
-            } label: {
-                Text(translation.abbreviation)
-                    .font(.app(.caption, weight: .semibold))
-                    .padding(.horizontal, AppSpacing.sm)
-                    .padding(.vertical, AppSpacing.xs)
-                    .background(Color.secondary.opacity(0.15), in: Capsule())
-                    .foregroundStyle(.secondary)
-                Image(systemName: "info.circle")
-                    .foregroundStyle(.secondary)
-            }
-            .buttonStyle(.plain)
+            TranslationBadgeButton(translation: translation)
         }
     }
 
