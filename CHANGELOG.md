@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.1.0-beta.11](https://github.com/jadenzaleski/verse-by-verse/compare/v0.1.0-beta.10...v0.1.0-beta.11) (2026-11-06)
+
+
+### Features
+
+* Add the ability to export your data. ([dbbfef4](https://github.com/jadenzaleski/verse-by-verse/commit/dbbfef4de2918f4506e07f833efe1adc06c6ce70))
+* daily reminder, streak reminder and due-count badge ([9563da5](https://github.com/jadenzaleski/verse-by-verse/commit/9563da570afe8eb1255e32d7516b94f2804957bc))
+* Updated flow of practice session and changed badges. ([01ca134](https://github.com/jadenzaleski/verse-by-verse/commit/01ca134bd3d4d4ff4fe41b23d1b48b2141db5e39))
+
+
+### Bug Fixes
+
+* purge expired cached verse text on launch ([34537d0](https://github.com/jadenzaleski/verse-by-verse/commit/34537d0e5982e4053ff1817ca6a5a40b09f478e5))
+* updated scheduling behavior and tweaked how sessions are scored. ([c5320d5](https://github.com/jadenzaleski/verse-by-verse/commit/c5320d5374c6c87142a8f101ed1d01a9bd577454))
+
 ## [0.1.0-beta.10](https://github.com/jadenzaleski/verse-by-verse/compare/v0.1.0-beta.9...v0.1.0-beta.10) (2026-11-01)
 
 
