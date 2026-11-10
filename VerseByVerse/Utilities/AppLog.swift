@@ -8,7 +8,7 @@
 import Foundation
 import os
 
-enum LogLevel: Int, Comparable, CaseIterable {
+nonisolated enum LogLevel: Int, Comparable, CaseIterable {
     case trace = 0
     case debug = 1
     case info = 2
@@ -45,7 +45,7 @@ enum LogLevel: Int, Comparable, CaseIterable {
     }
 }
 
-enum AppLog {
+nonisolated enum AppLog {
     static let subsystem = "com.jadenzaleski.vbv"
 
     /// The minimum level for this build, resolved at compile time from the
@@ -74,7 +74,7 @@ enum AppLog {
 /// - Important: Messages are recorded with `.public` privacy so they appear in
 ///   full in exported logs that testers send back. Never pass secrets (tokens,
 ///   passwords, raw request bodies) into these methods.
-struct AppLogger {
+nonisolated struct AppLogger {
     let category: String
     private let logger: Logger
 

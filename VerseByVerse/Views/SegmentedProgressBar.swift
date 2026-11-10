@@ -65,7 +65,7 @@ struct SegmentedProgressBar: View {
                         value: completedSegments,
                     )
                     .animation(.easeInOut(duration: 0.35), value: totalSegments)
-                    .transition(.opacity.combined(with: .scale(scale: 0.7)))
+                    .transition(unsafe .opacity.combined(with: .scale(scale: 0.7)))
             }
         }
         .frame(height: height)

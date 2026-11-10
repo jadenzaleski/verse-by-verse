@@ -12,6 +12,7 @@ import Testing
 /// API.Bible FUMS reporting: one anonymous beacon per scripture display,
 /// carrying the tokens the Bible proxy returned with the text.
 @Suite("FUMS reporter")
+@MainActor
 struct FUMSReporterTests {
     /// Collects the URLs the reporter would have requested.
     private final class Recorder: @unchecked Sendable {

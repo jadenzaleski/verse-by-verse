@@ -12,7 +12,6 @@ import Foundation
 /// All stored properties are immutable and of `Sendable` types.
 final nonisolated class LoggingService: Sendable {
     static let shared = LoggingService()
-    private static let timestampFormatter = ISO8601DateFormatter()
     /// Filename-safe timestamp (no colons) for rotated and exported files.
     private static let fileTimestampFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -39,7 +38,7 @@ final nonisolated class LoggingService: Sendable {
 
     func log(level: LogLevel, category: String, source: String, message: String) {
         queue.async {
-            let timestamp = Self.timestampFormatter.string(from: Date())
+            let timestamp = Date().ISO8601Format()
             let entry = "[\(timestamp)] [\(level.fileTag)] [\(category)] (\(source)) \(message)\n"
             self.rotateIfNeeded()
             self.appendToFile(entry)
@@ -142,7 +141,7 @@ final nonisolated class LoggingService: Sendable {
         VerseByVerse Logs
         Version: \(AppFunctions.versionString() ?? "unknown")
         Channel: \(AppFunctions.channel)
-        Exported: \(Self.timestampFormatter.string(from: Date()))
+        Exported: \(Date().ISO8601Format())
 
         """
 

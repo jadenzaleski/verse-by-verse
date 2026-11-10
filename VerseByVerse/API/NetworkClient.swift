@@ -59,7 +59,7 @@ final class NetworkClient {
     }
 }
 
-struct APIResponse<T: Codable>: Codable {
+nonisolated struct APIResponse<T: Codable>: Codable {
     let statusCode: Int
     let body: T
 
@@ -82,10 +82,10 @@ nonisolated extension JSONDecoder {
         decoder.dateDecodingStrategy = .custom { decoder in
             let container = try decoder.singleValueContainer()
             let string = try container.decode(String.self)
-            if let date = DateFormatters.iso8601Fractional.date(from: string) {
+            if let date = try? DateFormatters.iso8601Fractional.parse(string) {
                 return date
             }
-            if let date = DateFormatters.iso8601.date(from: string) {
+            if let date = try? DateFormatters.iso8601.parse(string) {
                 return date
             }
             throw DecodingError.dataCorruptedError(
@@ -103,22 +103,40 @@ nonisolated extension JSONEncoder {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .custom { date, encoder in
             var container = encoder.singleValueContainer()
-            try container.encode(DateFormatters.iso8601Fractional.string(from: date))
+            try container.encode(DateFormatters.fractionalString(from: date))
         }
         return encoder
     }
 }
 
+/// `Date.ISO8601FormatStyle` is a `Sendable` value type (unlike
+/// `ISO8601DateFormatter`), so these can be shared statics under Swift 6.
+/// Both format and parse in UTC with a trailing `Z`.
 private nonisolated enum DateFormatters {
-    static let iso8601Fractional: ISO8601DateFormatter = {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        return formatter
-    }()
+    static let iso8601Fractional = Date.ISO8601FormatStyle(includingFractionalSeconds: true)
+    static let iso8601 = Date.ISO8601FormatStyle()
 
-    static let iso8601: ISO8601DateFormatter = {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime]
-        return formatter
-    }()
+    /// `2026-01-02T12:00:00.123Z`, rounded to the nearest millisecond.
+    ///
+    /// `ISO8601FormatStyle(includingFractionalSeconds: true)` *truncates* the
+    /// fraction, and a millisecond that isn't exactly representable as a
+    /// `Double` (most of them) lands just below its value and truncates a
+    /// millisecond low, so a decode-then-encode round trip would drift. Counting
+    /// whole milliseconds as integers first keeps encoding stable, and only the
+    /// whole-second part goes through the format style.
+    static func fractionalString(from date: Date) -> String {
+        let totalMilliseconds = Int64((date.timeIntervalSince1970 * 1000).rounded())
+        var seconds = totalMilliseconds / 1000
+        var milliseconds = totalMilliseconds % 1000
+        if milliseconds < 0 {
+            // Before 1970: keep the fraction positive, counting from the earlier second.
+            milliseconds += 1000
+            seconds -= 1
+        }
+        let wholeSeconds = Date(timeIntervalSince1970: Double(seconds)).formatted(iso8601)
+        let digits = String(milliseconds)
+        let fraction = String(repeating: "0", count: 3 - digits.count) + digits
+        // `wholeSeconds` ends in "Z"; the fraction goes before it.
+        return wholeSeconds.dropLast() + "." + fraction + "Z"
+    }
 }

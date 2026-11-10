@@ -12,7 +12,7 @@ import Foundation
 /// and never scored or colored. `“This,` → (`“`, `T`, `his`, `,`).
 /// A word with no letter or digit (a lone `—` or `”`) has no `key` and is
 /// never masked.
-struct TypedWordParts: Equatable {
+nonisolated struct TypedWordParts: Equatable {
     /// Punctuation before the typed character, e.g. `“` or `(`.
     let leading: String
     /// The first letter or digit — the character the user types.
@@ -51,7 +51,7 @@ struct TypedWordParts: Equatable {
 /// Derives per-character typing correctness for a masked-word activity
 /// (Every Other Word / Every Word) from the raw passage text, which word
 /// indices are masked, and what's been typed so far.
-struct TypingProgress {
+nonisolated struct TypingProgress {
     let words: [String]
     let maskedIndices: [Int]
     let inputText: String

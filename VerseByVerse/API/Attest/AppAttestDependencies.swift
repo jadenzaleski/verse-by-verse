@@ -79,7 +79,7 @@ struct KeychainAttestKeyStore: AttestKeyStore {
         lookup[kSecReturnData as String] = true
         lookup[kSecMatchLimit as String] = kSecMatchLimitOne
         var result: AnyObject?
-        guard SecItemCopyMatching(lookup as CFDictionary, &result) == errSecSuccess,
+        guard unsafe SecItemCopyMatching(lookup as CFDictionary, &result) == errSecSuccess,
               let data = result as? Data
         else { return nil }
         return try? JSONDecoder().decode(StoredAttestKey.self, from: data)

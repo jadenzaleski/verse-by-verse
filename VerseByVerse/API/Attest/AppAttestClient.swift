@@ -252,6 +252,6 @@ final class AppAttestClient {
     /// Short, non-reversible handle for logs.
     private func fingerprint(of keyId: String?) -> String {
         guard let keyId else { return "none" }
-        return SHA256.hash(data: Data(keyId.utf8)).prefix(4).map { String(format: "%02x", $0) }.joined()
+        return SHA256.hash(data: Data(keyId.utf8)).prefix(4).hexString
     }
 }

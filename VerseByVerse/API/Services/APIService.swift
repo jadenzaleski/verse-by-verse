@@ -27,7 +27,7 @@ final class APIService {
     ) async throws -> APIResponse<T> {
         let cacheKey = endpoint.cacheIdentifier
 
-        if lookInCache, let cached = cache.get(cacheKey, decode: T.self), isCacheable(cached.body) {
+        if lookInCache, let cached = await cache.get(cacheKey, decode: T.self), isCacheable(cached.body) {
             log.debug("Cache hit: \(endpoint.debugIdentifier)")
             return cached
         }
@@ -73,7 +73,7 @@ final class APIService {
             )
 
             if saveToCache, isCacheable(apiResponse.body) {
-                cache.set(key: cacheKey, response: apiResponse, ttl: endpoint.ttl)
+                await cache.set(key: cacheKey, response: apiResponse, ttl: endpoint.ttl)
             }
 
             reportReachability(endpoint: endpoint, status: .online)

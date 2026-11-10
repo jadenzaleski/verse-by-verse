@@ -275,7 +275,7 @@ final class NotificationScheduler {
 }
 
 /// Handles notifications that arrive while the app is open, and taps.
-final nonisolated class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
+final nonisolated class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate, Sendable {
     static let shared = NotificationDelegate()
 
     /// The user is already in the app: no banner or sound, but keep the badge.

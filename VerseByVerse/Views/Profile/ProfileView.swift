@@ -213,16 +213,18 @@ struct ProfileView: View {
     }
 }
 
-extension String {
+nonisolated extension String {
     var stableSeed: Int {
         // 1. Convert string to data using UTF-8 encoding
         let data = Data(utf8)
         // 2. Generate a SHA-256 hash (32 bytes / 256 bits)
         let hash = SHA256.hash(data: data)
-        // 3. Extract the first 8 bytes (64 bits)
-        return hash.withUnsafeBytes { pointer in
-            pointer.load(as: Int.self)
+        // 3. Pack the first 8 bytes (64 bits) little-endian, the same value a
+        // native-endian raw load produced, without touching raw memory.
+        let bits = hash.prefix(8).enumerated().reduce(UInt64(0)) { partial, item in
+            partial | (UInt64(item.element) << UInt64(8 * item.offset))
         }
+        return Int(truncatingIfNeeded: bits)
     }
 }
 

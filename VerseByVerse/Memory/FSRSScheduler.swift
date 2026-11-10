@@ -12,7 +12,7 @@ import FSRS
 /// `open-spaced-repetition/swift-fsrs` package: FSRS-6 default 21 weights,
 /// fuzzing disabled so scheduling is deterministic.
 /// Fine-tuning (per-user parameters, custom retention UI) can come later.
-struct FSRSScheduler: MemoryScheduler {
+nonisolated struct FSRSScheduler: MemoryScheduler {
     private let engine: FSRS
     private let log = AppLog.category("FSRSScheduler")
 

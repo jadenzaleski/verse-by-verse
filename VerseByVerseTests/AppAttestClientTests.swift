@@ -102,6 +102,7 @@ struct AppAttestClientTests {
         var now = Date(timeIntervalSince1970: 1_800_000_000)
     }
 
+    @MainActor
     struct Harness {
         let attest = FakeAttest()
         let server = FakeServer()

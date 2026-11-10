@@ -250,7 +250,7 @@ final class RecitationRecorder {
 
     private func requestSpeechAuthorization() async -> Bool {
         await withCheckedContinuation { continuation in
-            SFSpeechRecognizer.requestAuthorization { status in
+            SFSpeechRecognizer.requestAuthorization { @Sendable status in
                 continuation.resume(returning: status == .authorized)
             }
         }
@@ -323,7 +323,7 @@ final class RecitationRecorder {
 
         try inputNode.__installTap(
             onBus: 0, bufferSize: 1024, format: recordingFormat, error: (),
-        ) { [weak self] buffer, _ in
+        ) { @Sendable [weak self] buffer, _ in
             let amplitude = RecitationRecorder.peakAmplitude(of: buffer)
             Task { @MainActor in self?.apply(amplitude: amplitude) }
 
@@ -336,13 +336,13 @@ final class RecitationRecorder {
 
             var conversionError: NSError?
             var consumed = false
-            converter.convert(to: convertedBuffer, error: &conversionError) { _, inputStatus in
+            unsafe converter.convert(to: convertedBuffer, error: &conversionError) { _, inputStatus in
                 if consumed {
-                    inputStatus.pointee = .noDataNow
+                    unsafe inputStatus.pointee = .noDataNow
                     return nil
                 }
                 consumed = true
-                inputStatus.pointee = .haveData
+                unsafe inputStatus.pointee = .haveData
                 return buffer
             }
 
@@ -362,13 +362,13 @@ final class RecitationRecorder {
     /// a whole syllable into a single number — precisely the variation the
     /// meter is supposed to show. Runs on the audio thread; keep it cheap.
     private nonisolated static func peakAmplitude(of buffer: AVAudioPCMBuffer) -> Double {
-        guard let samples = buffer.floatChannelData?[0] else { return 0 }
+        guard let samples = unsafe buffer.floatChannelData?[0] else { return 0 }
         let count = Int(buffer.frameLength)
         guard count > 0 else { return 0 }
 
         var peak: Float = 0
         for index in 0 ..< count {
-            peak = max(peak, abs(samples[index]))
+            peak = max(peak, abs(unsafe samples[index]))
         }
         return Double(peak)
     }

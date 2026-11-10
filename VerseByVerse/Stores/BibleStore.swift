@@ -88,7 +88,7 @@ final class BibleStore {
     /// (offline).
     @MainActor
     func clearCache() async {
-        Cache.shared.removeAll()
+        await Cache.shared.removeAll()
         clearSelections()
         async let books: Void = loadBibleData(force: true)
         async let translations: Void = loadTranslations(force: true)

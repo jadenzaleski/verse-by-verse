@@ -17,7 +17,7 @@ struct SelectionVerse: Identifiable, Equatable {
     let text: String
 }
 
-struct BibleSelectionKey: Hashable, Codable {
+nonisolated struct BibleSelectionKey: Hashable, Codable {
     let translation: String
     let book: String
     let startChapter: Int

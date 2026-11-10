@@ -7,14 +7,14 @@
 
 import Foundation
 
-enum ActivityStep: Equatable {
+nonisolated enum ActivityStep: Equatable {
     case everyOtherWord(phase: Int)
     case everyWord(allowsRetry: Bool)
     case everyWordRetry
     case verbalRecite
 }
 
-extension ActivityStep {
+nonisolated extension ActivityStep {
     /// The standard practice plan, in execution order. This is the plan the
     /// retired backend returned from `/practice-session/start`.
     static let standardPlan: [ActivityStep] = [
@@ -93,7 +93,7 @@ extension ActivityStep {
 
 /// What counts toward a session's score, overall and per verse. Only
 /// ``ActivityStep/isScored`` steps contribute; every word counts as one.
-struct SessionTally {
+nonisolated struct SessionTally {
     private(set) var correct = 0
     private(set) var total = 0
     /// Per-verse tallies, indexed like the session's verses.

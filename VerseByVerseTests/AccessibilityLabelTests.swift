@@ -12,6 +12,7 @@ import Testing
 /// unanswered word is only ever "blank" — the hidden word is never spoken —
 /// and a wrong answer says "Incorrect", never the expected letter.
 @Suite("Typing VoiceOver")
+@MainActor
 struct AccessibilityLabelTests {
     private func cell(
         _ word: String = "said,",

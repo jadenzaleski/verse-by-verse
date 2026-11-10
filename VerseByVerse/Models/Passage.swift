@@ -81,6 +81,7 @@ extension Passage {
         )
     }
 
+    @MainActor
     func verseCount(using bibleStore: BibleStore) -> Int {
         if startChapter == endChapter {
             return endVerse - startVerse + 1
@@ -188,6 +189,7 @@ extension Passage {
     /// Attaches the shared `Verse` cards for this passage's range, creating
     /// any that don't exist yet. Requires Bible metadata for per-chapter
     /// verse counts on cross-chapter ranges.
+    @MainActor
     func attachVerses(using bibleStore: BibleStore, in context: ModelContext) throws {
         var members: [Verse] = []
         for chapter in startChapter ... endChapter {

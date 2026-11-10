@@ -152,7 +152,7 @@ struct WeeklySessionsChart: View {
 
     private var averageString: String {
         let avg = visibleAverage
-        return avg == avg.rounded() ? String(Int(avg)) : String(format: "%.1f", avg)
+        return avg == avg.rounded() ? String(Int(avg)) : avg.formatted(.number.precision(.fractionLength(1)))
     }
 
     // MARK: - Chart

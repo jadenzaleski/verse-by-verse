@@ -89,8 +89,9 @@ struct VerseByVerseApp: App {
         NotificationScheduler.shared.configure(context: container.mainContext)
         NotificationScheduler.shared.appBecameActive()
         // Verse text may be stored for at most 14 days. Entries expire lazily
-        // when read, so sweep the ones nobody asked for again.
-        Cache.shared.purgeExpired()
+        // when read, so sweep the ones nobody asked for again. Off the main
+        // thread and not awaited: startup never waits on the sweep.
+        Task { await Cache.shared.purgeExpired() }
         // Register (first launch) or refresh the App Attest session in the
         // background so the first verse fetch already has a token. Not
         // awaited: startup never waits on Apple's attestation service.

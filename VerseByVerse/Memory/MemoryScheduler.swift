@@ -12,7 +12,7 @@ import Foundation
 /// This is the only shape the app persists for scheduling; any engine that
 /// can turn a `MemoryState` + a session score into a new `MemoryState`
 /// (via ``MemoryScheduler``) can drive the practice loop.
-struct MemoryState: Equatable, Codable {
+nonisolated struct MemoryState: Equatable, Codable {
     /// FSRS stability in days; `nil` until the first review.
     var stability: Double?
     /// FSRS difficulty (1–10); `nil` until the first review.
@@ -40,7 +40,7 @@ struct MemoryState: Equatable, Codable {
 }
 
 /// Result of applying one completed practice session to a passage.
-struct ReviewOutcome: Equatable {
+nonisolated struct ReviewOutcome: Equatable {
     var state: MemoryState
     /// FSRS rating derived from the session score: 1 = Again … 4 = Easy.
     var rating: Int
@@ -49,7 +49,7 @@ struct ReviewOutcome: Equatable {
 }
 
 /// The seam between VerseByVerse and any scheduling engine.
-protocol MemoryScheduler {
+nonisolated protocol MemoryScheduler {
     /// Applies one completed session (score 0…1) to a passage's memory state.
     func processReview(state: MemoryState, score: Double, at date: Date) -> ReviewOutcome
 
@@ -57,7 +57,7 @@ protocol MemoryScheduler {
     func retrievability(of state: MemoryState, at date: Date) -> Double
 }
 
-enum MemoryScoring {
+nonisolated enum MemoryScoring {
     /// A verse's score for one session: words correct ÷ words scored, or `nil`
     /// when none of its words were scored (e.g. the translation omits the verse).
     /// Such a verse must be skipped, not treated as a failed review.

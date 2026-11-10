@@ -21,6 +21,7 @@ extension Passage {
     /// Deletes this passage. Its verses are kept as standalone cards when
     /// `alsoDeleteVerses` is false; otherwise any verse nothing else
     /// references is swept away along with its reviews.
+    @MainActor
     func delete(alsoDeleteVerses: Bool, in context: ModelContext) throws {
         if !alsoDeleteVerses {
             for verse in verses ?? [] {
@@ -54,6 +55,7 @@ extension Verse {
     /// Deletes this verse from the library: removes it from every set, deletes
     /// every passage it belongs to (and so their sibling verses, unless
     /// referenced elsewhere), and sweeps what's left unreferenced.
+    @MainActor
     func deleteFromLibrary(in context: ModelContext) throws {
         for set in studySets ?? [] {
             set.verses?.removeAll { $0 === self }
@@ -71,6 +73,7 @@ extension Verse {
 extension StudySet {
     /// Deletes this set. Its passages and verses stay in the library, except
     /// verses that were only reachable through the set.
+    @MainActor
     func delete(in context: ModelContext) throws {
         context.delete(self)
         try Verse.sweepOrphans(in: context)
