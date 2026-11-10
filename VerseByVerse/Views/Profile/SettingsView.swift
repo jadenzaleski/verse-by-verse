@@ -154,7 +154,6 @@ struct SettingsView: View {
                     Spacer()
                     DatePicker("", selection: reminderTime, displayedComponents: .hourAndMinute)
                 }
-
             }
 
             notificationToggle(

@@ -320,7 +320,10 @@ final class RecitationRecorder {
         // Smaller buffers than the analyzer strictly needs: ~21ms each, so
         // the level meter updates ~45×/sec and tracks speech instead of
         // lagging a syllable behind it.
-        inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { [weak self] buffer, _ in
+
+        try inputNode.__installTap(
+            onBus: 0, bufferSize: 1024, format: recordingFormat, error: (),
+        ) { [weak self] buffer, _ in
             let amplitude = RecitationRecorder.peakAmplitude(of: buffer)
             Task { @MainActor in self?.apply(amplitude: amplitude) }
 

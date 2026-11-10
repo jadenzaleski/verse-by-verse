@@ -225,13 +225,13 @@ struct VerbalActivityView: View {
             switch mode {
             case .idle:
                 HStack(spacing: AppSpacing.md) {
+                    Button("Skip", action: onSkip)
+                        .buttonStyle(.outlined)
+
                     Button("Start") {
                         Task { await recorder.start() }
                     }
                     .buttonStyle(.primary)
-
-                    Button("Skip", action: onSkip)
-                        .buttonStyle(.outlined)
                 }
             case .preparing:
                 EmptyView()

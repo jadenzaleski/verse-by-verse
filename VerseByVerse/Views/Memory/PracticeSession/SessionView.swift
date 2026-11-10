@@ -146,7 +146,7 @@ struct SessionView: View {
             await startSession()
         }
         .retryWhenOnline(if: phase == .loadFailed) { retryLoad() }
-        .retryAfterRateLimit(error: { phase == .loadFailed ? loadError : nil }) { retryLoad() }
+        .retryAfterRateLimit(error: { phase == .loadFailed ? loadError : nil }, perform: { retryLoad() })
         .alert("Quit Session?", isPresented: $showAbandonConfirmation) {
             Button("Quit", role: .destructive) { dismiss() }
             Button("Continue", role: .cancel) {}
@@ -156,6 +156,12 @@ struct SessionView: View {
     }
 
     // MARK: - Activity routing
+
+    /// Skip is offered only on steps that aren't scored (warm-up, retry).
+    private var skipAction: (() -> Void)? {
+        guard stepIndex < steps.count, !steps[stepIndex].isScored else { return nil }
+        return { skipStep() }
+    }
 
     @ViewBuilder
     private var activityContent: some View {
@@ -168,6 +174,7 @@ struct SessionView: View {
                     passageText: verseText,
                     maskedIndices: TypingProgress.everyOtherIndices(in: words, phase: phase),
                     instruction: "Type the first letter of each missing word. This warm-up isn't scored.",
+                    onSkip: skipAction,
                     onContinue: advance,
                 )
                 .id(stepIndex)
@@ -181,6 +188,7 @@ struct SessionView: View {
                     instruction: steps[stepIndex].isRetry
                         ? "Type the first letter of every word from memory. This retry isn't scored."
                         : "Type the first letter of every word from memory.",
+                    onSkip: skipAction,
                     onContinue: advance,
                 )
                 .id(stepIndex)

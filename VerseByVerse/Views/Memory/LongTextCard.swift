@@ -143,7 +143,13 @@ struct LongTextCard: View {
     }()
     LongTextCard(
         title: "Verse",
-        translation: BibleTranslationInfo(id: "KJV", abbreviation: "KJV", name: "King James Version", copyright: "Public Domain", provider: "Public Domain"),
+        translation: BibleTranslationInfo(
+            id: "KJV",
+            abbreviation: "KJV",
+            name: "King James Version",
+            copyright: "Public Domain",
+            provider: "Public Domain",
+        ),
         text: Text(attributed),
     )
     .padding()
