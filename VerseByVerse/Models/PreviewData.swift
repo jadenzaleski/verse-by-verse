@@ -126,11 +126,15 @@ enum PreviewData {
             }
         }
 
-        // A standalone verse the user memorizes on its own.
-        if let standalone = try? Verse.findOrCreate(
-            translation: "KJV", book: "Philippians", chapter: 4, number: 13, in: context,
-        ) {
-            standalone.addedDirectly = true
+        // Standalone verses the user memorizes on their own.
+        var standaloneVerses: [Verse] = []
+        for (book, chapter, number) in [("Philippians", 4, 13), ("John", 14, 6)] {
+            if let standalone = try? Verse.findOrCreate(
+                translation: "KJV", book: book, chapter: chapter, number: number, in: context,
+            ) {
+                standalone.addedDirectly = true
+                standaloneVerses.append(standalone)
+            }
         }
 
         let seedSets: [SeedSet] = [
@@ -148,6 +152,10 @@ enum PreviewData {
                 meshTheme: entry.theme,
             )
             set.passages = Array(passages.prefix(index + 2))
+            // The first set mixes passages with loose verses (e.g. for SetDetailView previews).
+            if index == 0 {
+                set.verses = standaloneVerses
+            }
             context.insert(set)
         }
 

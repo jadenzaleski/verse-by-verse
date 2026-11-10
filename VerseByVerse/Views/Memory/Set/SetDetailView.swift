@@ -63,16 +63,16 @@ struct SetDetailView: View {
                     .padding(.top, AppSpacing.sm)
 
                     ForEach(passages) { passage in
-                        NavigationLink(destination: PassageDetailView(passage: passage)) {
-                            PassageCard(passage: passage, style: .compact)
-                        }
-                        .buttonStyle(.plain)
-                        .contextMenu {
-                            Button(role: .destructive) {
-                                remove(passage)
-                            } label: {
-                                Label("Remove from Set", systemImage: "minus.circle")
+                        SetMemberSwipeRow(
+                            title: passage.reference,
+                            message: "It stays in your library and in any other sets.",
+                        ) {
+                            NavigationLink(destination: PassageDetailView(passage: passage)) {
+                                PassageCard(passage: passage, style: .compact)
                             }
+                            .buttonStyle(.plain)
+                        } onRemove: {
+                            remove(passage)
                         }
                     }
                 }
@@ -89,21 +89,22 @@ struct SetDetailView: View {
                     .padding(.top, AppSpacing.sm)
 
                     ForEach(looseVerses) { verse in
-                        NavigationLink(destination: VerseDetailView(verse: verse)) {
-                            VerseCard(verse: verse)
-                        }
-                        .buttonStyle(.plain)
-                        .contextMenu {
-                            Button(role: .destructive) {
-                                remove(verse)
-                            } label: {
-                                Label("Remove from Set", systemImage: "minus.circle")
+                        SetMemberSwipeRow(
+                            title: verse.reference,
+                            message: "It stays in your library if it's in a passage or was added on its own.",
+                        ) {
+                            NavigationLink(destination: VerseDetailView(verse: verse)) {
+                                VerseCard(verse: verse)
                             }
+                            .buttonStyle(.plain)
+                        } onRemove: {
+                            remove(verse)
                         }
                     }
                 }
             }
         }
+        .swipeActionsContainer()
         .padding(.horizontal)
         .scrollIndicators(.hidden)
         .background(SetMesh(colorPallette: set.meshTheme.palette,
