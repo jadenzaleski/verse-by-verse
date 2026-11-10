@@ -8,7 +8,7 @@
 import SwiftUI
 
 /// An outline of the session ahead, shown before the first activity: one
-/// linked step per activity, each marked as scored or warm-up. It's the same
+/// linked step per activity, each marked as scored or practice. It's the same
 /// for every session, new material or not. The session clock and progress
 /// only start when the user taps Start.
 struct SessionPreviewView: View {

@@ -11,7 +11,7 @@ import SwiftUI
 /// correctness is derived by `TypingProgress`; this view is just layout and
 /// the hidden `TextField` that captures keystrokes.
 struct ActivityView: View {
-    /// The step being run; drives the Scored / Warm-up / Retry badge.
+    /// The step being run; drives the Scored / Practice / Retry badge.
     let step: ActivityStep
     let translation: BibleTranslationInfo
     let passageText: String
@@ -234,7 +234,7 @@ struct ActivityView: View {
     .environment(\.font, .app())
 }
 
-#Preview("Long passage, warm-up with Skip") {
+#Preview("Long passage, practice with Skip") {
     let verse = """
     For God so loved the world that he gave his one and only Son, that whoever believes in him \
     shall not perish but have eternal life. For God did not send his Son into the world to condemn \
@@ -253,7 +253,7 @@ struct ActivityView: View {
         ),
         passageText: verse,
         maskedIndices: TypingProgress.everyOtherIndices(in: Array(words.map(String.init)), phase: 0),
-        instruction: "Type the first letter of each missing word. This warm-up isn't scored.",
+        instruction: "Type the first letter of each missing word. This practice round isn't scored.",
         onSkip: {},
         onContinue: { _, _, _ in },
     )

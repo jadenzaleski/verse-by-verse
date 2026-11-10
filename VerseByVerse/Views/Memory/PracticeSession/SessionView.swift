@@ -157,7 +157,7 @@ struct SessionView: View {
 
     // MARK: - Activity routing
 
-    /// Skip is offered only on steps that aren't scored (warm-up, retry).
+    /// Skip is offered only on steps that aren't scored (practice, retry).
     private var skipAction: (() -> Void)? {
         guard stepIndex < steps.count, !steps[stepIndex].isScored else { return nil }
         return { skipStep() }
@@ -173,7 +173,7 @@ struct SessionView: View {
                     translation: translationInfo,
                     passageText: verseText,
                     maskedIndices: TypingProgress.everyOtherIndices(in: words, phase: phase),
-                    instruction: "Type the first letter of each missing word. This warm-up isn't scored.",
+                    instruction: "Type the first letter of each missing word. This practice round isn't scored.",
                     onSkip: skipAction,
                     onContinue: advance,
                 )

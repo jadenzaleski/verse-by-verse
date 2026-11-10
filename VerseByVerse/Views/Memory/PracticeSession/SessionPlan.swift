@@ -63,7 +63,7 @@ nonisolated extension ActivityStep {
     var outlineTag: String {
         switch self {
         case .verbalRecite, .everyWord: "Scored"
-        case .everyOtherWord: "Warm-up"
+        case .everyOtherWord: "Practice"
         case .everyWordRetry: "If needed"
         }
     }

@@ -16,7 +16,7 @@ struct SessionTallyTests {
         #expect(!ActivityStep.everyWordRetry.isScored)
     }
 
-    @Test func `warm-up and retry add nothing`() {
+    @Test func `practice and retry add nothing`() {
         var tally = SessionTally(verseCount: 1, wordOwners: [0, 0, 0, 0])
         let allRight: [Int: Bool] = [0: true, 1: true, 2: true, 3: true]
 

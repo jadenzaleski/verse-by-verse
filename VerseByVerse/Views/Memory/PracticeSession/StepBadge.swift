@@ -8,7 +8,7 @@
 import SwiftUI
 
 /// The pill at the top of an activity that says whether it counts: "Scored"
-/// for unaided recall, "Warm-up" or "Retry" for steps that don't.
+/// for unaided recall, "Practice" or "Retry" for steps that don't.
 struct StepBadge: View {
     let step: ActivityStep
 
@@ -18,7 +18,7 @@ struct StepBadge: View {
         } else if step.isRetry {
             "Retry"
         } else {
-            "Warm-up"
+            "Practice"
         }
     }
 
