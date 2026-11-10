@@ -45,15 +45,25 @@ struct SetCard: View {
                     .font(.app(.callout, weight: .semibold))
                     .padding(.top, AppSpacing.xs)
 
-                HStack {
-                    Text("\(passageCount ?? 0) Passages")
-                    Spacer(minLength: 5)
-                    Text("\(verseCount ?? 0) Verses")
+                // Full labels when they fit; abbreviate to P / V on narrow cards.
+                ViewThatFits(in: .horizontal) {
+                    countsRow(passages: "\(passageCount ?? 0) Passages", verses: "\(verseCount ?? 0) Verses")
+                    countsRow(passages: "\(passageCount ?? 0) P", verses: "\(verseCount ?? 0) V")
                 }
                 .font(.app(.caption))
                 .foregroundStyle(.secondary)
             }
             .lineLimit(1)
+        }
+    }
+}
+
+private extension SetCard {
+    func countsRow(passages: String, verses: String) -> some View {
+        HStack {
+            Text(passages).fixedSize(horizontal: true, vertical: false)
+            Spacer(minLength: 5)
+            Text(verses).fixedSize(horizontal: true, vertical: false)
         }
     }
 }

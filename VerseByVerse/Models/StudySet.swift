@@ -62,6 +62,26 @@ final class StudySet {
         meshThemeRaw = meshTheme.rawValue
     }
 
+    /// Total number of passages in the set.
+    var totalPassageCount: Int {
+        passages?.count ?? 0
+    }
+
+    /// Total number of distinct verses in the set: every verse of its passages
+    /// plus its loose verses, with a verse that appears in both counted once.
+    var totalVerseCount: Int {
+        var ids = Set<PersistentIdentifier>()
+        for passage in passages ?? [] {
+            for verse in passage.verses ?? [] {
+                ids.insert(verse.persistentModelID)
+            }
+        }
+        for verse in verses ?? [] {
+            ids.insert(verse.persistentModelID)
+        }
+        return ids.count
+    }
+
     var meshTheme: MeshTheme {
         get { MeshTheme(rawValue: meshThemeRaw) ?? .ocean }
         set { meshThemeRaw = newValue.rawValue }

@@ -449,8 +449,8 @@ struct MemoryView: View {
                                     NavigationLink(destination: SetDetailView(set: set)) {
                                         SetCard(
                                             title: set.name,
-                                            passageCount: set.passages?.count,
-                                            verseCount: setVerseCount(set),
+                                            passageCount: set.totalPassageCount,
+                                            verseCount: set.totalVerseCount,
                                             description: set.setDescription,
                                             positionSeed: set.meshPositionSeed,
                                             colorShuffleSeed: set.meshColorSeed,
@@ -487,8 +487,8 @@ struct MemoryView: View {
                             NavigationLink(destination: SetDetailView(set: set)) {
                                 SetCard(
                                     title: set.name,
-                                    passageCount: set.passages?.count,
-                                    verseCount: setVerseCount(set),
+                                    passageCount: set.totalPassageCount,
+                                    verseCount: set.totalVerseCount,
                                     description: set.setDescription,
                                     positionSeed: set.meshPositionSeed,
                                     colorShuffleSeed: set.meshColorSeed,
@@ -500,13 +500,6 @@ struct MemoryView: View {
                     }
                 }
             }
-        }
-    }
-
-    /// Total verse count across a set's passages.
-    private func setVerseCount(_ set: StudySet) -> Int? {
-        set.passages.map { passages in
-            passages.reduce(0) { $0 + $1.verseCount(using: bibleStore) }
         }
     }
 
