@@ -41,8 +41,13 @@ struct VerseDetailView: View {
                                 retentionScore: retentionScore,
                                 lastResult: verse.lastResult)
                 PracticeCard(showPractice: $showPractice, nextPracticeDate: verse.nextPractice, isNew: verse.isNew)
+                SelectionTextCard(
+                    title: "Verse",
+                    translation: verse.translation,
+                    key: verse.selectionKey,
+                    verses: [verse],
+                )
                 historyCard
-                SelectionTextCard(title: "Verse", translation: verse.translation, key: verse.selectionKey)
 
                 appearsInCard()
             }
@@ -285,6 +290,6 @@ private struct VerseMemoryChart: View {
         VerseDetailView(verse: PreviewData.sampleVerse)
     }
     .modelContainer(PreviewData.container)
-    .environment(BibleStore.shared)
+    .environment(PreviewData.bibleStore)
     .environment(\.font, .app())
 }

@@ -43,6 +43,61 @@ enum PreviewData {
         verses.first ?? Verse(book: "John", chapter: 3, number: 16)
     }
 
+    /// A store holding the sample text for the seeded passage and verse, so
+    /// detail previews render offline (and the heatmap has words to color).
+    static var bibleStore: BibleStore {
+        let passage = samplePassage
+        let verse = sampleVerse
+        let selections = [
+            selection(key: passage.selectionKey, verses: passage.orderedVerses),
+            selection(key: verse.selectionKey, verses: [verse]),
+        ]
+        return BibleStore.offline(selections: selections.compactMap(\.self))
+    }
+
+    /// The sample text for `verses`, or `nil` if any of them has none.
+    private static func selection(key: BibleSelectionKey, verses: [Verse]) -> BibleSelection? {
+        let selectionVerses = verses.compactMap { verse -> SelectionVerse? in
+            sampleText[verse.reference].map { text in
+                SelectionVerse(
+                    id: verse.reference, book: verse.book, chapter: verse.chapter, verse: verse.number, text: text,
+                )
+            }
+        }
+        guard selectionVerses.count == verses.count else { return nil }
+        return BibleSelection(
+            translation: key.translation, book: key.book,
+            startChapter: key.startChapter, startVerse: key.startVerse,
+            endChapter: key.endChapter, endVerse: key.endVerse,
+            verses: selectionVerses, fumsTokens: [],
+        )
+    }
+
+    /// Records which words a sample verse's `sessionIndex`-th session missed.
+    private static func applySampleMisses(to review: VerseReview, verse: Verse, sessionIndex: Int) {
+        guard let text = sampleText[verse.reference], let misses = sampleMisses[verse.reference] else { return }
+        review.missedWordIndices = misses[min(sessionIndex, misses.count - 1)]
+        review.textFingerprint = VerseWords.fingerprint(of: text)
+    }
+
+    /// KJV (public domain) text for the sample verses, keyed by reference.
+    /// Only previews use it; the app never stores verse text.
+    private static let sampleText: [String: String] = [
+        "John 3:16": "For God so loved the world, that he gave his only begotten Son, "
+            + "that whosoever believeth in him should not perish, but have everlasting life.",
+        "John 3:17": "For God sent not his Son into the world to condemn the world; "
+            + "but that the world through him might be saved.",
+    ]
+
+    /// Word positions missed in each of a sample verse's practice sessions
+    /// (oldest first), so the heatmap shows a spread from green to red.
+    private static let sampleMisses: [String: [[Int]]] = [
+        // begotten (11) and believeth (15) three times; whosoever (14), everlasting (23) twice; should (18) once.
+        "John 3:16": [[11, 14, 15, 23], [11, 15], [11, 14, 15, 18, 23]],
+        // condemn (10) three times; through (17) twice; might (19) once.
+        "John 3:17": [[10, 17], [10], [10, 17, 19]],
+    ]
+
     private struct SeedRef {
         let book: String
         let chapter: Int
@@ -98,7 +153,7 @@ enum PreviewData {
             // Give the first few passages a practice history.
             guard index < 4 else { continue }
             var reviewDate = Date().addingTimeInterval(Double(-(10 - index)) * 86400)
-            for score in [0.92, 0.95, 0.75].prefix(3 - (index % 2)) {
+            for (sessionIndex, score) in [0.92, 0.95, 0.75].prefix(3 - (index % 2)).enumerated() {
                 let session = PracticeSession(startDate: reviewDate)
                 session.endDate = reviewDate.addingTimeInterval(180)
                 session.score = score
@@ -118,6 +173,7 @@ enum PreviewData {
                     review.stabilityAfter = outcome.state.stability ?? 0
                     review.difficultyAfter = outcome.state.difficulty ?? 0
                     review.stateAfter = outcome.state.state
+                    applySampleMisses(to: review, verse: verse, sessionIndex: sessionIndex)
                     review.verse = verse
                     review.session = session
                     verse.memoryState = outcome.state

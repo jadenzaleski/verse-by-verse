@@ -41,8 +41,13 @@ struct PassageDetailView: View {
                     lastResult: passage.lastResult,
                 )
                 PracticeCard(showPractice: $showPractice, nextPracticeDate: passage.nextPractice, isNew: passage.isNew)
+                SelectionTextCard(
+                    title: "Passage",
+                    translation: passage.translation,
+                    key: passage.selectionKey,
+                    verses: passage.orderedVerses,
+                )
                 historyCard
-                SelectionTextCard(title: "Passage", translation: passage.translation, key: passage.selectionKey)
             }
             .padding(.horizontal, AppSpacing.md)
             .padding(.bottom, AppSpacing.xxl)
@@ -121,6 +126,6 @@ struct PassageDetailView: View {
         PassageDetailView(passage: PreviewData.samplePassage)
     }
     .modelContainer(PreviewData.container)
-    .environment(BibleStore.shared)
+    .environment(PreviewData.bibleStore)
     .environment(\.font, .app())
 }

@@ -43,6 +43,20 @@ final class BibleStore {
         self.translationsLoader = translationsLoader
     }
 
+    /// A store that already holds `selections` and never touches the network,
+    /// for previews and tests that need verse text without fetching it.
+    @MainActor
+    static func offline(selections: [BibleSelection]) -> BibleStore {
+        let store = BibleStore(
+            booksLoader: { throw URLError(.notConnectedToInternet) },
+            translationsLoader: { throw URLError(.notConnectedToInternet) },
+        )
+        for selection in selections {
+            store.selections[selection.key] = selection
+        }
+        return store
+    }
+
     /// The list of Bible books in traditional biblical order.
     let bibleBooksOrder = [
         "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy",

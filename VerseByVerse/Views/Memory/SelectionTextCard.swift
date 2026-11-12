@@ -14,11 +14,17 @@ struct SelectionTextCard: View {
     let title: String
     let translation: String
     let key: BibleSelectionKey
+    /// The verses shown, whose reviews feed the missed-word heatmap.
+    let verses: [Verse]
 
     @Environment(BibleStore.self) private var bibleStore
 
     private var hasFailed: Bool {
         bibleStore.selectionState(for: key).apiError != nil
+    }
+
+    private var heatmap: HeatmapData? {
+        bibleStore.selections[key].map { WordHeatmap.build(selection: $0, verses: verses) }
     }
 
     var body: some View {
@@ -27,6 +33,7 @@ struct SelectionTextCard: View {
             translation: bibleStore.translationInfo(forAbbreviation: translation),
             text: bibleStore.displayText(for: key, placeholder: "Loading..."),
             onRetry: hasFailed ? { Task { await load() } } : nil,
+            heatmap: heatmap,
         )
         .task { await load() }
         .retryWhenOnline(if: hasFailed) { await load() }
