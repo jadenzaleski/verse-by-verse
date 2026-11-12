@@ -207,6 +207,13 @@ final class VerseReview {
     var difficultyAfter: Double = 0
     /// Card state after the review (0…3).
     var stateAfter: Int = 0
+    /// Positions (0-based, in ``VerseWords/canonical(_:)`` order) of the words
+    /// missed in a scored step. Positions only; the words themselves are never
+    /// stored. Read them through ``missedWordIndices(forText:)``.
+    var missedWordIndices: [Int] = []
+    /// ``VerseWords/fingerprint(of:)`` of the verse text when this review was
+    /// recorded; empty when unknown. It says which text the positions belong to.
+    var textFingerprint: String = ""
     /// Record-format version for future lazy migrations.
     var schemaVersion: Int = 1
 
@@ -215,5 +222,44 @@ final class VerseReview {
 
     init(reviewedAt: Date = Date()) {
         self.reviewedAt = reviewedAt
+    }
+}
+
+extension VerseReview {
+    /// The missed-word positions, but only if they were recorded against this
+    /// exact set of words. `nil` (not empty) means "can't tell", so a changed
+    /// verse is never shown wrong words.
+    func missedWordIndices(forText text: String) -> [Int]? {
+        guard !textFingerprint.isEmpty, textFingerprint == VerseWords.fingerprint(of: text) else {
+            return nil
+        }
+        return missedWordIndices
+    }
+}
+
+/// How often each word of a verse was missed, from the reviews recorded
+/// against its current text.
+struct MissSummary: Equatable {
+    /// Word position (see ``VerseWords``) → number of reviews that missed it.
+    /// Positions never missed are absent.
+    var counts: [Int: Int] = [:]
+    /// Reviews that were recorded against this exact text. Zero means there is
+    /// no history to draw on (never practiced, or the text has changed).
+    var reviewCount = 0
+}
+
+extension Verse {
+    /// Misses per word position, counting only reviews recorded against
+    /// `text`'s current words.
+    func missSummary(forText text: String) -> MissSummary {
+        let fingerprint = VerseWords.fingerprint(of: text)
+        var summary = MissSummary()
+        for review in reviews ?? [] where review.textFingerprint == fingerprint {
+            summary.reviewCount += 1
+            for index in review.missedWordIndices {
+                summary.counts[index, default: 0] += 1
+            }
+        }
+        return summary
     }
 }

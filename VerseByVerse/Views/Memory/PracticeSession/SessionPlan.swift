@@ -99,13 +99,30 @@ nonisolated struct SessionTally {
     /// Per-verse tallies, indexed like the session's verses.
     private(set) var verseCorrect: [Int]
     private(set) var verseTotal: [Int]
+    /// Per-verse word positions missed in any scored step (see ``VerseWords``).
+    private(set) var verseMissed: [Set<Int>]
     /// Word index (in the joined text) → index into the session's verses.
     private let wordOwners: [Int]
+    /// Word index → the word's position within its verse, or `nil` for a
+    /// token that isn't a word (a lone dash).
+    private let wordPositions: [Int?]
 
-    init(verseCount: Int = 0, wordOwners: [Int] = []) {
+    /// - Parameter wordPositions: when omitted, every token counts as a word
+    ///   and is numbered within its verse.
+    init(verseCount: Int = 0, wordOwners: [Int] = [], wordPositions: [Int?]? = nil) {
         verseCorrect = Array(repeating: 0, count: verseCount)
         verseTotal = Array(repeating: 0, count: verseCount)
+        verseMissed = Array(repeating: [], count: verseCount)
         self.wordOwners = wordOwners
+        if let wordPositions {
+            self.wordPositions = wordPositions
+        } else {
+            var seen = Array(repeating: 0, count: verseCount)
+            self.wordPositions = wordOwners.map { owner in
+                defer { seen[owner] += 1 }
+                return seen[owner]
+            }
+        }
     }
 
     /// Adds one finished step; unscored steps are ignored. Results are
@@ -121,6 +138,8 @@ nonisolated struct SessionTally {
             verseTotal[verseIndex] += 1
             if isCorrect {
                 verseCorrect[verseIndex] += 1
+            } else if wordIndex < wordPositions.count, let position = wordPositions[wordIndex] {
+                verseMissed[verseIndex].insert(position)
             }
         }
     }

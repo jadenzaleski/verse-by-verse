@@ -281,6 +281,12 @@ struct SessionView: View {
         }
     }
 
+    /// The fetched text of `verse`, used only to fingerprint it; never stored.
+    private func selectionVerseText(for verse: Verse) -> String? {
+        guard let selectionKey, let selection = bibleStore.selections[selectionKey] else { return nil }
+        return selection.verses.first { $0.chapter == verse.chapter && $0.verse == verse.number }?.text
+    }
+
     /// Fetches the verse text, maps each word to its verse, and shows the
     /// preview. Nothing persists until the session completes.
     private func startSession() async {
@@ -297,6 +303,7 @@ struct SessionView: View {
         tally = SessionTally(
             verseCount: verses.count,
             wordOwners: Self.mapWordsToVerses(selection: selection, verses: verses),
+            wordPositions: Self.mapWordPositions(selection: selection),
         )
 
         steps = ActivityStep.standardPlan
@@ -340,6 +347,17 @@ struct SessionView: View {
             owners.append(contentsOf: Array(repeating: owner, count: wordCount))
         }
         return owners
+    }
+
+    /// Each word's position within its own verse (see ``VerseWords``), aligned
+    /// with ``mapWordsToVerses(selection:verses:)``; `nil` for tokens that
+    /// aren't words, such as a lone dash.
+    static func mapWordPositions(selection: BibleSelection) -> [Int?] {
+        selection.verses.flatMap { selectionVerse in
+            VerseWords.positions(
+                ofTokens: selectionVerse.text.split(separator: " ", omittingEmptySubsequences: true).map(String.init),
+            )
+        }
     }
 
     /// Applies one FSRS review per verse and persists the session, its
@@ -391,6 +409,10 @@ struct SessionView: View {
             review.stabilityAfter = outcome.state.stability ?? 0
             review.difficultyAfter = outcome.state.difficulty ?? 0
             review.stateAfter = outcome.state.state
+            review.missedWordIndices = tally.verseMissed[index].sorted()
+            if let text = selectionVerseText(for: verse) {
+                review.textFingerprint = VerseWords.fingerprint(of: text)
+            }
             review.verse = verse
             review.session = session
 

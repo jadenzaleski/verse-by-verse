@@ -67,6 +67,9 @@ extension DataExport {
         var difficultyAfter: Double
         /// Card state after the review (0…3).
         var stateAfter: Int
+        /// Word positions missed (never the words) and the fingerprint of the text they belong to.
+        var missedWordIndices: [Int]
+        var textFingerprint: String
         /// `startDate` of the session this review came from, if any.
         var sessionStartedAt: Date?
     }
@@ -230,6 +233,8 @@ extension DataExport {
                         stabilityAfter: review.stabilityAfter,
                         difficultyAfter: review.difficultyAfter,
                         stateAfter: review.stateAfter,
+                        missedWordIndices: review.missedWordIndices.sorted(),
+                        textFingerprint: review.textFingerprint,
                         sessionStartedAt: review.session?.startDate,
                     )
                 }
