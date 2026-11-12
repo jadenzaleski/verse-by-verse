@@ -17,8 +17,8 @@ struct FSRSSchedulerTests {
 
     @Test func `score to rating thresholds`() {
         #expect(MemoryScoring.rating(forScore: 1.0) == 4)
-        #expect(MemoryScoring.rating(forScore: 0.97) == 4)
-        #expect(MemoryScoring.rating(forScore: 0.96) == 3)
+        #expect(MemoryScoring.rating(forScore: 0.99) == 4)
+        #expect(MemoryScoring.rating(forScore: 0.98) == 3)
         #expect(MemoryScoring.rating(forScore: 0.90) == 3)
         #expect(MemoryScoring.rating(forScore: 0.89) == 2)
         #expect(MemoryScoring.rating(forScore: 0.70) == 2)

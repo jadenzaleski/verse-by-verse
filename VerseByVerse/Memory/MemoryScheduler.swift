@@ -69,7 +69,7 @@ nonisolated enum MemoryScoring {
     /// - Parameter score: The score of the session
     /// - Returns: The FSRS rating based on that score.
     static func rating(forScore score: Double) -> Int {
-        if score >= 0.97 {
+        if score >= 0.99 {
             return 4
         } // Easy
         if score >= 0.90 {
