@@ -21,6 +21,7 @@ struct VerseDetailView: View {
 
     @State private var showPractice = false
     @State private var showDeleteConfirmation = false
+    @State private var isStartButtonVisible = true
 
     private let scheduler = FSRSScheduler()
     private let log = AppLog.category("VerseDetailView")
@@ -36,11 +37,16 @@ struct VerseDetailView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: AppSpacing.md) {
-                MemoryScoreCard(lastPracticed: verse.lastPracticed,
-                                totalReps: verse.reps,
-                                retentionScore: retentionScore,
-                                lastResult: verse.lastResult)
-                PracticeCard(showPractice: $showPractice, nextPracticeDate: verse.nextPractice, isNew: verse.isNew)
+                MemoryScoreCard(
+                    lastPracticed: verse.lastPracticed,
+                    totalReps: verse.reps,
+                    retentionScore: retentionScore,
+                    lastResult: verse.lastResult,
+                    nextPracticeDate: verse.nextPractice,
+                    isNew: verse.isNew,
+                )
+                PracticeStartButton(isVisible: $isStartButtonVisible) { showPractice = true }
+
                 SelectionTextCard(
                     title: "Verse",
                     translation: verse.translation,
@@ -60,25 +66,23 @@ struct VerseDetailView: View {
         .navigationTitle(verse.reference)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button(role: .destructive) {
-                    showDeleteConfirmation = true
-                } label: {
-                    Image(systemName: "trash")
-                }
-                .confirmationDialog(
-                    "Delete \(verse.reference)?",
-                    isPresented: $showDeleteConfirmation,
-                    titleVisibility: .visible,
-                ) {
-                    Button(verse.deleteConfirmationLabel, role: .destructive) {
-                        deleteVerse()
-                    }
-                } message: {
-                    Text(verse.deleteConfirmationMessage)
-                }
-                .accessibilityLabel("Delete Verse")
+            PracticeToolbar(
+                deleteTitle: "Delete Verse",
+                showsPractice: !isStartButtonVisible,
+                onPractice: { showPractice = true },
+                onDelete: { showDeleteConfirmation = true },
+            )
+        }
+        .confirmationDialog(
+            "Delete \(verse.reference)?",
+            isPresented: $showDeleteConfirmation,
+            titleVisibility: .visible,
+        ) {
+            Button(verse.deleteConfirmationLabel, role: .destructive) {
+                deleteVerse()
             }
+        } message: {
+            Text(verse.deleteConfirmationMessage)
         }
     }
 

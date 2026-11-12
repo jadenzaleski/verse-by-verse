@@ -17,6 +17,7 @@ struct PassageDetailView: View {
 
     @State private var showPractice = false
     @State private var showDeleteConfirmation = false
+    @State private var isStartButtonVisible = true
 
     private let log = AppLog.category("PassageDetailView")
     private let scheduler = FSRSScheduler()
@@ -39,8 +40,10 @@ struct PassageDetailView: View {
                     totalReps: PracticeStats.completedCount(passageSessions),
                     retentionScore: retentionScore,
                     lastResult: passage.lastResult,
+                    nextPracticeDate: passage.nextPractice,
+                    isNew: passage.isNew,
                 )
-                PracticeCard(showPractice: $showPractice, nextPracticeDate: passage.nextPractice, isNew: passage.isNew)
+                PracticeStartButton(isVisible: $isStartButtonVisible) { showPractice = true }
                 SelectionTextCard(
                     title: "Passage",
                     translation: passage.translation,
@@ -58,28 +61,26 @@ struct PassageDetailView: View {
         .navigationTitle(passage.reference)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button(role: .destructive) {
-                    showDeleteConfirmation = true
-                } label: {
-                    Image(systemName: "trash")
-                }
-                .confirmationDialog(
-                    "Delete \(passage.reference)?",
-                    isPresented: $showDeleteConfirmation,
-                    titleVisibility: .visible,
-                ) {
-                    Button("Delete Passage", role: .destructive) {
-                        deletePassage(alsoDeleteVerses: false)
-                    }
-                    Button("Delete Passage & Verses", role: .destructive) {
-                        deletePassage(alsoDeleteVerses: true)
-                    }
-                } message: {
-                    Text(Passage.deleteConfirmationMessage)
-                }
-                .accessibilityLabel("Delete Passage")
+            PracticeToolbar(
+                deleteTitle: "Delete Passage",
+                showsPractice: !isStartButtonVisible,
+                onPractice: { showPractice = true },
+                onDelete: { showDeleteConfirmation = true },
+            )
+        }
+        .confirmationDialog(
+            "Delete \(passage.reference)?",
+            isPresented: $showDeleteConfirmation,
+            titleVisibility: .visible,
+        ) {
+            Button("Delete Passage", role: .destructive) {
+                deletePassage(alsoDeleteVerses: false)
             }
+            Button("Delete Passage & Verses", role: .destructive) {
+                deletePassage(alsoDeleteVerses: true)
+            }
+        } message: {
+            Text(Passage.deleteConfirmationMessage)
         }
     }
 

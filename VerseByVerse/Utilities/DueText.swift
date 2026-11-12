@@ -11,7 +11,7 @@ import Foundation
 /// consistent voice: "Due in N days" / "Due today" / "Overdue N days".
 ///
 /// Single source of truth for due/overdue wording, shared between VerseCard,
-/// PassageCard, PracticeCard, and HomeView's Up Next badges — previously
+/// PassageCard, MemoryScoreCard, and HomeView's Up Next badges — previously
 /// duplicated with drifting formats ("10d overdue", "Overdue by N days").
 enum DueText {
     /// Calendar-day granularity between `now` and `date`.
@@ -28,7 +28,7 @@ enum DueText {
 
     /// Same as `days`, but drops to hour/minute granularity once the
     /// difference is under a day — for contexts where sub-day precision
-    /// matters (e.g. the practice card's countdown).
+    /// matters (e.g. the Memory Score card's due badge).
     static func precise(from now: Date = .now, to date: Date) -> String {
         if date <= now {
             let components = Calendar.current.dateComponents([.day, .hour, .minute], from: date, to: now)
