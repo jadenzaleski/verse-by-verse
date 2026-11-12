@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.1.0-beta.12](https://github.com/jadenzaleski/verse-by-verse/compare/v0.1.0-beta.11...v0.1.0-beta.12) (2026-11-12)
+
+
+### Features
+
+* Add a missed-word heatmap and typing reveal to the text card. ([d878c2d](https://github.com/jadenzaleski/verse-by-verse/commit/d878c2dedc5035d9448ab94093f3bf52f6afa109))
+* Add a skip button to the warm sections. ([9204e2a](https://github.com/jadenzaleski/verse-by-verse/commit/9204e2a3bb9da3c07b809cfc62e57f79845f8bb3))
+* Merge the practice and Memory Score cards and move Practice to the toolbar. ([dc27fb4](https://github.com/jadenzaleski/verse-by-verse/commit/dc27fb44251df8c28dccaf56b58c2ebe497379b9))
+* Record missed word positions with each review. ([1296f23](https://github.com/jadenzaleski/verse-by-verse/commit/1296f23d4d86be7eb01b11d8567440a6bc485059))
+* Swipe to remove passages and verses from a set. ([e82c74c](https://github.com/jadenzaleski/verse-by-verse/commit/e82c74c010fd7ec983e37058c2479f009881943b))
+
+
+### Bug Fixes
+
+* Enforce strict memory safty and move to swift 6. ([bbb81ba](https://github.com/jadenzaleski/verse-by-verse/commit/bbb81baf7f2fdcea85f2ca303800c274b975db8b))
+* Raise the Easy rating threshold to 99%. ([065e0d7](https://github.com/jadenzaleski/verse-by-verse/commit/065e0d7b4090d131dea12ed2c8db5564575c02d1))
+* Show total passage and verse counts on set cards. ([8f2710d](https://github.com/jadenzaleski/verse-by-verse/commit/8f2710d99c7c80fd53fbdbe5c931c417290daaa8))
+
 ## [0.1.0-beta.11](https://github.com/jadenzaleski/verse-by-verse/compare/v0.1.0-beta.10...v0.1.0-beta.11) (2026-11-06)
 
 
