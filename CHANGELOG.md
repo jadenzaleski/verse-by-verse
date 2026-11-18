@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.0-beta.13](https://github.com/jadenzaleski/verse-by-verse/compare/v0.1.0-beta.12...v0.1.0-beta.13) (2026-11-18)
+
+
+### Features
+
+* Replace SF Symbols with Lucide icons. ([f42ac38](https://github.com/jadenzaleski/verse-by-verse/commit/f42ac3823ed162dea20a32e8732daf6c34bfa27a))
+
 ## [0.1.0-beta.12](https://github.com/jadenzaleski/verse-by-verse/compare/v0.1.0-beta.11...v0.1.0-beta.12) (2026-11-12)
 
 
