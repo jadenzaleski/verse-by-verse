@@ -25,7 +25,7 @@ struct TranslationBadgeButton: View {
                     .padding(.horizontal, AppSpacing.sm)
                     .padding(.vertical, AppSpacing.xs)
                     .background(Color.secondary.opacity(0.15), in: Capsule())
-                Image(systemName: "info.circle")
+                Image("lucide.info")
             }
             .foregroundStyle(.secondary)
         }

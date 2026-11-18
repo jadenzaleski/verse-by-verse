@@ -57,7 +57,7 @@ struct PracticeHistoryCalendar: View {
                 Button {
                     withAnimation { scrollID = currentOffset - 1 }
                 } label: {
-                    Image(systemName: "chevron.left")
+                    Image("lucide.chevron.left")
                         .foregroundStyle(Color.appAccent)
                 }
                 .disabled(currentOffset <= -monthsToShow)
@@ -70,7 +70,7 @@ struct PracticeHistoryCalendar: View {
                 Button {
                     withAnimation { scrollID = currentOffset + 1 }
                 } label: {
-                    Image(systemName: "chevron.right")
+                    Image("lucide.chevron.right")
                         .foregroundStyle(Color.appAccent)
                 }
                 .disabled(currentOffset >= 0)

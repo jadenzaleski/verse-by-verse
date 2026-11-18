@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 nonisolated enum ActivityStep: Equatable {
     case everyOtherWord(phase: Int)
@@ -49,13 +50,13 @@ nonisolated extension ActivityStep {
         isRetry ? "Retry" : activityType
     }
 
-    /// SF Symbol for the session outline.
-    var outlineSymbol: String {
+    /// Icon for the session outline.
+    var outlineSymbol: Image {
         switch self {
-        case .verbalRecite: "mic.fill"
-        case .everyOtherWord: "circle.lefthalf.fill"
-        case .everyWord: "circle.fill"
-        case .everyWordRetry: "circle.dotted"
+        case .verbalRecite: Image("lucide.mic")
+        case .everyOtherWord: Image("lucide.contrast")
+        case .everyWord: Image("lucide.circle")
+        case .everyWordRetry: Image("lucide.circle.dashed")
         }
     }
 

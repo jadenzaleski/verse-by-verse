@@ -27,7 +27,7 @@ struct LogsView: View {
         .toolbar {
             if let logFileURL {
                 ShareLink(item: logFileURL) {
-                    Image(systemName: "square.and.arrow.up")
+                    Image("lucide.share")
                 }
             }
         }

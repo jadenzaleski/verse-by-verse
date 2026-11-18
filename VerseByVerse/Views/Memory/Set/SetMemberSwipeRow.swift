@@ -25,7 +25,7 @@ struct SetMemberSwipeRow<Content: View>: View {
                 Button {
                     confirmingRemove = true
                 } label: {
-                    Label("Remove from Set", systemImage: "minus.circle")
+                    Label("Remove from Set", image: "lucide.circle.minus")
                         .labelStyle(.iconOnly)
                 }
                 .tint(.appDestructive)
@@ -34,7 +34,7 @@ struct SetMemberSwipeRow<Content: View>: View {
                 Button(role: .destructive) {
                     confirmingRemove = true
                 } label: {
-                    Label("Remove from Set", systemImage: "minus.circle")
+                    Label("Remove from Set", image: "lucide.circle.minus")
                 }
             }
             .confirmationDialog(

@@ -28,11 +28,11 @@ struct AddPassagesToSetView: View {
         NavigationStack {
             Group {
                 if availablePassages.isEmpty {
-                    ContentUnavailableView(
-                        "No Passages to Add",
-                        systemImage: "text.book.closed",
-                        description: Text("All your passages are already in this set."),
-                    )
+                    ContentUnavailableView {
+                        Label("No Passages to Add", image: "lucide.book.open.text")
+                    } description: {
+                        Text("All your passages are already in this set.")
+                    }
                 } else {
                     List(availablePassages) { passage in
                         Button {
@@ -49,8 +49,8 @@ struct AddPassagesToSetView: View {
                                 }
                                 Spacer()
                                 Image(
-                                    systemName: selected.contains(passage.persistentModelID)
-                                        ? "checkmark.circle.fill" : "circle",
+                                    selected.contains(passage.persistentModelID)
+                                        ? "lucide.circle.check" : "lucide.circle",
                                 )
                                 .foregroundStyle(
                                     selected.contains(passage.persistentModelID) ? Color.appAccent
@@ -72,14 +72,14 @@ struct AddPassagesToSetView: View {
                     Button {
                         dismiss()
                     } label: {
-                        Image(systemName: "xmark")
+                        Image("lucide.x")
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
                         confirm()
                     } label: {
-                        Image(systemName: "checkmark")
+                        Image("lucide.check")
                     }
                     .accessibilityLabel("Add selected passages")
                     .disabled(selected.isEmpty)

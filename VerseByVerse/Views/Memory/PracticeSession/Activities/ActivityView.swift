@@ -156,7 +156,7 @@ struct ActivityView: View {
                             Button {
                                 fieldFocused = false
                             } label: {
-                                Image(systemName: "keyboard.chevron.compact.down")
+                                Image("lucide.chevron.down")
                                     .font(.app(.body))
                             }
                             .buttonStyle(.glass)
@@ -169,7 +169,7 @@ struct ActivityView: View {
                         Button(action: onSkip) {
                             HStack(spacing: AppSpacing.sm) {
                                 Text("Skip")
-                                Image(systemName: "forward.fill")
+                                Image("lucide.skip.forward")
                             }
                         }
                         .buttonStyle(.glass)

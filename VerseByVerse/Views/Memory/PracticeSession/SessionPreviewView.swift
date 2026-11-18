@@ -68,7 +68,7 @@ struct SessionPreviewView: View {
     private func stepRow(_ row: Row, isLast: Bool) -> some View {
         HStack(alignment: .top, spacing: AppSpacing.lg) {
             VStack(spacing: 0) {
-                Label(row.step.outlineTitle, systemImage: row.step.outlineSymbol)
+                Label { Text(row.step.outlineTitle) } icon: { row.step.outlineSymbol }
                     .labelStyle(.iconOnly)
                     .font(.app(.title3))
                     .frame(width: 28, height: 28)

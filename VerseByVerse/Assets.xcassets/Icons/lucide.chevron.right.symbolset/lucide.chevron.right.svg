@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Icon "chevron-right" from Lucide (v1.73.0), ISC License: see LICENSE-lucide.txt. Converted to an SF Symbols template by Symbol Maker. Template rev 651dcae0. -->
+<svg height="600" width="800" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <g id="Notes" font-family="LucidaGrande, 'Lucida Grande', sans-serif" font-size="13">
+        <rect fill="white" height="600.0" width="800.0" x="0.0" y="0.0" />
+        <g font-size="13">
+            <text x="18.0" y="176.0">Small</text>
+            <text x="18.0" y="376.0">Medium</text>
+            <text x="18.0" y="576.0">Large</text>
+        </g>
+        <g font-size="9">
+            <text x="250.0" y="30.0">Ultralight</text>
+            <text x="450.0" y="30.0">Regular</text>
+            <text x="650.0" y="30.0">Black</text>
+            <text id="template-version" fill="#505050" text-anchor="end" x="785.0" y="575.0">Template v.3.0</text>
+            <a href="https://github.com/swhitty/SwiftDraw">
+                <text fill="#505050" text-anchor="end" x="785.0" y="590.0">https://github.com/swhitty/SwiftDraw</text>
+            </a>
+        </g>
+    </g>
+    <g id="Guides" stroke="rgb(39, 170, 225)" stroke-width="0.5">
+        <path id="Capline-S" d="M18,76 l800,0" />
+        <path id="H-reference" d="M85,145.755 L87.685,145.755 L113.369,79.287 L114.052,79.287 L114.052,76 L112.148,76 L85,145.755 Z M95.693,121.536 L130.996,121.536 L130.263,119.313 L96.474,119.313 L95.693,121.536 Z M139.15,145.755 L141.787,145.755 L114.638,76 L113.466,76 L113.466,79.287 L139.15,145.755 Z" stroke="none" transform="translate(0,0)" />
+        <path id="Baseline-S" d="M18,146 l800,0" />
+        <path id="left-margin-Ultralight-S" d="M221.923,56 l0,110" />
+        <path id="right-margin-Ultralight-S" d="M308.077,56 l0,110" />
+        <path id="left-margin-Regular-S" d="M421.923,56 l0,110" />
+        <path id="right-margin-Regular-S" d="M508.077,56 l0,110" />
+        <path id="left-margin-Black-S" d="M621.923,56 l0,110" />
+        <path id="right-margin-Black-S" d="M708.077,56 l0,110" />
+        <path id="Capline-M" d="M18,276 l800,0" />
+        <path id="Baseline-M" d="M18,346 l800,0" />
+        <path id="Capline-L" d="M18,476 l800,0" />
+        <path id="Baseline-L" d="M18,546 l800,0" />
+    </g>
+    <g id="Symbols">
+        <g id="Ultralight-S" transform="translate(0,0)">
+            <path class="monochrome-0 multicolor-0:tintColor hierarchical-0:primary" d="M254.992,133.3 L276.531,111.762 C276.951,111.341 276.951,110.659 276.531,110.239 L254.992,88.7 C254.572,88.279 253.89,88.279 253.469,88.7 C253.049,89.121 253.049,89.802 253.469,90.223 L275.008,111.762 L275.008,110.239 L253.469,131.777 C253.049,132.198 253.049,132.879 253.469,133.3 C253.89,133.721 254.572,133.721 254.992,133.3 Z" />
+        </g>
+        <g id="Regular-S" transform="translate(0,0)">
+            <path class="monochrome-0 multicolor-0:tintColor hierarchical-0:primary" d="M456.769,135.077 L478.308,113.538 C479.709,112.136 479.709,109.864 478.308,108.462 L456.769,86.923 C455.367,85.521 453.094,85.521 451.692,86.923 C450.291,88.325 450.291,90.598 451.692,92 L473.231,113.538 L473.231,108.462 L451.692,130 C450.291,131.402 450.291,133.675 451.692,135.077 C453.094,136.479 455.367,136.479 456.769,135.077 Z" />
+        </g>
+        <g id="Black-S" transform="translate(0,0)">
+            <path class="monochrome-0 multicolor-0:tintColor hierarchical-0:primary" d="M659.054,137.361 L680.592,115.823 C683.256,113.159 683.256,108.841 680.592,106.177 L659.054,84.639 C656.39,81.975 652.072,81.975 649.408,84.639 C646.744,87.302 646.744,91.621 649.408,94.284 L670.946,115.823 L670.946,106.177 L649.408,127.716 C646.744,130.379 646.744,134.698 649.408,137.361 C652.072,140.025 656.39,140.025 659.054,137.361 Z" />
+        </g>
+    </g>
+</svg>

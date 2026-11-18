@@ -31,11 +31,11 @@ struct AddVersesToSetView: View {
         NavigationStack {
             Group {
                 if availableVerses.isEmpty {
-                    ContentUnavailableView(
-                        "No Verses to Add",
-                        systemImage: "text.book.closed",
-                        description: Text("All your tracked verses are already in this set."),
-                    )
+                    ContentUnavailableView {
+                        Label("No Verses to Add", image: "lucide.book.open.text")
+                    } description: {
+                        Text("All your tracked verses are already in this set.")
+                    }
                 } else {
                     List(availableVerses) { verse in
                         Button {
@@ -52,8 +52,8 @@ struct AddVersesToSetView: View {
                                 }
                                 Spacer()
                                 Image(
-                                    systemName: selected.contains(verse.persistentModelID)
-                                        ? "checkmark.circle.fill" : "circle",
+                                    selected.contains(verse.persistentModelID)
+                                        ? "lucide.circle.check" : "lucide.circle",
                                 )
                                 .foregroundStyle(
                                     selected.contains(verse.persistentModelID) ? Color.appAccent
@@ -75,14 +75,14 @@ struct AddVersesToSetView: View {
                     Button {
                         dismiss()
                     } label: {
-                        Image(systemName: "xmark")
+                        Image("lucide.x")
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
                         confirm()
                     } label: {
-                        Image(systemName: "checkmark")
+                        Image("lucide.check")
                     }
                     .accessibilityLabel("Add selected verses")
                     .disabled(selected.isEmpty)

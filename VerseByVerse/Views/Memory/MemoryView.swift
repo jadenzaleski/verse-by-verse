@@ -37,13 +37,13 @@ enum MemorySort: String, CaseIterable, Identifiable {
         }
     }
 
-    var systemImage: String {
+    var icon: Image {
         switch self {
-        case .dueSoonest: "clock.badge.exclamationmark"
-        case .reference: "books.vertical"
-        case .memoryScore: "brain"
-        case .dateAdded: "calendar.badge.plus"
-        case .lastPracticed: "calendar.badge.clock"
+        case .dueSoonest: Image("lucide.clock.exclamation.point")
+        case .reference: Image("lucide.library")
+        case .memoryScore: Image("lucide.brain")
+        case .dateAdded: Image("lucide.calendar.plus")
+        case .lastPracticed: Image("lucide.calendar.clock")
         }
     }
 }
@@ -66,11 +66,11 @@ enum SetSort: String, CaseIterable, Identifiable {
         }
     }
 
-    var systemImage: String {
+    var icon: Image {
         switch self {
-        case .dateModified: "calendar.badge.clock"
-        case .dateAdded: "calendar.badge.plus"
-        case .name: "textformat"
+        case .dateModified: Image("lucide.calendar.clock")
+        case .dateAdded: Image("lucide.calendar.plus")
+        case .name: Image("lucide.arrow.down.a.z")
         }
     }
 }
@@ -174,15 +174,15 @@ struct MemoryView: View {
                     Button {
                         activeSheet = .add
                     } label: {
-                        Label("Add Verse/Passage", systemImage: "plus")
+                        Label("Add Verse/Passage", image: "lucide.plus")
                     }
                     Button {
                         activeSheet = .addSet
                     } label: {
-                        Label("Add Set", systemImage: "rectangle.stack.badge.plus")
+                        Label("Add Set", image: "lucide.layers.plus")
                     }
                 } label: {
-                    Image(systemName: "plus")
+                    Image("lucide.plus")
                 }
                 .accessibilityLabel("Add passage or set")
             }
@@ -197,7 +197,7 @@ struct MemoryView: View {
             case .addSet:
                 AddSetView(
                     title: "New Set",
-                    confirmSystemImage: "plus",
+                    confirmImage: "lucide.plus",
                     confirmTint: .green,
                 ) { name, description, theme, positionSeed, colorSeed in
                     let set = StudySet(
@@ -222,50 +222,55 @@ struct MemoryView: View {
 
     private var sortMenu: some View {
         Menu {
-            if selectedTab == .sets {
-                Picker("Sort By", selection: $setSort) {
-                    ForEach(SetSort.allCases) { sort in
-                        Label(sort.title, systemImage: sort.systemImage).tag(sort)
-                    }
-                }
-                .pickerStyle(.inline)
-            } else {
-                Picker("Sort By", selection: $memorySort) {
-                    ForEach(MemorySort.allCases) { sort in
-                        Label(sort.title, systemImage: sort.systemImage).tag(sort)
-                    }
-                }
-                .pickerStyle(.inline)
-            }
-
-            Section {
-                Toggle(isOn: $sortReversed) {
-                    Label("Reverse Order", systemImage: "arrow.up.arrow.down")
-                }
-            }
-
-            if selectedTab != .sets {
-                Menu {
-                    Toggle(isOn: $dueOnly) {
-                        Label("Due Now", systemImage: "bell.badge")
-                    }
-                    Picker("Testament", selection: $testament) {
-                        ForEach(TestamentFilter.allCases) { filter in
-                            Text(filter.title).tag(filter)
+            Group {
+                if selectedTab == .sets {
+                    Picker("Sort By", selection: $setSort) {
+                        ForEach(SetSort.allCases) { sort in
+                            Label { Text(sort.title) } icon: { sort.icon }.tag(sort)
                         }
                     }
-                } label: {
-                    Label(
-                        "Filter",
-                        systemImage: hasActiveFilter
-                            ? "line.3.horizontal.decrease.circle.fill"
-                            : "line.3.horizontal.decrease.circle",
-                    )
+                    .pickerStyle(.inline)
+                } else {
+                    Picker("Sort By", selection: $memorySort) {
+                        ForEach(MemorySort.allCases) { sort in
+                            Label { Text(sort.title) } icon: { sort.icon }.tag(sort)
+                        }
+                    }
+                    .pickerStyle(.inline)
+                }
+
+                Section {
+                    Toggle(isOn: $sortReversed) {
+                        Label("Reverse Order", image: "lucide.arrow.up.down")
+                    }
+                }
+
+                if selectedTab != .sets {
+                    Menu {
+                        Group {
+                            Toggle(isOn: $dueOnly) {
+                                Label("Due Now", image: "lucide.bell.dot")
+                            }
+                            Picker("Testament", selection: $testament) {
+                                ForEach(TestamentFilter.allCases) { filter in
+                                    Text(filter.title).tag(filter)
+                                }
+                            }
+                        }
+                        .tint(Color.primary)
+                    } label: {
+                        Label("Filter", image: "lucide.funnel")
+                    }
+                    // The funnel shows the active tint; its own rows stay neutral.
+                    .tint(hasActiveFilter ? Color.appAccent : Color.primary)
                 }
             }
+            // Keep the rows neutral; only the toolbar button shows the active tint.
+            .tint(Color.primary)
         } label: {
-            Label("Sort and Filter", systemImage: "line.3.horizontal.decrease")
+            Label("Sort and Filter", image: "lucide.list.filter")
         }
+        .tint(hasActiveFilter ? Color.appAccent : nil)
         .accessibilityLabel("Sort and filter")
     }
 
@@ -406,7 +411,7 @@ struct MemoryView: View {
                         hasQuery
                             ? "No passages match your search."
                             : hasActiveFilter ? "Nothing matches your filters."
-                            : "No passages yet — tap \(Image(systemName: "plus")) to create one.",
+                            : "No passages yet — tap \(Image("lucide.plus")) to create one.",
                     )
                 }
                 ForEach(filteredPassages) { passage in
@@ -469,7 +474,7 @@ struct MemoryView: View {
                     emptyMessage(
                         hasQuery
                             ? "No sets match your search."
-                            : "No sets yet — tap \(Image(systemName: "plus")) to create one.",
+                            : "No sets yet — tap \(Image("lucide.plus")) to create one.",
                     )
                 } else {
                     Text("All")

@@ -16,9 +16,13 @@ struct PracticeStartButton: View {
 
     var body: some View {
         Button(action: action) {
-            Label("Practice", systemImage: "play.fill")
-                .padding(.vertical, AppSpacing.xs)
-                .frame(maxWidth: .infinity)
+            Label {
+                Text("Practice")
+            } icon: {
+                Image("lucide.play")
+            }
+            .padding(.vertical, AppSpacing.xs)
+            .frame(maxWidth: .infinity)
         }
         .buttonStyle(.glassProminent)
         .onScrollVisibilityChange(threshold: 0.5) { visible in
@@ -40,14 +44,24 @@ struct PracticeToolbar: ToolbarContent {
     var body: some ToolbarContent {
         if showsPractice {
             ToolbarItem(placement: .topBarTrailing) {
-                Button("Practice", systemImage: "play.fill", action: onPractice)
-                    .buttonStyle(.glassProminent)
+                Button(action: onPractice) {
+                    Label {
+                        Text("Practice")
+                    } icon: {
+                        Image("lucide.play")
+                    }
+                }
+                .buttonStyle(.glassProminent)
             }
             ToolbarSpacer(.fixed, placement: .topBarTrailing)
         }
         ToolbarItem(placement: .topBarTrailing) {
-            Menu("More", systemImage: "ellipsis") {
-                Button(deleteTitle, systemImage: "trash", role: .destructive, action: onDelete)
+            Menu {
+                Button(role: .destructive, action: onDelete) {
+                    Label(deleteTitle, image: "lucide.trash")
+                }
+            } label: {
+                Label("More", image: "lucide.ellipsis")
             }
         }
     }

@@ -65,7 +65,7 @@ struct DeveloperView: View {
 
             if let logFileURL {
                 ShareLink(item: logFileURL) {
-                    Label("Share Logs", systemImage: "square.and.arrow.up")
+                    Label("Share Logs", image: "lucide.share")
                 }
             }
         }

@@ -73,7 +73,7 @@ private struct SwipeDeleteButton: View {
 
     var body: some View {
         Button(action: action) {
-            Label("Delete", systemImage: "trash")
+            Label("Delete", image: "lucide.trash")
                 .labelStyle(.iconOnly)
         }
         .tint(.appDestructive)

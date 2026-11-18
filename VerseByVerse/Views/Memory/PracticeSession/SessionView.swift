@@ -131,7 +131,7 @@ struct SessionView: View {
                                 dismiss()
                             }
                         } label: {
-                            Image(systemName: "xmark")
+                            Image("lucide.x")
                         }
                         .accessibilityLabel("Close session")
                     }
@@ -221,7 +221,7 @@ struct SessionView: View {
 
     private func failedView(message: String) -> some View {
         ContentUnavailableView {
-            Label("Something Went Wrong", systemImage: "exclamationmark.triangle")
+            Label("Something Went Wrong", image: "lucide.triangle.exclamation.point")
         } description: {
             Text(message)
         } actions: {

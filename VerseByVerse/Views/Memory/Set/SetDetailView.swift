@@ -116,15 +116,15 @@ struct SetDetailView: View {
                     Button {
                         showingEditSheet = true
                     } label: {
-                        Label("Edit", systemImage: "pencil")
+                        Label("Edit", image: "lucide.pencil")
                     }
                     Button(role: .destructive) {
                         showingDeleteConfirmation = true
                     } label: {
-                        Label("Delete Set", systemImage: "trash")
+                        Label("Delete Set", image: "lucide.trash")
                     }
                 } label: {
-                    Image(systemName: "ellipsis")
+                    Image("lucide.ellipsis")
                 }
                 .accessibilityLabel("Set options")
             }
@@ -133,15 +133,15 @@ struct SetDetailView: View {
                     Button {
                         showingAddPassages = true
                     } label: {
-                        Label("Add Passages", systemImage: "text.book.closed")
+                        Label("Add Passages", image: "lucide.book.open.text")
                     }
                     Button {
                         showingAddVerses = true
                     } label: {
-                        Label("Add Verses", systemImage: "text.quote")
+                        Label("Add Verses", image: "lucide.quote")
                     }
                 } label: {
-                    Image(systemName: "plus")
+                    Image("lucide.plus")
                 }
                 .accessibilityLabel("Add passages or verses to set")
             }
@@ -160,7 +160,7 @@ struct SetDetailView: View {
                 initialTheme: set.meshTheme,
                 positionSeed: set.meshPositionSeed,
                 colorSeed: set.meshColorSeed,
-                confirmSystemImage: "checkmark",
+                confirmImage: "lucide.check",
                 confirmTint: .blue,
             ) { name, description, theme, _, _ in
                 set.name = name

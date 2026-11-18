@@ -90,7 +90,7 @@ struct LongTextCard: View {
         Button {
             showsHeatmap.toggle()
         } label: {
-            Image(systemName: "square.grid.3x3.fill")
+            Image("lucide.highlighter")
                 .foregroundStyle(showsHeatmap ? Color.appAccent : .secondary)
         }
         .buttonStyle(.plain)
@@ -138,7 +138,7 @@ struct LongTextCard: View {
         } label: {
             HStack(spacing: AppSpacing.sm) {
                 // One chevron that turns over, rather than two that swap.
-                Image(systemName: "chevron.down")
+                Image("lucide.chevron.down")
                     .rotationEffect(.degrees(isExpanded ? 180 : 0))
                 Text(isExpanded ? "Hide" : "Show")
             }

@@ -14,7 +14,7 @@ struct AddSetView: View {
     var initialTheme: MeshTheme
     var positionSeed: Int
     var colorSeed: Int
-    var confirmSystemImage: String
+    var confirmImage: String
     var confirmTint: Color
     var onConfirm: (
         _ name: String,
@@ -38,7 +38,7 @@ struct AddSetView: View {
         initialTheme: MeshTheme = .ocean,
         positionSeed: Int = Int.random(in: 1 ... 99999),
         colorSeed: Int = Int.random(in: 1 ... 99999),
-        confirmSystemImage: String,
+        confirmImage: String,
         confirmTint: Color,
         onConfirm: @escaping (
             _ name: String,
@@ -54,7 +54,7 @@ struct AddSetView: View {
         self.initialTheme = initialTheme
         self.positionSeed = positionSeed
         self.colorSeed = colorSeed
-        self.confirmSystemImage = confirmSystemImage
+        self.confirmImage = confirmImage
         self.confirmTint = confirmTint
         self.onConfirm = onConfirm
         _name = State(initialValue: initialName)
@@ -132,7 +132,7 @@ struct AddSetView: View {
                     Button {
                         dismiss()
                     } label: {
-                        Image(systemName: "xmark")
+                        Image("lucide.x")
                     }
                     .accessibilityLabel("Cancel")
                 }
@@ -140,7 +140,7 @@ struct AddSetView: View {
                     Button {
                         confirm()
                     } label: {
-                        Image(systemName: confirmSystemImage)
+                        Image(confirmImage)
                     }
                     .accessibilityLabel("Save set")
                     .tint(confirmTint)
@@ -175,7 +175,7 @@ struct AddSetView: View {
 #Preview("Create") {
     AddSetView(
         title: "New Set",
-        confirmSystemImage: "plus",
+        confirmImage: "lucide.plus",
         confirmTint: .green,
     ) { _, _, _, _, _ in }
         .environment(\.font, .app())

@@ -54,7 +54,7 @@ struct ProfileView: View {
                 Button {
                     showSettings = true
                 } label: {
-                    Image(systemName: "gear")
+                    Image("lucide.settings")
                 }
                 .accessibilityLabel("Settings")
                 .matchedTransitionSource(id: "settings", in: namespace)
@@ -145,14 +145,14 @@ struct ProfileView: View {
             columns: [GridItem(.flexible(), spacing: AppSpacing.md), GridItem(.flexible())],
             spacing: AppSpacing.md,
         ) {
-            statCard(value: "\(passages.count)", label: "Passages", systemImage: "book.closed")
+            statCard(value: "\(passages.count)", label: "Passages", image: "lucide.book")
             statCard(value: "\(PracticeStats.completedCount(sessions))",
-                     label: "Sessions", systemImage: "checkmark.circle")
+                     label: "Sessions", image: "lucide.circle.check")
             statCard(value: "\(PracticeStats.bestStreak(from: sessions))",
-                     label: "Best Streak", systemImage: "flame.fill",
+                     label: "Best Streak", image: "lucide.flame",
                      valueStyle: AnyShapeStyle(streakGradient))
             statCard(value: avgScore.map { "\(Int($0 * 100))%" } ?? "—",
-                     label: "Avg Score", systemImage: "chart.line.uptrend.xyaxis",
+                     label: "Avg Score", image: "lucide.chart.line",
                      valueStyle: avgScore.map { AnyShapeStyle(scoreColor($0)) } ?? AnyShapeStyle(.primary))
         }
     }
@@ -160,11 +160,11 @@ struct ProfileView: View {
     private func statCard(
         value: String,
         label: String,
-        systemImage: String,
+        image: String,
         valueStyle: AnyShapeStyle = AnyShapeStyle(.primary),
     ) -> some View {
         VStack(spacing: AppSpacing.xs) {
-            Image(systemName: systemImage)
+            Image(image)
                 .font(.app(.caption))
                 .foregroundStyle(.secondary)
             Text(value)

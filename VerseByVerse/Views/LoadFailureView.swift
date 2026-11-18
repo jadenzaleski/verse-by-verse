@@ -24,7 +24,7 @@ struct LoadFailureView: View {
 
     var body: some View {
         ContentUnavailableView {
-            Label(title, systemImage: isOffline ? "wifi.slash" : "exclamationmark.triangle")
+            Label(title, image: isOffline ? "lucide.wifi.off" : "lucide.triangle.exclamation.point")
         } description: {
             if isOffline {
                 Text(offlineMessage)

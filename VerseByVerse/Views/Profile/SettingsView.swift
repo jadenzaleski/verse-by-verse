@@ -85,7 +85,7 @@ struct SettingsView: View {
     private var profileSection: some View {
         Section {
             HStack {
-                Label("Name", systemImage: "person.text.rectangle")
+                Label("Name", image: "lucide.id.card")
                 Spacer()
                 TextField("What should we call you?", text: $displayName)
                     .multilineTextAlignment(.trailing)
@@ -104,7 +104,7 @@ struct SettingsView: View {
         Section {
             shareRow(
                 "Export My Data",
-                systemImage: "square.and.arrow.up",
+                image: "lucide.share",
                 isBusy: isExporting,
                 hint: "Saves your passages, sets and practice history as a JSON file",
                 action: exportData,
@@ -113,7 +113,7 @@ struct SettingsView: View {
             Button {
                 showConfirmClearCache = true
             } label: {
-                Label("Clear Cache", systemImage: "shippingbox")
+                Label("Clear Cache", image: "lucide.package")
             }
             .confirmationDialog(
                 "Clear Cache",
@@ -144,13 +144,13 @@ struct SettingsView: View {
         Section {
             notificationToggle(
                 "Daily Reminder",
-                systemImage: "bell",
+                image: "lucide.bell",
                 isOn: $dailyReminderEnabled,
                 hint: "Reminds you once a day when reviews are due",
             )
             if dailyReminderEnabled {
                 HStack {
-                    Label("Time", systemImage: "clock")
+                    Label("Time", image: "lucide.clock")
                     Spacer()
                     DatePicker("", selection: reminderTime, displayedComponents: .hourAndMinute)
                 }
@@ -158,14 +158,14 @@ struct SettingsView: View {
 
             notificationToggle(
                 "Streak Reminder",
-                systemImage: "flame",
+                image: "lucide.flame",
                 isOn: $streakReminderEnabled,
                 hint: "Reminds you at 8 PM when your streak is about to end",
             )
 
             notificationToggle(
                 "Due Count Badge",
-                systemImage: "app.badge",
+                image: "lucide.bell.dot",
                 isOn: $dueBadgeEnabled,
                 hint: "Shows how many reviews are due on the app icon",
             )
@@ -200,7 +200,7 @@ struct SettingsView: View {
     /// turned on, and turns itself back off if the answer is no.
     private func notificationToggle(
         _ title: String,
-        systemImage: String,
+        image: String,
         isOn: Binding<Bool>,
         hint: String,
     ) -> some View {
@@ -211,7 +211,7 @@ struct SettingsView: View {
                 Task { await notificationSettingChanged(isOn, enabled: newValue) }
             },
         )) {
-            Label(title, systemImage: systemImage)
+            Label(title, image: image)
         }
         .accessibilityHint(hint)
     }
@@ -231,13 +231,13 @@ struct SettingsView: View {
             Button {
                 contactSupport()
             } label: {
-                Label("Contact Support", systemImage: "envelope")
+                Label("Contact Support", image: "lucide.mail")
             }
             .accessibilityHint("Opens a new email to the developer")
 
             shareRow(
                 "Share Diagnostics",
-                systemImage: "doc.text",
+                image: "lucide.file.text",
                 isBusy: isSharingDiagnostics,
                 hint: "Shares a log file you can attach to a support email",
                 action: shareDiagnostics,
@@ -273,22 +273,22 @@ struct SettingsView: View {
                     }
                     if AppAttestClient.shared.isAttested {
                         Spacer()
-                        Label("Secure connection", systemImage: "lock")
+                        Label("Secure connection", image: "lucide.lock")
                             .labelStyle(.iconOnly)
                             .opacity(0.5)
                     }
                 }
             } icon: {
-                Image(systemName: "app.badge")
+                Image("lucide.milestone")
             }
 
             Link(destination: AppLinks.website) {
-                Label("Website", systemImage: "globe")
+                Label("Website", image: "lucide.globe")
             }
             .accessibilityHint("Opens versebyverse.jadenzaleski.com in your browser")
 
             Link(destination: AppLinks.privacyPolicy) {
-                Label("Privacy Policy", systemImage: "hand.raised")
+                Label("Privacy Policy", image: "lucide.shield.lock")
             }
             .accessibilityHint("Opens the privacy policy in your browser")
 
@@ -320,7 +320,7 @@ struct SettingsView: View {
                 NavigationLink {
                     DeveloperView()
                 } label: {
-                    Label("Developer", systemImage: "hammer.fill")
+                    Label("Developer", image: "lucide.engine")
                 }
             }
         }
@@ -392,7 +392,7 @@ struct SettingsView: View {
     /// the first time after a launch).
     private func shareRow(
         _ title: String,
-        systemImage: String,
+        image: String,
         isBusy: Bool,
         hint: String,
         action: @escaping () async -> Void,
@@ -401,7 +401,7 @@ struct SettingsView: View {
             Task { await action() }
         } label: {
             HStack {
-                Label(title, systemImage: systemImage)
+                Label(title, image: image)
                 Spacer()
                 if isBusy {
                     ProgressView()

@@ -117,7 +117,7 @@ struct HomeView: View {
             if passages.isEmpty, verses.isEmpty {
                 Button(action: onOpenMemory) {
                     HStack(spacing: AppSpacing.md) {
-                        Image(systemName: "book.closed")
+                        Image("lucide.book")
                             .font(.title3)
                             .foregroundStyle(.secondary)
                         VStack(alignment: .leading, spacing: AppSpacing.xxs) {
@@ -136,7 +136,7 @@ struct HomeView: View {
             } else if duePassages.isEmpty, dueVerses.isEmpty {
                 Button(action: onOpenMemory) {
                     HStack(spacing: AppSpacing.md) {
-                        Image(systemName: "checkmark.circle.fill")
+                        Image("lucide.circle.check")
                             .font(.title3)
                             .foregroundStyle(.green)
                         VStack(alignment: .leading, spacing: AppSpacing.xxs) {

@@ -16,10 +16,10 @@ struct NetworkWidget: View {
         case deviceOffline
         case serverUnreachable
 
-        var icon: String {
+        var icon: Image {
             switch self {
-            case .deviceOffline: "icloud.slash"
-            case .serverUnreachable: "exclamationmark.triangle"
+            case .deviceOffline: Image("lucide.wifi.off")
+            case .serverUnreachable: Image("lucide.triangle.exclamation.point")
             }
         }
 
@@ -49,7 +49,7 @@ struct NetworkWidget: View {
 
     var body: some View {
         HStack {
-            Image(systemName: issue.icon)
+            issue.icon
                 .font(.app(.title3))
                 .foregroundStyle(issue.tint)
 

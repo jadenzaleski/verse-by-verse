@@ -50,9 +50,9 @@ struct StreakWidget: View {
                                 .font(.app(.footnote, weight: .semibold))
                                 .foregroundStyle(.secondary)
                             ZStack {
-                                Image(systemName: completed[i] ? "checkmark.circle.fill" : "circle")
+                                Image(completed[i] ? "lucide.circle.check" : "lucide.circle")
                                     .foregroundColor(completed[i] ? .orange : .secondary)
-                                    .font(.app(.title2, weight: .semibold))
+                                    .font(.app(.title2))
                                     .scaleEffect(revealed[safe: i] == true ? 1.0 : 0.4)
                                     .opacity(revealed[safe: i] == true ? 1.0 : 0.0)
                                     .animation(
@@ -152,8 +152,8 @@ struct StreakWidget: View {
         }
 
         HStack(spacing: 0) {
-            Image(systemName: "flame.fill")
-                .font(.app(.title))
+            Image("lucide.flame")
+                .font(.app(.title, weight: .semibold))
                 .padding(.trailing, AppSpacing.xs)
 //                .rotationEffect(.degrees(showBadge ? 0 : -10))
                 .opacity(showBadge ? 1 : 0)

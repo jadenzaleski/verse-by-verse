@@ -25,7 +25,7 @@ struct PassageReferenceHeader: View {
             Button {
                 onRefresh()
             } label: {
-                Image(systemName: "arrow.clockwise")
+                Image("lucide.refresh.cw")
             }
             .buttonStyle(.plain)
             .disabled(disableRefresh)

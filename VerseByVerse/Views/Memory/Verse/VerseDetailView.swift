@@ -125,7 +125,7 @@ struct VerseDetailView: View {
                                 Text(passage.reference)
                                     .font(.app(.subheadline, weight: .semibold))
                                 Spacer()
-                                Image(systemName: "chevron.right")
+                                Image("lucide.chevron.right")
                                     .font(.app(.caption))
                                     .foregroundStyle(.tertiary)
                             }
@@ -148,7 +148,7 @@ struct VerseDetailView: View {
                                 Text(set.name)
                                     .font(.app(.subheadline, weight: .semibold))
                                 Spacer()
-                                Image(systemName: "chevron.right")
+                                Image("lucide.chevron.right")
                                     .font(.app(.caption))
                                     .foregroundStyle(.tertiary)
                             }

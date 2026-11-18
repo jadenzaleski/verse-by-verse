@@ -23,7 +23,7 @@ struct PassageKeyboardBar: View {
                     Button {
                         onPrevious()
                     } label: {
-                        Image(systemName: "chevron.left")
+                        Image("lucide.chevron.left")
                             .frame(width: 20, height: 20)
                             .padding()
                             .glassEffect(.regular.interactive())
@@ -33,7 +33,7 @@ struct PassageKeyboardBar: View {
                     Button {
                         onNext()
                     } label: {
-                        Image(systemName: "chevron.left")
+                        Image("lucide.chevron.left")
                             .rotationEffect(.degrees(180))
                             .frame(width: 20, height: 20)
                             .padding()
@@ -80,7 +80,7 @@ struct PassageKeyboardBar: View {
                     onDone()
                 }
             } label: {
-                Image(systemName: "checkmark")
+                Image("lucide.check")
                     .foregroundStyle(.windowBackground)
                     .frame(width: 20, height: 20)
                     .padding()

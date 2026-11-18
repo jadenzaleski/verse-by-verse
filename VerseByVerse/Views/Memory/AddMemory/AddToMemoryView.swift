@@ -188,14 +188,14 @@ struct AddToMemoryView: View {
                         Button {
                             dismiss()
                         } label: {
-                            Image(systemName: "xmark")
+                            Image("lucide.x")
                         }
                     }
                     ToolbarItem(placement: .confirmationAction) {
                         Button {
                             handleAddPassage()
                         } label: {
-                            Image(systemName: "plus")
+                            Image("lucide.plus")
                         }
                         .accessibilityLabel("Add to memory")
                         .buttonStyle(.glassProminent)

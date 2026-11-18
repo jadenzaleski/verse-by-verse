@@ -21,7 +21,7 @@ struct SessionCompleteView: View {
         VStack(spacing: AppSpacing.xxl) {
             Spacer()
 
-            Image(systemName: isPerfect ? "star.circle.fill" : "checkmark.circle.fill")
+            Image(isPerfect ? "lucide.star" : "lucide.circle.check")
                 .font(.system(size: 64))
                 .foregroundStyle(isPerfect ? .yellow : .green)
                 .accessibilityHidden(true)
@@ -42,7 +42,7 @@ struct SessionCompleteView: View {
 
                 if let nextReview {
                     HStack(spacing: AppSpacing.sm) {
-                        Image(systemName: "calendar")
+                        Image("lucide.calendar")
                             .accessibilityHidden(true)
                         Text("Next review: \(nextReview.formatted(.dateTime.month(.abbreviated).day().year()))")
                     }

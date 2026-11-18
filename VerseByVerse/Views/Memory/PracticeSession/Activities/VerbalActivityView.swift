@@ -135,7 +135,7 @@ struct VerbalActivityView: View {
 
     private var idleContent: some View {
         VStack(spacing: AppSpacing.lg) {
-            Image(systemName: "mic.fill")
+            Image("lucide.mic")
                 .font(.system(size: 48))
                 .foregroundStyle(Color.appAccent)
                 .accessibilityHidden(true)
