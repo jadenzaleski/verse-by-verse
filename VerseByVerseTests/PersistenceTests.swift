@@ -150,6 +150,54 @@ struct PersistenceTests {
 
     // MARK: - Deletion & orphan sweep
 
+    /// Mirrors the per-verse write path in `SessionView.completeSession`:
+    /// one FSRS review, one `VerseReview` with its snapshot, new verse state.
+    @discardableResult
+    private func practice(_ verse: Verse, score: Double, at date: Date, using scheduler: FSRSScheduler) -> VerseReview {
+        let outcome = scheduler.processReview(state: verse.memoryState, score: score, at: date)
+        let review = VerseReview(reviewedAt: date)
+        review.score = score
+        review.rating = outcome.rating
+        review.stabilityAfter = outcome.state.stability ?? 0
+        review.difficultyAfter = outcome.state.difficulty ?? 0
+        review.stateAfter = outcome.state.state
+        review.verse = verse
+        verse.memoryState = outcome.state
+        return review
+    }
+
+    @Test func `verse score is anchored to its newest review`() throws {
+        let context = makeContext()
+        let passage = try insertJohn316to17(context)
+        let verse = try #require(passage.orderedVerses.first)
+        let scheduler = FSRSScheduler()
+        let now = Date(timeIntervalSince1970: 1_767_268_800)
+
+        // Attach the newer review first, so array order is not date order.
+        let older = practice(verse, score: 0.5, at: now.addingTimeInterval(-3 * 86400), using: scheduler)
+        let newer = practice(verse, score: 0.76, at: now, using: scheduler)
+        verse.reviews = [newer, older]
+        try context.save()
+
+        let score = verse.memoryScore(using: scheduler, at: now)
+        #expect(abs(score - 0.76) < 1e-9)
+    }
+
+    @Test func `passage score averages anchored verse scores`() throws {
+        let context = makeContext()
+        let passage = try insertJohn316to17(context)
+        let scheduler = FSRSScheduler()
+        let now = Date(timeIntervalSince1970: 1_767_268_800)
+        let verses = passage.orderedVerses
+
+        verses[0].reviews = [practice(verses[0], score: 0.76, at: now, using: scheduler)]
+        verses[1].reviews = [practice(verses[1], score: 1.0, at: now, using: scheduler)]
+        try context.save()
+
+        let score = try #require(passage.memoryScore(using: scheduler, at: now))
+        #expect(abs(score - 0.88) < 1e-9)
+    }
+
     @Test func `deleting a passage sweeps only true orphans`() throws {
         let context = makeContext()
         let passage = try insertJohn316to17(context)

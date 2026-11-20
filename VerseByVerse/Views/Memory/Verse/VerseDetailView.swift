@@ -27,7 +27,7 @@ struct VerseDetailView: View {
     private let log = AppLog.category("VerseDetailView")
 
     private var retentionScore: Double {
-        scheduler.retrievability(of: verse.memoryState, at: .now)
+        verse.memoryScore(using: scheduler)
     }
 
     private var sortedReviews: [VerseReview] {
@@ -181,9 +181,9 @@ struct VerseDetailView: View {
 
 // MARK: - Sawtooth history chart
 
-/// The verse's exact retrievability curve: decaying between reviews along
-/// the engine's own forgetting curve (from each review's stability
-/// snapshot), jumping back toward 100% at every review.
+/// The verse's Memory Score curve: each review's result decaying along the
+/// engine's own forgetting curve (from that review's stability snapshot),
+/// jumping to the new result at every review — the same number the card shows.
 private struct VerseMemoryChart: View {
     let reviews: [VerseReview]
     let scheduler: FSRSScheduler
@@ -195,38 +195,32 @@ private struct VerseMemoryChart: View {
         let segment: Int
     }
 
+    private var snapshots: [ReviewSnapshot] {
+        reviews.map { ReviewSnapshot($0) }
+    }
+
     private var points: [ChartPoint] {
         var result: [ChartPoint] = []
         let now = Date()
+        let snapshots = snapshots
 
-        for (index, review) in reviews.enumerated() {
-            let segmentEnd = index + 1 < reviews.count ? reviews[index + 1].reviewedAt : now
-            let state = MemoryState(
-                stability: review.stabilityAfter,
-                difficulty: review.difficultyAfter,
-                state: max(review.stateAfter, 1),
-                step: 0,
-                due: nil,
-                lastReviewed: review.reviewedAt,
-                reps: 1,
-                lapses: 0,
-            )
-
-            let duration = segmentEnd.timeIntervalSince(review.reviewedAt)
+        for (index, snapshot) in snapshots.enumerated() {
+            let segmentEnd = index + 1 < snapshots.count ? snapshots[index + 1].reviewedAt : now
+            let duration = segmentEnd.timeIntervalSince(snapshot.reviewedAt)
             guard duration > 0 else {
                 result.append(ChartPoint(
-                    date: review.reviewedAt,
-                    retention: scheduler.retrievability(of: state, at: review.reviewedAt),
+                    date: snapshot.reviewedAt,
+                    retention: snapshot.memoryScore(using: scheduler, at: snapshot.reviewedAt),
                     segment: index,
                 ))
                 continue
             }
             let sampleCount = 24
             for sample in 0 ... sampleCount {
-                let date = review.reviewedAt.addingTimeInterval(duration * Double(sample) / Double(sampleCount))
+                let date = snapshot.reviewedAt.addingTimeInterval(duration * Double(sample) / Double(sampleCount))
                 result.append(ChartPoint(
                     date: date,
-                    retention: scheduler.retrievability(of: state, at: date),
+                    retention: snapshot.memoryScore(using: scheduler, at: date),
                     segment: index,
                 ))
             }
@@ -235,20 +229,10 @@ private struct VerseMemoryChart: View {
     }
 
     private var reviewMarkers: [ChartPoint] {
-        reviews.enumerated().map { index, review in
-            let state = MemoryState(
-                stability: review.stabilityAfter,
-                difficulty: review.difficultyAfter,
-                state: max(review.stateAfter, 1),
-                step: 0,
-                due: nil,
-                lastReviewed: review.reviewedAt,
-                reps: 1,
-                lapses: 0,
-            )
-            return ChartPoint(
-                date: review.reviewedAt,
-                retention: scheduler.retrievability(of: state, at: review.reviewedAt),
+        snapshots.enumerated().map { index, snapshot in
+            ChartPoint(
+                date: snapshot.reviewedAt,
+                retention: snapshot.memoryScore(using: scheduler, at: snapshot.reviewedAt),
                 segment: index,
             )
         }

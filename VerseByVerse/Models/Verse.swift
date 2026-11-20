@@ -94,6 +94,12 @@ extension Verse {
         (reviews ?? []).max { $0.reviewedAt < $1.reviewedAt }?.score
     }
 
+    /// The Memory Score: ``lastResult`` decayed along the forgetting curve (see
+    /// ``MemoryScheduler/memoryScore(of:lastResult:at:)``).
+    func memoryScore(using scheduler: MemoryScheduler, at date: Date = .now) -> Double {
+        scheduler.memoryScore(of: memoryState, lastResult: lastResult, at: date)
+    }
+
     func isDue(at date: Date = .now) -> Bool {
         if let next = nextPractice {
             return next <= date

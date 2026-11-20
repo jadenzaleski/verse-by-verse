@@ -26,8 +26,8 @@ struct PassageDetailView: View {
         passage.sessions ?? []
     }
 
-    /// Average probability of recall across the passage's verses, straight
-    /// from the FSRS engine — the same curve that schedules reviews.
+    /// Average Memory Score across the passage's verses: each verse's last
+    /// result, decayed along the same curve that schedules reviews.
     private var retentionScore: Double {
         passage.memoryScore(using: scheduler) ?? 0
     }
@@ -104,7 +104,7 @@ struct PassageDetailView: View {
                 Text("History")
                     .font(.app(.title2))
                     .padding([.horizontal, .top])
-                PassageMemoryScoreChart(sessions: passageSessions)
+                PassageMemoryScoreChart(sessions: passageSessions, verses: passage.orderedVerses)
                     .padding()
             }
             .frame(maxWidth: .infinity, alignment: .leading)

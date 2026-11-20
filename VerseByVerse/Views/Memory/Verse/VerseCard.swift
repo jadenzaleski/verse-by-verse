@@ -14,10 +14,10 @@ struct VerseCard: View {
 
     private let scheduler = FSRSScheduler()
 
-    /// Probability of recall right now — the same curve that schedules
-    /// reviews, not a raw rep count.
+    /// Memory Score right now: your last result, decayed along the same curve
+    /// that schedules reviews.
     private var retentionScore: Double {
-        scheduler.retrievability(of: verse.memoryState, at: .now)
+        verse.memoryScore(using: scheduler)
     }
 
     var body: some View {

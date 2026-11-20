@@ -20,8 +20,8 @@ struct PassageCard: View {
 
     private let scheduler = FSRSScheduler()
 
-    /// Average probability of recall across the passage's verses — the same
-    /// curve that schedules reviews, not raw rep counts.
+    /// Average Memory Score across the passage's verses: each verse's last
+    /// result, decayed along the same curve that schedules reviews.
     private var retentionScore: Double {
         passage.memoryScore(using: scheduler) ?? 0
     }

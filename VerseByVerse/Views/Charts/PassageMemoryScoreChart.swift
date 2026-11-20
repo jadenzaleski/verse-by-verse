@@ -6,157 +6,97 @@
 //
 
 import Charts
+import SwiftData
 import SwiftUI
 
-struct MemoryPoint: Identifiable {
-    let id = UUID()
-    let date: Date
-    let retention: Double
-}
-
-enum ChartDuration: String, CaseIterable, Identifiable {
-    case week = "1W"
-    case month = "1M"
-    case sixMonths = "6M"
-    case year = "1Y"
-    case all = "All"
-
-    var id: String {
-        rawValue
-    }
-}
-
+/// The passage's Memory Score over time. The curve is recomputed from each verse's
+/// review snapshots with the same function the Memory Score card uses
+/// (``MemoryScoreHistory``), so the two always agree and the line starts at what
+/// you actually scored. The numbers come from ``PassageScoreChartData``; this view
+/// only draws them.
 struct PassageMemoryScoreChart: View {
     let sessions: [PracticeSession]
+    let verses: [Verse]
+
+    private typealias ChartData = PassageScoreChartData<PracticeSession.ID>
+
+    private let scheduler = FSRSScheduler()
+
+    /// What the chart data depends on: the picker, the sessions, and the review count
+    /// (which changes whenever any verse is practiced, even from another screen).
+    private struct RefreshKey: Equatable {
+        let duration: ChartDuration
+        let sessions: [PracticeSession]
+        let reviewCount: Int
+    }
 
     @State private var selectedSession: PracticeSession?
     @State private var selectedDuration: ChartDuration = .week
     @State private var selectedDate: Date?
 
-    // Memoized Data
-    @State private var memoizedFilteredSessions: [PracticeSession] = []
-    @State private var memoizedCurve: [MemoryPoint] = []
-    @State private var memoizedRangeStart: Date?
-    @State private var memoizedGradient: LinearGradient = .init(colors: [.green], startPoint: .bottom, endPoint: .top)
+    /// Built once per refresh, not per body evaluation or drag frame — rebuilding the
+    /// review snapshots faults every `VerseReview`.
+    @State private var data: ChartData?
 
     private var activeRetention: Double {
-        if let selectedDate {
-            return retention(at: selectedDate)
-        }
-        return currentRetention
+        score(at: selectedDate ?? Date())
     }
 
-    private var currentRetention: Double {
-        retention(at: Date())
+    private var completedSessions: [PracticeSession] {
+        sessions.filter(\.isCompleted)
     }
 
-    private var allCompletedSorted: [PracticeSession] {
-        sessions.filter(\.isCompleted).sorted(by: { $0.startDate < $1.startDate })
+    private var reviewCount: Int {
+        verses.reduce(0) { $0 + ($1.reviews?.count ?? 0) }
     }
 
-    private func retention(at date: Date) -> Double {
-        // Always evaluate against every completed session so the score is correct
-        // even when the most recent practice is outside the selected window.
-        retention(at: date, in: allCompletedSorted)
+    /// Against every review, so it is right even when the latest practice is outside
+    /// the window. Before the first refresh it falls back to a direct computation.
+    private func score(at date: Date) -> Double {
+        if let data {
+            return data.score(at: date)
+        }
+        return MemoryScoreHistory.score(at: date, verses: verses.map(\.reviewSnapshots), scheduler: scheduler)
     }
 
-    /// Retention at `date` against a pre-sorted session list — avoids re-sorting
-    /// when sampling the curve at many points.
-    private func retention(at date: Date, in data: [PracticeSession]) -> Double {
-        guard let lastSession = data.last(where: { $0.startDate <= date }) else {
-            return data.first?.score ?? 1.0
-        }
-        let daysSince = date.timeIntervalSince(lastSession.startDate) / 86400
-        let stability = Double(lastSession.scheduledDays ?? 1)
-        return pow(0.9, daysSince / max(1.0, stability))
+    private func refreshData() {
+        data = ChartData(
+            duration: selectedDuration,
+            now: Date(),
+            sessions: completedSessions.map {
+                ChartData.SessionInput(id: $0.id, startDate: $0.startDate, endDate: $0.endDate)
+            },
+            snapshots: verses.map(\.reviewSnapshots),
+            scheduler: scheduler,
+        )
     }
 
-    private func refreshMemoizedData() {
-        let now = Date()
-        let calendar = Calendar.current
-        let allSorted = allCompletedSorted
-
-        // 1. Determine the visible window's start.
-        let windowStart: Date? = switch selectedDuration {
-        case .week:
-            calendar.date(byAdding: .day, value: -7, to: now)
-        case .month:
-            calendar.date(byAdding: .month, value: -1, to: now)
-        case .sixMonths:
-            calendar.date(byAdding: .month, value: -6, to: now)
-        case .year:
-            calendar.date(byAdding: .year, value: -1, to: now)
-        case .all:
-            allSorted.first?.startDate
+    private var lineGradient: LinearGradient {
+        guard let span = data?.gradientSpan else {
+            return LinearGradient(colors: [.green], startPoint: .bottom, endPoint: .top)
         }
-
-        // Sessions whose marker dots fall inside the window.
-        memoizedFilteredSessions = allSorted.filter { session in
-            guard let windowStart else { return true }
-            return session.startDate >= windowStart
-        }
-
-        // 2. Generate the retention curve across the whole visible window.
-        // It is anchored by the most recent practice — even one before the
-        // window — so a line always shows whenever any practice exists.
-        guard let firstEver = allSorted.first?.startDate else {
-            memoizedCurve = []
-            memoizedRangeStart = nil
-            return
-        }
-        let rangeStart = max(windowStart ?? firstEver, firstEver)
-        memoizedRangeStart = rangeStart
-
-        var points: [MemoryPoint] = []
-        let totalInterval = max(0, now.timeIntervalSince(rangeStart))
-        // Aim for ~250 points across the visible range for smooth performance.
-        let stepInterval = max(3600, totalInterval / 250)
-
-        var pointDate = rangeStart
-        while pointDate < now {
-            points.append(MemoryPoint(date: pointDate, retention: retention(at: pointDate, in: allSorted)))
-            pointDate = pointDate.addingTimeInterval(stepInterval)
-        }
-        points.append(MemoryPoint(date: now, retention: retention(at: now, in: allSorted)))
-        memoizedCurve = points
-
-        // 3. Calculate Gradient
-        let values = points.map(\.retention)
-        let minR = values.min() ?? 0
-        let maxR = values.max() ?? 1
-        let range = maxR - minR
-
-        if range < 0.001 {
-            memoizedGradient = LinearGradient(colors: [.green], startPoint: .bottom, endPoint: .top)
-        } else {
-            let startY = (0.0 - maxR) / (minR - maxR)
-            let endY = (1.0 - maxR) / (minR - maxR)
-
-            memoizedGradient = LinearGradient(
-                stops: [
-                    .init(color: .red, location: 0),
-                    .init(color: .orange, location: 0.5),
-                    .init(color: .green, location: 1),
-                ],
-                startPoint: UnitPoint(x: 0, y: startY),
-                endPoint: UnitPoint(x: 0, y: endY),
-            )
-        }
+        return LinearGradient(
+            stops: [
+                .init(color: .red, location: 0),
+                .init(color: .orange, location: 0.5),
+                .init(color: .green, location: 1),
+            ],
+            startPoint: UnitPoint(x: 0, y: span.startY),
+            endPoint: UnitPoint(x: 0, y: span.endY),
+        )
     }
 
-    private func color(for score: Double) -> Color {
-        switch score {
-        case 0 ..< 0.6: .red
-        case 0.6 ..< 0.8: .orange
-        default: .green
+    private func select(at date: Date) {
+        switch data?.selection(at: date) {
+        case let .marker(marker):
+            selectedDate = marker.date
+            selectedSession = completedSessions.first { $0.id == marker.id }
+        case let .moment(moment):
+            selectedDate = moment
+            selectedSession = nil
+        case nil:
+            break
         }
-    }
-
-    private func nearestSession(to date: Date) -> PracticeSession? {
-        memoizedFilteredSessions.min(by: {
-            abs($0.startDate.timeIntervalSince(date)) <
-                abs($1.startDate.timeIntervalSince(date))
-        })
     }
 
     var body: some View {
@@ -196,21 +136,21 @@ struct PassageMemoryScoreChart: View {
 
             Chart {
                 // Retention Curve (Line)
-                ForEach(memoizedCurve) { point in
+                ForEach(data?.curve ?? []) { point in
                     LineMark(
                         x: .value("Date", point.date),
-                        y: .value("Retention", point.retention),
+                        y: .value("Memory Score", point.score),
                     )
-                    .foregroundStyle(memoizedGradient)
+                    .foregroundStyle(lineGradient)
                 }
 
-                // Practice Sessions (Points)
-                ForEach(memoizedFilteredSessions) { session in
+                // Practice Sessions (Points, on the line)
+                ForEach(data?.markers ?? []) { marker in
                     PointMark(
-                        x: .value("Date", session.startDate),
-                        y: .value("Score", session.score ?? 0.0),
+                        x: .value("Date", marker.date),
+                        y: .value("Memory Score", marker.score),
                     )
-                    .symbolSize(selectedSession?.id == session.id ? 120 : 60)
+                    .symbolSize(selectedSession?.id == marker.id ? 120 : 60)
                     .foregroundStyle(.accent)
                 }
 
@@ -243,27 +183,8 @@ struct PassageMemoryScoreChart: View {
                         .gesture(
                             DragGesture()
                                 .onChanged { value in
-                                    let location = value.location
-                                    if let date: Date = proxy.value(atX: location.x) {
-                                        let now = Date()
-                                        guard let firstDate = memoizedRangeStart else { return }
-                                        // Clamp date between the curve's start and now
-                                        let clampedDate = min(max(date, firstDate), now)
-
-                                        // Slight snap logic
-                                        let nearest = nearestSession(to: clampedDate)
-                                        let timeRange = now.timeIntervalSince(firstDate)
-                                        let threshold = timeRange / 80
-
-                                        if let nearest,
-                                           abs(nearest.startDate.timeIntervalSince(clampedDate)) < threshold
-                                        {
-                                            selectedDate = nearest.startDate
-                                            selectedSession = nearest
-                                        } else {
-                                            selectedDate = clampedDate
-                                            selectedSession = nil
-                                        }
+                                    if let date: Date = proxy.value(atX: value.location.x) {
+                                        select(at: date)
                                     }
                                 }
                                 .onEnded { _ in
@@ -276,31 +197,48 @@ struct PassageMemoryScoreChart: View {
             .frame(height: 220)
             .padding(.top, AppSpacing.md)
         }
-        .task(id: selectedDuration) {
-            refreshMemoizedData()
-        }
-        .task(id: sessions) {
-            refreshMemoizedData()
+        .task(id: RefreshKey(duration: selectedDuration, sessions: sessions, reviewCount: reviewCount)) {
+            refreshData()
         }
     }
 }
 
 #Preview {
-    let now = Date()
+    let container = AppModelContainer.make(inMemory: true)
+    let context = container.mainContext
+    let scheduler = FSRSScheduler()
     let calendar = Calendar.current
+    let now = Date()
 
-    let daysAgoAndScores: [(Int, Double)] = [(-12, 0.85), (-9, 0.92), (-4, 0.70), (-1, 0.95)]
-    let sessions: [PracticeSession] = daysAgoAndScores.map { daysAgo, score in
+    let verse = try? Verse.findOrCreate(
+        translation: "ESV", book: "Psalms", chapter: 23, number: 1, in: context,
+    )
+    var sessions: [PracticeSession] = []
+    let daysAgoAndScores: [(Int, Double)] = [(-12, 0.76), (-9, 0.88), (-4, 0.70), (-1, 0.95)]
+    for (daysAgo, score) in daysAgoAndScores {
         let day = calendar.date(byAdding: .day, value: daysAgo, to: now) ?? now
-        let session = PracticeSession(startDate: day)
-        session.endDate = day.addingTimeInterval(300)
+        let session = PracticeSession(startDate: day.addingTimeInterval(-300))
+        session.endDate = day
         session.score = score
         session.rating = MemoryScoring.rating(forScore: score)
-        session.scheduledDays = 5
-        return session
+        context.insert(session)
+        sessions.append(session)
+
+        guard let verse else { continue }
+        let outcome = scheduler.processReview(state: verse.memoryState, score: score, at: day)
+        let review = VerseReview(reviewedAt: day)
+        review.score = score
+        review.rating = outcome.rating
+        review.stabilityAfter = outcome.state.stability ?? 0
+        review.difficultyAfter = outcome.state.difficulty ?? 0
+        review.stateAfter = outcome.state.state
+        review.verse = verse
+        review.session = session
+        verse.memoryState = outcome.state
     }
 
-    PassageMemoryScoreChart(sessions: sessions)
+    return PassageMemoryScoreChart(sessions: sessions, verses: verse.map { [$0] } ?? [])
         .environment(\.font, .app())
         .padding()
+        .modelContainer(container)
 }

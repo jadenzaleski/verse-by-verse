@@ -355,7 +355,7 @@ struct MemoryView: View {
             case .reference:
                 referenceKey(book: verse.book, chapter: verse.chapter, verse: verse.number, books: books)
             case .memoryScore:
-                scheduler.retrievability(of: verse.memoryState, at: now)
+                verse.memoryScore(using: scheduler, at: now)
             case .dateAdded:
                 -verse.createdAt.timeIntervalSinceReferenceDate
             case .lastPracticed:

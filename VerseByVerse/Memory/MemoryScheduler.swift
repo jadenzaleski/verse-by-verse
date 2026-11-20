@@ -57,6 +57,21 @@ nonisolated protocol MemoryScheduler {
     func retrievability(of state: MemoryState, at date: Date) -> Double
 }
 
+nonisolated extension MemoryScheduler {
+    /// The Memory Score: what you scored last time, decayed along the
+    /// forgetting curve — "how much is in my head right now".
+    ///
+    /// Retrievability alone is 100% the instant after any review, whatever the
+    /// result, so it is scaled by the last result (clamped to 0…1). With no
+    /// recorded result (legacy data) it falls back to retrievability, and a
+    /// perfect result scores exactly retrievability.
+    func memoryScore(of state: MemoryState, lastResult: Double?, at date: Date) -> Double {
+        let recall = retrievability(of: state, at: date)
+        guard let lastResult else { return recall }
+        return recall * min(max(lastResult, 0), 1)
+    }
+}
+
 nonisolated enum MemoryScoring {
     /// A verse's score for one session: words correct ÷ words scored, or `nil`
     /// when none of its words were scored (e.g. the translation omits the verse).

@@ -147,13 +147,13 @@ extension Passage {
         return verses.reduce(0) { $0 + $1.reps } / verses.count
     }
 
-    /// Average retrievability across all verses (unpracticed verses count
-    /// as 0), or nil when nothing has been practiced yet.
+    /// Average Memory Score (last result × retrievability) across all verses
+    /// (unpracticed verses count as 0), or nil when nothing has been practiced yet.
     func memoryScore(using scheduler: MemoryScheduler, at date: Date = .now) -> Double? {
         let verses = verses ?? []
         guard !verses.isEmpty, verses.contains(where: { $0.lastPracticed != nil }) else { return nil }
         let total = verses.reduce(0.0) { sum, verse in
-            sum + scheduler.retrievability(of: verse.memoryState, at: date)
+            sum + verse.memoryScore(using: scheduler, at: date)
         }
         return total / Double(verses.count)
     }

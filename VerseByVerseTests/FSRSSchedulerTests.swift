@@ -33,7 +33,7 @@ struct FSRSSchedulerTests {
         #expect(MemoryScoring.score(correct: 3, total: 4) == 0.75)
     }
 
-    @Test func `first review schedules the future`() {
+    @Test func `first review schedules the future`() throws {
         let scheduler = FSRSScheduler()
         let outcome = scheduler.processReview(state: .new, score: 0.92, at: epoch)
 
@@ -43,7 +43,7 @@ struct FSRSSchedulerTests {
         #expect(outcome.state.difficulty != nil)
         #expect(outcome.state.lastReviewed == epoch)
         let due = outcome.state.due
-        #expect(due != nil && due! > epoch)
+        #expect(try due != nil && #require(due) > epoch)
     }
 
     @Test func `good reviews grow the interval`() {
@@ -135,5 +135,63 @@ struct FSRSSchedulerTests {
         let first = FSRSScheduler().processReview(state: .new, score: 0.92, at: epoch)
         let second = FSRSScheduler().processReview(state: .new, score: 0.92, at: epoch)
         #expect(first == second)
+    }
+
+    // MARK: - Memory Score (last result × retrievability)
+
+    private func day(_ days: Int) -> Date {
+        epoch.addingTimeInterval(Double(days) * 86400)
+    }
+
+    @Test func `memory score starts at the result`() {
+        let scheduler = FSRSScheduler()
+        let state = scheduler.processReview(state: .new, score: 0.76, at: epoch).state
+        let score = scheduler.memoryScore(of: state, lastResult: 0.76, at: epoch)
+        #expect(abs(score - 0.76) < 1e-9)
+    }
+
+    @Test func `memory score only falls between reviews`() {
+        let scheduler = FSRSScheduler()
+        let state = scheduler.processReview(state: .new, score: 0.76, at: epoch).state
+        var previous = 1.0
+        for offset in 0 ... 60 {
+            let value = scheduler.memoryScore(of: state, lastResult: 0.76, at: day(offset))
+            #expect(value <= previous + 1e-12, "score rose on day \(offset)")
+            previous = value
+        }
+        // A single 76% review reads about 61% four days later.
+        let dayFour = scheduler.memoryScore(of: state, lastResult: 0.76, at: day(4))
+        #expect((0.60 ... 0.63).contains(dayFour), "day-4 score was \(dayFour)")
+    }
+
+    @Test func `perfect result equals retrievability`() {
+        let scheduler = FSRSScheduler()
+        let state = scheduler.processReview(state: .new, score: 1.0, at: epoch).state
+        for offset in [0, 4, 30] {
+            let score = scheduler.memoryScore(of: state, lastResult: 1.0, at: day(offset))
+            let recall = scheduler.retrievability(of: state, at: day(offset))
+            #expect(abs(score - recall) < 1e-12)
+        }
+    }
+
+    @Test func `no recorded result falls back to retrievability`() {
+        let scheduler = FSRSScheduler()
+        let state = scheduler.processReview(state: .new, score: 0.92, at: epoch).state
+        let score = scheduler.memoryScore(of: state, lastResult: nil, at: day(5))
+        #expect(score == scheduler.retrievability(of: state, at: day(5)))
+    }
+
+    @Test func `zero result scores zero and out of range results are clamped`() {
+        let scheduler = FSRSScheduler()
+        let state = scheduler.processReview(state: .new, score: 0.92, at: epoch).state
+        #expect(scheduler.memoryScore(of: state, lastResult: 0, at: epoch) == 0)
+        #expect(scheduler.memoryScore(of: state, lastResult: -0.2, at: epoch) == 0)
+        let recall = scheduler.retrievability(of: state, at: day(3))
+        #expect(scheduler.memoryScore(of: state, lastResult: 1.5, at: day(3)) == recall)
+    }
+
+    @Test func `unpracticed state scores zero`() {
+        let scheduler = FSRSScheduler()
+        #expect(scheduler.memoryScore(of: .new, lastResult: 0.9, at: epoch) == 0)
     }
 }
