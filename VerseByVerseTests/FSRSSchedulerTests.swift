@@ -65,6 +65,21 @@ struct FSRSSchedulerTests {
         #expect(previousInterval > 1, "review intervals should reach multiple days")
     }
 
+    @Test func `intervals never exceed the 30 day cap`() {
+        let scheduler = FSRSScheduler()
+        var state = MemoryState.new
+        var longest = 0.0
+
+        // Perfect practice on every due date would otherwise reach hundreds of days.
+        for _ in 0 ..< 12 {
+            let outcome = scheduler.processReview(state: state, score: 1.0, at: state.due ?? epoch)
+            state = outcome.state
+            longest = max(longest, outcome.intervalDays)
+            #expect(outcome.intervalDays <= FSRSScheduler.maximumIntervalDays + 1e-6)
+        }
+        #expect(abs(longest - FSRSScheduler.maximumIntervalDays) < 1e-6, "a well-known verse should reach the cap")
+    }
+
     @Test func `failing A review shortens the schedule`() {
         let scheduler = FSRSScheduler()
         var state = MemoryState.new

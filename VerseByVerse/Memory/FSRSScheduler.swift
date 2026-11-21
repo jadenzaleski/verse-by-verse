@@ -10,9 +10,17 @@ import FSRS
 
 /// FSRS-6 implementation of ``MemoryScheduler`` over the official
 /// `open-spaced-repetition/swift-fsrs` package: FSRS-6 default 21 weights,
-/// fuzzing disabled so scheduling is deterministic.
+/// fuzzing disabled so scheduling is deterministic, and no review scheduled
+/// more than ``maximumIntervalDays`` out.
 /// Fine-tuning (per-user parameters, custom retention UI) can come later.
 nonisolated struct FSRSScheduler: MemoryScheduler {
+    /// The longest gap before a verse is due again. FSRS is tuned on flashcards, where
+    /// perfect recall grows intervals to hundreds of days; for verses we want them back
+    /// at least monthly. It caps the due date only — stability, and so the Memory
+    /// Score's decay curve, is unchanged. Applied here rather than through the
+    /// library's `maximumInterval`, which still lets an Easy result land a day past it.
+    static let maximumIntervalDays = 30.0
+
     private let engine: FSRS
     private let log = AppLog.category("FSRSScheduler")
 
@@ -39,12 +47,14 @@ nonisolated struct FSRSScheduler: MemoryScheduler {
             return ReviewOutcome(state: state, rating: rating, intervalDays: 0)
         }
 
+        let due = min(updated.due, date.addingTimeInterval(Self.maximumIntervalDays * 86400))
+
         let newState = MemoryState(
             stability: updated.stability,
             difficulty: updated.difficulty,
             state: updated.state.rawValue,
             step: updated.learningSteps,
-            due: updated.due,
+            due: due,
             lastReviewed: date,
             reps: state.reps + 1,
             // VBV counts every Again as a lapse (spec of the retired backend),
@@ -55,7 +65,7 @@ nonisolated struct FSRSScheduler: MemoryScheduler {
         return ReviewOutcome(
             state: newState,
             rating: rating,
-            intervalDays: updated.due.timeIntervalSince(date) / 86400.0,
+            intervalDays: due.timeIntervalSince(date) / 86400.0,
         )
     }
 
