@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.0-beta.14](https://github.com/jadenzaleski/verse-by-verse/compare/v0.1.0-beta.13...v0.1.0-beta.14) (2026-11-21)
+
+
+### Features
+
+* Cap review intervals at 30 days ([c478c5d](https://github.com/jadenzaleski/verse-by-verse/commit/c478c5d1b3d66da77f27e20e59e26ad290aeac0b))
+* Compact the Memory Score card and unify score colors ([df3455b](https://github.com/jadenzaleski/verse-by-verse/commit/df3455b942a6ab3523d7708f08073b84fa62a568))
+
+
+### Bug Fixes
+
+* Anchor Memory Score to the last result ([b6b2ec3](https://github.com/jadenzaleski/verse-by-verse/commit/b6b2ec35a1c55c406e13088ac7bd13fdb0c19515))
+* Score zero when a card has no stability ([36d7b94](https://github.com/jadenzaleski/verse-by-verse/commit/36d7b9483f2fc3ce136c9383d1ff6fbaa84147c8))
+
 ## [0.1.0-beta.13](https://github.com/jadenzaleski/verse-by-verse/compare/v0.1.0-beta.12...v0.1.0-beta.13) (2026-11-18)
 
 
