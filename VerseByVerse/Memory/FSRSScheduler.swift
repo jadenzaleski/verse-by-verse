@@ -71,6 +71,9 @@ nonisolated struct FSRSScheduler: MemoryScheduler {
 
     func retrievability(of state: MemoryState, at date: Date) -> Double {
         guard state.state != 0 else { return 0 }
+        // No stability means nothing is retained. Left to the library, 0 ÷ 0 gives NaN
+        // (and a negative stability gives nonsense), which would crash `Int(score * 100)`.
+        guard let stability = state.stability, stability > 0 else { return 0 }
         return engine.getRetrievability(card: makeCard(from: state, now: date), now: date).number
     }
 

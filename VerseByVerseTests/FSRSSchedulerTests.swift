@@ -135,6 +135,21 @@ struct FSRSSchedulerTests {
         #expect(scheduler.retrievability(of: .new, at: epoch) == 0)
     }
 
+    @Test func `a state with no stability recalls nothing and is never NaN`() {
+        let scheduler = FSRSScheduler()
+        let reviewed = scheduler.processReview(state: .new, score: 0.92, at: epoch).state
+
+        for stability in [0.0, -1.0, nil] {
+            var state = reviewed
+            state.stability = stability
+            // Same instant as the review (elapsed 0) is the 0 ÷ 0 case; later is x ÷ 0.
+            for offset in [0, 3] {
+                let recall = scheduler.retrievability(of: state, at: epoch.addingTimeInterval(Double(offset) * 86400))
+                #expect(recall == 0, "stability \(String(describing: stability)), day \(offset): \(recall)")
+            }
+        }
+    }
+
     @Test func `first review schedules days out, never minutes`() {
         // A session already drills the passage; no minute-scale learning steps.
         let scheduler = FSRSScheduler()
