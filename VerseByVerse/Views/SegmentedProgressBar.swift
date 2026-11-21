@@ -7,17 +7,13 @@
 
 import SwiftUI
 
-enum ProgressBarFill {
-    case dynamic
-    case solid(Color)
-}
-
 struct SegmentedProgressBar: View {
     let totalSegments: Int
     /// Number of fully completed segments. The segment at this index is the active one.
     let completedSegments: Int
 
-    var fill: ProgressBarFill = .dynamic
+    /// The filled segments' colour. For a Memory Score pass ``Color/score(_:)``.
+    var fill: Color = .appAccent
     /// When true, completed segments are dimmed and the segment at `completedSegments` is highlighted as active.
     var highlightCurrent: Bool = false
     /// VoiceOver reads the bar as one element: this label and value (default
@@ -28,27 +24,11 @@ struct SegmentedProgressBar: View {
     var spacing: CGFloat = 5
     var height: CGFloat = 5
 
-    private var fillColor: Color {
-        switch fill {
-        case let .solid(color):
-            return color
-        case .dynamic:
-            let ratio = totalSegments > 0 ? Double(completedSegments) / Double(totalSegments) : 0
-            if ratio <= 0.33 {
-                return .red
-            }
-            if ratio <= 0.66 {
-                return .orange
-            }
-            return .green
-        }
-    }
-
     private func segmentColor(at index: Int) -> Color {
         if index < completedSegments {
-            highlightCurrent ? fillColor.opacity(0.4) : fillColor
+            highlightCurrent ? fill.opacity(0.4) : fill
         } else if index == completedSegments, highlightCurrent {
-            fillColor
+            fill
         } else {
             emptyColor
         }
@@ -88,10 +68,10 @@ struct SegmentedProgressBar: View {
 
     VStack(spacing: AppSpacing.xxl) {
         SegmentedProgressBar(totalSegments: 6, completedSegments: Int(completed))
-        SegmentedProgressBar(totalSegments: 6, completedSegments: Int(completed), fill: .solid(.appAccent))
+        SegmentedProgressBar(totalSegments: 6, completedSegments: Int(completed), fill: .appAccent)
         SegmentedProgressBar(totalSegments: 6,
                              completedSegments: Int(completed),
-                             fill: .solid(.appAccent),
+                             fill: .appAccent,
                              highlightCurrent: true)
         Slider(value: $completed, in: 0 ... 6, step: 1)
     }

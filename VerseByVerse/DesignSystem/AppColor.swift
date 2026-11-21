@@ -13,4 +13,22 @@ extension Color {
     static let appDestructive = Color.red
     static let appSuccess = Color.green
     static let appPrimary = Color.primary
+
+    /// The one colour rule for any percentage in the app (Memory Score, practice
+    /// results, averages): red below 60%, orange below 80%, green from 80%.
+    /// ``ScoreBand`` holds the boundaries, for views that must place them
+    /// (the chart line's gradient).
+    nonisolated static func score(_ value: Double) -> Color {
+        switch value {
+        case ..<ScoreBand.orange: .red
+        case ..<ScoreBand.green: .orange
+        default: .green
+        }
+    }
+}
+
+/// Where each score colour starts, as a 0…1 score.
+nonisolated enum ScoreBand {
+    static let orange = 0.6
+    static let green = 0.8
 }

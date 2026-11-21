@@ -73,12 +73,20 @@ struct PassageMemoryScoreChart: View {
 
     private var lineGradient: LinearGradient {
         guard let span = data?.gradientSpan else {
-            return LinearGradient(colors: [.green], startPoint: .bottom, endPoint: .top)
+            // Flat (or empty): one colour, the score it sits at.
+            return LinearGradient(
+                colors: [.score(data?.curve.last?.score ?? 0)], startPoint: .bottom, endPoint: .top,
+            )
         }
+        // Hard stops at the shared score bands, so the line's colour at any height is `Color.score`
+        // of that height — the same as the readout above it.
         return LinearGradient(
             stops: [
                 .init(color: .red, location: 0),
-                .init(color: .orange, location: 0.5),
+                .init(color: .red, location: ScoreBand.orange),
+                .init(color: .orange, location: ScoreBand.orange),
+                .init(color: .orange, location: ScoreBand.green),
+                .init(color: .green, location: ScoreBand.green),
                 .init(color: .green, location: 1),
             ],
             startPoint: UnitPoint(x: 0, y: span.startY),
@@ -111,7 +119,7 @@ struct PassageMemoryScoreChart: View {
                     Text("\(Int(activeRetention * 100))%")
                         .font(.app(.largeTitle, weight: .semibold))
                         .contentTransition(.numericText())
-                        .foregroundStyle(activeRetention < 0.6 ? .orange : .green)
+                        .foregroundStyle(Color.score(activeRetention))
 
                     Text(selectedDate?.formatted(.dateTime.month().day().hour().minute()) ?? "CURRENT MEMORY SCORE")
                         .font(.app(.caption))

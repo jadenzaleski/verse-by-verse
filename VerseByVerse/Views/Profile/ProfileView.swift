@@ -153,7 +153,7 @@ struct ProfileView: View {
                      valueStyle: AnyShapeStyle(streakGradient))
             statCard(value: avgScore.map { "\(Int($0 * 100))%" } ?? "—",
                      label: "Avg Score", image: "lucide.chart.line",
-                     valueStyle: avgScore.map { AnyShapeStyle(scoreColor($0)) } ?? AnyShapeStyle(.primary))
+                     valueStyle: avgScore.map { AnyShapeStyle(Color.score($0)) } ?? AnyShapeStyle(.primary))
         }
     }
 
@@ -186,14 +186,6 @@ struct ProfileView: View {
             startPoint: .topLeading,
             endPoint: .bottomTrailing,
         )
-    }
-
-    private func scoreColor(_ score: Double) -> Color {
-        switch score {
-        case ..<0.6: .red
-        case ..<0.8: .orange
-        default: .green
-        }
     }
 
     private func jitteredNumber(_ number: Float, _ seed: Int) -> Float {

@@ -83,14 +83,7 @@ struct SessionCompleteView: View {
 
     private var scoreColor: Color {
         guard total > 0 else { return .secondary }
-        let pct = Double(correct) / Double(total)
-        if pct >= 0.8 {
-            return .green
-        }
-        if pct >= 0.5 {
-            return .orange
-        }
-        return .red
+        return .score(Double(correct) / Double(total))
     }
 }
 

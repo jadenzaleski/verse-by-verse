@@ -38,6 +38,7 @@ struct VerseCard: View {
             SegmentedProgressBar(
                 totalSegments: 10,
                 completedSegments: Int(retentionScore * 10),
+                fill: .score(retentionScore),
                 accessibilityLabel: "Memory score",
             )
 

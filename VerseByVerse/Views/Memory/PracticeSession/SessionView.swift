@@ -91,7 +91,7 @@ struct SessionView: View {
                 SegmentedProgressBar(
                     totalSegments: steps.count,
                     completedSegments: phase == .activity ? stepIndex : 0,
-                    fill: .solid(.appAccent),
+                    fill: .appAccent,
                     highlightCurrent: phase == .activity,
                     accessibilityLabel: "Session progress",
                     accessibilityValue: phase == .activity ? "Step \(stepIndex + 1) of \(steps.count)" : "Not started",

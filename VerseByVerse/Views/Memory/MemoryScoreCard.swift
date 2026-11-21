@@ -8,8 +8,8 @@
 import SwiftUI
 
 /// The detail screens' summary card: Memory Score with its bar, when the
-/// material is next due, and the last result / session / last-practice
-/// stats. Practice itself starts from ``PracticeStartButton`` and ``PracticeToolbar``.
+/// material is next due, and a one-line last result / session / last-practice
+/// summary. Practice itself starts from ``PracticeStartButton`` and ``PracticeToolbar``.
 struct MemoryScoreCard: View {
     let lastPracticed: Date?
     let totalReps: Int
@@ -20,7 +20,7 @@ struct MemoryScoreCard: View {
     let isNew: Bool
 
     private var scoreColor: Color {
-        retentionScore < 0.6 ? .red : retentionScore < 0.8 ? .orange : .green
+        .score(retentionScore)
     }
 
     private var dueText: String {
@@ -45,35 +45,36 @@ struct MemoryScoreCard: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.md) {
+        VStack(alignment: .leading, spacing: AppSpacing.sm) {
             HStack(alignment: .firstTextBaseline) {
                 Text("Memory Score")
-                    .font(.app(.title2))
+                    .font(.app(.headline))
                 Spacer()
                 dueBadge
             }
 
-            if lastPracticed != nil {
-                HStack(spacing: AppSpacing.md) {
+            if let lastPracticed {
+                HStack(spacing: AppSpacing.sm) {
                     Text("\(Int(retentionScore * 100))%")
-                        .font(.app(.title, weight: .semibold))
+                        .font(.app(.headline, weight: .semibold))
                         .foregroundStyle(scoreColor)
                         .monospacedDigit()
                     SegmentedProgressBar(
                         totalSegments: 10,
                         completedSegments: Int(retentionScore * 10),
+                        fill: scoreColor,
                         accessibilityLabel: "Memory score",
-                        height: 16,
+                        height: 8,
                     )
                 }
-                stats
+                summary(lastPracticed: lastPracticed)
             } else {
                 Text("Practice once to start tracking your memory score.")
                     .font(.app(.subheadline))
                     .foregroundStyle(.secondary)
             }
         }
-        .padding()
+        .padding(AppSpacing.md)
         .frame(maxWidth: .infinity, alignment: .leading)
         .glassEffect(.regular, in: RoundedRectangle(cornerRadius: AppRadius.lg))
     }
@@ -90,27 +91,21 @@ struct MemoryScoreCard: View {
         .accessibilityElement(children: .combine)
     }
 
-    private var stats: some View {
-        HStack(spacing: AppSpacing.lg) {
-            if let lastResult {
-                statItem(label: "Last Result", value: "\(Int((lastResult * 100).rounded()))%")
-            }
-            statItem(label: totalReps == 1 ? "Session" : "Sessions", value: "\(totalReps)")
-            if let last = lastPracticed {
-                statItem(label: "Last Practice", value: last.formatted(.relative(presentation: .named)))
-            }
+    /// Summary text.
+    private func summary(lastPracticed: Date) -> some View {
+        var parts: [String] = []
+        if let lastResult {
+            parts.append("Last \(Int((lastResult * 100).rounded()))%")
         }
-    }
-
-    private func statItem(label: String, value: String) -> some View {
-        VStack(alignment: .leading, spacing: AppSpacing.xxs) {
-            Text(value)
-                .font(.app(.body, weight: .semibold))
-            Text(label)
-                .font(.app(.caption))
-                .foregroundStyle(.secondary)
+        parts.append(totalReps == 1 ? "1 session" : "\(totalReps) sessions")
+        parts.append(lastPracticed.formatted(.relative(presentation: .named)))
+        let dot = Image("lucide.dot")
+        let line = parts.dropFirst().reduce(Text(parts[0])) { line, part in
+            Text("\(line)\(dot)\(part)")
         }
-        .accessibilityElement(children: .combine)
+        return line
+            .font(.app(.footnote))
+            .foregroundStyle(.secondary)
     }
 }
 
