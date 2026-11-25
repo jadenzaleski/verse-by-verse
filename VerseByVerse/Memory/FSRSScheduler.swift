@@ -24,6 +24,10 @@ nonisolated struct FSRSScheduler: MemoryScheduler {
     private let engine: FSRS
     private let log = AppLog.category("FSRSScheduler")
 
+    /// The FSRS-6 forgetting curve R(t) = (1 + factor · t / S)^decay, for the weights above.
+    private static let decay = -FSRSDefaults.defaultWv6[20]
+    private static let factor = exp(Foundation.log(0.9) / decay) - 1
+
     init(desiredRetention: Double = 0.95) {
         engine = FSRS(parameters: FSRSParameters(
             requestRetention: desiredRetention,
@@ -70,11 +74,14 @@ nonisolated struct FSRSScheduler: MemoryScheduler {
     }
 
     func retrievability(of state: MemoryState, at date: Date) -> Double {
-        guard state.state != 0 else { return 0 }
-        // No stability means nothing is retained. Left to the library, 0 ÷ 0 gives NaN
+        guard state.state != 0, let lastReviewed = state.lastReviewed else { return 0 }
+        // No stability means nothing is retained. Left to the curve, 0 ÷ 0 gives NaN
         // (and a negative stability gives nonsense), which would crash `Int(score * 100)`.
         guard let stability = state.stability, stability > 0 else { return 0 }
-        return engine.getRetrievability(card: makeCard(from: state, now: date), now: date).number
+        // The curve is evaluated on fractional days. The library's own `getRetrievability`
+        // floors elapsed time to whole days, which draws the History chart as a staircase.
+        let elapsedDays = max(date.timeIntervalSince(lastReviewed) / 86400, 0)
+        return pow(1 + Self.factor * elapsedDays / stability, Self.decay)
     }
 
     /// Maps the persisted ``MemoryState`` onto an FSRS `Card`.

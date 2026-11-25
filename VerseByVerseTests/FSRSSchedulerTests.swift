@@ -135,6 +135,19 @@ struct FSRSSchedulerTests {
         #expect(scheduler.retrievability(of: .new, at: epoch) == 0)
     }
 
+    @Test func `retrievability falls smoothly within a day`() {
+        // The library floors elapsed time to whole days, which draws a staircase.
+        let scheduler = FSRSScheduler()
+        let state = scheduler.processReview(state: .new, score: 0.92, at: epoch).state
+
+        var previous = scheduler.retrievability(of: state, at: epoch)
+        for hour in 1 ... 72 {
+            let value = scheduler.retrievability(of: state, at: epoch.addingTimeInterval(Double(hour) * 3600))
+            #expect(value < previous, "flat or rising at hour \(hour): \(value) after \(previous)")
+            previous = value
+        }
+    }
+
     @Test func `a state with no stability recalls nothing and is never NaN`() {
         let scheduler = FSRSScheduler()
         let reviewed = scheduler.processReview(state: .new, score: 0.92, at: epoch).state
