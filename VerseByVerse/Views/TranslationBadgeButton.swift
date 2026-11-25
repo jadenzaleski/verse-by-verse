@@ -32,19 +32,24 @@ struct TranslationBadgeButton: View {
         .buttonStyle(.plain)
         .accessibilityLabel("\(translation.abbreviation) copyright information")
         .sheet(isPresented: $isShowingCopyright) {
-            CopyrightSheetView(translation: translation)
-                .presentationDetents([.medium])
-                .presentationDragIndicator(.visible)
+            NavigationStack {
+                CopyrightSheetView(translation: translation)
+                    .navigationBarTitleDisplayMode(.inline)
+            }
+            .presentationDetents([.medium])
+            .presentationDragIndicator(.visible)
         }
     }
 }
 
 #Preview {
-    TranslationBadgeButton(
-        translation: BibleTranslationInfo(
-            id: "kjv", abbreviation: "KJV", name: "King James Version",
-            copyright: "Public Domain.", provider: "local",
-        ),
-    )
-    .environment(\.font, .app())
+    NavigationStack {
+        TranslationBadgeButton(
+            translation: BibleTranslationInfo(
+                id: "kjv", abbreviation: "KJV", name: "King James Version",
+                copyright: "Public Domain.", provider: "local",
+            ),
+        )
+        .environment(\.font, .app())
+    }
 }

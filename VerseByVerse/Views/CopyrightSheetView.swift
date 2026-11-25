@@ -13,8 +13,6 @@ struct CopyrightSheetView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: AppSpacing.md) {
-                Text(translation.name)
-                    .font(.app(.title))
                 Text(translation.abbreviation)
                     .font(.app(.headline))
                     .foregroundStyle(.secondary)
@@ -22,9 +20,10 @@ struct CopyrightSheetView: View {
                 translation.copyrightText
                     .font(.app(.subheadline))
             }
-            .padding()
+            .padding(.horizontal)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .navigationTitle(translation.name)
     }
 }
 
@@ -40,16 +39,18 @@ struct CopyrightSheetView: View {
 }
 
 #Preview("With Markdown Link") {
-    CopyrightSheetView(
-        translation: BibleTranslationInfo(
-            id: "kjv",
-            abbreviation: "KJV",
-            name: "King James Version",
-            copyright: "Public Domain except in the United Kingdom, where a Crown Copyright applies to "
+    NavigationStack {
+        CopyrightSheetView(
+            translation: BibleTranslationInfo(
+                id: "kjv",
+                abbreviation: "KJV",
+                name: "King James Version",
+                copyright: "Public Domain except in the United Kingdom, where a Crown Copyright applies to "
                 + "printing the KJV. See the [Queen's Printers Patent]"
                 + "(http://www.cambridge.org/about-us/who-we-are/queens-printers-patent).",
-            provider: "local",
-        ),
-    )
-    .environment(\.font, .app())
+                provider: "local",
+            ),
+        )
+        .environment(\.font, .app())
+    }
 }
