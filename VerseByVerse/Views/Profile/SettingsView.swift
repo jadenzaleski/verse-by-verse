@@ -303,6 +303,12 @@ struct SettingsView: View {
                 }
             }
             .accessibilityHint("Opens the GitHub repository in your browser")
+
+            NavigationLink {
+                AcknowledgementsView()
+            } label: {
+                Label("Acknowledgements", image: "lucide.file.text")
+            }
         } header: {
             Text("ABOUT")
                 .font(Font.app(.footnote, weight: .semibold))
