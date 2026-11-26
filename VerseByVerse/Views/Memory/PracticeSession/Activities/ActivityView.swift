@@ -154,7 +154,7 @@ struct ActivityView: View {
                                     .font(.app(.body))
                             }
                             .buttonStyle(.glass)
-                            .tint(.accent)
+                            .tint(Color.appAccent)
                             .accessibilityLabel("Hide keyboard")
                         }
                     }
@@ -167,7 +167,7 @@ struct ActivityView: View {
                             }
                         }
                         .buttonStyle(.glass)
-                        .tint(.accent)
+                        .tint(Color.appAccent)
                         .accessibilityHint("Moves on without scoring this step")
                     }
                 }

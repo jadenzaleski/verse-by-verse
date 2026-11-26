@@ -199,7 +199,7 @@ struct AddToMemoryView: View {
                         }
                         .accessibilityLabel("Add to memory")
                         .buttonStyle(.glassProminent)
-                        .tint(.accent)
+                        .tint(Color.appAccent)
                         .disabled(!isRefValid)
                     }
                 }

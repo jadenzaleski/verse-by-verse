@@ -102,6 +102,19 @@ struct SettingsView: View {
 
     private var generalSection: some View {
         Section {
+            NavigationLink {
+                AppearanceView()
+            } label: {
+                HStack {
+                    Label("Appearance", image: "lucide.palette")
+                    Spacer()
+                    Circle()
+                        .fill(Color.appAccent)
+                        .frame(width: 20, height: 20)
+                        .accessibilityHidden(true)
+                }
+            }
+
             shareRow(
                 "Export My Data",
                 image: "lucide.share",
