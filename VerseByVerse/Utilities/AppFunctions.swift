@@ -86,7 +86,7 @@ nonisolated enum AppFunctions {
         /// Tint for the build badge.
         var badgeColor: Color {
             switch self {
-            case .development: .accentColor
+            case .development: .blue
             case .beta: .orange
             case .production: .clear
             }

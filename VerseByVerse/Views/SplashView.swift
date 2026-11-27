@@ -25,7 +25,7 @@ struct SplashView: View {
                     .symbolEffect(.drawOff.byLayer.reversed, options: .nonRepeating.speed(1.3), isActive: playOff)
                     .foregroundStyle(
                         LinearGradient(
-                            gradient: Gradient(colors: [Color("CustomPurple"), Color("CustomGreen")]),
+                            gradient: Gradient(colors: [.appPurple, .appGreen]),
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing,
                         ),

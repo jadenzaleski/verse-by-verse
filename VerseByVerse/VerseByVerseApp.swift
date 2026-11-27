@@ -55,6 +55,7 @@ struct VerseByVerseApp: App {
                     NotificationScheduler.shared.refresh()
                 }
             }
+            .appAppearance()
             .environment(\.font, .app())
             .environment(bibleStore)
             .environment(networkMonitor)

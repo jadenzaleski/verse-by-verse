@@ -182,7 +182,7 @@ struct ProfileView: View {
 
     private var streakGradient: LinearGradient {
         LinearGradient(
-            gradient: Gradient(colors: [Color("CustomPurple"), Color("CustomGreen")]),
+            gradient: Gradient(colors: [.appPurple, .appGreen]),
             startPoint: .topLeading,
             endPoint: .bottomTrailing,
         )

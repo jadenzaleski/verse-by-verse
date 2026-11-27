@@ -159,7 +159,7 @@ struct PassageMemoryScoreChart: View {
                         y: .value("Memory Score", marker.score),
                     )
                     .symbolSize(selectedSession?.id == marker.id ? 120 : 60)
-                    .foregroundStyle(.accent)
+                    .foregroundStyle(Color.appAccent)
                 }
 
                 if let selectedDate {

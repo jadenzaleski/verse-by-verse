@@ -22,6 +22,10 @@ enum StorageKeys: String, CaseIterable {
     case dailyReminderMinutes
     case streakReminderEnabled
     case dueBadgeEnabled
+    /// `AccentChoice.rawValue`: a preset name or `#RRGGBB`.
+    case accentColor
+    /// `AppTheme.rawValue`: system, light or dark.
+    case theme
 }
 
 extension AppStorage {

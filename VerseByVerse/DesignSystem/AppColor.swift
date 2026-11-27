@@ -6,9 +6,14 @@
 import SwiftUI
 
 extension Color {
-    static let appPurple = Color("CustomPurple")
-    static let appGreen = Color("CustomGreen")
-    static let appAccent = Color.accent
+    static let appPurple = Color("Colors/Purple")
+    static let appGreen = Color("Colors/Green")
+    /// The user's accent (Settings → Appearance), `Colors/AccentColor` by default. Read it
+    /// in a view's body so the view redraws when the user changes it.
+    static var appAccent: Color {
+        AppearanceStore.shared.accentColor
+    }
+
     // Status
     static let appDestructive = Color.red
     static let appSuccess = Color.green
