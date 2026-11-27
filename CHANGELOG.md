@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.1.0-beta.14](https://github.com/jadenzaleski/verse-by-verse/compare/v0.1.0-beta.13...v0.1.0-beta.14) (2026-11-27)
+
+
+### Features
+
+* Add Acknowledgements screen with bundled licenses ([6e8e0ef](https://github.com/jadenzaleski/verse-by-verse/commit/6e8e0ef6470ec35f3807a518dc401ee2616de06b))
+* Add Appearance settings with theme and accent color ([77328be](https://github.com/jadenzaleski/verse-by-verse/commit/77328be9ad9bd6b452dbe892de6042f66cbac754))
+* Cap review intervals at 30 days ([c478c5d](https://github.com/jadenzaleski/verse-by-verse/commit/c478c5d1b3d66da77f27e20e59e26ad290aeac0b))
+* Compact the Memory Score card and unify score colors ([df3455b](https://github.com/jadenzaleski/verse-by-verse/commit/df3455b942a6ab3523d7708f08073b84fa62a568))
+
+
+### Bug Fixes
+
+* Anchor Memory Score to the last result ([b6b2ec3](https://github.com/jadenzaleski/verse-by-verse/commit/b6b2ec35a1c55c406e13088ac7bd13fdb0c19515))
+* Score zero when a card has no stability ([36d7b94](https://github.com/jadenzaleski/verse-by-verse/commit/36d7b9483f2fc3ce136c9383d1ff6fbaa84147c8))
+* Show translation title in copyright sheet ([e157d38](https://github.com/jadenzaleski/verse-by-verse/commit/e157d38404775b2aec1a0f7d7f8e88ad97ce9e8d))
+* Smooth out forgetting curve. ([1341b76](https://github.com/jadenzaleski/verse-by-verse/commit/1341b76e99e680ec06382c4b222ee327ebe2e925))
+
 ## [0.1.0-beta.13](https://github.com/jadenzaleski/verse-by-verse/compare/v0.1.0-beta.12...v0.1.0-beta.13) (2026-11-18)
 
 
